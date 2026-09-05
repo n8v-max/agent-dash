@@ -47,3 +47,24 @@ the architecture rather than a number chased later.
 ## Skills
 
 Consult `codebase-design` alongside `grilling` and `domain-modeling` for this one.
+
+**From ticket 14 (2026-09-05, HITL)** — the library is settled, which turns several of 04's
+conditionals into facts:
+
+- **shadcn/ui charts on Recharts 3.** The Plot branch of this ticket is closed; no
+  `toHyperScript()` shim, no imperative-wrapper testing story.
+- **A visually-hidden `<table>` mirror of the grouped data is in scope** as an accessibility
+  requirement. That is very likely this ticket's answer to "is chart *output* asserted or only
+  chart *presence*" — a table mirror is queryable DOM, so output becomes assertable without
+  parsing SVG or falling back to Playwright. Decide whether that is the primary assertion or a
+  secondary one.
+- **`key={index}` legend keys are live**, since the day-one patches were deferred to encounter.
+  A test that pins legend *identity* across a roll-up switch is what converts that deferred patch
+  from a silent bug into a caught one — React will otherwise reconcile "Team A" into "Team B" in
+  place. This ticket owns whether that test exists.
+- **Turbopack is mandatory** (both open Next 15 × Recharts 3 blockers are webpack-specific), so
+  the build-tool question 04 raised is answered and no longer load-bearing here.
+- **Visible series are capped at top-N + "Other".** Series cardinality in tests is therefore
+  bounded and known, which makes legend assertions tractable.
+- Still open and owned here: `initialDimension` vs fixed numeric `width`/`height`. 14 recorded
+  that the `ResizeObserver`-polyfill failure is confusing rather than loud, but did not decide.

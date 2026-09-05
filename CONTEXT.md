@@ -68,9 +68,14 @@ Model selection is a **speed/cost lever**, not an implementation detail: it is t
 by which token volume and monetary cost diverge. The ~200× input-price spread across tiers is
 what gives that divergence its size.
 
-**The `family` and `tier` roll-ups have no vendor precedent.** Every surveyed platform treats
-model as a flat group-by; none offers a family or cross-vendor tier roll-up (ticket 02). This is
-a deliberate design bet, not an inherited convention, and it should be defended as one.
+**The `tier` roll-up has no vendor precedent; `family` now has some.** Every surveyed platform
+treats model as a flat analytics group-by (ticket 02), but two first-party counter-examples exist
+for `family`: Anthropic's Team/Enterprise spend-report CSV carries a `Model family` column
+alongside `Model`, and the FOCUS 1.5 working draft adds a standards-track `ModelFamily` —
+*"Grouping of related models as defined by the model developer"* (ticket 15). **Cross-vendor
+`tier` remains without precedent** and stays a deliberate design bet — arguably a stronger one
+now, since FOCUS notes that `ModelId` is *"not guaranteed to match across service providers"*,
+which is precisely the gap a capability tier exists to close.
 
 **Rate card** — The pricing that converts TokenUsage into Cost. **It is not keyed on Model
 alone**: in the real market the key is (model × token class × service tier × context tier ×
@@ -121,7 +126,8 @@ level on a single ladder.
 | `self` | the acting Member's own data |
 | `peer` | **named** individual Members of the acting Member's own Team |
 | `team` | the acting Member's own Team, **aggregated** |
-| `peer-team` | other Teams, **aggregated only** — never resolved to named Members |
+| `peer-team` | other Teams, **aggregated only** |
+| `cohort` | **named** individual Members doing comparable work, **across Team boundaries** |
 | `org` | the whole Organization, **aggregated** |
 | `org-member` | **named** individual Members across the whole Organization |
 
@@ -134,13 +140,33 @@ level on a single ladder.
 | `cost` | monetary spend |
 | `access` | Visibility of the Role and permission model itself |
 
+**Cohort** — The population a Member is compared against for like-for-like work. Its key is a
+**viewer-selected** aggregation dimension — Repository work domain, AgentTemplate, or both — so
+cohort membership is computed per view rather than stored. A Member belongs to as many cohorts as
+they do kinds of work.
+
 **Permission** — One granted (subject scope × datapoint class) cell.
 
 **Role** — A named preset over the permission matrix. Roles are **data**, not a fixed enum: an
 Organization with `access` at `org-member` scope can define its own. (Whether that authoring
 happens *in this product* is a separate question from how the model is expressed.)
 
-**Aggregated vs identified** — The central distinction the matrix encodes. Seeing a population's
+**The unit of comparison differs by datapoint class.** This is the load-bearing idea, and it is
+why the matrix is not a ladder. Each class is compared against the population that makes it
+meaningful, not against a single organisational hierarchy:
+
+| Class | Unit | Default for a Member | Additional grant |
+|---|---|---|---|
+| `jobs` | `peer` | named teammates | — |
+| `tokens` | `cohort` | named, anyone doing comparable work, any Team | — |
+| `cost` | `team` | own spend, plus Team **per-capita** — not named | team-level access → named individual breakdown |
+
+Token volume compares across a cohort because the question it answers is *"am I heavy or light on
+work like mine"*, and that question is meaningless against people doing different work. Currency
+compares within a Team because the question it answers is a management one. Consequently a Member
+sees a named teammate's **token volume** but not their **spend** — see `docs/adr/0002`.
+
+**Aggregated vs identified** — A distinction the matrix encodes **per class**, not globally. Seeing a population's
 *totals* and being able to resolve those totals to *named people* are separate grants. This is
 why a Member can benchmark against org-wide numbers without being able to see who produced them.
 

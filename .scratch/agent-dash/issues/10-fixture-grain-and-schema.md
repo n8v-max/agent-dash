@@ -31,3 +31,17 @@ What is the exact shape of the fixture data, and at what grain is it stored?
 
 05 (metrics determine what must be answerable) and 08 (taxonomies determine the categorical
 columns). This is the ticket the archived v1 got backwards by fixing scale before shape.
+
+**From ticket 12 (2026-09-05, HITL)**:
+
+- **The "must exercise both sides of the floor" requirement is withdrawn** — no floor exists, so
+  Team sizes are unconstrained by access rules.
+- **Replaced by a harder one: the fixture must contain at least one Member whose cohort crosses a
+  Team boundary**, or the `cohort` scope — the central new idea in the access model — is never
+  exercised by the demo or the tests. A fixture where work domains map cleanly one-to-one onto
+  Teams silently makes cohort and team the same thing.
+- **Cohort membership is computed, not stored.** It derives from Repository work domain and
+  AgentTemplate on the rows themselves, so no cohort column is needed — but those two dimensions
+  now carry access-model weight, not just analytical weight (see 08).
+- **Rate cards must be present and priceable per Member**, since Team per-capita currency is
+  derived, not stored.

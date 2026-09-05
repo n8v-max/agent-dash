@@ -48,6 +48,8 @@ Settled at charting (2026-09-05), before any ticket existed:
 - **Access is a two-dimensional matrix**, not a role ladder: (subject scope × datapoint class).
   Roles are named presets over it, expressed as data. → `CONTEXT.md` § Access
 - **Peer visibility covers `jobs`, never `cost`.** → `docs/adr/0001-peer-visibility-excludes-cost.md`
+  **Amended 2026-09-05 by ticket 12**: the `cost` half stands, the `tokens` half is reversed.
+  → `docs/adr/0002-comparison-unit-differs-by-class.md`
 - **Product spine is cost control; the differentiator is joining cost to efficacy.**
   Cost alone is a billing page every competitor already has.
 - **Task → AgentSession is one-to-many**, so that Rework is measurable. "Job" is the UI alias
@@ -92,7 +94,57 @@ Resolved tickets:
   test, so maintenance health was the discriminator, not capability. Final choice between
   shadcn/Recharts 3 and Observable Plot graduated to ticket 14.
 
-**All four research tickets are resolved. The remaining frontier is entirely HITL.**
+- **Charting library selection** ([ticket 14](issues/14-charting-library-selection.md),
+  2026-09-05, HITL): **shadcn/ui charts on Recharts 3**, decided on stack coherence and schedule.
+  Plot's re-grouping and bundle wins were traded away, not refuted, so the roll-up spike (flip one
+  chart 20→4 series, watch the legend) becomes the cheapest risk reduction available and belongs
+  early in the build. The `--chart-1..5` ceiling is closed by **capping visible series at top-N +
+  "Other"** rather than extending the theme — a better chart independently of the bug, but N and
+  the "Other" behaviour are left to 05/07. Day-one patches deferred to encounter **except** the
+  `v4`/`base-*` scaffold, which is a setup constraint, not an encounterable defect: the legacy
+  styles pin deprecated `recharts@2.15.4` and would silently reverse this decision. Turbopack is
+  mandatory (both Next 15 blockers are webpack-only). Accessibility is a requirement, not a
+  tiebreaker: a roll-up-naming `aria-label` plus a **visually-hidden table mirror**, which doubles
+  as the assertion target that lets 09 assert chart *output* rather than presence.
+
+- **Aggregate re-identification** ([ticket 12](issues/12-aggregate-reidentification.md),
+  2026-09-05, HITL): **no minimum-population floor, at any scope or class.** The question
+  dissolved rather than being answered — grilling the *purpose* of the aggregate established it
+  as ballpark self-reference, not expense auditing, which makes the Team the wrong comparison
+  population regardless of its size. What replaced the floor is a change to the access model:
+  **the unit of comparison differs by datapoint class** — `jobs` at `peer`, `tokens` at a new
+  viewer-keyed **`cohort`** scope spanning Teams, `cost` at `team` as a per-capita figure with
+  named breakdown as a team-level grant. Seven scopes now; `peer-team` keeps its name but loses
+  "never resolved to named Members". The subtraction hole is **accepted and disclosed** — the
+  product claims only that it does not *display* named peer currency, not that it is
+  unrecoverable. No anti-ranking guardrail: declined, not endorsed, with the Goodhart exposure
+  recorded. Enforcement is data-layer. → `CONTEXT.md` § Access, `docs/adr/0002`, ADR-0001 amended.
+
+- **Actionable signal landscape** ([ticket 15](issues/15-actionable-signal-landscape.md),
+  2026-09-05): charted mid-session and answered clean-slate — the researcher was blocked from
+  briefs 01–04 so that convergence would mean something. **The field ranks named engineers by
+  default and publishes the rationale** (Google Workspace default-on since 2026-02-16, top bucket
+  literally "the top 10% of users"; Anthropic's `user_cost_report` sorted by spend by default;
+  Cursor `/leaderboard`; Cline "TOP SPENDING USERS"). Justifications are always enablement or
+  budget, never evaluation. **Every alert in the field fires on money** — nothing alerts on
+  failure, rework or quality across ~15 vendors. Anthropic and OpenAI **publicly disagree on the
+  headline metric**, OpenAI listing LOC and accept rate under "what it does not provide". Thirteen
+  gaps raised as questions to 05/08, of which **seat cost** is the sharpest: seat fees are
+  invisible to usage APIs, so usage-derived cost-per-engineer distorts the *ordering*, not just
+  the total. **GitHub's ≥5 floor — 01's most transferable finding — was sunset 2026-04-02**, which
+  corroborates 12's no-floor decision rather than undermining it. Corrected `CONTEXT.md`: `family`
+  now has vendor precedent (Anthropic spend CSV, FOCUS 1.5 draft `ModelFamily`); **`tier` does
+  not, and the bet is stronger for it.**
+
+**Research tickets 01–05 are resolved (01–04, 15), and two HITL tickets (14, 12) are answered.**
+
+**Collision discharged.** Brief 15 was gathered clean-slate against the `CONTEXT.md` and ADR-0001
+that predate ticket 12, and its ticket asserted ADR-0001 "stands". 12 has since amended ADR-0001,
+added ADR-0002, and added the `cohort` scope. The brief's *findings* are unaffected — they are
+observations about other vendors — but its **Reconciliation section diffs against superseded
+documents** and must be re-read against the current ones. Recorded on the ticket.
+
+The remaining frontier is entirely HITL.
 
 ## Not yet specified
 

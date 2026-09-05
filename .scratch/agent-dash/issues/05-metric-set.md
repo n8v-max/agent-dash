@@ -73,3 +73,27 @@ Rework is measurable because Task → AgentSession is one-to-many.
 ## Blocked by
 
 01, 02, 03 — **all resolved 2026-09-05. This ticket is now on the frontier.**
+
+**From ticket 12 (2026-09-05, HITL)** — two of this ticket's queued questions are now answered,
+and one new problem lands squarely here:
+
+- **Question 1 above is settled, and not in ADR-0001's favour.** The line is neither "no
+  per-person cost" nor "no ranked comparative cost" — **no structural guardrail against ranking
+  was imposed at all**. The access model neither mandates nor forbids a leaderboard. That decision
+  was recorded as *declining to prohibit*, explicitly leaving the call to this ticket. So: does a
+  top-spenders view ship? The Goodhart evidence is unmitigated and is now this ticket's to weigh —
+  Amazon's KiroRank raised compute spend with no matching value, which is a cost-control dashboard
+  causing the exact harm it exists to prevent.
+- **The comparison population differs by class.** `tokens` compares across a viewer-keyed
+  **cohort** (work domain / template / both, spanning Teams); `cost` compares within a **Team**,
+  per-capita for Members, named only at team-level access. Every metric in the inventory has to
+  declare which unit it uses — a metric with no defensible comparison population is not
+  implementable.
+- **No population floor**, so no metric needs a suppression rule or an n-threshold caveat.
+- **The largest unresolved cost of ticket 12 is a metric problem.** Token volume is now the most
+  widely visible cross-person figure — but ticket 02's **~200× input-price spread across tiers**
+  means volume is a poor predictor of spend. So the product's most visible comparative metric
+  serves **adoption intensity**, not cost control, and cost control is the spine. Either find the
+  metric that makes cohort comparison speak to money (cost-per-outcome at cohort grain? efficiency
+  against a same-work baseline?), or state plainly that the cohort surface answers a different
+  question than the headline. Do not leave this implicit.
