@@ -45,3 +45,11 @@ columns). This is the ticket the archived v1 got backwards by fixing scale befor
   now carry access-model weight, not just analytical weight (see 08).
 - **Rate cards must be present and priceable per Member**, since Team per-capita currency is
   derived, not stored.
+
+**Correction — ticket 12 was reversed after the note above was written (2026-09-05).** The
+requirements survive but their reason changed. `cohort` is no longer an access scope; it is an
+aggregation dimension. The fixture must still contain **at least one Member whose cohort crosses a
+Team boundary** — now so the *comparison control* is exercised rather than the permission model.
+Access grants no longer constrain Team sizes at all: the default is `org-member` over everything.
+New requirement instead: the fixture must support at least one **restricted Role preset** having a
+visibly different view from the default, or ticket 06's presets cannot be demonstrated.

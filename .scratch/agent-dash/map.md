@@ -47,9 +47,10 @@ Settled at charting (2026-09-05), before any ticket existed:
   → `.scratch/_archive/handover-v1.md`
 - **Access is a two-dimensional matrix**, not a role ladder: (subject scope × datapoint class).
   Roles are named presets over it, expressed as data. → `CONTEXT.md` § Access
-- **Peer visibility covers `jobs`, never `cost`.** → `docs/adr/0001-peer-visibility-excludes-cost.md`
-  **Amended 2026-09-05 by ticket 12**: the `cost` half stands, the `tokens` half is reversed.
-  → `docs/adr/0002-comparison-unit-differs-by-class.md`
+- ~~**Peer visibility covers `jobs`, never `cost`.**~~ **Reversed 2026-09-05 by ticket 12**, in
+  two steps. Individual usage and spend are now **open org-wide by default, symmetric, to every
+  Member**. ADR-0001 and ADR-0002 are both superseded, retained for their reasoning.
+  → `docs/adr/0003-individual-visibility-is-open-by-default.md`
 - **Product spine is cost control; the differentiator is joining cost to efficacy.**
   Cost alone is a billing page every competitor already has.
 - **Task → AgentSession is one-to-many**, so that Rework is measurable. "Job" is the UI alias
@@ -107,18 +108,22 @@ Resolved tickets:
   tiebreaker: a roll-up-naming `aria-label` plus a **visually-hidden table mirror**, which doubles
   as the assertion target that lets 09 assert chart *output* rather than presence.
 
-- **Aggregate re-identification** ([ticket 12](issues/12-aggregate-reidentification.md),
-  2026-09-05, HITL): **no minimum-population floor, at any scope or class.** The question
-  dissolved rather than being answered — grilling the *purpose* of the aggregate established it
-  as ballpark self-reference, not expense auditing, which makes the Team the wrong comparison
-  population regardless of its size. What replaced the floor is a change to the access model:
-  **the unit of comparison differs by datapoint class** — `jobs` at `peer`, `tokens` at a new
-  viewer-keyed **`cohort`** scope spanning Teams, `cost` at `team` as a per-capita figure with
-  named breakdown as a team-level grant. Seven scopes now; `peer-team` keeps its name but loses
-  "never resolved to named Members". The subtraction hole is **accepted and disclosed** — the
-  product claims only that it does not *display* named peer currency, not that it is
-  unrecoverable. No anti-ranking guardrail: declined, not endorsed, with the Goodhart exposure
-  recorded. Enforcement is data-layer. → `CONTEXT.md` § Access, `docs/adr/0002`, ADR-0001 amended.
+- **Aggregate re-identification, and the visibility position** ([ticket
+  12](issues/12-aggregate-reidentification.md), 2026-09-05, HITL): **no minimum-population floor,
+  and individual usage and spend are open org-wide by default.** Every Member holds `org-member`
+  scope over `jobs`, `tokens` and `cost`; visibility is symmetric, with no administrative tier
+  seeing more than an ordinary Member. The subtraction attack the ticket was opened to close is
+  obsolete rather than defended — the identified figure is shown directly.
+  Reached in three steps, and the two rejected positions are the substance: ADR-0001's strict line
+  fell to its own Known gap (every documented 2026 failure was a *ranking*, and it conceded it
+  took the stricter line "on judgement, not evidence"); ADR-0002's per-class comparison model fell
+  as elaborate machinery for withholding one number. → `docs/adr/0003`, which folds in both.
+  Carried forward: **no anti-ranking guardrail** — declined, not endorsed, Goodhart exposure
+  recorded in full. **The matrix is the mechanism, not the default**, so restricted Role presets
+  ship alongside the permissive one to demonstrate it — ticket 06. **`cohort` is demoted** from a
+  subject scope to an aggregation dimension: a viewer-keyed comparison group over work domain and
+  template, gating nothing. Enforcement is data-layer.
+  → `CONTEXT.md` §§ Access and Aggregation Dimensions.
 
 - **Actionable signal landscape** ([ticket 15](issues/15-actionable-signal-landscape.md),
   2026-09-05): charted mid-session and answered clean-slate — the researcher was blocked from
@@ -138,11 +143,20 @@ Resolved tickets:
 
 **Research tickets 01–05 are resolved (01–04, 15), and two HITL tickets (14, 12) are answered.**
 
-**Collision discharged.** Brief 15 was gathered clean-slate against the `CONTEXT.md` and ADR-0001
-that predate ticket 12, and its ticket asserted ADR-0001 "stands". 12 has since amended ADR-0001,
-added ADR-0002, and added the `cohort` scope. The brief's *findings* are unaffected — they are
-observations about other vendors — but its **Reconciliation section diffs against superseded
-documents** and must be re-read against the current ones. Recorded on the ticket.
+**Collision discharged, then re-opened and discharged again.** Brief 15 was gathered clean-slate
+against the `CONTEXT.md` and ADR-0001 that predate ticket 12, and its ticket asserted ADR-0001
+"stands". Ticket 12 then reversed the visibility position **twice** on the same day: ADR-0001 and
+ADR-0002 are now both superseded by **ADR-0003**, the `cohort` scope has been demoted to an
+aggregation dimension, and § Access has been rewritten. Brief 15's *findings* remain unaffected —
+they are observations about other vendors — but its Reconciliation section diffs against documents
+that no longer exist in that form and must be re-read against ADR-0003.
+
+**Brief 15 independently corroborates the final position**, which is worth recording because it
+arrived after the decision and was not available to it: the field **ranks named engineers by
+default and publishes the rationale** (Google Workspace default-on; Anthropic's `user_cost_report`
+sorted by spend; Cursor `/leaderboard`; Cline "TOP SPENDING USERS"), and **GitHub's ≥5 floor —
+brief 01's most transferable finding, and the only surveyed precedent for a floor — was sunset
+2026-04-02.**
 
 The remaining frontier is entirely HITL.
 

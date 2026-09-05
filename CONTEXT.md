@@ -127,7 +127,6 @@ level on a single ladder.
 | `peer` | **named** individual Members of the acting Member's own Team |
 | `team` | the acting Member's own Team, **aggregated** |
 | `peer-team` | other Teams, **aggregated only** |
-| `cohort` | **named** individual Members doing comparable work, **across Team boundaries** |
 | `org` | the whole Organization, **aggregated** |
 | `org-member` | **named** individual Members across the whole Organization |
 
@@ -140,35 +139,26 @@ level on a single ladder.
 | `cost` | monetary spend |
 | `access` | Visibility of the Role and permission model itself |
 
-**Cohort** — The population a Member is compared against for like-for-like work. Its key is a
-**viewer-selected** aggregation dimension — Repository work domain, AgentTemplate, or both — so
-cohort membership is computed per view rather than stored. A Member belongs to as many cohorts as
-they do kinds of work.
-
 **Permission** — One granted (subject scope × datapoint class) cell.
 
 **Role** — A named preset over the permission matrix. Roles are **data**, not a fixed enum: an
 Organization with `access` at `org-member` scope can define its own. (Whether that authoring
 happens *in this product* is a separate question from how the model is expressed.)
 
-**The unit of comparison differs by datapoint class.** This is the load-bearing idea, and it is
-why the matrix is not a ladder. Each class is compared against the population that makes it
-meaningful, not against a single organisational hierarchy:
+**The default is open, org-wide, and symmetric.** Every Member holds `org-member` scope over
+`jobs`, `tokens` and `cost`: named individual usage and spend, for anyone in the Organization,
+visible to everyone on the same terms. There is no minimum-population floor and no class that
+resolves less sharply than another.
 
-| Class | Unit | Default for a Member | Additional grant |
-|---|---|---|---|
-| `jobs` | `peer` | named teammates | — |
-| `tokens` | `cohort` | named, anyone doing comparable work, any Team | — |
-| `cost` | `team` | own spend, plus Team **per-capita** — not named | team-level access → named individual breakdown |
+The matrix is therefore **the mechanism, not the default** — it exists so that visibility *can* be
+restricted, and the shipped presets include genuinely restricted Roles precisely so the mechanism
+is demonstrable. See `docs/adr/0003-individual-visibility-is-open-by-default.md`, which records
+this position along with the two stricter ones that preceded it and why each fell.
 
-Token volume compares across a cohort because the question it answers is *"am I heavy or light on
-work like mine"*, and that question is meaningless against people doing different work. Currency
-compares within a Team because the question it answers is a management one. Consequently a Member
-sees a named teammate's **token volume** but not their **spend** — see `docs/adr/0002`.
-
-**Aggregated vs identified** — A distinction the matrix encodes **per class**, not globally. Seeing a population's
-*totals* and being able to resolve those totals to *named people* are separate grants. This is
-why a Member can benchmark against org-wide numbers without being able to see who produced them.
+**Aggregated vs identified** — The distinction the matrix is *able* to encode: seeing a
+population's *totals* and resolving those totals to *named people* are separate grants. The
+default grants both, so the distinction does no work in the default configuration — it exists for
+Organizations that restrict, and for the restricted presets shipped to demonstrate it.
 
 ---
 
@@ -184,6 +174,14 @@ without being re-stored. Selecting a level is a user-facing control, not a schem
 | Model | exact model → family → tier |
 | Repository | repository → work domain |
 | AgentTemplate | template → kind (`vendored` / `user_tuned` / `api_provided`) |
+| Cohort | Repository work domain, AgentTemplate, or both — **viewer-selected** |
+
+**Cohort** — Not an access scope. A comparison group: the population it is *meaningful* to measure
+a Member against, being those doing comparable work. Its key is viewer-selected, so membership is
+computed per view rather than stored, and a Member belongs to as many cohorts as they do kinds of
+work. It answers *"am I heavy or light on work like mine"*, which a Team-level or org-level
+average cannot — the sole engineer doing mobile work has no meaningful comparator on their own
+Team. Access does not gate it; relevance is what it is for.
 
 ## Metric Concepts
 

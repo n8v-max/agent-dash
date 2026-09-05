@@ -1,7 +1,13 @@
 # ADR-0001: Peer visibility covers jobs, never cost
 
 Date: 2026-09-05
-Status: Accepted — **amended 2026-09-05**, see Amendment below. The `cost` decision stands; the `tokens` decision is reversed.
+Status: **Superseded** by [ADR-0003](0003-individual-visibility-is-open-by-default.md), 2026-09-05.
+
+*Retained for its reasoning, not its conclusion.* This ADR was in force, shaped tickets 06 and 12,
+and was reversed in two steps on the day it was written — first partially (see Amendment below),
+then wholly. ADR-0003 folds this history in and is the document to read for the current position.
+The evidence and the surveillance argument recorded here are still the best statement of the case
+that lost.
 
 ## Context
 

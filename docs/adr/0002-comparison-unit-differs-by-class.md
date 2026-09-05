@@ -1,7 +1,16 @@
 # ADR-0002: The unit of comparison differs by datapoint class
 
 Date: 2026-09-05
-Status: Accepted
+Status: **Superseded** by [ADR-0003](0003-individual-visibility-is-open-by-default.md) on the day
+it was written, 2026-09-05.
+
+*A false start, retained briefly and retired.* This ADR proposed that each datapoint class be
+compared against a different population — `tokens` across a work cohort, `cost` within a Team. The
+decision to make individual usage and spend open org-wide removed the problem it solved: the
+per-class split existed to withhold currency while sharing volume, and nothing is withheld now.
+Its one surviving idea — that a *comparison group* should be the people doing comparable work — is
+kept, demoted from an access scope to an aggregation dimension. See `CONTEXT.md` § Aggregation
+Dimensions.
 
 ## Context
 

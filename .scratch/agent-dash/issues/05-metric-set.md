@@ -97,3 +97,25 @@ and one new problem lands squarely here:
   metric that makes cohort comparison speak to money (cost-per-outcome at cohort grain? efficiency
   against a same-work baseline?), or state plainly that the cohort surface answers a different
   question than the headline. Do not leave this implicit.
+
+**Correction — ticket 12 was reversed after the note above was written (2026-09-05).** The
+per-class comparison model is withdrawn: there is no `tokens`-at-cohort / `cost`-at-team split.
+**Individual usage and spend are open org-wide by default, to every Member, symmetrically**
+([ADR-0003](../../../docs/adr/0003-individual-visibility-is-open-by-default.md)).
+
+What this changes for the metric set:
+
+- **The ranking question is now unavoidable, not deferred.** With named per-person cost visible to
+  everyone, this ticket decides whether a top-spenders view ships. The access model declined to
+  forbid it. Brief 15 found the field ranks by default and justifies it as *enablement or budget,
+  never evaluation* — so the live question is whether this product adopts that framing or declines
+  the view on the Goodhart evidence (Amazon's KiroRank raised their compute bill).
+- **`cohort` survives as a comparison group, not a permission.** "Compare me against people doing
+  comparable work" remains the most defensible framing for a per-person metric, and it is now a
+  presentation choice this ticket owns rather than an access rule.
+- **Seat cost is now load-bearing** (brief 15). Seat fees are invisible to usage APIs, so
+  usage-derived cost-per-engineer distorts the **ordering**, not just the total. A product
+  publishing named per-person spend to everyone is publishing that ordering whether or not it
+  renders a leaderboard. Decide explicitly whether seat cost is modelled.
+- **Every alert in the field fires on money; nothing alerts on failure, rework or quality**
+  (brief 15, ~15 vendors). Still the clearest unoccupied ground, and unaffected by the reversal.

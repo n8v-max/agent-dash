@@ -65,3 +65,26 @@ visible rate card reconstructs named currency by multiplication — which circum
 position ADR-0001's amendment preserved. Model was settled as a *distribution display, not a
 filter*, which points the right way without closing it. **ADR-0002's `cost` clause is contingent
 on this answer**, so it cannot be left implicit.
+
+**Correction — ticket 12 was reversed after the note above was written (2026-09-05).** Read this
+in place of it. Current position: [ADR-0003](../../../docs/adr/0003-individual-visibility-is-open-by-default.md).
+
+- **Six scopes, not seven.** `cohort` is withdrawn from the subject-scope vocabulary and demoted to
+  an aggregation dimension — a comparison group, gating nothing.
+- **The default preset grants `org-member` over `jobs`, `tokens` and `cost`.** Named individual
+  usage and spend, org-wide, to every Member, symmetrically. There is no asymmetric grant; no tier
+  sees more than an ordinary Member.
+- **The model-mix contingency is void.** Named currency is shown directly, so reconstructing it
+  from volume × rate card protects nothing.
+
+**This ticket's real work is now the restricted presets, not the permissive one.** Because the
+default grants every cell, the matrix demonstrates nothing on its own — and `CONTEXT.md` still
+calls it a central, non-obvious idea. So the presets that earn their place are the ones that
+*restrict*: what they are, why each exists, and which cells each withholds. Candidates worth
+arguing rather than assuming — a contractor limited to `self`; a finance role holding `cost` but
+not `jobs`; a lead scoped to `team`. At least one must be legible in ten seconds on `/demo`
+(ticket 03's measured budget), because the role switcher is the only place the mechanism is
+visible at all.
+
+Still open and still yours: whether `org-member` × `access` survives, and whether a Member holds
+one preset or several.

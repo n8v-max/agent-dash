@@ -166,3 +166,43 @@ symmetry (no asymmetric watcher) and the fact that the cross-person figure is *v
   is never exercised.
 - **→ ADR-0001** amended: `tokens` clause reversed, `cost` clause stands, both Known gap and Known
   hole marked resolved. **ADR-0002** added.
+
+## Revision — 2026-09-05, after resolution
+
+**The human reversed this ticket's outcome shortly after it was resolved.** The Answer above is
+retained as the record of a position that was held and abandoned; it is **not** the current state.
+
+**Current position:** individual usage and spend — **both tokens and currency** — are visible for
+**named individuals org-wide, to every Member, by default**, gated by a visibility permission
+scope that exists but grants the widest setting. Recorded in
+[ADR-0003](../../../docs/adr/0003-individual-visibility-is-open-by-default.md), which supersedes
+both ADR-0001 and ADR-0002.
+
+**What this ticket's direct question comes to:** still "no floor" — now for a different and
+simpler reason. There is no aggregate to re-identify *from*, because the identified figure is
+shown directly. The subtraction attack that opened this ticket is not defended against; it is
+obsolete.
+
+**What was discarded from the Answer above:**
+
+- The per-class comparison-unit model (`jobs`→peer, `tokens`→cohort, `cost`→team).
+- `cohort` as a seventh subject scope. It survives **demoted to an aggregation dimension** —
+  a comparison group keyed on work domain and/or template, viewer-selected, gating nothing. See
+  `CONTEXT.md` § Aggregation Dimensions.
+- Team per-capita currency, and the named-vs-per-capita distinction it carried.
+- The one asymmetric grant. Access is now symmetric: no tier sees more than an ordinary Member.
+- The contingency on per-named-Member model mix (handed to 06 above). Moot — named currency is
+  shown directly, so reconstructing it from volume × rate card protects nothing.
+
+**What survives unchanged:**
+
+- No minimum-population floor, at any scope or class.
+- No structural guardrail against ranking — declined, not endorsed. Still tickets 05 and 07.
+- Enforcement in the data layer, as a pure function over fixture rows.
+- Filters are Repository and AgentTemplate; Model is a distribution display, not a filter.
+- Self included in aggregates with the self/others split shown.
+- The Goodhart exposure, now recorded in full in ADR-0003 as a deliberate position. It was raised
+  before this reversal and again after it, and reaffirmed both times.
+
+**New, from the reversal:** the matrix is the *mechanism*, not the default, so **restricted Role
+presets ship alongside the permissive default** in order to demonstrate it. Ticket 06 owns which.
