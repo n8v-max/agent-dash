@@ -141,6 +141,37 @@ Resolved tickets:
   now has vendor precedent (Anthropic spend CSV, FOCUS 1.5 draft `ModelFamily`); **`tier` does
   not, and the bet is stronger for it.**
 
+- **Session data model — inputs and outputs** ([ticket 08](issues/08-dimension-taxonomies.md),
+  2026-09-07, HITL): the AgentSession fact table settled end to end, grounded in a field
+  inventory of Claude Code OTel, the Claude Code Analytics API, Devin, Cursor, Copilot and
+  Cline. **`AgentTemplate` is renamed `WorkType`** — the configuration *is* the class of work,
+  so it is one dimension rather than two; `vendored`/`user_tuned`/`api_provided` demoted from a
+  roll-up level to a provenance label. Flat and global: repo-specific variants were declined,
+  since a WorkType behaving differently per repo is a finding to surface, not a reason to
+  multiply cardinality. **Declared at launch, not classified post-hoc** — the two vendors with
+  this dimension (Devin's `category`, Cursor's `workTypes`) both classify at teardown, and
+  declaring it is the deliberate divergence, because the label must exist *before* the session
+  in order to bootstrap its skills and prompt prefix. **Task is externally keyed** and launch is
+  blocked without a tracker issue, so multi-session analysis is never undermined by missing
+  keys; the platform explicitly does **not** own the external issue's lifecycle, which is what
+  keeps every session row immutable. **`execution_mode: interactive | headless`** is a session
+  property independent of `Member.kind` (`human` / `service_account`), following Cursor's
+  `isHeadless` rather than the RPA attended/unattended pair, which no agent vendor uses.
+  **Acceptance is split from terminal status** — a session can exit cleanly and produce nothing
+  — which in turn splits multi-session Tasks into **Rework** (retry of the same WorkType after
+  a non-accepted session) and **Decomposition** (several accepted sessions), converting ticket
+  05's stated doubt about rework into two separate findings. Tokens stored as four disjoint
+  classes and summed for display; cost derived, never stored. Three human-presence duration
+  spans; machine allocation stored but unpriced and out of the MVP display.
+  **Cut:** cost centre (isomorphic to Team), interruption counter (no vendor ships one),
+  repo-scoped templates, `on_behalf_of` attribution. → `CONTEXT.md` §§ Work, Models & Money,
+  Metric Concepts.
+  **Corrects brief 01:** "efficacy is a category-wide blank" no longer holds — Devin ships
+  `category`, `status_detail` and `num_user_messages` as first-class session fields, and Cursor
+  ships `workTypes`/`categories`/`complexity`. The differentiator is not unoccupied ground; it
+  is ground occupied by two vendors, **neither of whom joins it to cost**.
+  **Still open in 08:** the Repository work-domain vocabulary and the Model roster.
+
 **Research tickets 01–05 are resolved (01–04, 15), and two HITL tickets (14, 12) are answered.**
 
 **Collision discharged, then re-opened and discharged again.** Brief 15 was gathered clean-slate

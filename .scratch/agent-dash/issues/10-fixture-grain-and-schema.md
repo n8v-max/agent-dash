@@ -53,3 +53,20 @@ Team boundary** — now so the *comparison control* is exercised rather than the
 Access grants no longer constrain Team sizes at all: the default is `org-member` over everything.
 New requirement instead: the fixture must support at least one **restricted Role preset** having a
 visibly different view from the default, or ticket 06's presets cannot be demonstrated.
+
+
+**From ticket 08 (2026-09-07, HITL)** — the entity graph and the categorical columns are fixed;
+see `CONTEXT.md` §§ Work and Models & Money for field-level detail. Consequences for the fixture:
+
+- **Grain is the AgentSession**, with TokenUsage at (session × model × four disjoint token
+  classes). Cost is **derived, never stored** — the pricing function is a pure function and is
+  09's cleanest unit-test target after the comparability intersection.
+- **Every session carries an external Task key**; there are no unattributed sessions to model.
+- **Invariant to assert in the generator**: the three duration spans sum exactly to
+  `machine_allocation_duration_s`.
+- **Distributions that must be present**, or the intended findings are asserted over noise:
+  headless sessions ~100% AFK with zero interactive/idle time; at least one Task exhibiting
+  Rework and one exhibiting Decomposition; at least one CPU-heavy, token-light session so the
+  machine-allocation datapoint has something to find when it is expanded.
+- **The `WorkType → [artefact kind]` map is fixture data**, not chart-layer convention.
+- **Still needed from 08**: the Repository work-domain vocabulary and the Model roster.

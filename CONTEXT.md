@@ -16,7 +16,11 @@ for Team and Member import.
 **Team** — A group of Members within an Organization, imported from a GitHubTeam in the linked
 GitHubOrg. A Member belongs to one or more Teams. Hierarchy: Organization → Team → Member.
 
-**Member** — A person who belongs to an Organization and runs Tasks. Carries a Role.
+**Member** — An account that belongs to an Organization and runs Tasks. Carries a Role and a
+**kind**: `human` or `service_account`. Kind is a roll-up level on the Member dimension, in the
+same way `family` and `tier` are roll-ups on Model. It is load-bearing rather than cosmetic:
+service accounts hold no seat, so any per-capita figure that includes them has a wrong
+denominator.
 
 **Repository** — A GitHub repo within the linked GitHubOrg. Tasks are tagged to a Repository.
 Surfaced in the UI as "Project".
@@ -31,24 +35,118 @@ work*. The domain vocabulary is an open decision.
 ## Work
 
 **Task** — The unit of work a Member asks an agent to do: one request, one intended outcome.
-A Task is resolved by one **or more** AgentSessions. **UI alias: "Job".** `Task` is the
+A Task is addressed by one **or more** AgentSessions. **UI alias: "Job".** `Task` is the
 canonical term in code, schemas and specs; `Job` is the label shown to users and the name of
 the corresponding datapoint class.
 
-**AgentSession** — A single *attempt* at a Task. Has a start time, duration, status
-(`completed` | `failed` | `interrupted`), and TokenUsage. The atomic unit of platform activity
-and the grain at which cost is incurred.
+A Task is **externally keyed**: it *is* an issue in an external tracker (Jira, GitHub Issues),
+referenced by its real key. The platform **refuses to launch an AgentSession without one**, for
+accountability; a Member with no existing issue creates one ad hoc at launch, seeded from the
+session's opening intent. The key is therefore never absent and never synthetic, which is what
+makes multi-session analysis trustworthy.
 
-**Rework** — A Task that required more than one AgentSession to resolve. The distinction
-between Task and AgentSession exists so that Rework is *measurable*: three retries of one Task
-and three first-time-successful Tasks are otherwise indistinguishable.
+**The platform does not own the Task's lifecycle.** Whether the external issue is ultimately
+resolved may depend on non-engineering work the platform never sees, so Task resolution is out
+of scope. What the platform observes is the sessions it ran against the Task.
 
-**AgentTemplate** — A named, versioned agent configuration that a Task runs under. Three kinds:
-- `vendored` — built-in, shipped by the platform
-- `user_tuned` — derived from a vendored template, customised by a Member or Organization
-- `api_provided` — registered via the platform API (third-party or org-authored)
+**AgentSession** — A single *attempt* at a Task, and the atomic unit of platform activity: the
+grain at which cost is incurred and the grain everything is stored at. It is launched under a
+fixed set of labels — Member, Repository, WorkType, Task, and `execution_mode` — and accumulates
+measures as it runs.
 
-Every AgentSession references exactly one AgentTemplate.
+**Execution mode** — Whether a human is at the keyboard: `interactive` | `headless`. It is a
+**property of the session, not of the Member**: a human runs headless sessions, and a service
+account's session can be taken over. Conflating it with `Member.kind` would collapse two
+independent bits into one and lose the interesting cell. The naming follows shipped precedent
+(Cursor's `isHeadless`) rather than the RPA "attended/unattended" pair, which no agent vendor
+uses.
+
+**Session measures** — What an AgentSession accumulates as it runs. All are observable at
+session end, which is what keeps session rows immutable and every metric free of an as-of date.
+
+- **`terminal_status`** — `completed` | `failed` | `interrupted`. Whether the session ran to the
+  end. Platform health, not efficacy.
+- **`accepted`** — Whether the session met its WorkType's acceptance criterion. Kept distinct
+  from `terminal_status` because a session can exit cleanly and still produce nothing that
+  counts. Each WorkType defines its own criterion, and the criterion names the artefact that
+  actually matters: for `implementation` it is a **published pull request**, not the presence of
+  a branch or a commit.
+- **`prompt_count`** — User messages sent during the session. The single interaction-volume
+  measure; there is deliberately **no interruption counter**, because no surveyed vendor ships
+  one and Devin documents `num_user_messages` as the standing proxy for "frequent interruptions
+  or course corrections".
+- **Output artefacts** — Typed counts of permanent objects produced: `pull_request`, `commit`,
+  `file_changed`, `line_changed`, `comment`, `document`. Permitted kinds are declared per
+  WorkType. See Output comparability, below.
+- **TokenUsage** — See § Models & Money.
+- **Duration spans** — See below.
+
+**Duration spans** — Three disjoint spans, keyed on **human presence**, partitioning the
+session's machine allocation:
+
+| Span | Meaning |
+|---|---|
+| `interactive_duration_s` | a human is engaged — typing or reading, within the idle timeout |
+| `idle_duration_s` | the human has gone quiet past the timeout; the session is still live |
+| `afk_duration_s` | no human at the keyboard; the agent runs unattended |
+
+`machine_allocation_duration_s` is their sum. A `headless` session is `afk` for its entire
+lifetime by construction and then suspends — it has no interactive or idle time at all. **AFK
+time is therefore only informative for `interactive` sessions**; an AFK view spanning both modes
+would merely rediscover which sessions were headless.
+
+Because the partition is keyed on the *human* rather than on the actor doing the work, agent
+execution time is **not separately recoverable** from these three spans. That is accepted, and
+noted here because it is the change machine-use analysis will require.
+
+**Machine allocation** — Wall-clock time a session held a machine. **Stored, but not priced and
+not displayed in the MVP**: there is no compute rate card and no second currency. It is retained
+because token spend alone cannot detect CPU-heavy, token-light abuse — a CI-shaped session that
+burns machine time without consuming models. Flagged as a datapoint to expand on separately;
+backfilled when it is.
+
+**Output comparability** — Output artefact counts are comparable only across WorkTypes that
+share an artefact kind. `refactor` and `implementation` both produce changed lines; `review` and
+`refactor` share nothing, so no chart may put them on one axis. The `WorkType → [artefact kind]`
+map is **data**, and comparability is its intersection, evaluated in the data layer rather than
+enforced by convention inside a chart component. In the UI the dependency runs the other way
+round: **choosing a datapoint conditions which WorkTypes are offered**, so an incomparable
+selection cannot be expressed in the first place.
+
+**Rework** — A Task on which a **non-accepted** session was followed by another session of the
+**same WorkType**: a genuine retry at the same thing. The distinction between Task and
+AgentSession exists so that Rework is *measurable* at all — three retries of one Task and three
+first-time-successful Tasks are otherwise indistinguishable.
+
+**Decomposition** — A Task with more than one **accepted** session: work deliberately split, not
+work repeated. Rework and Decomposition are independent labels on a Task rather than a
+partition; a long Task can exhibit both. Separating them is what makes multi-session Tasks
+interpretable — the raw count alone cannot tell a retry from a split.
+
+**WorkType** — The class of work a session is launched to do. **UI alias: "template".** It is
+one dimension, not two: the agent configuration *is* the work type, so choosing "bugfix" both
+declares intent and bootstraps the session — loading the appropriate skills and prefixing the
+first prompt with framing such as *"implementing Jira ABC-42"*. Every AgentSession references
+exactly one WorkType.
+
+The vocabulary is **global and flat**: `research`, `implementation`, `refactor`, `bugfix`,
+`review`, `deploy`. Deliberately **not repo-scoped** — a WorkType may well behave differently on
+a mobile repo than on an infra one, but that interaction is a *finding to surface*, not a reason
+to multiply the values by the repository count.
+
+Each WorkType carries a **source** label recording where its configuration came from —
+`vendored` | `user_tuned` | `api_provided`. Source is provenance metadata, not an aggregation
+level: nothing is grouped by it.
+
+Each WorkType also defines its own **acceptance criterion** and its own set of permitted
+**output artefact kinds**, which is why output volume is not comparable across all of them.
+
+**WorkType is declared at launch, not classified afterwards.** The two shipped precedents do the
+opposite — Devin assigns a `category` at session teardown "based on the work performed", Cursor
+derives `workTypes` from conversation content. Declaring it is the deliberate choice, because the
+label has to exist *before* the session runs in order to bootstrap it. The gap this leaves —
+sessions that drift from their declared type — is a real efficacy signal and is recorded as
+future work, not modelled here.
 
 ---
 
@@ -89,6 +187,16 @@ which is why Model mix, not token volume, dominates cost variance.
 **TokenUsage** — Tokens consumed by an AgentSession, **keyed by Model**. A single AgentSession
 may consume tokens across more than one Model.
 
+Stored as **four raw, disjoint counts** per (AgentSession × Model): uncached input, cache read
+(hits), cache write (creation/misses), and output. Disjointness is the property that matters —
+it is the only shape that sums safely. Cost is **derived** from these against the rate card,
+never stored alongside them.
+
+For display the four are **summed into one "tokens processed" figure**, because four numbers per
+model is more than a viewer needs. That the sum weights a cache read the same as an output token
+is accepted: token volume is an adoption measure, not a cost proxy, and cost already diverges
+from volume through Model choice and effort level regardless.
+
 **Token class** — The priced categories tokens fall into. Every token-based vendor reports at
 least four, separately, because each is priced differently: uncached input, cache read, cache
 write, output. Two hazards this project has to hold precisely, both established by ticket 02:
@@ -99,7 +207,12 @@ write, output. Two hazards this project has to hold precisely, both established 
 - **Cache writes subdivide by TTL** and are priced differently by TTL (Anthropic: 1.25× at 5m,
   2× at 1h). A single flat `cache_write_tokens` cannot be priced against that card.
 
-How this project normalises across those definitions is an open decision (ticket 13).
+This project's canonical set is the four disjoint classes named under TokenUsage above, and
+every vendor reading normalises into it. Cache-write TTL is **collapsed** to a single class, and
+the rest of the rate-card key — region, service tier, context tier, speed — is collapsed to
+(model × token class). The precision lost is real and is stated rather than discovered: this
+model cannot reproduce a vendor invoice, only estimate one. Ticket 13 carries the remaining
+question of what happens to an un-normalisable vendor reading.
 
 **Model mix** — The distribution of TokenUsage across Models for a given population and
 period, viewable at any of the three roll-up levels.
@@ -134,7 +247,7 @@ level on a single ladder.
 
 | Class | Covers |
 |---|---|
-| `jobs` | Task and AgentSession activity: counts, status, duration, template, rework |
+| `jobs` | Task and AgentSession activity: counts, status, duration, work type, rework |
 | `tokens` | TokenUsage volume and Model mix |
 | `cost` | monetary spend |
 | `access` | Visibility of the Role and permission model itself |
@@ -170,11 +283,11 @@ without being re-stored. Selecting a level is a user-facing control, not a schem
 
 | Dimension | Roll-up levels |
 |---|---|
-| Member | Member → Team → Organization |
+| Member | Member → Team → Organization; `kind` (`human` / `service_account`) |
 | Model | exact model → family → tier |
 | Repository | repository → work domain |
-| AgentTemplate | template → kind (`vendored` / `user_tuned` / `api_provided`) |
-| Cohort | Repository work domain, AgentTemplate, or both — **viewer-selected** |
+| WorkType | flat — no roll-up levels; `source` is provenance, not a level |
+| Cohort | Repository work domain, WorkType, or both — **viewer-selected** |
 
 **Cohort** — Not an access scope. A comparison group: the population it is *meaningful* to measure
 a Member against, being those doing comparable work. Its key is viewer-selected, so membership is
@@ -188,10 +301,16 @@ Team. Access does not gate it; relevance is what it is for.
 Only terms fixed by the model itself are listed here. The dashboard's metric *set* is an open
 decision; terms graduate into this section as it settles.
 
-**Success rate** — Share of AgentSessions with status `completed`, against `failed` and
-`interrupted`.
+**Acceptance rate** — Share of AgentSessions that met their WorkType's acceptance criterion.
+This is the efficacy metric. Reported **within** a WorkType, since the criterion differs by type.
+
+**Completion rate** — Share of AgentSessions with `terminal_status` `completed`, against `failed`
+and `interrupted`. Platform health, and deliberately not the same number as acceptance rate.
 
 **Session duration** — Wall-clock time from AgentSession start to end. Median and p95 are the
 meaningful aggregations; the distribution is right-skewed, so the mean is not.
 
-**Rework rate** — Share of Tasks requiring more than one AgentSession.
+**Rework rate** — Share of Tasks exhibiting Rework: a non-accepted session followed by another
+of the same WorkType.
+
+**Decomposition rate** — Share of Tasks with more than one accepted session.

@@ -119,3 +119,24 @@ What this changes for the metric set:
   renders a leaderboard. Decide explicitly whether seat cost is modelled.
 - **Every alert in the field fires on money; nothing alerts on failure, rework or quality**
   (brief 15, ~15 vendors). Still the clearest unoccupied ground, and unaffected by the reversal.
+
+
+**From ticket 08 (2026-09-07, HITL)** — the session data model is settled, and it changes what
+this ticket has to decide:
+
+- **Efficacy has a field now.** `accepted` (per-WorkType acceptance criterion) is separate from
+  `terminal_status`, so **acceptance rate** and **completion rate** are different metrics and
+  this ticket must not conflate them. Acceptance is only comparable *within* a WorkType.
+- **Rework is trustworthy after all**, which retires this ticket's queued doubt. `accepted`
+  splits multi-session Tasks into **Rework** (retry of the same WorkType after a non-accepted
+  session) and **Decomposition** (several accepted sessions) — two findings from one shape,
+  where the raw session count was ambiguous between them.
+- **Token totals are an adoption measure, not a cost proxy**, and that is now an explicit
+  position rather than an oversight: the displayed figure sums four disjoint classes, so it
+  weights a cache read like an output token. Cost carries the money.
+- **Machine allocation is stored but out of the MVP display.** Any metric this ticket wants from
+  it is a post-MVP expansion, and utilisation is *not* derivable from the three human-presence
+  duration spans.
+- **AFK time must be scoped to `interactive` sessions.** Headless sessions are 100% AFK by
+  construction, so an unscoped AFK metric only rediscovers `execution_mode`.
+- **The ranking question is untouched by 08 and still lands here.**
