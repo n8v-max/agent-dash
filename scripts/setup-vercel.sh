@@ -185,7 +185,7 @@ finish() {
 # ──────────────────────────────────────────────────────────────────────────
 
 
-TOTAL_STAGES=4
+TOTAL_STAGES=5
 
 # Production URL is a public value and useful to code later (metadataBase,
 # Playwright BASE_URL), so it lands in .env.local rather than .env.
@@ -261,6 +261,38 @@ fi
 say ""
 note "Git integration is now automatic: pushes to main deploy to production,"
 note "and every pull request gets its own preview URL, commented on the PR."
+
+# ── 5 ─────────────────────────────────────────────────────────────────────
+stage "Set the session signing key on Vercel"
+say "The app signs its session JWT with AUTH_JWT_SECRET (R-T14). Dev and CI carry"
+say "their own keys; production needs one that exists only in the Vercel dashboard."
+
+PROD_JWT_SECRET=$(openssl rand -base64 32)
+say ""
+say "Here is a fresh 32-byte key for production:"
+printf '  %s%s%s\n' "$BOLD" "$PROD_JWT_SECRET" "$RESET"
+note "Not written to any file here — copy it straight into Vercel and nowhere else."
+open_url "https://vercel.com/dashboard"
+step "Open the agent-dash project, then Settings → Environment Variables."
+step "Add the key AUTH_JWT_SECRET with the value above."
+step "Tick Production. Tick Preview too if you want preview URLs to sign in."
+step "Save, then Deployments → latest → ⋯ → Redeploy."
+note "Env vars are read at build and at runtime, so the deployment already live"
+note "will not pick this up until it is redeployed."
+warn "Without it, sign-in fails on the deployed build — the app throws at boot."
+if confirm "Added AUTH_JWT_SECRET and redeployed?"; then
+  say "Good — sign-in will work on the deployed build."
+else
+  SKIPPED+=("Set AUTH_JWT_SECRET in the Vercel dashboard and redeploy, or sign-in fails")
+  warn "recorded as outstanding; see the summary at the end"
+fi
+
+# The local dev key is a different key. Only generate one if .env.local has
+# none, so re-running this wizard never invalidates a working dev session.
+if ! _existing AUTH_JWT_SECRET >/dev/null 2>&1; then
+  write_env AUTH_JWT_SECRET "$(openssl rand -base64 32)"
+  note "also wrote a separate local dev key to $ENV_FILE"
+fi
 
 # The library's summary short-circuits under `set -e` when no GitHub secrets
 # were written — this wizard writes none, so relax errexit for the summary.

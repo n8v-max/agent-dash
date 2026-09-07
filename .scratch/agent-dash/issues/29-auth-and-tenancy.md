@@ -14,6 +14,12 @@ Two accounts, two JWTs, and enforcement that acts on the wire rather than in a f
 - **`/sign-in`** — two "continue as" buttons (R-A4), each posting to `POST /api/session`, which
   issues that account's JWT as an `httpOnly`, `sameSite=lax`, `secure` cookie and redirects to
   `/demo`. `DELETE` clears it.
+- **The signing key is the env var `AUTH_JWT_SECRET`** (R-T14), read server-side only and never
+  `NEXT_PUBLIC_`-prefixed. Read it once at module load and **throw if it is missing or under 32
+  bytes** (HS256's minimum), so a keyless deploy fails at boot rather than at first sign-in. It is
+  already provisioned in all three environments: `.env.local` for dev, a fixed non-production
+  literal in `.github/workflows/ci.yml`, and the Vercel dashboard for production via
+  `scripts/setup-vercel.sh` stage 5. **Do not invent a second name for it.**
 - **The JWT carries `{ member_id, org_slug }` only** (R-T14). Grants are resolved server-side from
   the Member's Role. **A token carrying its own grants is a token that can be edited to widen
   them.**

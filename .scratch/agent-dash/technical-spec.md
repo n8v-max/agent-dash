@@ -284,9 +284,16 @@ the generator on every row and re-asserted as a fixture invariant test.
 `httpOnly`, `sameSite=lax`, `secure` cookie. `DELETE` clears it. `/sign-in` posts to it; the header
 switcher posts to it and reloads in place (R-A5).
 
-**R-T14 — The JWT is signed with an env secret and carries `{ member_id, org_slug }` only.** Grants
+**R-T14 — The JWT is signed with the env secret `AUTH_JWT_SECRET` and carries `{ member_id, org_slug }` only.** Grants
 are **not** in the token — they are resolved server-side from the Member's Role. A token carrying
 its own grants is a token that can be edited to widen them.
+
+The secret is read server-side only and is **never** `NEXT_PUBLIC_`-prefixed: a signing key
+serialised to the browser forges tokens for anyone who opens devtools. It is absent by design from
+`.env.example` (empty key, generation command in the comment), present in `.env.local` for dev, a
+fixed non-production literal in CI, and set in the Vercel dashboard for production. **Read it once
+at module load and throw if it is missing or under 32 bytes** — HS256 requires 32, and a server
+that boots without a key would otherwise fail at first sign-in instead of at deploy.
 
 ### 5.2 Enforcement
 

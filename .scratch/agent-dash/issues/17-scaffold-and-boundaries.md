@@ -18,6 +18,21 @@ resolved, and the `src/domain/**` purity boundary enforced by lint rather than b
 - `shadcn init` scaffolded from a **`v4` or `base-*` style** — hard requirement (R-T2). The legacy
   `default` / `new-york` styles pin `recharts@2.15.4`, npm-marked **deprecated**: the same dead 2.x
   branch that disqualified Tremor in ticket 04. Landing there silently reverses ticket 14.
+- **Run it non-interactively.** The CLI prompts otherwise, and an unattended run hangs on the
+  prompt rather than failing:
+
+  ```sh
+  pnpm dlx shadcn@4.21.0 init --preset base-nova --no-monorepo --yes --force
+  ```
+
+  Flags verified against shadcn **4.21.0** on 2026-09-07. `--preset base-nova` is the CLI's own
+  default preset and satisfies R-T2's `base-*` requirement; `--no-monorepo` and `--yes` suppress
+  the two prompts; `--force` lets it overwrite the config it finds in an already-scaffolded app.
+  The 4.x CLI has **no `--style` flag at all**, so the deprecated `default` / `new-york` styles
+  cannot be reached through it — but the pinned CLI version is the only thing holding that true,
+  which is why the check below still runs. If it prompts anyway, that is a defect in these flags:
+  do not answer it, re-run with `--defaults` (which resolves to `--template=next
+  --preset=base-nova`) and record what changed.
 - Verify `components.json` and the **resolved** recharts version immediately after init. **Pin
   recharts exactly** (R-T3) — `package.json` currently has `"recharts": "^3.10.1"`, and the caret
   lets a transitive bump cross the 2.x/3.x boundary unobserved. Change it to `"3.10.1"`.
@@ -31,6 +46,8 @@ resolved, and the `src/domain/**` purity boundary enforced by lint rather than b
 
 ## Done when
 
+- `components.json` records a `base-*` preset, and no `style` field naming `default` or
+  `new-york`.
 - `pnpm why recharts` shows a single 3.x entry.
 - A deliberate `import { useState } from 'react'` inside `src/domain/` fails `pnpm lint`.
 - `pnpm lint && pnpm typecheck && pnpm test` pass.

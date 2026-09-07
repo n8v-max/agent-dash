@@ -14,6 +14,14 @@ jobs:
     name: Lint, typecheck, unit, e2e
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    # A fixed, non-production signing key (R-T14). Deliberately a literal and
+    # not a GitHub secret: the fixture is public, the two seeded accounts are
+    # public, and a repo secret here would only be theatre. Production's key is
+    # set in the Vercel dashboard and never appears in this repo.
+    env:
+      AUTH_JWT_SECRET: ci-not-a-production-key-000000000000000000
+
     steps:
       - uses: actions/checkout@v7
 
