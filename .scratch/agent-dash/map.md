@@ -172,7 +172,37 @@ Resolved tickets:
   is ground occupied by two vendors, **neither of whom joins it to cost**.
   **Still open in 08:** the Repository work-domain vocabulary and the Model roster.
 
-**Research tickets 01–05 are resolved (01–04, 15), and two HITL tickets (14, 12) are answered.**
+- **The metric set** ([ticket 05](issues/05-metric-set.md), 2026-09-07, HITL): the keystone,
+  settled over five rounds. **Headline is four tiles arranged as the thesis** — Total spend ·
+  Completed Tasks · Cost per completed Task · Rework rate — two money, two efficacy, with the
+  third being the differentiator itself. **`terminal_status` is cut**: a session is `accepted` or
+  it is not, and sessions that fail on infrastructure are **hidden**, their cost absorbed by the
+  platform. That achieves by exclusion what 08 wanted an enum for, and frees `completed` for Task
+  grain. **Machine allocation is now priced** against an undisplayed compute rate card keyed on
+  machine spec, and folds into session Cost — which is what makes the CPU-heavy, token-light
+  session detectable at all. **Seat cost is modelled**, humans only, as a component of Total spend
+  at monthly grain and coarser, never inside session Cost; it unlocks the sharpest finding in the
+  product, that a seat held against near-zero usage is the highest cost per unit of work in the
+  org. **Cost per completed Task** answers G3, with waste in the numerator and not the
+  denominator. **Rework drops its same-WorkType clause.** **Incomplete Task** is an umbrella
+  reported by age bucket, because the platform does not own the external Task's lifecycle and
+  cannot tell in-flight from abandoned. **Ranking exists but never by default** — tables sort by
+  cost and tokens; no surface defaults to it and no percentile labels are computed. **The product
+  makes no productivity claim**: no pre-agent baseline exists, so only period-over-period velocity
+  is observable — which retires ticket 03's "say the premise is contested" question entirely.
+  **Periods fall in the Organization's declared timezone, not UTC**, and comparison is
+  unrestricted with incomplete periods flagged rather than withheld; the change floor is **one**.
+  **Model is a breakdown, not a comparison axis** (G11), since a session spans Models. Filters are
+  per-metric and ergonomic, not a unified combinatorial set.
+  **Cut:** completion rate, quality signals, org-level acceptance rate, unaccepted-spend tile,
+  interruption counter, standalone seat metric, idle-time waste metric, compute-rate display,
+  default-sorted top-spenders view, productivity-gain claim. Projection survives as a separate
+  FinOps-first view and is MVP-optional.
+  → `CONTEXT.md` §§ Work, Models & Money, Metric Concepts (rewritten).
+  **Handed to 07**: view grouping, page layout, and what occupies the fourth tile when rework
+  rate flatlines at 0%.
+
+**Research tickets 01–05 are resolved (01–04, 15), and four HITL tickets (14, 12, 08, 05) are answered.**
 
 **Collision discharged, then re-opened and discharged again.** Brief 15 was gathered clean-slate
 against the `CONTEXT.md` and ADR-0001 that predate ticket 12, and its ticket asserted ADR-0001
@@ -190,6 +220,81 @@ brief 01's most transferable finding, and the only surveyed precedent for a floo
 2026-04-02.**
 
 The remaining frontier is entirely HITL.
+
+## Convergence pass — 2026-09-07
+
+A pass over the open tickets after ticket 08 resolved, to close the distance between this map and
+a writable spec. No HITL question was answered; what changed is which questions are still live and
+in what order they have to fall.
+
+**Ticket 16 charted** — *Repository work-domain vocabulary and the Model roster*
+([16](issues/16-work-domain-and-model-roster.md)). The two items ticket 08 closed with as "still
+open". Shape is settled, values are not: the work-domain value list and whether a Repository
+carries one domain or several, and the model roster with `family` / `tier` assignments and the
+illustrative rate card. A vocabulary ticket, not a modelling one.
+
+**Ticket 13 downgraded and narrowed.** It was charted as a correctness question blocking the
+fixture. Ticket 08 wrote most of its answer into `CONTEXT.md` § Models & Money — four disjoint
+classes, cache-write TTL collapsed, rate-card key collapsed to (model × token class), precision
+loss stated rather than discovered, cost derived and never stored. What survives is a scoping
+question, not a correctness one: what happens to an un-normalisable vendor reading, and how much
+of the vendor-mapping boundary is *built and unit-tested* versus *documented in prose*, given the
+data is fixtures throughout and no vendor reading is ever actually parsed.
+
+**Ticket 10 re-blocked**: `05, 08` → **`05, 13, 16`**. 08 discharged the entity graph and the
+grain but graduated the categorical *values* and the normalisation scoping question, which are
+exactly what a fixture needs. 07 is deliberately not a blocker — 10 owns the data, not its
+arrangement.
+
+**Brief 15's thirteen gaps routed into ticket 05.** Six are discharged: G1 outcome and G2 rework
+by `accepted` / `terminal_status` and the Task-retry definition; G4 by the work-domain dimension,
+with its values passed to 16; G5 by `source` being provenance rather than a roll-up level; G6 by
+ADR-0003's no-floor position; G13 was never open. **Seven remain live** — G3 cost per outcome
+(the differentiator in metric form, and the denominator is the decision), G7 watched-versus-browsed
+and its noise floor, G8 presenting uncertainty, G9 the IC's own view, G10 quality, G11 model mix as
+a lever rather than a breakdown, G12 seat cost. Plus the top-spenders view, which no brief raised
+and no ticket has discharged.
+
+## Critical path to spec
+
+Five tickets are open and unblocked; two are blocked behind them. The path is not flat — **05 is
+the keystone and gates most of the remainder.**
+
+**Updated 2026-09-07 after ticket 05 resolved.** Seven tickets remain, four of them unblocked.
+
+| Order | Ticket | Type | Blocks |
+|---|---|---|---|
+| ~~1~~ | ~~05 metric set~~ | grilling | **Resolved 2026-09-07** |
+| 1 | [07](issues/07-information-architecture.md) IA and route map | grilling | 11 |
+| 2 | [16](issues/16-work-domain-and-model-roster.md) vocabularies and roster | grilling | 10 |
+| 2 | [13](issues/13-token-class-normalisation.md) token normalisation | grilling | 10 |
+| 2 | [06](issues/06-role-preset-table.md) role presets | grilling | — |
+| 3 | [10](issues/10-fixture-grain-and-schema.md) fixture grain and schema | grilling | — |
+| 4 | [11](issues/11-empty-state.md) zero-data state | prototype | — |
+| 5 | [09](issues/09-testing-architecture.md) testing architecture and seams | grilling | — |
+
+07 leads because 05 handed it three decisions outright — view grouping, page layout, and what
+occupies the fourth headline tile when rework rate flatlines. 13, 16 and 06 are mutually
+independent. 09 is unblocked today but placed last on purpose: 05 named three pure functions for
+it, and the seam is easiest to draw once the fixture shape exists.
+
+**11 is a prototype, not a conversation**, and its own constraint says whoever resolves it must
+build the options and not pick one. Budget for that when 05 and 07 land.
+
+## Handoff shape
+
+`/to-spec` and `/to-tickets` are named in this map's Destination but **are not installed skills in
+this environment**. The handoff is therefore manual, and per `docs/agents/issue-tracker.md` it
+lands as files in this repo rather than in a tool. The assignment's step 1–4 map onto four
+artefacts:
+
+- `.scratch/agent-dash/spec.md` — requirements
+- the technical implementation spec
+- the testing spec, which is ticket 09's output written as requirements rather than as a decision
+- the step-by-step plan, which becomes `.scratch/<slug>/issues/NN-*.md` implementation tickets
+
+Naming and splitting of the middle two is itself unsettled and is the first thing `/to-spec` would
+have decided. It is recorded here rather than left to be discovered at the boundary.
 
 ## Not yet specified
 

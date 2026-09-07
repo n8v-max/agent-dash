@@ -1,6 +1,6 @@
 Type: grilling
 Status: open
-Blocked by: 05, 08
+Blocked by: 13, 16
 Label: wayfinder:grilling
 
 # Fixture grain and schema
@@ -70,3 +70,29 @@ see `CONTEXT.md` §§ Work and Models & Money for field-level detail. Consequenc
   machine-allocation datapoint has something to find when it is expanded.
 - **The `WorkType → [artefact kind]` map is fixture data**, not chart-layer convention.
 - **Still needed from 08**: the Repository work-domain vocabulary and the Model roster.
+
+## Blocking re-stated (2026-09-07)
+
+`Blocked by` was `05, 08`. Ticket 08 is resolved, but it discharged only part of what this
+ticket needed from it and graduated the rest. Current blockers:
+
+- **05** — the metric set determines what the grain must be able to answer. Unchanged, and the
+  keystone.
+- **13** — whether the normalisation boundary is built or documented determines whether the
+  fixture needs vendor-shaped token rows at all.
+- **16** — the Repository work-domain vocabulary and the Model roster with its rate card. These
+  are the categorical columns and the pricing input; 08 fixed their shape and left their values.
+
+07 is deliberately **not** a blocker: this ticket owns the data, not its arrangement.
+
+**From ticket 05 (2026-09-07, HITL)** — this ticket is now unblocked on 05. New fixture
+requirements:
+
+- **Organization carries a declared timezone.** Period boundaries derive from it.
+- **A compute rate card keyed on machine specification**, plus a flat monthly **seat fee**.
+- **Hidden sessions** — infra-failed — must not appear in customer analytics. Decide whether they
+  exist in the fixture at all or are simply never generated.
+- **Session has no `terminal_status`.** `accepted` is the only outcome field.
+- Distributions that must be present, extending 08's list: at least one **Incomplete Task** in
+  each age bucket, and at least one Member holding a seat with near-zero usage — otherwise the
+  sharpest finding in the product has nothing to find.

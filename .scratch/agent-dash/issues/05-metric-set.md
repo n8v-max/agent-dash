@@ -1,5 +1,5 @@
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 01, 02, 03
 Label: wayfinder:grilling
 
@@ -140,3 +140,202 @@ this ticket has to decide:
 - **AFK time must be scoped to `interactive` sessions.** Headless sessions are 100% AFK by
   construction, so an unscoped AFK metric only rediscovers `execution_mode`.
 - **The ranking question is untouched by 08 and still lands here.**
+
+## Brief 15's thirteen gaps, routed (2026-09-07)
+
+Brief 15 raised G1–G13 as open questions addressed to this ticket and to 08. Ticket 08 has since
+resolved, and it discharged six of them outright. Routing the list so this ticket carries what is
+actually still live rather than all thirteen.
+
+**Discharged — closed, with the answer and where it lives:**
+
+| Gap | Discharged by | Answer |
+|---|---|---|
+| G1 outcome of an attempt | 08 | `accepted` and `terminal_status`, both at AgentSession grain, deliberately different numbers |
+| G2 rework | 08 | Defined on retries of a Task at the same WorkType after a non-accepted session. The Git-churn branch, with its two-to-three-week lag, was not taken |
+| G4 roll-up above Repository | 08 | Work domain. Its *value list* is now ticket 16, not this one |
+| G5 configuration provenance | 08 | `source` (`vendored`/`user_tuned`/`api_provided`) is provenance metadata, not a roll-up level. Nothing groups by it, so the cardinality problem Anthropic solved by redaction does not arise |
+| G6 peer-aggregate and the k-anonymity floor | 12 / ADR-0003 | No floor. `org-member` over `jobs`, `tokens` and `cost` is the default grant, so there is no aggregate-only tier to size |
+| G13 what the individual actually did | brief 15 itself | Nothing open; the field is consistent and this product follows it |
+
+**Live, and this ticket's to answer:**
+
+- **G3 — cost per outcome.** The stated differentiator, in metric form. Not one surveyed product
+  reports cost per completed unit of work, while DORA, Faros, Vantage, CloudZero and the FinOps
+  Foundation all ask for it by name. **The denominator is the decision**: accepted AgentSession,
+  Task, or merged PR. 08 makes the first two internal and free; the third is sourced from Git,
+  which this platform does not own. Note that acceptance is only comparable *within* a WorkType,
+  so a single org-wide cost-per-outcome number needs an argument for existing at all.
+- **G7 — watched versus browsed.** Alerting is out of scope, so the alert half is closed; the
+  design half is not. If any metric is intended to be *watched*, this ticket names it and states
+  how a change in it is distinguishable from noise. Every vendor shipping anomaly detection had
+  to set an explicit floor (Vantage $5 + 0.5%; Datadog daily minimum 5; LiteLLM $10). A trend
+  arrow with no noise floor is the same claim without the honesty.
+- **G8 — presenting uncertainty.** Rate cards here are illustrative by decision, so this is not
+  reconciliation to a real invoice; it is whether a derived cost figure renders as one number or
+  carries the estimate/actual distinction the field found necessary. Ticket 02 already binds the
+  harder case: a projection without an interval is the least defensible tile on the page.
+- **G9 — the IC's own view.** Under ADR-0003 the field's opt-in default is moot, but the shape
+  question is untouched and has one precedent each way: the admin's metric set at a narrower
+  subject scope (Anthropic, Augment) or a genuinely different metric set (Devin Coach). Shared
+  with ticket 06.
+- **G10 — quality.** Nothing in the field exposes a defect, revert or change-failure rate. Either
+  this product carries no quality signal, or it takes one from inside its own data (where the
+  only proxies are review-activity counts) or from Git and incident systems (where the
+  research-backed signals live, at the cost of a dependency it does not own). 08 declined to
+  model WorkType drift and recorded it as future work, which narrows but does not settle this.
+- **G11 — model mix as a lever, not a breakdown.** 08 kept all three roll-up levels but did not
+  say what they are *for*. A tier's share of spend is uninformative without knowing what work it
+  did, so a tier-level comparison needs a normalising denominator — which is G3's denominator
+  again, applied at a different grain. The roster itself is ticket 16.
+- **G12 — seat cost.** Already flagged above as load-bearing. Is Cost marginal consumption only,
+  or does it acknowledge a fixed component? Seat fees are invisible to usage APIs, so a
+  usage-derived per-engineer figure distorts the **ordering**, not just the total — and under
+  ADR-0003 that ordering is published to everyone whether or not a leaderboard is rendered.
+
+**Plus the one question no brief raised and no ticket discharged: does a top-spenders view ship?**
+Recorded above under ticket 12's correction. It is the last undecided product question with a
+straight yes/no, and it is the one an interviewer will reach for first.
+
+## Answer
+
+Resolved 2026-09-07, HITL, over five grilling rounds. Terms graduated into `CONTEXT.md`
+§§ Work, Models & Money and Metric Concepts.
+
+### The inventory
+
+| Metric | Class | Grain and scoping |
+|---|---|---|
+| Total spend | `cost` | Session Cost + Seat cost. Monthly grain and coarser only |
+| Cost per session | `cost` | Filters: WorkType, Repository, `accepted`. Aggregates to day / week / month |
+| Cost per completed Task | `cost` | The join. Filter: presence of a WorkType |
+| **Completed Tasks per period** | `jobs` | Velocity. Raw by default, per-capita on toggle |
+| Acceptance rate | `jobs` | **Within a WorkType**, always. Over time aggregates |
+| Rework rate | `jobs` | Task grain |
+| Decomposition rate | `jobs` | Task grain |
+| Incomplete Tasks | `jobs` | Bucketed by age since last session |
+| Tokens processed | `tokens` | Sortable column and time series. Adoption, not cost |
+| Model mix | `tokens` | Distribution at exact / family / tier |
+| Session duration | `jobs` | Median and p95 |
+| Human-presence spans | `jobs` | Composition, **`interactive` sessions only** |
+| Projected cost | `cost` | Separate FinOps-first view. MVP-optional |
+
+### Headline
+
+Four tiles, arranged as the thesis — two money, two efficacy, and the third is the
+differentiator itself:
+
+**Total spend · Completed Tasks · Cost per completed Task · Rework rate**
+
+Each carries a period-over-period change. The same four serve the individual, team and
+organisation views. **The fourth slot is provisional**: rework rate may flatline at 0%, which is
+dead space at a ten-second read, so what occupies it is ticket 07's call.
+
+### Decisions, and what each one closed
+
+**The session has one outcome field.** `terminal_status` is cut, and with it completion rate. A
+session is `accepted` or it is not. Sessions that fail on platform or infrastructure faults are
+**hidden**: the platform absorbs their cost, the Organization is not billed, and they appear in
+no metric. This achieves by exclusion what ticket 08 wanted an enum for — acceptance rate becomes
+a clean measure of *agent* efficacy with no platform noise in it. It also removes the
+`completed` collision, freeing the term for Task grain.
+
+**Cost is three things, at two grains.** Session Cost = token cost + machine cost, blended.
+Machine allocation is now **priced**, against a compute rate card keyed on machine specification
+that is never displayed — rates vary by spec and the breakdown is not something a viewer should
+reason about. Pricing it is what makes the CPU-heavy, token-light session detectable at all;
+unpriced it was a duration nobody compared against money. Seat cost sits outside session Cost as
+a component of **Total spend**, at monthly grain and coarser only.
+
+**Seat cost is modelled, and it pays for itself immediately** (brief 15's G12). Seats attach to
+`human` Members only. The finding it unlocks: a seat held against near-zero usage is the highest
+cost per unit of work in the organisation, and a consumption-only model cannot see it. It also
+fixes the per-capita denominator.
+
+**Cost per completed Task is the answer to G3.** Denominator is the Completed Task, not the
+merged PR — 08 already made a published pull request the acceptance criterion for
+`implementation`, so a PR denominator both duplicates that and imports a Git dependency the
+platform does not own. Attempts that produced nothing sit in the numerator and not the
+denominator, so waste raises the figure. That is the mechanism.
+
+**Rework loses its same-WorkType clause.** Rework is a non-accepted session followed by another
+session in the same Task, of any type. Requiring the same class of work was too strict: a failed
+`research` session followed by an `implementation` session is still a second attempt at the same
+Task. Consequence accepted: the rate runs higher than the strict reading would give.
+
+**Incomplete is an umbrella, on purpose.** A Task with no accepted session may be in flight or
+abandoned, and the platform cannot tell — it does not own the external Task's lifecycle. Rather
+than invent a cutoff, report the count bucketed by age since the last session and let the reader
+conclude. Age carries what the label cannot claim.
+
+**Ranking exists but is never the default.** Per-member tables sort by total cost and by total
+tokens, because transparency and expectation-matching argue for it and ADR-0003 already opened
+the data. But no surface defaults to sort-by-spend, no tile is titled "top spenders", and no
+Member carries a computed percentile label. Every documented 2026 failure was **default-on
+ranking as the headline** — Amazon's KiroRank raised compute spend with no matching value — not
+the ability to sort a table. The product ships the data and declines to editorialise an ordering.
+
+**The product makes no productivity claim.** Measuring a gain needs a pre-agent baseline, and the
+dashboard's window is entirely agent-assisted, so no baseline exists. Only period-over-period
+velocity is observable. This retires ticket 03's question of whether to say the premise is
+contested out loud: the product never asserts the premise, so it has nothing to litigate. It is
+also the more defensible position than either side of the METR disagreement.
+
+**Model is a breakdown, not a comparison axis** — resolving G11. A session may span several
+Models, so grouping a per-session metric by Model would attribute one session's cost to one model
+unsoundly. Model mix stays a distribution at all three roll-up levels. This confirms ticket 12's
+"distribution display, not a filter" for a reason that ticket did not have.
+
+**Filters are per-metric and chosen for ergonomics**, not a single unified dimension set applied
+combinatorially. The shared-set proposal was rejected: it optimises for implementation symmetry
+over the viewer.
+
+**Period boundaries fall in the Organization's declared timezone.** Not UTC. An organisation's
+"last month" should be the month its people worked. Aggregation is therefore a pure function of
+(rows, timezone) — a clean unit-test target for ticket 09 and a required fixture field for 10.
+
+**Comparison is unrestricted; incompleteness is flagged, not withheld.** Any period may be
+compared with any other. The change floor is **one**: a change figure is suppressed only when the
+prior period holds nothing at all. Above zero it is shown — two to three sessions week-over-week
+really is +50%, and on a narrow self-view that is the honest reading rather than noise. This is
+the answer to G7, and it is deliberately looser than the field's: every vendor shipping anomaly
+detection sets a magnitude floor, but those exist to gate *alerts*, and alerting is out of scope
+here.
+
+**The self view is the individual view with comparators.** Same metric set at `self` scope, plus
+the cohort comparator, which answers *"am I heavy or light on work like mine"* — a question that
+only has meaning from a personal vantage. Answers G9. Shared with ticket 06.
+
+**Projection is a separate, FinOps-first view and may not make the MVP.** It is proportional to
+the period elapsed. Deliberately not on the core surfaces: ticket 02 is right that a projected
+number is the least defensible thing on a page, and the mitigation chosen is to move it off the
+page rather than to dress it.
+
+### Exclusions
+
+| Cut | Reason |
+|---|---|
+| `terminal_status`, completion rate | Infra failure is the platform's cost. Hiding those sessions gives a cleaner acceptance rate than an enum would |
+| Quality signals — defect, revert, change-failure rates | Internal proxies are review-activity counts, which are not quality. The research-backed signals need Git and incident systems, at a two-to-three week lag and a dependency the platform does not own. `bugfix` WorkType is a lateral proxy, noted, out of MVP |
+| Organisation-level acceptance rate | WorkType-scoped by definition; an org-wide figure averages incommensurable criteria |
+| Model as a group-by or filter on any per-session metric | A session spans Models. Unsound attribution |
+| Unaccepted-spend tile | Derivable from cost per session with the `accepted` filter. No third ratio |
+| Interruption counter | No surveyed vendor ships one; `prompt_count` is the standing proxy |
+| Standalone seat-cost metric | A component of Total spend, not a metric |
+| Idle time as a waste metric | A real signal, held back to keep the surface small. Named expansion |
+| Compute rate card display | Varies by machine spec; not something a viewer should reason about |
+| Default-sorted "top spenders" view | Ranking available by sorting; the product does not editorialise an ordering |
+| Productivity-gain claim | No pre-agent baseline exists in the data |
+| Year-over-year as a *restriction* | Not excluded — comparison is unrestricted, incompleteness is flagged |
+
+### Handed downstream
+
+- **07 (IA)** — view grouping and page layout, including whether human-presence spans and machine
+  time share one view; and what occupies the fourth headline tile when rework rate is flat.
+- **06 (role presets)** — the self view's shape, shared with G9.
+- **10 (fixture)** — Organization timezone as a field; the compute rate card keyed on machine
+  spec; seat fee; hidden sessions absent from customer analytics; and distributions that make
+  Rework, Decomposition and a CPU-heavy token-light session all present.
+- **16 (roster)** — the compute rate card joins the token rate card in scope.
+- **09 (testing)** — three pure functions named: (rows, timezone) → period buckets, session
+  pricing over two rate cards, and the change-floor rule.

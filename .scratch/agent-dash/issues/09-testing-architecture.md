@@ -68,3 +68,18 @@ conditionals into facts:
   bounded and known, which makes legend assertions tractable.
 - Still open and owned here: `initialDimension` vs fixed numeric `width`/`height`. 14 recorded
   that the `ResizeObserver`-polyfill failure is confusing rather than loud, but did not decide.
+
+**From ticket 05 (2026-09-07, HITL)** — three pure functions are now named and are this ticket's
+most obvious unit-test targets:
+
+1. **(rows, timezone) → period buckets.** Period boundaries fall in the Organization's declared
+   timezone, not UTC, so day/week/month bucketing is a function of two inputs and is the one place
+   an off-by-one is both easy to write and invisible in a chart.
+2. **Session pricing over two rate cards.** Token cost from four disjoint classes against the
+   token card, plus machine cost against the compute card, blended into one figure.
+3. **The change-floor rule.** A change figure is suppressed only when the prior period holds
+   nothing. Floor of one, not a magnitude threshold.
+
+Also relevant: **hidden sessions** — infra-failed sessions absent from every metric — are a
+filtering rule that must hold across the whole data layer, which is the kind of invariant that is
+cheap to assert once and expensive to click through.

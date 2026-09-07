@@ -48,3 +48,17 @@ to `/demo` plus a minimal landing.
 ## Blocked by
 
 03 — **resolved 2026-09-05. This ticket is now on the frontier.**
+
+**From ticket 05 (2026-09-07, HITL)** — the metric set is settled and hands this ticket three
+things it now owns outright:
+
+- **View grouping and page layout are yours.** 05 declined to place its metrics on surfaces.
+- **The fourth headline tile is provisional.** The headline is four tiles — Total spend ·
+  Completed Tasks · Cost per completed Task · Rework rate — but rework rate may flatline at 0%,
+  which is dead space at a ten-second read. What occupies that slot is this ticket's call.
+- **Whether human-presence spans and machine time share one view or two.** Both are secondary,
+  both are time-shaped, and both would duplicate chrome if split.
+
+Also settled and constraining: Total spend exists only at monthly grain and coarser, so any
+surface offering a day or week view cannot show it. Projection is a separate FinOps-first view
+and is MVP-optional, so nothing else may depend on it.

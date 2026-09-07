@@ -88,3 +88,14 @@ visible at all.
 
 Still open and still yours: whether `org-member` × `access` survives, and whether a Member holds
 one preset or several.
+
+**From ticket 05 (2026-09-07, HITL)** — the self view is settled in shape and shared with this
+ticket: **the same metric set at `self` scope, plus the cohort comparator**, which answers *"am I
+heavy or light on work like mine"* — a question that only has meaning from a personal vantage.
+No second metric set. That closes brief 15's G9.
+
+The datapoint-class assignment for every metric is now filled in 05's inventory table, which is
+what the restricted presets actually withhold. A preset granting `jobs` but not `cost` hides
+Total spend, cost per session and cost per completed Task — including **the third headline
+tile**, which is the product's differentiator. Whether a restricted preset that removes the
+differentiator is worth shipping on `/demo` is a real question for this ticket.

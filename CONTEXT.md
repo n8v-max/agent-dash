@@ -8,7 +8,8 @@ implementation detail. Decisions live on the wayfinder map and in `docs/adr/`.
 ## Organisation & People
 
 **Organization** — The top-level billing and access-control unit. An org subscribes to the
-platform and manages Members. All analytics are scoped to an Organization.
+platform and manages Members. All analytics are scoped to an Organization. It declares a
+**timezone**, which fixes where every day, week and month boundary falls in its analytics.
 
 **GitHubOrg** — The external GitHub organisation linked to an Organization. Source of truth
 for Team and Member import.
@@ -64,13 +65,10 @@ uses.
 **Session measures** — What an AgentSession accumulates as it runs. All are observable at
 session end, which is what keeps session rows immutable and every metric free of an as-of date.
 
-- **`terminal_status`** — `completed` | `failed` | `interrupted`. Whether the session ran to the
-  end. Platform health, not efficacy.
-- **`accepted`** — Whether the session met its WorkType's acceptance criterion. Kept distinct
-  from `terminal_status` because a session can exit cleanly and still produce nothing that
-  counts. Each WorkType defines its own criterion, and the criterion names the artefact that
-  actually matters: for `implementation` it is a **published pull request**, not the presence of
-  a branch or a commit.
+- **`accepted`** — Whether the session met its WorkType's acceptance criterion. **This is the
+  session's only outcome field.** Each WorkType defines its own criterion, and the criterion names
+  the artefact that actually matters: for `implementation` it is a **published pull request**, not
+  the presence of a branch or a commit.
 - **`prompt_count`** — User messages sent during the session. The single interaction-volume
   measure; there is deliberately **no interruption counter**, because no surveyed vendor ships
   one and Devin documents `num_user_messages` as the standing proxy for "frequent interruptions
@@ -99,11 +97,19 @@ Because the partition is keyed on the *human* rather than on the actor doing the
 execution time is **not separately recoverable** from these three spans. That is accepted, and
 noted here because it is the change machine-use analysis will require.
 
-**Machine allocation** — Wall-clock time a session held a machine. **Stored, but not priced and
-not displayed in the MVP**: there is no compute rate card and no second currency. It is retained
-because token spend alone cannot detect CPU-heavy, token-light abuse — a CI-shaped session that
-burns machine time without consuming models. Flagged as a datapoint to expand on separately;
-backfilled when it is.
+**Machine allocation** — Wall-clock time a session held a machine. It is **priced**, against a
+compute rate card keyed on the machine specification allocated, and the resulting figure folds
+into the session's Cost alongside token cost. The compute rate card is **never surfaced**: rates
+vary by specification and the breakdown is not something a viewer is asked to reason about.
+
+Pricing it is what lets token spend and machine spend disagree. A CPU-heavy, token-light session —
+CI-shaped work that burns machine time without consuming models — is invisible to a token figure
+and visible in Cost.
+
+**Hidden session** — An AgentSession that terminated through platform or infrastructure failure.
+The platform absorbs its cost; it is not billed to the Organization, and it appears in no metric
+and no view. Excluding these is what keeps Acceptance rate a clean measure of *agent* efficacy
+with no platform noise in it, and it is why the session model needs no terminal-status field.
 
 **Output comparability** — Output artefact counts are comparable only across WorkTypes that
 share an artefact kind. `refactor` and `implementation` both produce changed lines; `review` and
@@ -113,10 +119,18 @@ enforced by convention inside a chart component. In the UI the dependency runs t
 round: **choosing a datapoint conditions which WorkTypes are offered**, so an incomparable
 selection cannot be expressed in the first place.
 
-**Rework** — A Task on which a **non-accepted** session was followed by another session of the
-**same WorkType**: a genuine retry at the same thing. The distinction between Task and
-AgentSession exists so that Rework is *measurable* at all — three retries of one Task and three
-first-time-successful Tasks are otherwise indistinguishable.
+**Rework** — A Task on which a **non-accepted** session was followed by **another session** —
+of any WorkType. The follow-up need not attempt the same class of work: a failed `research`
+session followed by an `implementation` session is still a second attempt at the same Task.
+The distinction between Task and AgentSession exists so that Rework is *measurable* at all —
+three retries of one Task and three first-time-successful Tasks are otherwise indistinguishable.
+
+**Completed Task** — A Task with **at least one accepted session**. The unit of delivered work.
+
+**Incomplete Task** — A Task with **no** accepted session. Deliberately an umbrella: it covers
+both work still in flight and work someone gave up on, and the platform cannot tell them apart,
+because it does not own the external Task's lifecycle. Age since the last session is reported
+instead, and the reader draws their own conclusion.
 
 **Decomposition** — A Task with more than one **accepted** session: work deliberately split, not
 work repeated. Rework and Decomposition are independent labels on a Task rather than a
@@ -175,8 +189,11 @@ alongside `Model`, and the FOCUS 1.5 working draft adds a standards-track `Model
 now, since FOCUS notes that `ModelId` is *"not guaranteed to match across service providers"*,
 which is precisely the gap a capability tier exists to close.
 
-**Rate card** — The pricing that converts TokenUsage into Cost. **It is not keyed on Model
-alone**: in the real market the key is (model × token class × service tier × context tier ×
+**Rate card** — The pricing that converts a measured quantity into Cost. There are two: the
+**token rate card**, keyed on (model × token class), and the **compute rate card**, keyed on the
+machine specification allocated. Only the token card is ever surfaced to a viewer.
+
+The token card **is not keyed on Model alone**: in the real market the key is (model × token class × service tier × context tier ×
 region × speed). How much of that key this project models is an open decision.
 
 Rate cards here are **illustrative** and must be labelled as such wherever they are surfaced.
@@ -215,10 +232,26 @@ model cannot reproduce a vendor invoice, only estimate one. Ticket 13 carries th
 question of what happens to an un-normalisable vendor reading.
 
 **Model mix** — The distribution of TokenUsage across Models for a given population and
-period, viewable at any of the three roll-up levels.
+period, viewable at any of the three roll-up levels. It is a **breakdown, not a comparison
+axis**: a single AgentSession may span several Models, so no per-session metric can be grouped
+or filtered by Model without attributing a session's cost to one of them unsoundly.
 
-**Cost** — Monetary spend, derived from TokenUsage evaluated against the applicable rate card.
-Rolls up to Member, Team, and Organization.
+**Cost** — Monetary spend. At AgentSession grain it is **token cost plus machine cost**, both
+derived — token cost from TokenUsage against the token rate card, machine cost from machine
+allocation against the compute rate card. The two are **blended by default**; a session presents
+one figure.
+
+**Seat cost** — The recurring per-seat subscription fee. Seats attach to Members of kind `human`
+only; service accounts hold none. Seat cost is **not a metric of its own and not part of session
+Cost**. It is a component of a *total* — and only at monthly grain and coarser, because
+apportioning a monthly fee across days is invented precision.
+
+**Total spend** — For a population over a period: session Cost plus Seat cost. Available at
+monthly grain and coarser. This is the only figure that represents what the Organization actually
+pays. It rolls up to Member, Team, and Organization.
+
+Seat cost is what makes a low-usage Member legible: a seat held against near-zero usage is the
+highest cost per unit of work in the Organization, and a consumption-only model cannot see it.
 
 Cost derived from usage telemetry is **estimated**, and every surveyed vendor labels it so —
 authoritative money lives in billing, not in analytics. This product surfaces estimates only,
@@ -298,19 +331,53 @@ Team. Access does not gate it; relevance is what it is for.
 
 ## Metric Concepts
 
-Only terms fixed by the model itself are listed here. The dashboard's metric *set* is an open
-decision; terms graduate into this section as it settles.
-
 **Acceptance rate** — Share of AgentSessions that met their WorkType's acceptance criterion.
-This is the efficacy metric. Reported **within** a WorkType, since the criterion differs by type.
+This is the efficacy metric. Reported **within** a WorkType, since the criterion differs by type,
+which is why there is no Organization-level acceptance rate: averaging across criteria that
+measure different things produces a number that means nothing.
 
-**Completion rate** — Share of AgentSessions with `terminal_status` `completed`, against `failed`
-and `interrupted`. Platform health, and deliberately not the same number as acceptance rate.
+**Rework rate** — Share of Tasks exhibiting Rework.
+
+**Decomposition rate** — Share of Tasks exhibiting Decomposition.
+
+**Incomplete Task count** — Tasks with no accepted session, reported **bucketed by age since the
+last session**. The bucketing carries the meaning the platform cannot assert: it does not know
+whether a Task is in flight or abandoned.
+
+**Completed Tasks per period** — The velocity measure, and the only one. Session counts are not
+velocity: they *rise* when work goes badly.
+
+**Cost per session** — Session Cost, aggregated over a period.
+
+**Cost per completed Task** — Total Cost over a period divided by Completed Tasks in it. This is
+where cost meets efficacy, and it is the product's central claim: attempts that produced nothing
+sit in the numerator and not in the denominator, so waste raises the figure.
+
+**Tokens processed** — The four disjoint token classes summed. An **adoption** measure, not a
+cost proxy, and never presented beside a spend figure in a way that invites the inference.
 
 **Session duration** — Wall-clock time from AgentSession start to end. Median and p95 are the
 meaningful aggregations; the distribution is right-skewed, so the mean is not.
 
-**Rework rate** — Share of Tasks exhibiting Rework: a non-accepted session followed by another
-of the same WorkType.
+**Projected cost** — Total spend extrapolated to the end of the current period, in proportion to
+the period elapsed. A forecast, not a measurement.
 
-**Decomposition rate** — Share of Tasks with more than one accepted session.
+---
+
+### Period semantics
+
+**Period** — Day, week, or month. Boundaries are computed in the **Organization's declared
+timezone**, so an Organization's "last month" is the month its people worked, not a UTC artefact.
+
+**Period-over-period comparison** — Any period may be compared with any other; the product
+imposes no restriction on the base. A period that has not finished is **flagged as incomplete**
+rather than withheld.
+
+**Comparison floor** — A change figure is suppressed only when the prior period holds **nothing**
+to compare against. Above zero it is shown: two to three sessions week-over-week really is +50%,
+and on a narrow self-view that is the honest reading, not noise.
+
+**Per-capita** — Any population figure may be divided by its **active human Members**, excluding
+service accounts, which hold no seat and would give the denominator the wrong size. Raw is the
+default; per-capita is available wherever more than one Member is aggregated, and is what makes
+populations of different sizes comparable.

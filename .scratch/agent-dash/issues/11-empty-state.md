@@ -1,6 +1,6 @@
 Type: prototype
 Status: open
-Blocked by: 05, 07
+Blocked by: 07
 Label: wayfinder:prototype
 
 # Zero-data state
