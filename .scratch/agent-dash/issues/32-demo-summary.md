@@ -47,3 +47,36 @@ velocity, because they *rise* when work goes badly.
 
 `/demo` is an authenticated surface. The question of how it relates to the authenticated surfaces
 dissolved once `demo` was recognised as an org slug rather than a demo mode.
+
+## Comments
+
+### 2026-09-08 — inherited from ticket 28 (AFK build, wave 6)
+
+**The fourth tile stacks a measure R-N8's own justification does not cover. Do not silently
+"fix" it, and do not silently ship it without knowing.**
+
+R-N8 makes this tile a stacked area of **Completed Tasks** by WorkType, and justifies the stacking
+with *"WorkType is a true partition — every AgentSession references exactly one"*. That holds for
+**sessions**. It does not hold for **Tasks**: a Task with accepted sessions in two WorkTypes is a
+Completed Task under both, so the five columns can sum past the Organization's Completed Task
+count. That is the false geometric claim R-V1 exists to prevent — the same shape as the Team
+problem R-V3 makes explicit and requires a note for.
+
+It is real in the committed fixture, not hypothetical: ticket 25 found **118 Tasks spanning more
+than one WorkType**.
+
+**Ticket 28 followed R-N8** — the query returns `stackable: true` for this tile — because the spec
+is the fixed point and this is not an implementer's call (AFK handover § 8). Render what the
+ViewModel says.
+
+The two honest alternatives, for whoever decides:
+- **Measure sessions in this tile**, where the partition genuinely holds. But R-N4 names Completed
+  Tasks, and ticket 05 rejected session counts as a velocity measure on the grounds that they
+  *rise* when work goes badly.
+- **Key each Task to its first accepted session's WorkType**, restoring the partition at the cost
+  of a rule nothing else in the product uses.
+
+Note this also touches T-C11, which asserts stacking follows the partition: a ViewModel claiming
+`stackable: true` for a grouping that does not partition the measure is exactly what T-C11 calls a
+failure. As things stand the tile satisfies R-N8 and sits awkwardly against T-C11's principle.
+**Flagged for the human; not re-decided.**
