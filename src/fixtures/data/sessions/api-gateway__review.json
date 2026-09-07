@@ -1,0 +1,619 @@
+[
+  {
+    "id": "ses_0077",
+    "started_at": "2026-05-18T16:48:08+02:00",
+    "ended_at": "2026-05-18T18:26:42+02:00",
+    "member_id": "mem_ncastells",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#490",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 16,
+    "cost": 2.8,
+    "interactive_duration_s": 2421,
+    "idle_duration_s": 949,
+    "afk_duration_s": 2544,
+    "machine_allocation_duration_s": 5914,
+    "artefacts": {
+      "pr_comment": 0
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 44605,
+        "cache_read": 1571120,
+        "cache_write": 82568,
+        "output": 37233
+      },
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 24018,
+        "cache_read": 845987,
+        "cache_write": 44459,
+        "output": 20048
+      }
+    ]
+  },
+  {
+    "id": "ses_0079",
+    "started_at": "2026-05-19T00:52:14+02:00",
+    "ended_at": "2026-05-19T02:42:34+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#493",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 3.9,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6620,
+    "machine_allocation_duration_s": 6620,
+    "artefacts": {
+      "pr_comment": 6
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 51983,
+        "cache_read": 1037185,
+        "cache_write": 75106,
+        "output": 59961
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 27991,
+        "cache_read": 558484,
+        "cache_write": 40442,
+        "output": 32286
+      }
+    ]
+  },
+  {
+    "id": "ses_0083",
+    "started_at": "2026-05-19T23:10:18+02:00",
+    "ended_at": "2026-05-20T00:48:59+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#497",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 7.51,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 5921,
+    "machine_allocation_duration_s": 5921,
+    "artefacts": {
+      "pr_comment": 13
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 263099,
+        "cache_read": 2369493,
+        "cache_write": 448367,
+        "output": 147799
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 141668,
+        "cache_read": 1275881,
+        "cache_write": 241428,
+        "output": 79584
+      }
+    ]
+  },
+  {
+    "id": "ses_0102",
+    "started_at": "2026-05-22T17:44:28+02:00",
+    "ended_at": "2026-05-22T20:56:54+02:00",
+    "member_id": "mem_blorenzo",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#470",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 9,
+    "cost": 1.12,
+    "interactive_duration_s": 2666,
+    "idle_duration_s": 3534,
+    "afk_duration_s": 5346,
+    "machine_allocation_duration_s": 11546,
+    "artefacts": {
+      "pr_comment": 9
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 182195,
+        "cache_read": 7951083,
+        "cache_write": 814745,
+        "output": 212755
+      }
+    ]
+  },
+  {
+    "id": "ses_0138",
+    "started_at": "2026-06-01T23:57:24+02:00",
+    "ended_at": "2026-06-02T04:43:21+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#524",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 5.73,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 17157,
+    "machine_allocation_duration_s": 17157,
+    "artefacts": {
+      "pr_comment": 6
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 443,
+        "cache_read": 11401,
+        "cache_write": 981,
+        "output": 288
+      }
+    ]
+  },
+  {
+    "id": "ses_0278",
+    "started_at": "2026-07-06T11:42:09+02:00",
+    "ended_at": "2026-07-06T16:35:11+02:00",
+    "member_id": "mem_ncastells",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#561",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 5,
+    "cost": 7.72,
+    "interactive_duration_s": 12304,
+    "idle_duration_s": 2508,
+    "afk_duration_s": 2770,
+    "machine_allocation_duration_s": 17582,
+    "artefacts": {
+      "pr_comment": 5
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 83152,
+        "cache_read": 2186617,
+        "cache_write": 166632,
+        "output": 84003
+      }
+    ]
+  },
+  {
+    "id": "ses_0297",
+    "started_at": "2026-07-07T21:33:23+02:00",
+    "ended_at": "2026-07-07T23:33:58+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#564",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 20.59,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 7235,
+    "machine_allocation_duration_s": 7235,
+    "artefacts": {
+      "pr_comment": 13
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 812125,
+        "cache_read": 25454153,
+        "cache_write": 2241929,
+        "output": 646076
+      }
+    ]
+  },
+  {
+    "id": "ses_0333",
+    "started_at": "2026-07-14T08:56:20+02:00",
+    "ended_at": "2026-07-14T11:34:26+02:00",
+    "member_id": "mem_sibanez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#576",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 33,
+    "cost": 11.5,
+    "interactive_duration_s": 4114,
+    "idle_duration_s": 2091,
+    "afk_duration_s": 3281,
+    "machine_allocation_duration_s": 9486,
+    "artefacts": {
+      "pr_comment": 1
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 466818,
+        "cache_read": 12781541,
+        "cache_write": 1001552,
+        "output": 234542
+      }
+    ]
+  },
+  {
+    "id": "ses_0381",
+    "started_at": "2026-07-22T15:32:51+02:00",
+    "ended_at": "2026-07-22T19:40:22+02:00",
+    "member_id": "mem_jdominguez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#593",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 4.96,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 14851,
+    "machine_allocation_duration_s": 14851,
+    "artefacts": {
+      "pr_comment": 5
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 602,
+        "cache_read": 12627,
+        "cache_write": 589,
+        "output": 208
+      }
+    ]
+  },
+  {
+    "id": "ses_0384",
+    "started_at": "2026-07-23T04:10:04+02:00",
+    "ended_at": "2026-07-23T05:06:36+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#587",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 1.26,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 3392,
+    "machine_allocation_duration_s": 3392,
+    "artefacts": {
+      "pr_comment": 2
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 52473,
+        "cache_read": 1133434,
+        "cache_write": 97401,
+        "output": 30512
+      }
+    ]
+  },
+  {
+    "id": "ses_0388",
+    "started_at": "2026-07-23T21:13:16+02:00",
+    "ended_at": "2026-07-24T00:44:27+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#591",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 19.88,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 12671,
+    "machine_allocation_duration_s": 12671,
+    "artefacts": {
+      "pr_comment": 13
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 231838,
+        "cache_read": 3978527,
+        "cache_write": 362642,
+        "output": 153817
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 124836,
+        "cache_read": 2142284,
+        "cache_write": 195269,
+        "output": 82824
+      }
+    ]
+  },
+  {
+    "id": "ses_0428",
+    "started_at": "2026-07-29T20:55:57+02:00",
+    "ended_at": "2026-07-29T22:18:31+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#606",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 11,
+    "cost": 12.34,
+    "interactive_duration_s": 1444,
+    "idle_duration_s": 1074,
+    "afk_duration_s": 2436,
+    "machine_allocation_duration_s": 4954,
+    "artefacts": {
+      "pr_comment": 11
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 482524,
+        "cache_read": 19050472,
+        "cache_write": 1303124,
+        "output": 389003
+      }
+    ]
+  },
+  {
+    "id": "ses_0436",
+    "started_at": "2026-07-31T10:04:57+02:00",
+    "ended_at": "2026-07-31T12:34:17+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#609",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 3.47,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8960,
+    "machine_allocation_duration_s": 8960,
+    "artefacts": {
+      "pr_comment": 13
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 176833,
+        "cache_read": 5311950,
+        "cache_write": 336097,
+        "output": 98993
+      }
+    ]
+  },
+  {
+    "id": "ses_0467",
+    "started_at": "2026-08-05T10:39:16+02:00",
+    "ended_at": "2026-08-05T16:43:00+02:00",
+    "member_id": "mem_rmarin",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#632",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 7.29,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 21824,
+    "machine_allocation_duration_s": 21824,
+    "artefacts": {
+      "pr_comment": 12
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 474,
+        "cache_read": 9010,
+        "cache_write": 993,
+        "output": 193
+      }
+    ]
+  },
+  {
+    "id": "ses_0500",
+    "started_at": "2026-08-07T18:46:08+02:00",
+    "ended_at": "2026-08-07T20:46:52+02:00",
+    "member_id": "mem_jdominguez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#646",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 2.77,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 7244,
+    "machine_allocation_duration_s": 7244,
+    "artefacts": {
+      "pr_comment": 3
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 68614,
+        "cache_read": 2162396,
+        "cache_write": 332357,
+        "output": 76828
+      }
+    ]
+  },
+  {
+    "id": "ses_0558",
+    "started_at": "2026-08-14T13:54:47+02:00",
+    "ended_at": "2026-08-14T15:07:03+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#665",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 7,
+    "cost": 2.46,
+    "interactive_duration_s": 1504,
+    "idle_duration_s": 1383,
+    "afk_duration_s": 1449,
+    "machine_allocation_duration_s": 4336,
+    "artefacts": {
+      "pr_comment": 0
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 122182,
+        "cache_read": 1840004,
+        "cache_write": 148263,
+        "output": 39644
+      }
+    ]
+  },
+  {
+    "id": "ses_0594",
+    "started_at": "2026-08-19T14:04:26+02:00",
+    "ended_at": "2026-08-19T16:12:06+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#675",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 8,
+    "cost": 21.58,
+    "interactive_duration_s": 619,
+    "idle_duration_s": 5217,
+    "afk_duration_s": 1824,
+    "machine_allocation_duration_s": 7660,
+    "artefacts": {
+      "pr_comment": 11
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 278182,
+        "cache_read": 6690318,
+        "cache_write": 231157,
+        "output": 133387
+      }
+    ]
+  },
+  {
+    "id": "ses_0645",
+    "started_at": "2026-08-25T21:16:52+02:00",
+    "ended_at": "2026-08-25T23:11:38+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#671",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 51,
+    "cost": 3.9,
+    "interactive_duration_s": 2673,
+    "idle_duration_s": 934,
+    "afk_duration_s": 3279,
+    "machine_allocation_duration_s": 6886,
+    "artefacts": {
+      "pr_comment": 4
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 169298,
+        "cache_read": 4356634,
+        "cache_write": 314634,
+        "output": 132645
+      }
+    ]
+  },
+  {
+    "id": "ses_0742",
+    "started_at": "2026-09-07T15:49:22+02:00",
+    "ended_at": "2026-09-07T20:11:12+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#727",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 13.69,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 15710,
+    "machine_allocation_duration_s": 15710,
+    "artefacts": {
+      "pr_comment": 7
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 447417,
+        "cache_read": 14200251,
+        "cache_write": 1478039,
+        "output": 232885
+      }
+    ]
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "repo_web_console",
+    "github_id": 41207731,
+    "name": "web-console",
+    "full_name": "equilibrio/web-console",
+    "default_branch": "main",
+    "private": true
+  },
+  {
+    "id": "repo_mobile_app",
+    "github_id": 41207804,
+    "name": "mobile-app",
+    "full_name": "equilibrio/mobile-app",
+    "default_branch": "main",
+    "private": true
+  },
+  {
+    "id": "repo_api_gateway",
+    "github_id": 41207866,
+    "name": "api-gateway",
+    "full_name": "equilibrio/api-gateway",
+    "default_branch": "main",
+    "private": true
+  },
+  {
+    "id": "repo_ml_scoring",
+    "github_id": 41207912,
+    "name": "ml-scoring",
+    "full_name": "equilibrio/ml-scoring",
+    "default_branch": "main",
+    "private": true
+  },
+  {
+    "id": "repo_terraform_infra",
+    "github_id": 41207975,
+    "name": "terraform-infra",
+    "full_name": "equilibrio/terraform-infra",
+    "default_branch": "main",
+    "private": true
+  }
+]

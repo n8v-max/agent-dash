@@ -91,7 +91,9 @@ const eslintConfig = defineConfig([
 
   {
     name: "agent-dash/quality-budgets",
-    files: ["src/**/*.{ts,tsx}"],
+    // `.mts` is in the glob because the fixture generator is written in it: it runs directly
+    // on Node 24, and code that is exempt from the budgets is code that grows past them.
+    files: ["src/**/*.{ts,tsx,mts}"],
     rules: {
       "max-lines": [
         "error",
@@ -111,7 +113,7 @@ const eslintConfig = defineConfig([
 
   {
     name: "agent-dash/naming",
-    files: ["src/**/*.{ts,tsx}"],
+    files: ["src/**/*.{ts,tsx,mts}"],
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",

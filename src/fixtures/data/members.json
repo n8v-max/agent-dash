@@ -1,0 +1,390 @@
+{
+  "github_users": [
+    {
+      "id": 8140221,
+      "login": "ncv-dev",
+      "full_name": "Nuria Castells Vidal",
+      "email": "nuria.castells@equilibrio.io"
+    },
+    {
+      "id": 8140237,
+      "login": "aruizo",
+      "full_name": "ALVARO RUIZ ORTEGA",
+      "email": null
+    },
+    {
+      "id": 8140248,
+      "login": "mps-code",
+      "full_name": "Marta Peña Serrano",
+      "email": "marta.pena@equilibrio.io"
+    },
+    {
+      "id": 8140259,
+      "login": "jdlara",
+      "full_name": "Javier Dominguez Lara",
+      "email": "8140259+jdlara@users.noreply.github.com"
+    },
+    {
+      "id": 8140266,
+      "login": "lubermejo",
+      "full_name": "Lucía Bermejo Ferrer",
+      "email": "lucia.bermejo@equilibrio.io"
+    },
+    {
+      "id": 8140274,
+      "login": "sibz",
+      "full_name": "Sergio Ibanez Molina",
+      "email": null
+    },
+    {
+      "id": 8140283,
+      "login": "ccruzd",
+      "full_name": "Carmen Cruz Delgado",
+      "email": "carmen.cruz@equilibrio.io"
+    },
+    {
+      "id": 8140291,
+      "login": "phgil",
+      "full_name": "Pablo Herrera Gil",
+      "email": "pablo.herrera@equilibrio.io"
+    },
+    {
+      "id": 8140305,
+      "login": "esaez-r",
+      "full_name": "Elena Saez Roldan",
+      "email": "8140305+esaez-r@users.noreply.github.com"
+    },
+    {
+      "id": 8140318,
+      "login": "dnp-code",
+      "full_name": "Diego Navarro Prieto",
+      "email": "diego.navarro@equilibrio.io"
+    },
+    {
+      "id": 8140327,
+      "login": "ivsoto",
+      "full_name": "Irene Vázquez Soto",
+      "email": "irene.vazquez@equilibrio.io"
+    },
+    {
+      "id": 8140336,
+      "login": "rmarinc",
+      "full_name": "Ruben Marin Cano",
+      "email": null
+    },
+    {
+      "id": 8140344,
+      "login": "blpardo",
+      "full_name": "Beatriz Lorenzo Pardo",
+      "email": "beatriz.lorenzo@equilibrio.io"
+    },
+    {
+      "id": 8140352,
+      "login": "aqrey",
+      "full_name": "Andrés Quintana Rey",
+      "email": "andres.quintana@equilibrio.io"
+    },
+    {
+      "id": 8140361,
+      "login": "sroldann",
+      "full_name": "Silvia Roldán Nieto",
+      "email": "silvia.roldan@equilibrio.io"
+    },
+    {
+      "id": 8140379,
+      "login": "tfb-ops",
+      "full_name": "Tomas Ferran Blasco",
+      "email": null
+    },
+    {
+      "id": 8140388,
+      "login": "ngruano",
+      "full_name": "Noelia Gallego Ruano",
+      "email": "noelia.gallego@equilibrio.io"
+    },
+    {
+      "id": 8140396,
+      "login": "hcv-contract",
+      "full_name": "Héctor Camps Vidal",
+      "email": "hector.camps@equilibrio.io"
+    },
+    {
+      "id": 8140402,
+      "login": "equilibrio-deploy-bot",
+      "full_name": "Equilibrio Deploy Bot",
+      "email": "deploy-bot@equilibrio.io"
+    },
+    {
+      "id": 8140417,
+      "login": "equilibrio-nightly",
+      "full_name": "Equilibrio Nightly Runner",
+      "email": "nightly-runner@equilibrio.io"
+    }
+  ],
+  "members": [
+    {
+      "id": "mem_ncastells",
+      "github_id": 8140221,
+      "github_login": "ncv-dev",
+      "full_name": "Nuria Castells Vidal",
+      "email": "nuria.castells@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_platform"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_aruiz",
+      "github_id": 8140237,
+      "github_login": "aruizo",
+      "full_name": "Álvaro Ruiz Ortega",
+      "email": "alvaro.ruiz@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_platform"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_mpena",
+      "github_id": 8140248,
+      "github_login": "mps-code",
+      "full_name": "Marta Peña Serrano",
+      "email": "marta.pena@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_platform",
+        "team_product"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_jdominguez",
+      "github_id": 8140259,
+      "github_login": "jdlara",
+      "full_name": "Javier Domínguez Lara",
+      "email": "javier.dominguez@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_platform"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_lbermejo",
+      "github_id": 8140266,
+      "github_login": "lubermejo",
+      "full_name": "Lucía Bermejo Ferrer",
+      "email": "lucia.bermejo@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_product"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_sibanez",
+      "github_id": 8140274,
+      "github_login": "sibz",
+      "full_name": "Sergio Ibáñez Molina",
+      "email": "sergio.ibanez@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_platform",
+        "team_infrastructure"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_ccruz",
+      "github_id": 8140283,
+      "github_login": "ccruzd",
+      "full_name": "Carmen Cruz Delgado",
+      "email": "carmen.cruz@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_product"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_pherrera",
+      "github_id": 8140291,
+      "github_login": "phgil",
+      "full_name": "Pablo Herrera Gil",
+      "email": "pablo.herrera@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_product"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_esaez",
+      "github_id": 8140305,
+      "github_login": "esaez-r",
+      "full_name": "Elena Sáez Roldán",
+      "email": "elena.saez@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_product",
+        "team_data"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_dnavarro",
+      "github_id": 8140318,
+      "github_login": "dnp-code",
+      "full_name": "Diego Navarro Prieto",
+      "email": "diego.navarro@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_platform"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_ivazquez",
+      "github_id": 8140327,
+      "github_login": "ivsoto",
+      "full_name": "Irene Vázquez Soto",
+      "email": "irene.vazquez@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_data"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_rmarin",
+      "github_id": 8140336,
+      "github_login": "rmarinc",
+      "full_name": "Rubén Marín Cano",
+      "email": "ruben.marin@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_data"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_blorenzo",
+      "github_id": 8140344,
+      "github_login": "blpardo",
+      "full_name": "Beatriz Lorenzo Pardo",
+      "email": "beatriz.lorenzo@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_data"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_aquintana",
+      "github_id": 8140352,
+      "github_login": "aqrey",
+      "full_name": "Andrés Quintana Rey",
+      "email": "andres.quintana@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_data",
+        "team_infrastructure"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_sroldan",
+      "github_id": 8140361,
+      "github_login": "sroldann",
+      "full_name": "Silvia Roldán Nieto",
+      "email": "silvia.roldan@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_infrastructure"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_tferran",
+      "github_id": 8140379,
+      "github_login": "tfb-ops",
+      "full_name": "Tomás Ferrán Blasco",
+      "email": "tomas.ferran@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_infrastructure"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_ngallego",
+      "github_id": 8140388,
+      "github_login": "ngruano",
+      "full_name": "Noelia Gallego Ruano",
+      "email": "noelia.gallego@equilibrio.io",
+      "kind": "human",
+      "role": "member",
+      "team_ids": [
+        "team_product"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_hcamps",
+      "github_id": 8140396,
+      "github_login": "hcv-contract",
+      "full_name": "Héctor Camps Vidal",
+      "email": "hector.camps@equilibrio.io",
+      "kind": "human",
+      "role": "contractor",
+      "team_ids": [
+        "team_data"
+      ],
+      "seat_active": true
+    },
+    {
+      "id": "mem_deploybot",
+      "github_id": 8140402,
+      "github_login": "equilibrio-deploy-bot",
+      "full_name": "Equilibrio Deploy Bot",
+      "email": "deploy-bot@equilibrio.io",
+      "kind": "service_account",
+      "role": "automation",
+      "team_ids": [
+        "team_infrastructure"
+      ],
+      "seat_active": false
+    },
+    {
+      "id": "mem_nightlybot",
+      "github_id": 8140417,
+      "github_login": "equilibrio-nightly",
+      "full_name": "Equilibrio Nightly Runner",
+      "email": "nightly-runner@equilibrio.io",
+      "kind": "service_account",
+      "role": "automation",
+      "team_ids": [
+        "team_infrastructure"
+      ],
+      "seat_active": false
+    }
+  ]
+}

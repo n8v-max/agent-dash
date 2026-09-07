@@ -1,0 +1,461 @@
+[
+  {
+    "id": "ses_0005",
+    "started_at": "2026-04-13T18:03:27+02:00",
+    "ended_at": "2026-04-13T21:18:45+02:00",
+    "member_id": "mem_ncastells",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#132",
+    "execution_mode": "headless",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 2.44,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 11718,
+    "machine_allocation_duration_s": 11718,
+    "artefacts": {
+      "pr_comment": 9
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 49169,
+        "cache_read": 866900,
+        "cache_write": 93169,
+        "output": 14700
+      },
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 26476,
+        "cache_read": 466792,
+        "cache_write": 50168,
+        "output": 7916
+      }
+    ]
+  },
+  {
+    "id": "ses_0112",
+    "started_at": "2026-05-26T04:41:04+02:00",
+    "ended_at": "2026-05-26T09:34:30+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#155",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 6.93,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 17606,
+    "machine_allocation_duration_s": 17606,
+    "artefacts": {
+      "pr_comment": 1
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 67416,
+        "cache_read": 1332194,
+        "cache_write": 102433,
+        "output": 31544
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 40450,
+        "cache_read": 799316,
+        "cache_write": 61459,
+        "output": 18926
+      },
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 26967,
+        "cache_read": 532878,
+        "cache_write": 40973,
+        "output": 12618
+      }
+    ]
+  },
+  {
+    "id": "ses_0161",
+    "started_at": "2026-06-08T23:16:12+02:00",
+    "ended_at": "2026-06-09T01:41:57+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#159",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 4.75,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8745,
+    "machine_allocation_duration_s": 8745,
+    "artefacts": {
+      "pr_comment": 1
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 157540,
+        "cache_read": 6455655,
+        "cache_write": 307449,
+        "output": 129191
+      }
+    ]
+  },
+  {
+    "id": "ses_0180",
+    "started_at": "2026-06-15T02:56:17+02:00",
+    "ended_at": "2026-06-15T05:23:22+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#164",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 3.5,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8825,
+    "machine_allocation_duration_s": 8825,
+    "artefacts": {
+      "pr_comment": 14
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 251646,
+        "cache_read": 4141345,
+        "cache_write": 205013,
+        "output": 91838
+      }
+    ]
+  },
+  {
+    "id": "ses_0185",
+    "started_at": "2026-06-15T15:56:17+02:00",
+    "ended_at": "2026-06-15T19:36:27+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#164",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": true,
+    "prompt_count": 2,
+    "cost": 2.32,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 13210,
+    "machine_allocation_duration_s": 13210,
+    "artefacts": {
+      "pr_comment": 1
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 46457,
+        "cache_read": 1466331,
+        "cache_write": 92596,
+        "output": 19911
+      },
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 25015,
+        "cache_read": 789563,
+        "cache_write": 49859,
+        "output": 10721
+      }
+    ]
+  },
+  {
+    "id": "ses_0197",
+    "started_at": "2026-06-17T10:52:27+02:00",
+    "ended_at": "2026-06-17T13:06:12+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#163",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 37,
+    "cost": 2.86,
+    "interactive_duration_s": 1660,
+    "idle_duration_s": 611,
+    "afk_duration_s": 5754,
+    "machine_allocation_duration_s": 8025,
+    "artefacts": {
+      "pr_comment": 8
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 145510,
+        "cache_read": 1889234,
+        "cache_write": 275522,
+        "output": 83815
+      }
+    ]
+  },
+  {
+    "id": "ses_0251",
+    "started_at": "2026-07-01T09:03:29+02:00",
+    "ended_at": "2026-07-01T10:24:36+02:00",
+    "member_id": "mem_jdominguez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#193",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 17,
+    "cost": 2.24,
+    "interactive_duration_s": 1347,
+    "idle_duration_s": 1065,
+    "afk_duration_s": 2455,
+    "machine_allocation_duration_s": 4867,
+    "artefacts": {
+      "pr_comment": 7
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 18762,
+        "cache_read": 515611,
+        "cache_write": 46632,
+        "output": 14442
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 10102,
+        "cache_read": 277636,
+        "cache_write": 25110,
+        "output": 7776
+      }
+    ]
+  },
+  {
+    "id": "ses_0276",
+    "started_at": "2026-07-06T01:31:20+02:00",
+    "ended_at": "2026-07-06T03:10:59+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#200",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 11,
+    "cost": 2.2,
+    "interactive_duration_s": 1827,
+    "idle_duration_s": 2720,
+    "afk_duration_s": 1432,
+    "machine_allocation_duration_s": 5979,
+    "artefacts": {
+      "pr_comment": 11
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 105691,
+        "cache_read": 2786338,
+        "cache_write": 152829,
+        "output": 53231
+      },
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 56910,
+        "cache_read": 1500336,
+        "cache_write": 82292,
+        "output": 28663
+      }
+    ]
+  },
+  {
+    "id": "ses_0318",
+    "started_at": "2026-07-10T16:49:32+02:00",
+    "ended_at": "2026-07-10T18:50:16+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#219",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 16,
+    "cost": 2.09,
+    "interactive_duration_s": 2278,
+    "idle_duration_s": 1675,
+    "afk_duration_s": 3291,
+    "machine_allocation_duration_s": 7244,
+    "artefacts": {
+      "pr_comment": 1
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 12114,
+        "cache_read": 367700,
+        "cache_write": 39926,
+        "output": 8608
+      }
+    ]
+  },
+  {
+    "id": "ses_0523",
+    "started_at": "2026-08-11T05:12:54+02:00",
+    "ended_at": "2026-08-11T09:23:59+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#251",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 5.59,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 15065,
+    "machine_allocation_duration_s": 15065,
+    "artefacts": {
+      "pr_comment": 8
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 95076,
+        "cache_read": 3403128,
+        "cache_write": 253218,
+        "output": 32020
+      }
+    ]
+  },
+  {
+    "id": "ses_0555",
+    "started_at": "2026-08-14T12:54:51+02:00",
+    "ended_at": "2026-08-14T15:03:01+02:00",
+    "member_id": "mem_aquintana",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#257",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 24.74,
+    "interactive_duration_s": 2672,
+    "idle_duration_s": 1299,
+    "afk_duration_s": 3719,
+    "machine_allocation_duration_s": 7690,
+    "artefacts": {
+      "pr_comment": 9
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 202114,
+        "cache_read": 7702456,
+        "cache_write": 468314,
+        "output": 123612
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 108831,
+        "cache_read": 4147476,
+        "cache_write": 252169,
+        "output": 66560
+      }
+    ]
+  },
+  {
+    "id": "ses_0590",
+    "started_at": "2026-08-18T18:46:52+02:00",
+    "ended_at": "2026-08-18T21:16:23+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#263",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 3.89,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8971,
+    "machine_allocation_duration_s": 8971,
+    "artefacts": {
+      "pr_comment": 11
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 6905,
+        "cache_read": 447065,
+        "cache_write": 22240,
+        "output": 13881
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 3718,
+        "cache_read": 240727,
+        "cache_write": 11976,
+        "output": 7474
+      }
+    ]
+  },
+  {
+    "id": "ses_0634",
+    "started_at": "2026-08-25T04:08:29+02:00",
+    "ended_at": "2026-08-25T05:51:22+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "review",
+    "task_key": "equilibrio/ml-scoring#284",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 0.53,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6173,
+    "machine_allocation_duration_s": 6173,
+    "artefacts": {
+      "pr_comment": 1
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 57827,
+        "cache_read": 769695,
+        "cache_write": 49543,
+        "output": 23340
+      }
+    ]
+  }
+]

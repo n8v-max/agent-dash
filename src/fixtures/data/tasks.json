@@ -1,0 +1,4562 @@
+[
+  {
+    "key": "equilibrio/api-gateway#459",
+    "number": 459,
+    "title": "Ship the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/459",
+    "created_at": "2026-04-13T11:44:50+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#461",
+    "number": 461,
+    "title": "Extract structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/461",
+    "created_at": "2026-04-08T14:18:14+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#464",
+    "number": 464,
+    "title": "Refactor the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/464",
+    "created_at": "2026-04-03T10:46:02+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#466",
+    "number": 466,
+    "title": "Refactor structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/466",
+    "created_at": "2026-04-11T17:01:14+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#470",
+    "number": 470,
+    "title": "Ship idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/470",
+    "created_at": "2026-04-10T18:45:51+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#473",
+    "number": 473,
+    "title": "Fix cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/473",
+    "created_at": "2026-04-26T22:05:24+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#475",
+    "number": 475,
+    "title": "Stop the regression in the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/475",
+    "created_at": "2026-04-25T12:14:36+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#476",
+    "number": 476,
+    "title": "Add cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/476",
+    "created_at": "2026-05-05T10:33:29+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#478",
+    "number": 478,
+    "title": "Fix connection pooling to the metering service",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/478",
+    "created_at": "2026-05-07T10:06:11+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#479",
+    "number": 479,
+    "title": "Introduce structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/479",
+    "created_at": "2026-05-12T10:44:43+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#483",
+    "number": 483,
+    "title": "Release idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/483",
+    "created_at": "2026-05-07T18:23:40+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#486",
+    "number": 486,
+    "title": "Simplify request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/486",
+    "created_at": "2026-05-15T08:01:47+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#490",
+    "number": 490,
+    "title": "Re-review the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/490",
+    "created_at": "2026-05-15T16:48:08+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#493",
+    "number": 493,
+    "title": "Re-review gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/493",
+    "created_at": "2026-05-07T00:52:14+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#497",
+    "number": 497,
+    "title": "Repair the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/497",
+    "created_at": "2026-05-06T05:35:21+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#500",
+    "number": 500,
+    "title": "Introduce rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/500",
+    "created_at": "2026-05-18T12:50:27+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#501",
+    "number": 501,
+    "title": "Fix structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/501",
+    "created_at": "2026-05-15T16:15:34+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#505",
+    "number": 505,
+    "title": "Roll out cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/505",
+    "created_at": "2026-05-10T11:19:56+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#507",
+    "number": 507,
+    "title": "Ship request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/507",
+    "created_at": "2026-05-18T08:24:58+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#509",
+    "number": 509,
+    "title": "Support idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/509",
+    "created_at": "2026-05-12T21:43:15+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#513",
+    "number": 513,
+    "title": "Repair idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/513",
+    "created_at": "2026-05-12T12:04:38+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#515",
+    "number": 515,
+    "title": "Fix the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/515",
+    "created_at": "2026-05-13T10:48:16+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#516",
+    "number": 516,
+    "title": "Repair request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/516",
+    "created_at": "2026-05-25T09:12:18+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#520",
+    "number": 520,
+    "title": "Fix the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/520",
+    "created_at": "2026-05-24T20:33:56+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#521",
+    "number": 521,
+    "title": "Release rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/521",
+    "created_at": "2026-05-27T11:29:20+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#522",
+    "number": 522,
+    "title": "Support idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/522",
+    "created_at": "2026-05-25T13:02:39+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#524",
+    "number": 524,
+    "title": "Review the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/524",
+    "created_at": "2026-05-23T23:57:24+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#528",
+    "number": 528,
+    "title": "Support the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/528",
+    "created_at": "2026-05-23T14:46:13+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#532",
+    "number": 532,
+    "title": "Ship connection pooling to the metering service",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/532",
+    "created_at": "2026-06-07T10:45:01+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#533",
+    "number": 533,
+    "title": "Repair structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/533",
+    "created_at": "2026-05-25T13:10:13+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#537",
+    "number": 537,
+    "title": "Stop the regression in structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/537",
+    "created_at": "2026-05-29T12:51:03+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#538",
+    "number": 538,
+    "title": "Fix gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/538",
+    "created_at": "2026-06-06T00:14:59+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#539",
+    "number": 539,
+    "title": "Introduce the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/539",
+    "created_at": "2026-06-11T20:33:24+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#540",
+    "number": 540,
+    "title": "Repair idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/540",
+    "created_at": "2026-06-06T16:50:47+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#541",
+    "number": 541,
+    "title": "Extract request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/541",
+    "created_at": "2026-06-11T18:15:18+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#544",
+    "number": 544,
+    "title": "Promote rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/544",
+    "created_at": "2026-06-12T17:51:51+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#545",
+    "number": 545,
+    "title": "Roll out connection pooling to the metering service",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/545",
+    "created_at": "2026-06-11T10:48:50+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#546",
+    "number": 546,
+    "title": "Promote rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/546",
+    "created_at": "2026-06-13T22:05:50+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#547",
+    "number": 547,
+    "title": "Introduce the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/547",
+    "created_at": "2026-06-18T10:07:51+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#551",
+    "number": 551,
+    "title": "Release rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/551",
+    "created_at": "2026-06-20T23:27:09+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#552",
+    "number": 552,
+    "title": "Simplify request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/552",
+    "created_at": "2026-06-21T01:12:03+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#553",
+    "number": 553,
+    "title": "Support structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/553",
+    "created_at": "2026-06-22T22:11:01+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#556",
+    "number": 556,
+    "title": "Roll out cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/556",
+    "created_at": "2026-06-30T10:18:52+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#560",
+    "number": 560,
+    "title": "Support rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/560",
+    "created_at": "2026-06-19T16:57:06+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#561",
+    "number": 561,
+    "title": "Re-review the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/561",
+    "created_at": "2026-06-27T11:42:09+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#564",
+    "number": 564,
+    "title": "Fix request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/564",
+    "created_at": "2026-06-30T11:25:43+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#568",
+    "number": 568,
+    "title": "Support rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/568",
+    "created_at": "2026-07-06T09:42:42+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#570",
+    "number": 570,
+    "title": "Introduce the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/570",
+    "created_at": "2026-06-30T17:06:18+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#572",
+    "number": 572,
+    "title": "Roll out connection pooling to the metering service",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/572",
+    "created_at": "2026-06-27T19:18:25+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#574",
+    "number": 574,
+    "title": "Support rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/574",
+    "created_at": "2026-07-05T15:52:55+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#575",
+    "number": 575,
+    "title": "Ship gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/575",
+    "created_at": "2026-07-06T13:17:49+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#576",
+    "number": 576,
+    "title": "Review the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/576",
+    "created_at": "2026-07-11T08:56:20+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#577",
+    "number": 577,
+    "title": "Stop the regression in request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/577",
+    "created_at": "2026-07-12T08:43:42+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#579",
+    "number": 579,
+    "title": "Stop the regression in connection pooling to the metering service",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/579",
+    "created_at": "2026-07-14T12:07:24+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#583",
+    "number": 583,
+    "title": "Support request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/583",
+    "created_at": "2026-07-09T17:02:14+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#586",
+    "number": 586,
+    "title": "Ship gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/586",
+    "created_at": "2026-07-13T16:26:10+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#587",
+    "number": 587,
+    "title": "Simplify idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/587",
+    "created_at": "2026-07-19T02:53:31+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#591",
+    "number": 591,
+    "title": "Extract rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/591",
+    "created_at": "2026-07-11T13:50:40+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#593",
+    "number": 593,
+    "title": "Review the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/593",
+    "created_at": "2026-07-14T15:32:51+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#596",
+    "number": 596,
+    "title": "Roll out the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/596",
+    "created_at": "2026-07-22T17:37:11+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#600",
+    "number": 600,
+    "title": "Repair request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/600",
+    "created_at": "2026-07-15T18:33:28+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#602",
+    "number": 602,
+    "title": "Ship the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/602",
+    "created_at": "2026-07-18T11:13:36+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#606",
+    "number": 606,
+    "title": "Simplify gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/606",
+    "created_at": "2026-07-20T11:45:12+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#609",
+    "number": 609,
+    "title": "Support the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/609",
+    "created_at": "2026-07-23T16:51:52+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#613",
+    "number": 613,
+    "title": "Promote cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/613",
+    "created_at": "2026-07-18T17:30:49+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#614",
+    "number": 614,
+    "title": "Fix gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/614",
+    "created_at": "2026-07-15T17:39:56+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#618",
+    "number": 618,
+    "title": "Introduce request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/618",
+    "created_at": "2026-07-18T18:45:17+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#620",
+    "number": 620,
+    "title": "Refactor connection pooling to the metering service",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/620",
+    "created_at": "2026-07-23T23:34:13+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#623",
+    "number": 623,
+    "title": "Stop the regression in the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/623",
+    "created_at": "2026-07-20T22:39:25+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#625",
+    "number": 625,
+    "title": "Release rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/625",
+    "created_at": "2026-07-22T15:37:43+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#629",
+    "number": 629,
+    "title": "Add cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/629",
+    "created_at": "2026-07-27T11:58:02+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#632",
+    "number": 632,
+    "title": "Introduce request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/632",
+    "created_at": "2026-07-24T11:27:59+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#635",
+    "number": 635,
+    "title": "Promote gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/635",
+    "created_at": "2026-07-30T16:25:31+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#636",
+    "number": 636,
+    "title": "Roll out the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/636",
+    "created_at": "2026-07-31T11:09:49+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#640",
+    "number": 640,
+    "title": "Ship the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/640",
+    "created_at": "2026-07-25T15:02:30+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#642",
+    "number": 642,
+    "title": "Ship structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/642",
+    "created_at": "2026-07-27T12:07:09+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#643",
+    "number": 643,
+    "title": "Roll out cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/643",
+    "created_at": "2026-07-31T12:11:31+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#645",
+    "number": 645,
+    "title": "Promote cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/645",
+    "created_at": "2026-07-26T18:23:48+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#646",
+    "number": 646,
+    "title": "Re-review idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/646",
+    "created_at": "2026-08-07T18:46:08+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#649",
+    "number": 649,
+    "title": "Roll out the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/649",
+    "created_at": "2026-08-01T10:02:49+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#650",
+    "number": 650,
+    "title": "Repair the audit log writer",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/650",
+    "created_at": "2026-08-08T08:08:42+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#651",
+    "number": 651,
+    "title": "Refactor the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/651",
+    "created_at": "2026-08-11T13:14:16+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#652",
+    "number": 652,
+    "title": "Simplify the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/652",
+    "created_at": "2026-08-08T14:47:51+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#656",
+    "number": 656,
+    "title": "Stop the regression in request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/656",
+    "created_at": "2026-08-09T11:04:25+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#658",
+    "number": 658,
+    "title": "Support the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/658",
+    "created_at": "2026-07-31T11:20:07+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#662",
+    "number": 662,
+    "title": "Support the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/662",
+    "created_at": "2026-08-08T09:39:46+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#665",
+    "number": 665,
+    "title": "Re-review the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/665",
+    "created_at": "2026-08-09T13:54:47+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#668",
+    "number": 668,
+    "title": "Add gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/668",
+    "created_at": "2026-08-11T10:16:00+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#671",
+    "number": 671,
+    "title": "Support cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/671",
+    "created_at": "2026-08-14T13:17:42+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#672",
+    "number": 672,
+    "title": "Simplify the webhook retry queue",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/672",
+    "created_at": "2026-08-09T23:48:04+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#675",
+    "number": 675,
+    "title": "Re-review rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/675",
+    "created_at": "2026-08-11T14:04:26+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#677",
+    "number": 677,
+    "title": "Fix structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/677",
+    "created_at": "2026-08-11T04:06:47+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#680",
+    "number": 680,
+    "title": "Release the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/680",
+    "created_at": "2026-08-11T16:21:03+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#684",
+    "number": 684,
+    "title": "Ship gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/684",
+    "created_at": "2026-08-08T18:41:51+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#687",
+    "number": 687,
+    "title": "Add cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/687",
+    "created_at": "2026-08-18T01:28:40+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#690",
+    "number": 690,
+    "title": "Support request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/690",
+    "created_at": "2026-08-15T20:41:19+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#694",
+    "number": 694,
+    "title": "Refactor idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/694",
+    "created_at": "2026-08-20T00:00:40+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#697",
+    "number": 697,
+    "title": "Add gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/697",
+    "created_at": "2026-08-13T09:21:16+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#699",
+    "number": 699,
+    "title": "Promote rate limiting on /v2/sessions",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/699",
+    "created_at": "2026-08-15T19:20:39+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#700",
+    "number": 700,
+    "title": "Ship the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/700",
+    "created_at": "2026-08-23T14:35:52+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#701",
+    "number": 701,
+    "title": "Promote gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/701",
+    "created_at": "2026-08-17T18:11:43+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#702",
+    "number": 702,
+    "title": "Refactor structured error envelopes",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/702",
+    "created_at": "2026-08-26T23:25:01+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#704",
+    "number": 704,
+    "title": "Extract gzip negotiation",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/704",
+    "created_at": "2026-08-31T10:23:43+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#707",
+    "number": 707,
+    "title": "Add idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/707",
+    "created_at": "2026-08-30T11:37:11+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#708",
+    "number": 708,
+    "title": "Stop the regression in the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/708",
+    "created_at": "2026-08-30T13:36:39+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#711",
+    "number": 711,
+    "title": "Repair request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/711",
+    "created_at": "2026-08-26T03:50:43+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#714",
+    "number": 714,
+    "title": "Refactor the org-scoped token exchange",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/714",
+    "created_at": "2026-08-20T10:25:28+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#717",
+    "number": 717,
+    "title": "Stop the regression in idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/717",
+    "created_at": "2026-08-20T08:52:14+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#721",
+    "number": 721,
+    "title": "Release idempotency keys on session launch",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/721",
+    "created_at": "2026-08-25T12:49:32+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#724",
+    "number": 724,
+    "title": "Roll out cursor pagination for job listings",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/724",
+    "created_at": "2026-08-31T23:46:05+02:00"
+  },
+  {
+    "key": "equilibrio/api-gateway#727",
+    "number": 727,
+    "title": "Fix request signing for service accounts",
+    "repository_id": "repo_api_gateway",
+    "html_url": "https://github.com/equilibrio/api-gateway/issues/727",
+    "created_at": "2026-09-03T10:41:28+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#131",
+    "number": 131,
+    "title": "Add the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/131",
+    "created_at": "2026-03-31T14:13:49+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#132",
+    "number": 132,
+    "title": "Re-review GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/132",
+    "created_at": "2026-04-05T18:03:27+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#134",
+    "number": 134,
+    "title": "Add embedding cache invalidation",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/134",
+    "created_at": "2026-04-18T08:04:00+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#137",
+    "number": 137,
+    "title": "Fix scoring latency on cold start",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/137",
+    "created_at": "2026-04-20T08:31:06+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#139",
+    "number": 139,
+    "title": "Add batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/139",
+    "created_at": "2026-04-29T18:10:28+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#142",
+    "number": 142,
+    "title": "Stop the regression in the evaluation harness",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/142",
+    "created_at": "2026-04-29T23:20:43+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#145",
+    "number": 145,
+    "title": "Ship scoring latency on cold start",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/145",
+    "created_at": "2026-05-04T10:36:27+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#148",
+    "number": 148,
+    "title": "Add the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/148",
+    "created_at": "2026-05-15T14:07:35+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#152",
+    "number": 152,
+    "title": "Release the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/152",
+    "created_at": "2026-05-16T17:07:51+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#155",
+    "number": 155,
+    "title": "Re-review the training data sampler",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/155",
+    "created_at": "2026-05-17T04:41:04+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#159",
+    "number": 159,
+    "title": "Refactor the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/159",
+    "created_at": "2026-05-22T02:50:14+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#160",
+    "number": 160,
+    "title": "Ship batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/160",
+    "created_at": "2026-06-03T16:53:57+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#161",
+    "number": 161,
+    "title": "Ship the training data sampler",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/161",
+    "created_at": "2026-06-02T17:24:45+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#162",
+    "number": 162,
+    "title": "Promote model artefact versioning",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/162",
+    "created_at": "2026-05-30T12:39:22+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#163",
+    "number": 163,
+    "title": "Roll out batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/163",
+    "created_at": "2026-06-01T13:44:01+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#164",
+    "number": 164,
+    "title": "Review the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/164",
+    "created_at": "2026-06-12T02:56:17+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#168",
+    "number": 168,
+    "title": "Ship batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/168",
+    "created_at": "2026-06-03T12:16:15+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#172",
+    "number": 172,
+    "title": "Simplify GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/172",
+    "created_at": "2026-06-03T14:20:39+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#174",
+    "number": 174,
+    "title": "Add batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/174",
+    "created_at": "2026-06-16T10:09:09+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#177",
+    "number": 177,
+    "title": "Promote the evaluation harness",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/177",
+    "created_at": "2026-06-12T09:45:46+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#180",
+    "number": 180,
+    "title": "Add the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/180",
+    "created_at": "2026-06-15T10:24:11+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#183",
+    "number": 183,
+    "title": "Roll out the evaluation harness",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/183",
+    "created_at": "2026-06-15T10:02:07+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#185",
+    "number": 185,
+    "title": "Introduce the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/185",
+    "created_at": "2026-06-18T17:49:44+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#187",
+    "number": 187,
+    "title": "Repair batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/187",
+    "created_at": "2026-06-18T19:58:33+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#188",
+    "number": 188,
+    "title": "Refactor GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/188",
+    "created_at": "2026-06-17T13:12:22+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#190",
+    "number": 190,
+    "title": "Promote the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/190",
+    "created_at": "2026-06-19T12:03:58+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#192",
+    "number": 192,
+    "title": "Repair GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/192",
+    "created_at": "2026-06-30T20:54:36+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#193",
+    "number": 193,
+    "title": "Review the label export pipeline",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/193",
+    "created_at": "2026-06-27T09:03:29+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#196",
+    "number": 196,
+    "title": "Repair the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/196",
+    "created_at": "2026-06-20T21:21:11+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#197",
+    "number": 197,
+    "title": "Stop the regression in the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/197",
+    "created_at": "2026-07-02T15:20:18+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#200",
+    "number": 200,
+    "title": "Refactor the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/200",
+    "created_at": "2026-06-19T09:00:07+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#204",
+    "number": 204,
+    "title": "Promote the evaluation harness",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/204",
+    "created_at": "2026-06-20T17:36:29+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#208",
+    "number": 208,
+    "title": "Stop the regression in the label export pipeline",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/208",
+    "created_at": "2026-06-25T16:07:38+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#211",
+    "number": 211,
+    "title": "Ship the label export pipeline",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/211",
+    "created_at": "2026-07-07T09:52:23+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#212",
+    "number": 212,
+    "title": "Fix embedding cache invalidation",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/212",
+    "created_at": "2026-06-26T09:53:38+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#215",
+    "number": 215,
+    "title": "Stop the regression in GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/215",
+    "created_at": "2026-07-04T12:18:44+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#218",
+    "number": 218,
+    "title": "Promote the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/218",
+    "created_at": "2026-07-06T15:21:38+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#219",
+    "number": 219,
+    "title": "Review the label export pipeline",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/219",
+    "created_at": "2026-06-28T16:49:32+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#220",
+    "number": 220,
+    "title": "Repair batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/220",
+    "created_at": "2026-07-09T00:20:15+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#223",
+    "number": 223,
+    "title": "Repair batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/223",
+    "created_at": "2026-07-02T23:52:06+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#226",
+    "number": 226,
+    "title": "Simplify model artefact versioning",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/226",
+    "created_at": "2026-07-13T10:36:38+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#230",
+    "number": 230,
+    "title": "Add GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/230",
+    "created_at": "2026-07-12T09:59:01+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#233",
+    "number": 233,
+    "title": "Ship the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/233",
+    "created_at": "2026-07-19T14:23:05+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#235",
+    "number": 235,
+    "title": "Promote the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/235",
+    "created_at": "2026-07-24T16:02:57+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#236",
+    "number": 236,
+    "title": "Refactor scoring latency on cold start",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/236",
+    "created_at": "2026-07-28T09:01:14+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#238",
+    "number": 238,
+    "title": "Stop the regression in GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/238",
+    "created_at": "2026-07-27T19:27:56+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#239",
+    "number": 239,
+    "title": "Introduce the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/239",
+    "created_at": "2026-07-28T20:55:54+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#243",
+    "number": 243,
+    "title": "Refactor the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/243",
+    "created_at": "2026-08-07T12:16:10+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#246",
+    "number": 246,
+    "title": "Roll out the label export pipeline",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/246",
+    "created_at": "2026-08-04T03:41:43+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#247",
+    "number": 247,
+    "title": "Ship GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/247",
+    "created_at": "2026-08-10T12:54:02+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#251",
+    "number": 251,
+    "title": "Review the feature backfill job",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/251",
+    "created_at": "2026-08-11T05:12:54+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#255",
+    "number": 255,
+    "title": "Repair model artefact versioning",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/255",
+    "created_at": "2026-08-04T19:08:15+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#257",
+    "number": 257,
+    "title": "Re-review embedding cache invalidation",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/257",
+    "created_at": "2026-08-08T12:54:51+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#260",
+    "number": 260,
+    "title": "Promote model artefact versioning",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/260",
+    "created_at": "2026-08-12T17:54:16+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#263",
+    "number": 263,
+    "title": "Review the evaluation harness",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/263",
+    "created_at": "2026-08-09T18:46:52+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#264",
+    "number": 264,
+    "title": "Release the label export pipeline",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/264",
+    "created_at": "2026-08-16T21:01:20+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#268",
+    "number": 268,
+    "title": "Extract GPU memory pressure in the scorer",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/268",
+    "created_at": "2026-08-10T22:47:43+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#271",
+    "number": 271,
+    "title": "Support the drift monitor",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/271",
+    "created_at": "2026-08-14T14:37:35+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#273",
+    "number": 273,
+    "title": "Release scoring latency on cold start",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/273",
+    "created_at": "2026-08-19T16:26:11+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#275",
+    "number": 275,
+    "title": "Add embedding cache invalidation",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/275",
+    "created_at": "2026-08-07T23:40:10+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#278",
+    "number": 278,
+    "title": "Refactor model artefact versioning",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/278",
+    "created_at": "2026-08-17T09:04:38+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#280",
+    "number": 280,
+    "title": "Repair batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/280",
+    "created_at": "2026-08-15T01:26:20+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#284",
+    "number": 284,
+    "title": "Review batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/284",
+    "created_at": "2026-08-11T04:08:29+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#285",
+    "number": 285,
+    "title": "Release scoring latency on cold start",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/285",
+    "created_at": "2026-08-12T15:53:40+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#287",
+    "number": 287,
+    "title": "Roll out embedding cache invalidation",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/287",
+    "created_at": "2026-08-18T15:02:43+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#291",
+    "number": 291,
+    "title": "Add model artefact versioning",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/291",
+    "created_at": "2026-08-14T16:10:09+02:00"
+  },
+  {
+    "key": "equilibrio/ml-scoring#295",
+    "number": 295,
+    "title": "Refactor batch scoring throughput",
+    "repository_id": "repo_ml_scoring",
+    "html_url": "https://github.com/equilibrio/ml-scoring/issues/295",
+    "created_at": "2026-08-22T11:16:25+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#191",
+    "number": 191,
+    "title": "Fix offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/191",
+    "created_at": "2026-03-30T18:53:52+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#195",
+    "number": 195,
+    "title": "Add deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/195",
+    "created_at": "2026-04-08T17:09:24+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#197",
+    "number": 197,
+    "title": "Add tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/197",
+    "created_at": "2026-04-04T01:27:58+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#201",
+    "number": 201,
+    "title": "Repair the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/201",
+    "created_at": "2026-04-13T10:37:01+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#204",
+    "number": 204,
+    "title": "Refactor the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/204",
+    "created_at": "2026-04-21T11:57:01+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#205",
+    "number": 205,
+    "title": "Introduce the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/205",
+    "created_at": "2026-04-12T18:01:02+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#209",
+    "number": 209,
+    "title": "Support tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/209",
+    "created_at": "2026-04-17T11:30:59+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#211",
+    "number": 211,
+    "title": "Fix the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/211",
+    "created_at": "2026-04-21T13:19:33+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#214",
+    "number": 214,
+    "title": "Introduce the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/214",
+    "created_at": "2026-05-03T08:38:43+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#216",
+    "number": 216,
+    "title": "Review push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/216",
+    "created_at": "2026-04-30T12:15:49+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#220",
+    "number": 220,
+    "title": "Simplify push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/220",
+    "created_at": "2026-04-29T21:43:19+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#223",
+    "number": 223,
+    "title": "Extract the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/223",
+    "created_at": "2026-05-07T13:25:34+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#224",
+    "number": 224,
+    "title": "Fix the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/224",
+    "created_at": "2026-05-14T11:07:49+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#226",
+    "number": 226,
+    "title": "Fix background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/226",
+    "created_at": "2026-05-11T13:19:32+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#230",
+    "number": 230,
+    "title": "Ship background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/230",
+    "created_at": "2026-05-07T13:15:15+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#233",
+    "number": 233,
+    "title": "Refactor offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/233",
+    "created_at": "2026-05-21T16:44:55+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#236",
+    "number": 236,
+    "title": "Ship the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/236",
+    "created_at": "2026-05-20T09:18:02+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#240",
+    "number": 240,
+    "title": "Add the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/240",
+    "created_at": "2026-05-15T12:08:01+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#241",
+    "number": 241,
+    "title": "Add the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/241",
+    "created_at": "2026-05-25T14:36:50+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#242",
+    "number": 242,
+    "title": "Simplify background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/242",
+    "created_at": "2026-05-24T21:47:54+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#244",
+    "number": 244,
+    "title": "Add tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/244",
+    "created_at": "2026-05-19T13:34:03+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#248",
+    "number": 248,
+    "title": "Refactor deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/248",
+    "created_at": "2026-05-18T16:00:15+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#251",
+    "number": 251,
+    "title": "Ship tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/251",
+    "created_at": "2026-05-25T09:01:12+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#253",
+    "number": 253,
+    "title": "Ship the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/253",
+    "created_at": "2026-05-26T17:54:07+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#255",
+    "number": 255,
+    "title": "Fix biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/255",
+    "created_at": "2026-05-25T13:40:46+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#257",
+    "number": 257,
+    "title": "Fix the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/257",
+    "created_at": "2026-06-04T10:50:24+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#260",
+    "number": 260,
+    "title": "Fix background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/260",
+    "created_at": "2026-05-29T20:53:41+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#262",
+    "number": 262,
+    "title": "Support offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/262",
+    "created_at": "2026-05-30T11:51:02+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#265",
+    "number": 265,
+    "title": "Review the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/265",
+    "created_at": "2026-06-06T02:27:15+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#267",
+    "number": 267,
+    "title": "Review the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/267",
+    "created_at": "2026-06-08T12:03:06+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#268",
+    "number": 268,
+    "title": "Support tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/268",
+    "created_at": "2026-06-03T18:43:33+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#271",
+    "number": 271,
+    "title": "Review offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/271",
+    "created_at": "2026-06-13T09:56:03+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#273",
+    "number": 273,
+    "title": "Support background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/273",
+    "created_at": "2026-06-10T13:25:43+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#276",
+    "number": 276,
+    "title": "Review the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/276",
+    "created_at": "2026-06-12T05:19:35+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#278",
+    "number": 278,
+    "title": "Refactor the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/278",
+    "created_at": "2026-06-12T14:54:12+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#281",
+    "number": 281,
+    "title": "Stop the regression in the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/281",
+    "created_at": "2026-06-26T18:34:28+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#283",
+    "number": 283,
+    "title": "Simplify biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/283",
+    "created_at": "2026-06-24T20:24:34+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#285",
+    "number": 285,
+    "title": "Repair the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/285",
+    "created_at": "2026-06-21T18:49:16+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#286",
+    "number": 286,
+    "title": "Simplify the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/286",
+    "created_at": "2026-06-23T21:34:43+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#290",
+    "number": 290,
+    "title": "Re-review the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/290",
+    "created_at": "2026-06-28T22:18:16+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#292",
+    "number": 292,
+    "title": "Extract deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/292",
+    "created_at": "2026-06-22T10:17:33+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#294",
+    "number": 294,
+    "title": "Re-review the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/294",
+    "created_at": "2026-07-04T16:07:35+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#295",
+    "number": 295,
+    "title": "Re-review background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/295",
+    "created_at": "2026-06-30T21:57:39+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#297",
+    "number": 297,
+    "title": "Refactor the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/297",
+    "created_at": "2026-07-06T10:39:27+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#301",
+    "number": 301,
+    "title": "Add push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/301",
+    "created_at": "2026-07-01T12:58:49+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#304",
+    "number": 304,
+    "title": "Re-review background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/304",
+    "created_at": "2026-07-03T14:43:27+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#307",
+    "number": 307,
+    "title": "Repair the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/307",
+    "created_at": "2026-07-02T08:15:03+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#308",
+    "number": 308,
+    "title": "Ship push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/308",
+    "created_at": "2026-06-28T15:12:03+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#310",
+    "number": 310,
+    "title": "Fix the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/310",
+    "created_at": "2026-07-11T01:01:24+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#313",
+    "number": 313,
+    "title": "Add the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/313",
+    "created_at": "2026-07-18T18:20:57+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#317",
+    "number": 317,
+    "title": "Stop the regression in deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/317",
+    "created_at": "2026-07-13T20:17:15+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#320",
+    "number": 320,
+    "title": "Add biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/320",
+    "created_at": "2026-07-15T09:28:13+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#324",
+    "number": 324,
+    "title": "Extract offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/324",
+    "created_at": "2026-07-11T01:32:07+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#328",
+    "number": 328,
+    "title": "Support tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/328",
+    "created_at": "2026-07-23T11:31:45+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#329",
+    "number": 329,
+    "title": "Repair the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/329",
+    "created_at": "2026-07-22T13:50:15+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#331",
+    "number": 331,
+    "title": "Refactor push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/331",
+    "created_at": "2026-07-19T12:09:36+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#334",
+    "number": 334,
+    "title": "Refactor biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/334",
+    "created_at": "2026-07-27T14:34:36+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#338",
+    "number": 338,
+    "title": "Refactor tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/338",
+    "created_at": "2026-07-21T21:18:26+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#340",
+    "number": 340,
+    "title": "Repair background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/340",
+    "created_at": "2026-07-25T22:18:13+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#341",
+    "number": 341,
+    "title": "Introduce the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/341",
+    "created_at": "2026-07-29T11:01:08+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#344",
+    "number": 344,
+    "title": "Simplify the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/344",
+    "created_at": "2026-07-18T00:00:14+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#348",
+    "number": 348,
+    "title": "Stop the regression in the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/348",
+    "created_at": "2026-07-24T15:13:08+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#349",
+    "number": 349,
+    "title": "Re-review the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/349",
+    "created_at": "2026-07-23T09:55:30+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#353",
+    "number": 353,
+    "title": "Add tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/353",
+    "created_at": "2026-07-28T10:53:48+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#357",
+    "number": 357,
+    "title": "Introduce the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/357",
+    "created_at": "2026-07-29T14:39:04+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#359",
+    "number": 359,
+    "title": "Add tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/359",
+    "created_at": "2026-07-27T15:19:42+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#362",
+    "number": 362,
+    "title": "Support tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/362",
+    "created_at": "2026-07-27T16:57:06+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#366",
+    "number": 366,
+    "title": "Re-review deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/366",
+    "created_at": "2026-08-01T17:26:24+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#367",
+    "number": 367,
+    "title": "Add offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/367",
+    "created_at": "2026-07-31T13:14:43+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#370",
+    "number": 370,
+    "title": "Support the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/370",
+    "created_at": "2026-08-04T18:52:21+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#374",
+    "number": 374,
+    "title": "Extract push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/374",
+    "created_at": "2026-07-27T22:29:32+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#376",
+    "number": 376,
+    "title": "Extract the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/376",
+    "created_at": "2026-08-02T12:25:00+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#380",
+    "number": 380,
+    "title": "Introduce the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/380",
+    "created_at": "2026-07-30T20:07:07+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#381",
+    "number": 381,
+    "title": "Stop the regression in the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/381",
+    "created_at": "2026-08-05T10:45:56+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#383",
+    "number": 383,
+    "title": "Review the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/383",
+    "created_at": "2026-08-03T13:24:23+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#384",
+    "number": 384,
+    "title": "Review biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/384",
+    "created_at": "2026-07-26T13:56:01+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#386",
+    "number": 386,
+    "title": "Stop the regression in the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/386",
+    "created_at": "2026-08-01T14:16:43+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#389",
+    "number": 389,
+    "title": "Ship background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/389",
+    "created_at": "2026-07-25T16:24:31+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#392",
+    "number": 392,
+    "title": "Simplify the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/392",
+    "created_at": "2026-08-03T22:34:12+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#394",
+    "number": 394,
+    "title": "Re-review the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/394",
+    "created_at": "2026-08-05T16:34:56+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#398",
+    "number": 398,
+    "title": "Extract push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/398",
+    "created_at": "2026-07-30T10:15:34+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#402",
+    "number": 402,
+    "title": "Re-review biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/402",
+    "created_at": "2026-08-06T21:44:02+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#404",
+    "number": 404,
+    "title": "Repair the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/404",
+    "created_at": "2026-08-12T09:11:22+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#405",
+    "number": 405,
+    "title": "Review offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/405",
+    "created_at": "2026-08-04T09:31:40+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#407",
+    "number": 407,
+    "title": "Fix deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/407",
+    "created_at": "2026-08-08T13:21:19+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#408",
+    "number": 408,
+    "title": "Stop the regression in push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/408",
+    "created_at": "2026-08-07T17:34:03+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#411",
+    "number": 411,
+    "title": "Ship tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/411",
+    "created_at": "2026-08-07T19:37:56+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#412",
+    "number": 412,
+    "title": "Simplify biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/412",
+    "created_at": "2026-08-16T09:31:05+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#415",
+    "number": 415,
+    "title": "Simplify deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/415",
+    "created_at": "2026-08-15T13:37:25+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#417",
+    "number": 417,
+    "title": "Repair the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/417",
+    "created_at": "2026-08-08T17:52:23+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#421",
+    "number": 421,
+    "title": "Re-review offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/421",
+    "created_at": "2026-08-18T03:37:20+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#425",
+    "number": 425,
+    "title": "Repair background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/425",
+    "created_at": "2026-08-04T09:27:32+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#426",
+    "number": 426,
+    "title": "Introduce the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/426",
+    "created_at": "2026-08-12T13:39:38+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#428",
+    "number": 428,
+    "title": "Refactor the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/428",
+    "created_at": "2026-08-13T13:44:47+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#430",
+    "number": 430,
+    "title": "Simplify the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/430",
+    "created_at": "2026-08-17T14:36:26+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#432",
+    "number": 432,
+    "title": "Repair deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/432",
+    "created_at": "2026-08-18T14:54:56+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#434",
+    "number": 434,
+    "title": "Extract background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/434",
+    "created_at": "2026-08-14T21:20:35+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#438",
+    "number": 438,
+    "title": "Repair the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/438",
+    "created_at": "2026-08-13T10:13:38+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#440",
+    "number": 440,
+    "title": "Review deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/440",
+    "created_at": "2026-08-08T21:11:40+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#441",
+    "number": 441,
+    "title": "Refactor deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/441",
+    "created_at": "2026-08-11T10:27:26+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#445",
+    "number": 445,
+    "title": "Introduce the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/445",
+    "created_at": "2026-08-22T14:20:08+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#447",
+    "number": 447,
+    "title": "Support the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/447",
+    "created_at": "2026-08-13T09:24:01+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#450",
+    "number": 450,
+    "title": "Add the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/450",
+    "created_at": "2026-08-18T18:12:17+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#453",
+    "number": 453,
+    "title": "Refactor the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/453",
+    "created_at": "2026-08-15T18:56:00+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#456",
+    "number": 456,
+    "title": "Review push notification opt-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/456",
+    "created_at": "2026-08-14T20:42:00+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#459",
+    "number": 459,
+    "title": "Simplify tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/459",
+    "created_at": "2026-08-14T09:05:40+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#460",
+    "number": 460,
+    "title": "Stop the regression in deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/460",
+    "created_at": "2026-08-16T13:35:30+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#461",
+    "number": 461,
+    "title": "Introduce the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/461",
+    "created_at": "2026-08-23T18:32:49+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#462",
+    "number": 462,
+    "title": "Support offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/462",
+    "created_at": "2026-08-14T21:52:36+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#464",
+    "number": 464,
+    "title": "Repair the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/464",
+    "created_at": "2026-08-27T12:46:49+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#466",
+    "number": 466,
+    "title": "Refactor background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/466",
+    "created_at": "2026-08-23T18:25:01+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#468",
+    "number": 468,
+    "title": "Extract the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/468",
+    "created_at": "2026-08-14T12:46:56+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#472",
+    "number": 472,
+    "title": "Ship deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/472",
+    "created_at": "2026-08-16T12:49:15+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#475",
+    "number": 475,
+    "title": "Stop the regression in tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/475",
+    "created_at": "2026-08-16T13:08:28+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#479",
+    "number": 479,
+    "title": "Simplify biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/479",
+    "created_at": "2026-08-24T15:19:45+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#481",
+    "number": 481,
+    "title": "Re-review the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/481",
+    "created_at": "2026-08-22T14:41:53+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#484",
+    "number": 484,
+    "title": "Ship the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/484",
+    "created_at": "2026-08-18T10:45:53+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#485",
+    "number": 485,
+    "title": "Fix tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/485",
+    "created_at": "2026-08-19T18:43:57+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#489",
+    "number": 489,
+    "title": "Simplify deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/489",
+    "created_at": "2026-08-20T20:21:42+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#492",
+    "number": 492,
+    "title": "Re-review the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/492",
+    "created_at": "2026-08-31T10:06:07+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#496",
+    "number": 496,
+    "title": "Re-review offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/496",
+    "created_at": "2026-08-22T12:51:19+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#499",
+    "number": 499,
+    "title": "Repair offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/499",
+    "created_at": "2026-08-30T16:40:31+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#502",
+    "number": 502,
+    "title": "Introduce deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/502",
+    "created_at": "2026-08-29T21:58:46+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#506",
+    "number": 506,
+    "title": "Introduce biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/506",
+    "created_at": "2026-08-23T10:53:40+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#509",
+    "number": 509,
+    "title": "Introduce the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/509",
+    "created_at": "2026-08-29T12:46:32+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#510",
+    "number": 510,
+    "title": "Extract the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/510",
+    "created_at": "2026-09-01T10:29:14+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#511",
+    "number": 511,
+    "title": "Introduce the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/511",
+    "created_at": "2026-08-26T11:17:25+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#513",
+    "number": 513,
+    "title": "Stop the regression in background refresh throttling",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/513",
+    "created_at": "2026-08-28T00:17:46+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#515",
+    "number": 515,
+    "title": "Support tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/515",
+    "created_at": "2026-08-24T14:02:57+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#516",
+    "number": 516,
+    "title": "Add biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/516",
+    "created_at": "2026-09-01T18:24:02+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#518",
+    "number": 518,
+    "title": "Fix the cost tile on Android 16",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/518",
+    "created_at": "2026-09-04T19:38:42+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#519",
+    "number": 519,
+    "title": "Fix the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/519",
+    "created_at": "2026-08-23T17:26:48+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#520",
+    "number": 520,
+    "title": "Repair biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/520",
+    "created_at": "2026-09-03T18:39:30+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#524",
+    "number": 524,
+    "title": "Review the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/524",
+    "created_at": "2026-09-05T10:04:32+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#527",
+    "number": 527,
+    "title": "Refactor deep links into a job",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/527",
+    "created_at": "2026-08-27T13:13:24+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#530",
+    "number": 530,
+    "title": "Introduce the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/530",
+    "created_at": "2026-08-31T13:53:28+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#532",
+    "number": 532,
+    "title": "Re-review the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/532",
+    "created_at": "2026-08-27T14:53:28+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#533",
+    "number": 533,
+    "title": "Stop the regression in the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/533",
+    "created_at": "2026-09-03T17:39:52+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#534",
+    "number": 534,
+    "title": "Ship biometric sign-in",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/534",
+    "created_at": "2026-08-24T17:55:59+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#538",
+    "number": 538,
+    "title": "Introduce tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/538",
+    "created_at": "2026-08-24T19:18:08+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#541",
+    "number": 541,
+    "title": "Simplify offline session history",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/541",
+    "created_at": "2026-09-06T20:57:26+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#543",
+    "number": 543,
+    "title": "Extract the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/543",
+    "created_at": "2026-08-30T09:16:39+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#546",
+    "number": 546,
+    "title": "Support the token usage widget",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/546",
+    "created_at": "2026-09-03T10:33:54+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#550",
+    "number": 550,
+    "title": "Introduce the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/550",
+    "created_at": "2026-09-06T12:58:59+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#553",
+    "number": 553,
+    "title": "Simplify the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/553",
+    "created_at": "2026-08-28T14:50:22+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#556",
+    "number": 556,
+    "title": "Re-review the pull-to-refresh spinner",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/556",
+    "created_at": "2026-09-04T16:05:55+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#557",
+    "number": 557,
+    "title": "Support the onboarding carousel",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/557",
+    "created_at": "2026-09-01T19:56:20+02:00"
+  },
+  {
+    "key": "equilibrio/mobile-app#558",
+    "number": 558,
+    "title": "Stop the regression in tablet layout on the summary screen",
+    "repository_id": "repo_mobile_app",
+    "html_url": "https://github.com/equilibrio/mobile-app/issues/558",
+    "created_at": "2026-09-05T23:28:43+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#243",
+    "number": 243,
+    "title": "Support the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/243",
+    "created_at": "2026-04-04T16:30:28+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#246",
+    "number": 246,
+    "title": "Introduce the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/246",
+    "created_at": "2026-04-08T22:12:46+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#247",
+    "number": 247,
+    "title": "Extract the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/247",
+    "created_at": "2026-04-12T04:53:35+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#250",
+    "number": 250,
+    "title": "Promote the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/250",
+    "created_at": "2026-04-30T12:53:16+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#252",
+    "number": 252,
+    "title": "Repair IAM roles for the metering service",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/252",
+    "created_at": "2026-04-29T00:57:03+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#254",
+    "number": 254,
+    "title": "Repair secret rotation for the signing key",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/254",
+    "created_at": "2026-05-05T11:33:15+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#258",
+    "number": 258,
+    "title": "Re-review the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/258",
+    "created_at": "2026-05-13T02:59:35+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#262",
+    "number": 262,
+    "title": "Support the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/262",
+    "created_at": "2026-05-22T21:36:10+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#264",
+    "number": 264,
+    "title": "Roll out the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/264",
+    "created_at": "2026-06-02T10:51:20+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#265",
+    "number": 265,
+    "title": "Repair the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/265",
+    "created_at": "2026-05-31T13:18:51+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#267",
+    "number": 267,
+    "title": "Introduce the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/267",
+    "created_at": "2026-05-29T09:00:23+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#268",
+    "number": 268,
+    "title": "Promote the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/268",
+    "created_at": "2026-06-07T23:12:51+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#272",
+    "number": 272,
+    "title": "Simplify autoscaling on the worker pool",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/272",
+    "created_at": "2026-06-07T04:49:14+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#275",
+    "number": 275,
+    "title": "Fix the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/275",
+    "created_at": "2026-06-13T12:31:22+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#277",
+    "number": 277,
+    "title": "Promote the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/277",
+    "created_at": "2026-06-08T13:01:50+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#278",
+    "number": 278,
+    "title": "Fix the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/278",
+    "created_at": "2026-06-07T02:58:59+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#282",
+    "number": 282,
+    "title": "Re-review the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/282",
+    "created_at": "2026-06-08T03:46:08+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#285",
+    "number": 285,
+    "title": "Simplify the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/285",
+    "created_at": "2026-06-16T23:57:48+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#286",
+    "number": 286,
+    "title": "Re-review the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/286",
+    "created_at": "2026-06-15T23:48:09+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#289",
+    "number": 289,
+    "title": "Review the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/289",
+    "created_at": "2026-06-17T16:11:17+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#290",
+    "number": 290,
+    "title": "Extract the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/290",
+    "created_at": "2026-06-23T00:01:24+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#291",
+    "number": 291,
+    "title": "Promote the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/291",
+    "created_at": "2026-07-04T09:30:23+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#294",
+    "number": 294,
+    "title": "Repair IAM roles for the metering service",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/294",
+    "created_at": "2026-07-04T17:11:34+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#298",
+    "number": 298,
+    "title": "Refactor the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/298",
+    "created_at": "2026-07-08T22:28:20+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#300",
+    "number": 300,
+    "title": "Promote secret rotation for the signing key",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/300",
+    "created_at": "2026-07-13T10:58:18+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#302",
+    "number": 302,
+    "title": "Simplify IAM roles for the metering service",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/302",
+    "created_at": "2026-07-13T22:56:21+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#304",
+    "number": 304,
+    "title": "Promote the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/304",
+    "created_at": "2026-07-18T15:41:47+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#307",
+    "number": 307,
+    "title": "Review autoscaling on the worker pool",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/307",
+    "created_at": "2026-07-14T05:17:04+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#308",
+    "number": 308,
+    "title": "Roll out the DNS failover record",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/308",
+    "created_at": "2026-07-17T19:23:21+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#309",
+    "number": 309,
+    "title": "Re-review the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/309",
+    "created_at": "2026-07-25T05:57:38+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#312",
+    "number": 312,
+    "title": "Simplify the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/312",
+    "created_at": "2026-07-24T15:37:05+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#314",
+    "number": 314,
+    "title": "Fix the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/314",
+    "created_at": "2026-07-24T19:52:21+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#317",
+    "number": 317,
+    "title": "Refactor the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/317",
+    "created_at": "2026-07-18T03:40:41+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#318",
+    "number": 318,
+    "title": "Add the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/318",
+    "created_at": "2026-07-28T04:52:54+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#321",
+    "number": 321,
+    "title": "Roll out the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/321",
+    "created_at": "2026-07-18T20:09:39+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#322",
+    "number": 322,
+    "title": "Add the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/322",
+    "created_at": "2026-07-25T08:54:33+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#325",
+    "number": 325,
+    "title": "Introduce the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/325",
+    "created_at": "2026-07-25T09:58:12+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#327",
+    "number": 327,
+    "title": "Support the RDS failover drill",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/327",
+    "created_at": "2026-07-26T12:01:59+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#328",
+    "number": 328,
+    "title": "Add the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/328",
+    "created_at": "2026-07-27T09:58:05+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#329",
+    "number": 329,
+    "title": "Ship the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/329",
+    "created_at": "2026-08-02T13:46:40+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#332",
+    "number": 332,
+    "title": "Extract the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/332",
+    "created_at": "2026-07-29T19:05:07+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#334",
+    "number": 334,
+    "title": "Release the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/334",
+    "created_at": "2026-08-07T19:37:57+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#338",
+    "number": 338,
+    "title": "Stop the regression in the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/338",
+    "created_at": "2026-07-31T13:20:23+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#341",
+    "number": 341,
+    "title": "Refactor the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/341",
+    "created_at": "2026-08-04T01:49:59+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#343",
+    "number": 343,
+    "title": "Introduce the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/343",
+    "created_at": "2026-08-17T11:31:11+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#344",
+    "number": 344,
+    "title": "Fix the CDN cache policy",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/344",
+    "created_at": "2026-08-14T00:22:22+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#346",
+    "number": 346,
+    "title": "Add autoscaling on the worker pool",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/346",
+    "created_at": "2026-08-26T02:49:27+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#349",
+    "number": 349,
+    "title": "Stop the regression in the DNS failover record",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/349",
+    "created_at": "2026-08-20T13:47:43+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#350",
+    "number": 350,
+    "title": "Support the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/350",
+    "created_at": "2026-08-15T22:52:37+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#354",
+    "number": 354,
+    "title": "Refactor the staging VPC module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/354",
+    "created_at": "2026-08-27T18:45:00+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#356",
+    "number": 356,
+    "title": "Ship the nightly backup schedule",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/356",
+    "created_at": "2026-08-28T15:25:13+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#357",
+    "number": 357,
+    "title": "Fix the bastion host module",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/357",
+    "created_at": "2026-08-26T21:57:29+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#360",
+    "number": 360,
+    "title": "Re-review autoscaling on the worker pool",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/360",
+    "created_at": "2026-08-24T03:41:05+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#362",
+    "number": 362,
+    "title": "Stop the regression in the DNS failover record",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/362",
+    "created_at": "2026-08-29T11:04:55+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#364",
+    "number": 364,
+    "title": "Refactor the DNS failover record",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/364",
+    "created_at": "2026-08-27T12:15:28+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#366",
+    "number": 366,
+    "title": "Stop the regression in IAM roles for the metering service",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/366",
+    "created_at": "2026-08-24T17:41:48+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#369",
+    "number": 369,
+    "title": "Introduce autoscaling on the worker pool",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/369",
+    "created_at": "2026-08-25T10:20:09+02:00"
+  },
+  {
+    "key": "equilibrio/terraform-infra#372",
+    "number": 372,
+    "title": "Support the DNS failover record",
+    "repository_id": "repo_terraform_infra",
+    "html_url": "https://github.com/equilibrio/terraform-infra/issues/372",
+    "created_at": "2026-09-07T09:29:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#314",
+    "number": 314,
+    "title": "Release the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/314",
+    "created_at": "2026-04-13T08:57:20+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#315",
+    "number": 315,
+    "title": "Release usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/315",
+    "created_at": "2026-04-09T20:34:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#318",
+    "number": 318,
+    "title": "Re-review chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/318",
+    "created_at": "2026-04-12T21:25:26+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#321",
+    "number": 321,
+    "title": "Ship the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/321",
+    "created_at": "2026-04-11T11:29:41+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#323",
+    "number": 323,
+    "title": "Simplify the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/323",
+    "created_at": "2026-04-21T14:57:17+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#324",
+    "number": 324,
+    "title": "Extract session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/324",
+    "created_at": "2026-04-19T23:51:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#325",
+    "number": 325,
+    "title": "Refactor keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/325",
+    "created_at": "2026-04-25T23:31:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#326",
+    "number": 326,
+    "title": "Refactor the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/326",
+    "created_at": "2026-04-25T00:38:53+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#330",
+    "number": 330,
+    "title": "Ship the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/330",
+    "created_at": "2026-04-20T14:18:11+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#331",
+    "number": 331,
+    "title": "Simplify the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/331",
+    "created_at": "2026-04-21T09:44:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#334",
+    "number": 334,
+    "title": "Review the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/334",
+    "created_at": "2026-04-27T18:00:55+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#335",
+    "number": 335,
+    "title": "Repair chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/335",
+    "created_at": "2026-05-05T14:58:41+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#338",
+    "number": 338,
+    "title": "Support the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/338",
+    "created_at": "2026-04-29T15:56:24+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#340",
+    "number": 340,
+    "title": "Introduce empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/340",
+    "created_at": "2026-04-29T17:48:59+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#341",
+    "number": 341,
+    "title": "Review the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/341",
+    "created_at": "2026-04-29T11:35:42+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#344",
+    "number": 344,
+    "title": "Repair usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/344",
+    "created_at": "2026-05-05T09:11:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#345",
+    "number": 345,
+    "title": "Add session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/345",
+    "created_at": "2026-05-08T14:39:28+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#347",
+    "number": 347,
+    "title": "Release empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/347",
+    "created_at": "2026-05-09T17:53:33+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#350",
+    "number": 350,
+    "title": "Roll out usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/350",
+    "created_at": "2026-05-11T23:37:58+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#353",
+    "number": 353,
+    "title": "Promote chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/353",
+    "created_at": "2026-05-05T19:53:00+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#354",
+    "number": 354,
+    "title": "Promote session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/354",
+    "created_at": "2026-05-02T11:02:53+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#357",
+    "number": 357,
+    "title": "Review empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/357",
+    "created_at": "2026-05-11T18:18:23+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#359",
+    "number": 359,
+    "title": "Stop the regression in usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/359",
+    "created_at": "2026-05-04T08:47:19+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#361",
+    "number": 361,
+    "title": "Support the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/361",
+    "created_at": "2026-05-04T14:56:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#362",
+    "number": 362,
+    "title": "Add chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/362",
+    "created_at": "2026-05-16T18:38:25+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#363",
+    "number": 363,
+    "title": "Promote the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/363",
+    "created_at": "2026-05-11T09:40:50+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#365",
+    "number": 365,
+    "title": "Refactor the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/365",
+    "created_at": "2026-05-07T22:41:10+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#369",
+    "number": 369,
+    "title": "Fix the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/369",
+    "created_at": "2026-05-14T10:22:39+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#372",
+    "number": 372,
+    "title": "Roll out empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/372",
+    "created_at": "2026-05-14T17:40:48+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#374",
+    "number": 374,
+    "title": "Add the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/374",
+    "created_at": "2026-05-22T20:34:41+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#375",
+    "number": 375,
+    "title": "Support the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/375",
+    "created_at": "2026-05-19T17:21:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#379",
+    "number": 379,
+    "title": "Review session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/379",
+    "created_at": "2026-05-18T01:48:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#381",
+    "number": 381,
+    "title": "Fix usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/381",
+    "created_at": "2026-05-12T16:31:52+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#382",
+    "number": 382,
+    "title": "Repair the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/382",
+    "created_at": "2026-05-14T11:55:14+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#385",
+    "number": 385,
+    "title": "Ship the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/385",
+    "created_at": "2026-05-28T10:36:00+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#387",
+    "number": 387,
+    "title": "Stop the regression in the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/387",
+    "created_at": "2026-05-18T13:39:52+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#391",
+    "number": 391,
+    "title": "Support keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/391",
+    "created_at": "2026-05-17T18:30:42+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#393",
+    "number": 393,
+    "title": "Re-review keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/393",
+    "created_at": "2026-05-23T15:47:06+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#397",
+    "number": 397,
+    "title": "Refactor the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/397",
+    "created_at": "2026-05-20T01:21:03+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#401",
+    "number": 401,
+    "title": "Review the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/401",
+    "created_at": "2026-05-24T22:52:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#405",
+    "number": 405,
+    "title": "Release usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/405",
+    "created_at": "2026-06-03T10:31:19+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#408",
+    "number": 408,
+    "title": "Roll out keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/408",
+    "created_at": "2026-05-24T11:38:17+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#409",
+    "number": 409,
+    "title": "Ship the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/409",
+    "created_at": "2026-06-08T10:05:34+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#412",
+    "number": 412,
+    "title": "Introduce the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/412",
+    "created_at": "2026-06-03T10:38:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#416",
+    "number": 416,
+    "title": "Add the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/416",
+    "created_at": "2026-06-08T11:41:36+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#419",
+    "number": 419,
+    "title": "Simplify keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/419",
+    "created_at": "2026-05-29T03:00:34+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#420",
+    "number": 420,
+    "title": "Fix usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/420",
+    "created_at": "2026-06-08T19:11:15+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#423",
+    "number": 423,
+    "title": "Stop the regression in the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/423",
+    "created_at": "2026-06-02T21:08:15+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#425",
+    "number": 425,
+    "title": "Repair empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/425",
+    "created_at": "2026-06-10T20:49:23+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#429",
+    "number": 429,
+    "title": "Roll out chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/429",
+    "created_at": "2026-06-11T17:55:11+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#430",
+    "number": 430,
+    "title": "Repair the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/430",
+    "created_at": "2026-06-04T09:16:00+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#432",
+    "number": 432,
+    "title": "Simplify session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/432",
+    "created_at": "2026-06-05T17:02:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#433",
+    "number": 433,
+    "title": "Release the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/433",
+    "created_at": "2026-06-13T17:05:35+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#437",
+    "number": 437,
+    "title": "Support the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/437",
+    "created_at": "2026-06-04T10:47:32+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#441",
+    "number": 441,
+    "title": "Support session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/441",
+    "created_at": "2026-06-12T09:16:20+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#445",
+    "number": 445,
+    "title": "Roll out session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/445",
+    "created_at": "2026-06-13T11:41:10+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#446",
+    "number": 446,
+    "title": "Introduce empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/446",
+    "created_at": "2026-06-22T16:57:37+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#450",
+    "number": 450,
+    "title": "Support usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/450",
+    "created_at": "2026-06-22T20:04:53+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#451",
+    "number": 451,
+    "title": "Repair the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/451",
+    "created_at": "2026-06-12T18:16:42+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#454",
+    "number": 454,
+    "title": "Release the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/454",
+    "created_at": "2026-06-16T16:01:09+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#455",
+    "number": 455,
+    "title": "Fix the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/455",
+    "created_at": "2026-06-20T12:12:53+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#457",
+    "number": 457,
+    "title": "Introduce the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/457",
+    "created_at": "2026-06-26T09:03:59+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#458",
+    "number": 458,
+    "title": "Introduce chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/458",
+    "created_at": "2026-06-22T18:14:48+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#460",
+    "number": 460,
+    "title": "Introduce session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/460",
+    "created_at": "2026-06-24T19:11:36+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#463",
+    "number": 463,
+    "title": "Ship the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/463",
+    "created_at": "2026-06-25T00:15:12+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#464",
+    "number": 464,
+    "title": "Roll out empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/464",
+    "created_at": "2026-07-01T18:44:39+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#466",
+    "number": 466,
+    "title": "Roll out the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/466",
+    "created_at": "2026-07-02T13:24:25+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#468",
+    "number": 468,
+    "title": "Roll out chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/468",
+    "created_at": "2026-06-29T23:26:59+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#469",
+    "number": 469,
+    "title": "Release the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/469",
+    "created_at": "2026-06-29T09:11:04+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#472",
+    "number": 472,
+    "title": "Ship the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/472",
+    "created_at": "2026-07-03T12:37:23+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#476",
+    "number": 476,
+    "title": "Refactor empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/476",
+    "created_at": "2026-06-23T13:51:27+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#480",
+    "number": 480,
+    "title": "Refactor the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/480",
+    "created_at": "2026-07-02T11:59:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#482",
+    "number": 482,
+    "title": "Stop the regression in empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/482",
+    "created_at": "2026-06-24T18:03:15+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#486",
+    "number": 486,
+    "title": "Stop the regression in the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/486",
+    "created_at": "2026-07-01T21:37:12+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#488",
+    "number": 488,
+    "title": "Roll out the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/488",
+    "created_at": "2026-07-08T09:25:02+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#489",
+    "number": 489,
+    "title": "Extract empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/489",
+    "created_at": "2026-07-07T14:17:07+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#492",
+    "number": 492,
+    "title": "Ship keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/492",
+    "created_at": "2026-06-24T14:21:48+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#495",
+    "number": 495,
+    "title": "Refactor keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/495",
+    "created_at": "2026-07-06T18:57:17+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#498",
+    "number": 498,
+    "title": "Add the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/498",
+    "created_at": "2026-06-27T14:27:35+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#500",
+    "number": 500,
+    "title": "Add the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/500",
+    "created_at": "2026-06-27T19:53:50+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#502",
+    "number": 502,
+    "title": "Repair usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/502",
+    "created_at": "2026-07-03T08:11:11+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#505",
+    "number": 505,
+    "title": "Roll out the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/505",
+    "created_at": "2026-07-09T22:59:11+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#508",
+    "number": 508,
+    "title": "Fix chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/508",
+    "created_at": "2026-07-12T12:28:16+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#511",
+    "number": 511,
+    "title": "Support the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/511",
+    "created_at": "2026-07-12T16:33:26+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#512",
+    "number": 512,
+    "title": "Support the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/512",
+    "created_at": "2026-07-07T18:04:01+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#516",
+    "number": 516,
+    "title": "Introduce chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/516",
+    "created_at": "2026-07-13T20:18:05+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#519",
+    "number": 519,
+    "title": "Extract the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/519",
+    "created_at": "2026-07-08T22:03:30+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#521",
+    "number": 521,
+    "title": "Fix the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/521",
+    "created_at": "2026-07-05T13:00:57+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#524",
+    "number": 524,
+    "title": "Fix the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/524",
+    "created_at": "2026-07-11T14:51:00+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#525",
+    "number": 525,
+    "title": "Release usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/525",
+    "created_at": "2026-07-08T22:01:01+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#526",
+    "number": 526,
+    "title": "Add keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/526",
+    "created_at": "2026-07-06T09:10:34+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#530",
+    "number": 530,
+    "title": "Support the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/530",
+    "created_at": "2026-07-09T14:43:39+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#534",
+    "number": 534,
+    "title": "Support the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/534",
+    "created_at": "2026-07-14T09:06:40+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#535",
+    "number": 535,
+    "title": "Stop the regression in the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/535",
+    "created_at": "2026-07-04T12:33:43+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#536",
+    "number": 536,
+    "title": "Ship the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/536",
+    "created_at": "2026-07-07T14:50:38+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#540",
+    "number": 540,
+    "title": "Review usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/540",
+    "created_at": "2026-07-12T23:40:10+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#544",
+    "number": 544,
+    "title": "Refactor the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/544",
+    "created_at": "2026-07-15T05:22:19+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#546",
+    "number": 546,
+    "title": "Simplify empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/546",
+    "created_at": "2026-07-15T11:52:48+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#548",
+    "number": 548,
+    "title": "Repair the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/548",
+    "created_at": "2026-07-14T20:00:15+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#549",
+    "number": 549,
+    "title": "Fix the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/549",
+    "created_at": "2026-07-20T20:18:01+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#551",
+    "number": 551,
+    "title": "Extract the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/551",
+    "created_at": "2026-07-11T18:40:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#554",
+    "number": 554,
+    "title": "Release keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/554",
+    "created_at": "2026-07-14T22:46:10+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#555",
+    "number": 555,
+    "title": "Extract the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/555",
+    "created_at": "2026-07-21T00:59:07+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#559",
+    "number": 559,
+    "title": "Introduce the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/559",
+    "created_at": "2026-07-19T17:23:10+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#560",
+    "number": 560,
+    "title": "Repair the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/560",
+    "created_at": "2026-07-18T17:31:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#561",
+    "number": 561,
+    "title": "Roll out chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/561",
+    "created_at": "2026-07-22T19:35:42+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#564",
+    "number": 564,
+    "title": "Review keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/564",
+    "created_at": "2026-07-21T14:33:17+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#566",
+    "number": 566,
+    "title": "Fix the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/566",
+    "created_at": "2026-07-18T09:10:47+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#569",
+    "number": 569,
+    "title": "Roll out the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/569",
+    "created_at": "2026-07-21T12:00:19+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#570",
+    "number": 570,
+    "title": "Re-review session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/570",
+    "created_at": "2026-07-25T12:54:49+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#572",
+    "number": 572,
+    "title": "Re-review the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/572",
+    "created_at": "2026-07-28T15:36:29+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#576",
+    "number": 576,
+    "title": "Simplify the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/576",
+    "created_at": "2026-07-20T13:10:13+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#580",
+    "number": 580,
+    "title": "Support the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/580",
+    "created_at": "2026-07-18T17:09:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#583",
+    "number": 583,
+    "title": "Refactor the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/583",
+    "created_at": "2026-07-29T11:26:50+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#586",
+    "number": 586,
+    "title": "Stop the regression in session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/586",
+    "created_at": "2026-07-25T15:25:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#590",
+    "number": 590,
+    "title": "Repair the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/590",
+    "created_at": "2026-07-30T18:54:17+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#594",
+    "number": 594,
+    "title": "Simplify session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/594",
+    "created_at": "2026-07-18T00:58:51+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#597",
+    "number": 597,
+    "title": "Release the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/597",
+    "created_at": "2026-08-02T18:10:44+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#600",
+    "number": 600,
+    "title": "Refactor session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/600",
+    "created_at": "2026-07-21T10:28:11+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#601",
+    "number": 601,
+    "title": "Extract the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/601",
+    "created_at": "2026-07-26T11:47:01+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#602",
+    "number": 602,
+    "title": "Re-review the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/602",
+    "created_at": "2026-07-28T08:56:12+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#606",
+    "number": 606,
+    "title": "Re-review the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/606",
+    "created_at": "2026-07-26T09:40:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#608",
+    "number": 608,
+    "title": "Promote usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/608",
+    "created_at": "2026-08-03T11:54:20+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#612",
+    "number": 612,
+    "title": "Re-review the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/612",
+    "created_at": "2026-07-21T17:42:20+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#615",
+    "number": 615,
+    "title": "Re-review the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/615",
+    "created_at": "2026-08-02T13:31:08+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#619",
+    "number": 619,
+    "title": "Repair the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/619",
+    "created_at": "2026-07-30T16:14:48+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#621",
+    "number": 621,
+    "title": "Fix usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/621",
+    "created_at": "2026-08-01T17:36:22+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#622",
+    "number": 622,
+    "title": "Support empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/622",
+    "created_at": "2026-08-03T18:36:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#625",
+    "number": 625,
+    "title": "Stop the regression in session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/625",
+    "created_at": "2026-07-24T11:47:55+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#629",
+    "number": 629,
+    "title": "Simplify the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/629",
+    "created_at": "2026-07-31T11:51:50+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#630",
+    "number": 630,
+    "title": "Promote keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/630",
+    "created_at": "2026-08-04T12:16:37+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#634",
+    "number": 634,
+    "title": "Promote the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/634",
+    "created_at": "2026-08-04T12:30:33+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#637",
+    "number": 637,
+    "title": "Add empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/637",
+    "created_at": "2026-07-27T10:52:36+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#639",
+    "number": 639,
+    "title": "Extract keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/639",
+    "created_at": "2026-08-02T09:51:32+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#643",
+    "number": 643,
+    "title": "Release the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/643",
+    "created_at": "2026-08-01T10:28:23+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#646",
+    "number": 646,
+    "title": "Review keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/646",
+    "created_at": "2026-08-06T11:56:23+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#647",
+    "number": 647,
+    "title": "Support session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/647",
+    "created_at": "2026-07-30T13:55:06+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#651",
+    "number": 651,
+    "title": "Roll out empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/651",
+    "created_at": "2026-07-29T15:56:25+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#653",
+    "number": 653,
+    "title": "Promote the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/653",
+    "created_at": "2026-07-29T17:58:31+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#655",
+    "number": 655,
+    "title": "Review keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/655",
+    "created_at": "2026-07-29T22:58:55+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#658",
+    "number": 658,
+    "title": "Release usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/658",
+    "created_at": "2026-08-04T13:40:17+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#659",
+    "number": 659,
+    "title": "Repair the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/659",
+    "created_at": "2026-07-31T17:45:33+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#661",
+    "number": 661,
+    "title": "Roll out the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/661",
+    "created_at": "2026-07-29T21:21:55+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#665",
+    "number": 665,
+    "title": "Extract the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/665",
+    "created_at": "2026-08-08T13:26:34+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#666",
+    "number": 666,
+    "title": "Add chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/666",
+    "created_at": "2026-08-06T09:15:33+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#667",
+    "number": 667,
+    "title": "Introduce the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/667",
+    "created_at": "2026-08-07T11:11:15+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#668",
+    "number": 668,
+    "title": "Refactor the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/668",
+    "created_at": "2026-08-11T14:19:53+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#672",
+    "number": 672,
+    "title": "Ship the export dialog",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/672",
+    "created_at": "2026-08-11T15:23:52+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#676",
+    "number": 676,
+    "title": "Roll out chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/676",
+    "created_at": "2026-08-05T19:34:47+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#679",
+    "number": 679,
+    "title": "Fix empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/679",
+    "created_at": "2026-08-14T10:39:25+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#683",
+    "number": 683,
+    "title": "Add usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/683",
+    "created_at": "2026-08-13T11:00:22+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#684",
+    "number": 684,
+    "title": "Add the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/684",
+    "created_at": "2026-08-08T20:51:28+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#685",
+    "number": 685,
+    "title": "Stop the regression in keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/685",
+    "created_at": "2026-08-09T10:24:54+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#689",
+    "number": 689,
+    "title": "Refactor the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/689",
+    "created_at": "2026-08-04T13:03:56+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#690",
+    "number": 690,
+    "title": "Ship the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/690",
+    "created_at": "2026-08-08T14:05:41+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#692",
+    "number": 692,
+    "title": "Stop the regression in the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/692",
+    "created_at": "2026-08-05T10:25:32+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#694",
+    "number": 694,
+    "title": "Add the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/694",
+    "created_at": "2026-08-17T15:39:14+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#696",
+    "number": 696,
+    "title": "Release the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/696",
+    "created_at": "2026-08-14T16:36:32+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#700",
+    "number": 700,
+    "title": "Extract the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/700",
+    "created_at": "2026-08-10T02:50:58+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#701",
+    "number": 701,
+    "title": "Extract the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/701",
+    "created_at": "2026-08-07T08:29:16+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#702",
+    "number": 702,
+    "title": "Add session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/702",
+    "created_at": "2026-08-06T18:07:29+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#705",
+    "number": 705,
+    "title": "Review chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/705",
+    "created_at": "2026-08-15T03:23:53+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#707",
+    "number": 707,
+    "title": "Introduce the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/707",
+    "created_at": "2026-08-15T10:55:04+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#709",
+    "number": 709,
+    "title": "Ship keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/709",
+    "created_at": "2026-08-11T11:23:26+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#711",
+    "number": 711,
+    "title": "Simplify the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/711",
+    "created_at": "2026-08-11T14:41:07+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#713",
+    "number": 713,
+    "title": "Support the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/713",
+    "created_at": "2026-08-13T18:31:15+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#714",
+    "number": 714,
+    "title": "Promote session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/714",
+    "created_at": "2026-08-11T17:38:46+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#718",
+    "number": 718,
+    "title": "Support chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/718",
+    "created_at": "2026-08-19T18:41:48+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#721",
+    "number": 721,
+    "title": "Repair chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/721",
+    "created_at": "2026-08-22T09:05:12+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#723",
+    "number": 723,
+    "title": "Promote session detail drawer loading",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/723",
+    "created_at": "2026-08-15T17:48:09+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#726",
+    "number": 726,
+    "title": "Roll out empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/726",
+    "created_at": "2026-08-11T18:36:14+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#730",
+    "number": 730,
+    "title": "Add the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/730",
+    "created_at": "2026-08-19T09:07:16+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#734",
+    "number": 734,
+    "title": "Simplify the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/734",
+    "created_at": "2026-08-25T09:23:55+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#736",
+    "number": 736,
+    "title": "Fix empty states on the spend page",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/736",
+    "created_at": "2026-08-16T12:26:49+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#737",
+    "number": 737,
+    "title": "Promote chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/737",
+    "created_at": "2026-08-22T15:38:49+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#741",
+    "number": 741,
+    "title": "Release usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/741",
+    "created_at": "2026-08-18T09:13:32+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#743",
+    "number": 743,
+    "title": "Promote chart legend truncation",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/743",
+    "created_at": "2026-08-19T10:30:14+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#744",
+    "number": 744,
+    "title": "Fix the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/744",
+    "created_at": "2026-08-26T15:26:42+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#747",
+    "number": 747,
+    "title": "Promote the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/747",
+    "created_at": "2026-08-17T17:20:49+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#749",
+    "number": 749,
+    "title": "Support the date-range picker",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/749",
+    "created_at": "2026-08-24T19:25:36+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#752",
+    "number": 752,
+    "title": "Extract usage table pagination",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/752",
+    "created_at": "2026-08-22T08:27:45+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#755",
+    "number": 755,
+    "title": "Introduce keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/755",
+    "created_at": "2026-08-21T14:13:56+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#757",
+    "number": 757,
+    "title": "Refactor the seat usage banner",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/757",
+    "created_at": "2026-08-24T16:30:06+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#761",
+    "number": 761,
+    "title": "Stop the regression in the org switcher",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/761",
+    "created_at": "2026-08-23T16:09:00+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#763",
+    "number": 763,
+    "title": "Review the saved-view sidebar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/763",
+    "created_at": "2026-08-26T08:52:26+02:00"
+  },
+  {
+    "key": "equilibrio/web-console#766",
+    "number": 766,
+    "title": "Introduce keyboard navigation in the filter bar",
+    "repository_id": "repo_web_console",
+    "html_url": "https://github.com/equilibrio/web-console/issues/766",
+    "created_at": "2026-09-02T13:47:29+02:00"
+  }
+]

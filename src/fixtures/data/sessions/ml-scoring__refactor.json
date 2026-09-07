@@ -1,0 +1,677 @@
+[
+  {
+    "id": "ses_0148",
+    "started_at": "2026-06-04T02:50:14+02:00",
+    "ended_at": "2026-06-04T04:33:30+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#159",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 11.11,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6196,
+    "machine_allocation_duration_s": 6196,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 0,
+      "line_changed": 0
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 550671,
+        "cache_read": 12053971,
+        "cache_write": 1385466,
+        "output": 207321
+      }
+    ]
+  },
+  {
+    "id": "ses_0149",
+    "started_at": "2026-06-04T04:34:23+02:00",
+    "ended_at": "2026-06-04T07:18:42+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#159",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 5.41,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 9859,
+    "machine_allocation_duration_s": 9859,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 3,
+      "line_changed": 144
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 110816,
+        "cache_read": 5093905,
+        "cache_write": 153840,
+        "output": 49424
+      }
+    ]
+  },
+  {
+    "id": "ses_0198",
+    "started_at": "2026-06-17T14:20:39+02:00",
+    "ended_at": "2026-06-17T16:19:46+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#172",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 31,
+    "cost": 18.72,
+    "interactive_duration_s": 2202,
+    "idle_duration_s": 3049,
+    "afk_duration_s": 1896,
+    "machine_allocation_duration_s": 7147,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 3,
+      "line_changed": 27
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 681724,
+        "cache_read": 24352169,
+        "cache_write": 2455458,
+        "output": 593814
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 409034,
+        "cache_read": 14611302,
+        "cache_write": 1473274,
+        "output": 356288
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 272690,
+        "cache_read": 9740868,
+        "cache_write": 982183,
+        "output": 237526
+      }
+    ]
+  },
+  {
+    "id": "ses_0235",
+    "started_at": "2026-06-26T09:08:42+02:00",
+    "ended_at": "2026-06-26T10:41:48+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#174",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 17,
+    "cost": 2.37,
+    "interactive_duration_s": 1618,
+    "idle_duration_s": 2962,
+    "afk_duration_s": 1006,
+    "machine_allocation_duration_s": 5586,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 3,
+      "line_changed": 144
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 22460,
+        "cache_read": 726533,
+        "cache_write": 56139,
+        "output": 17852
+      }
+    ]
+  },
+  {
+    "id": "ses_0240",
+    "started_at": "2026-06-29T13:12:22+02:00",
+    "ended_at": "2026-06-29T14:56:28+02:00",
+    "member_id": "mem_aquintana",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#188",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 23,
+    "cost": 20.26,
+    "interactive_duration_s": 2689,
+    "idle_duration_s": 1326,
+    "afk_duration_s": 2231,
+    "machine_allocation_duration_s": 6246,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 22,
+      "line_changed": 616
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 108125,
+        "cache_read": 4788926,
+        "cache_write": 255670,
+        "output": 192570
+      }
+    ]
+  },
+  {
+    "id": "ses_0264",
+    "started_at": "2026-07-03T09:00:07+02:00",
+    "ended_at": "2026-07-03T10:44:28+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#200",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 5,
+    "cost": 6.96,
+    "interactive_duration_s": 2449,
+    "idle_duration_s": 1601,
+    "afk_duration_s": 2211,
+    "machine_allocation_duration_s": 6261,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 21,
+      "line_changed": 126
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 166758,
+        "cache_read": 3263762,
+        "cache_write": 675765,
+        "output": 150918
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 89793,
+        "cache_read": 1757411,
+        "cache_write": 363874,
+        "output": 81263
+      }
+    ]
+  },
+  {
+    "id": "ses_0363",
+    "started_at": "2026-07-20T10:36:38+02:00",
+    "ended_at": "2026-07-20T12:37:56+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#226",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 8,
+    "cost": 1.18,
+    "interactive_duration_s": 1979,
+    "idle_duration_s": 3169,
+    "afk_duration_s": 2130,
+    "machine_allocation_duration_s": 7278,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 5,
+      "line_changed": 75
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 24125,
+        "cache_read": 339693,
+        "cache_write": 87574,
+        "output": 5271
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 12990,
+        "cache_read": 182912,
+        "cache_write": 47155,
+        "output": 2838
+      }
+    ]
+  },
+  {
+    "id": "ses_0431",
+    "started_at": "2026-07-30T09:01:14+02:00",
+    "ended_at": "2026-07-30T11:18:07+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#236",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 10,
+    "cost": 4.5,
+    "interactive_duration_s": 3629,
+    "idle_duration_s": 1375,
+    "afk_duration_s": 3209,
+    "machine_allocation_duration_s": 8213,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 3,
+      "line_changed": 144
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 75393,
+        "cache_read": 2386169,
+        "cache_write": 193365,
+        "output": 64956
+      }
+    ]
+  },
+  {
+    "id": "ses_0456",
+    "started_at": "2026-08-03T23:36:03+02:00",
+    "ended_at": "2026-08-04T00:50:01+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#238",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 8,
+    "cost": 0.75,
+    "interactive_duration_s": 2088,
+    "idle_duration_s": 1042,
+    "afk_duration_s": 1308,
+    "machine_allocation_duration_s": 4438,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 14,
+      "line_changed": 672
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 137588,
+        "cache_read": 4138464,
+        "cache_write": 221958,
+        "output": 68054
+      },
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 74086,
+        "cache_read": 2228404,
+        "cache_write": 119516,
+        "output": 36644
+      }
+    ]
+  },
+  {
+    "id": "ses_0507",
+    "started_at": "2026-08-09T12:16:10+02:00",
+    "ended_at": "2026-08-09T14:24:49+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#243",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 7.93,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 7719,
+    "machine_allocation_duration_s": 7719,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 1,
+      "line_changed": 33
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 292681,
+        "cache_read": 7282370,
+        "cache_write": 599000,
+        "output": 182127
+      }
+    ]
+  },
+  {
+    "id": "ses_0510",
+    "started_at": "2026-08-10T04:57:30+02:00",
+    "ended_at": "2026-08-10T08:10:55+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#246",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 21.79,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 11605,
+    "machine_allocation_duration_s": 11605,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 8,
+      "line_changed": 256
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 400043,
+        "cache_read": 11518980,
+        "cache_write": 604118,
+        "output": 294023
+      }
+    ]
+  },
+  {
+    "id": "ses_0528",
+    "started_at": "2026-08-11T15:38:19+02:00",
+    "ended_at": "2026-08-11T18:41:56+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#243",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 7,
+    "cost": 3.99,
+    "interactive_duration_s": 3791,
+    "idle_duration_s": 3195,
+    "afk_duration_s": 4031,
+    "machine_allocation_duration_s": 11017,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 5,
+      "file_changed": 20,
+      "line_changed": 120
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 17404,
+        "cache_read": 921827,
+        "cache_write": 77198,
+        "output": 21639
+      }
+    ]
+  },
+  {
+    "id": "ses_0599",
+    "started_at": "2026-08-19T22:47:43+02:00",
+    "ended_at": "2026-08-19T23:52:43+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#268",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 20,
+    "cost": 1.36,
+    "interactive_duration_s": 1886,
+    "idle_duration_s": 680,
+    "afk_duration_s": 1334,
+    "machine_allocation_duration_s": 3900,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 6,
+      "line_changed": 54
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 235533,
+        "cache_read": 6608117,
+        "cache_write": 268486,
+        "output": 337960
+      }
+    ]
+  },
+  {
+    "id": "ses_0609",
+    "started_at": "2026-08-20T17:18:31+02:00",
+    "ended_at": "2026-08-20T18:43:45+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#264",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 1.22,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 5114,
+    "machine_allocation_duration_s": 5114,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 5,
+      "line_changed": 205
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 36332,
+        "cache_read": 747297,
+        "cache_write": 124547,
+        "output": 25689
+      }
+    ]
+  },
+  {
+    "id": "ses_0614",
+    "started_at": "2026-08-21T09:04:38+02:00",
+    "ended_at": "2026-08-21T11:15:02+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#278",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 28,
+    "cost": 14.55,
+    "interactive_duration_s": 3099,
+    "idle_duration_s": 1548,
+    "afk_duration_s": 3177,
+    "machine_allocation_duration_s": 7824,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 3,
+      "line_changed": 135
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 109860,
+        "cache_read": 7930965,
+        "cache_write": 444995,
+        "output": 125877
+      },
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 65916,
+        "cache_read": 4758579,
+        "cache_write": 266997,
+        "output": 75526
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 43944,
+        "cache_read": 3172386,
+        "cache_write": 177998,
+        "output": 50351
+      }
+    ]
+  },
+  {
+    "id": "ses_0637",
+    "started_at": "2026-08-25T10:12:06+02:00",
+    "ended_at": "2026-08-25T14:21:13+02:00",
+    "member_id": "mem_dnavarro",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#271",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 2.56,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 14947,
+    "machine_allocation_duration_s": 14947,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 4,
+      "line_changed": 68
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 17837,
+        "cache_read": 426902,
+        "cache_write": 26708,
+        "output": 4928
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 9604,
+        "cache_read": 229871,
+        "cache_write": 14381,
+        "output": 2653
+      }
+    ]
+  },
+  {
+    "id": "ses_0646",
+    "started_at": "2026-08-26T00:17:04+02:00",
+    "ended_at": "2026-08-26T02:53:39+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#284",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 5.23,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 9395,
+    "machine_allocation_duration_s": 9395,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 4,
+      "line_changed": 48
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 58397,
+        "cache_read": 486435,
+        "cache_write": 63100,
+        "output": 14849
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 31445,
+        "cache_read": 261926,
+        "cache_write": 33977,
+        "output": 7996
+      }
+    ]
+  },
+  {
+    "id": "ses_0686",
+    "started_at": "2026-08-31T11:16:25+02:00",
+    "ended_at": "2026-08-31T12:21:02+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "refactor",
+    "task_key": "equilibrio/ml-scoring#295",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 17.26,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 3877,
+    "machine_allocation_duration_s": 3877,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 10,
+      "line_changed": 240
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 1168310,
+        "cache_read": 39538054,
+        "cache_write": 1203145,
+        "output": 368408
+      }
+    ]
+  }
+]

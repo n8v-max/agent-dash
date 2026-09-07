@@ -1,0 +1,724 @@
+[
+  {
+    "id": "ses_0017",
+    "started_at": "2026-04-22T08:31:06+02:00",
+    "ended_at": "2026-04-22T11:45:16+02:00",
+    "member_id": "mem_dnavarro",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#137",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 19,
+    "cost": 3.21,
+    "interactive_duration_s": 4808,
+    "idle_duration_s": 1824,
+    "afk_duration_s": 5018,
+    "machine_allocation_duration_s": 11650,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 3,
+      "line_changed": 30
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 8367,
+        "cache_read": 330682,
+        "cache_write": 17349,
+        "output": 6739
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 4505,
+        "cache_read": 178059,
+        "cache_write": 9342,
+        "output": 3629
+      }
+    ]
+  },
+  {
+    "id": "ses_0056",
+    "started_at": "2026-05-08T23:20:43+02:00",
+    "ended_at": "2026-05-09T00:30:46+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#142",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 1.91,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 4203,
+    "machine_allocation_duration_s": 4203,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 20,
+      "line_changed": 380
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 293300,
+        "cache_read": 9468502,
+        "cache_write": 606431,
+        "output": 176134
+      }
+    ]
+  },
+  {
+    "id": "ses_0130",
+    "started_at": "2026-05-29T17:13:56+02:00",
+    "ended_at": "2026-05-29T19:05:55+02:00",
+    "member_id": "mem_jdominguez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#145",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 4,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6719,
+    "machine_allocation_duration_s": 6719,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 17,
+      "line_changed": 782
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 37734,
+        "cache_read": 763102,
+        "cache_write": 61823,
+        "output": 24683
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 20318,
+        "cache_read": 410901,
+        "cache_write": 33289,
+        "output": 13291
+      }
+    ]
+  },
+  {
+    "id": "ses_0139",
+    "started_at": "2026-06-02T10:04:57+02:00",
+    "ended_at": "2026-06-02T12:51:33+02:00",
+    "member_id": "mem_jdominguez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#145",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 2.44,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 9996,
+    "machine_allocation_duration_s": 9996,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 13,
+      "line_changed": 351
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 732439,
+        "cache_read": 14354047,
+        "cache_write": 1186562,
+        "output": 343841
+      }
+    ]
+  },
+  {
+    "id": "ses_0237",
+    "started_at": "2026-06-26T19:58:33+02:00",
+    "ended_at": "2026-06-26T21:01:25+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#187",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 9,
+    "cost": 10.96,
+    "interactive_duration_s": 1529,
+    "idle_duration_s": 370,
+    "afk_duration_s": 1873,
+    "machine_allocation_duration_s": 3772,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 23,
+      "line_changed": 1012
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 147551,
+        "cache_read": 3122776,
+        "cache_write": 202233,
+        "output": 49657
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 79451,
+        "cache_read": 1681494,
+        "cache_write": 108895,
+        "output": 26738
+      }
+    ]
+  },
+  {
+    "id": "ses_0246",
+    "started_at": "2026-06-30T17:14:05+02:00",
+    "ended_at": "2026-06-30T18:36:36+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#187",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 5,
+    "cost": 2.96,
+    "interactive_duration_s": 2150,
+    "idle_duration_s": 855,
+    "afk_duration_s": 1946,
+    "machine_allocation_duration_s": 4951,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 8,
+      "file_changed": 21,
+      "line_changed": 798
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 276231,
+        "cache_read": 4545433,
+        "cache_write": 181487,
+        "output": 62721
+      }
+    ]
+  },
+  {
+    "id": "ses_0249",
+    "started_at": "2026-06-30T20:54:36+02:00",
+    "ended_at": "2026-06-30T23:14:08+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#192",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 27,
+    "cost": 0.78,
+    "interactive_duration_s": 2062,
+    "idle_duration_s": 2423,
+    "afk_duration_s": 3887,
+    "machine_allocation_duration_s": 8372,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 2,
+      "line_changed": 40
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 27048,
+        "cache_read": 368031,
+        "cache_write": 65806,
+        "output": 26619
+      }
+    ]
+  },
+  {
+    "id": "ses_0254",
+    "started_at": "2026-07-01T21:21:11+02:00",
+    "ended_at": "2026-07-01T23:15:16+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#196",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 6,
+    "cost": 1.48,
+    "interactive_duration_s": 3162,
+    "idle_duration_s": 2313,
+    "afk_duration_s": 1370,
+    "machine_allocation_duration_s": 6845,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 4,
+      "line_changed": 84
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 45402,
+        "cache_read": 1249942,
+        "cache_write": 125263,
+        "output": 25362
+      }
+    ]
+  },
+  {
+    "id": "ses_0257",
+    "started_at": "2026-07-02T15:20:18+02:00",
+    "ended_at": "2026-07-02T18:56:53+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#197",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 7,
+    "cost": 12,
+    "interactive_duration_s": 6236,
+    "idle_duration_s": 4420,
+    "afk_duration_s": 2339,
+    "machine_allocation_duration_s": 12995,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 18,
+      "line_changed": 486
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 869358,
+        "cache_read": 11013052,
+        "cache_write": 858330,
+        "output": 266358
+      }
+    ]
+  },
+  {
+    "id": "ses_0263",
+    "started_at": "2026-07-03T08:20:18+02:00",
+    "ended_at": "2026-07-03T10:06:03+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#197",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": true,
+    "prompt_count": 6,
+    "cost": 0.97,
+    "interactive_duration_s": 1738,
+    "idle_duration_s": 2878,
+    "afk_duration_s": 1729,
+    "machine_allocation_duration_s": 6345,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 8,
+      "line_changed": 88
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 18739,
+        "cache_read": 528519,
+        "cache_write": 37317,
+        "output": 11504
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 10090,
+        "cache_read": 284587,
+        "cache_write": 20093,
+        "output": 6195
+      }
+    ]
+  },
+  {
+    "id": "ses_0283",
+    "started_at": "2026-07-06T16:07:38+02:00",
+    "ended_at": "2026-07-06T18:28:04+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#208",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 9.15,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8426,
+    "machine_allocation_duration_s": 8426,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 5,
+      "line_changed": 225
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 287677,
+        "cache_read": 9344515,
+        "cache_write": 1225387,
+        "output": 294059
+      }
+    ]
+  },
+  {
+    "id": "ses_0289",
+    "started_at": "2026-07-07T09:53:38+02:00",
+    "ended_at": "2026-07-07T11:05:57+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#212",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 26,
+    "cost": 1.35,
+    "interactive_duration_s": 860,
+    "idle_duration_s": 1570,
+    "afk_duration_s": 1909,
+    "machine_allocation_duration_s": 4339,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 0,
+      "line_changed": 0
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 97950,
+        "cache_read": 2934546,
+        "cache_write": 137759,
+        "output": 85056
+      }
+    ]
+  },
+  {
+    "id": "ses_0301",
+    "started_at": "2026-07-08T12:18:44+02:00",
+    "ended_at": "2026-07-08T15:40:56+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#215",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 5.81,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 12132,
+    "machine_allocation_duration_s": 12132,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 5,
+      "line_changed": 110
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 258224,
+        "cache_read": 6136542,
+        "cache_write": 378944,
+        "output": 210354
+      }
+    ]
+  },
+  {
+    "id": "ses_0325",
+    "started_at": "2026-07-13T00:20:15+02:00",
+    "ended_at": "2026-07-13T07:04:34+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#220",
+    "execution_mode": "headless",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 3.1,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 24259,
+    "machine_allocation_duration_s": 24259,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 5,
+      "file_changed": 8,
+      "line_changed": 376
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 177673,
+        "cache_read": 4958401,
+        "cache_write": 227703,
+        "output": 60083
+      }
+    ]
+  },
+  {
+    "id": "ses_0353",
+    "started_at": "2026-07-16T23:52:06+02:00",
+    "ended_at": "2026-07-17T01:42:55+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#223",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 2.02,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6649,
+    "machine_allocation_duration_s": 6649,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 6,
+      "line_changed": 96
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 29057,
+        "cache_read": 364389,
+        "cache_write": 43482,
+        "output": 12271
+      }
+    ]
+  },
+  {
+    "id": "ses_0396",
+    "started_at": "2026-07-27T13:42:56+02:00",
+    "ended_at": "2026-07-27T16:30:31+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#223",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 14,
+    "cost": 2.8,
+    "interactive_duration_s": 2037,
+    "idle_duration_s": 2022,
+    "afk_duration_s": 5996,
+    "machine_allocation_duration_s": 10055,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 4,
+      "line_changed": 56
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 17543,
+        "cache_read": 358008,
+        "cache_write": 38321,
+        "output": 8344
+      }
+    ]
+  },
+  {
+    "id": "ses_0432",
+    "started_at": "2026-07-30T19:27:56+02:00",
+    "ended_at": "2026-07-30T21:12:37+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#238",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 14,
+    "cost": 6.63,
+    "interactive_duration_s": 3441,
+    "idle_duration_s": 1628,
+    "afk_duration_s": 1212,
+    "machine_allocation_duration_s": 6281,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 6,
+      "line_changed": 222
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 35652,
+        "cache_read": 2316776,
+        "cache_write": 137673,
+        "output": 49088
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 19197,
+        "cache_read": 1247494,
+        "cache_write": 74131,
+        "output": 26432
+      }
+    ]
+  },
+  {
+    "id": "ses_0549",
+    "started_at": "2026-08-13T19:08:15+02:00",
+    "ended_at": "2026-08-13T21:08:59+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#255",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 22,
+    "cost": 23.3,
+    "interactive_duration_s": 3539,
+    "idle_duration_s": 1642,
+    "afk_duration_s": 2063,
+    "machine_allocation_duration_s": 7244,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 6,
+      "line_changed": 120
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 848247,
+        "cache_read": 24987304,
+        "cache_write": 2351618,
+        "output": 891284
+      }
+    ]
+  },
+  {
+    "id": "ses_0568",
+    "started_at": "2026-08-17T12:48:19+02:00",
+    "ended_at": "2026-08-17T14:13:44+02:00",
+    "member_id": "mem_sibanez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#247",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 13,
+    "cost": 4.73,
+    "interactive_duration_s": 1261,
+    "idle_duration_s": 1311,
+    "afk_duration_s": 2553,
+    "machine_allocation_duration_s": 5125,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 4,
+      "line_changed": 44
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 223417,
+        "cache_read": 3875650,
+        "cache_write": 141898,
+        "output": 144167
+      }
+    ]
+  },
+  {
+    "id": "ses_0633",
+    "started_at": "2026-08-25T01:26:20+02:00",
+    "ended_at": "2026-08-25T03:02:08+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#280",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 10,
+    "cost": 2.38,
+    "interactive_duration_s": 1730,
+    "idle_duration_s": 1323,
+    "afk_duration_s": 2695,
+    "machine_allocation_duration_s": 5748,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 6,
+      "line_changed": 78
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 56139,
+        "cache_read": 1225106,
+        "cache_write": 96207,
+        "output": 27743
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 30228,
+        "cache_read": 659673,
+        "cache_write": 51803,
+        "output": 14938
+      }
+    ]
+  }
+]

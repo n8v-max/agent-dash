@@ -1,0 +1,42 @@
+// The seeded fixture generator (R-T20). Run it with `pnpm fixtures:generate`; its output is
+// committed, and CI regenerates into a temp directory and diffs (R-T21 / T-F9).
+//
+//   node src/fixtures/generate.mts [--out <directory>]
+//
+// Everything downstream of the seed is deterministic: one PRNG instance is threaded through
+// every stage in a fixed order, so the same seed produces byte-identical files.
+
+import { fileURLToPath } from "node:url";
+import { planCells } from "./allocation.mts";
+import { assignCells } from "./assign.mts";
+import { assertFixture } from "./invariants.mts";
+import { mintTasks } from "./issues.mts";
+import { members } from "./people.mts";
+import { mulberry32 } from "./rng.mts";
+import { buildSessions } from "./rows.mts";
+import { generateSlots } from "./schedule.mts";
+import { SEED } from "./targets.mts";
+import { writeFixture } from "./write.mts";
+import { planTasks } from "./tasks.mts";
+
+const outputDirectory = (argv: readonly string[]): string => {
+  const flag = argv.indexOf("--out");
+  if (flag !== -1 && argv[flag + 1] !== undefined) return argv[flag + 1];
+  return fileURLToPath(new URL("./data", import.meta.url));
+};
+
+const main = (): void => {
+  const rng = mulberry32(SEED);
+  const slots = generateSlots(rng, members);
+  const { tasks: plannedTasks } = planTasks(rng, members, slots);
+  const plan = planCells(slots.length);
+  const assigned = assignCells(rng, members, plannedTasks, plan);
+  const tasks = mintTasks(rng, assigned);
+  const sessions = buildSessions(rng, members, assigned, tasks);
+  const report = assertFixture({ sessions, tasks });
+  const directory = outputDirectory(process.argv.slice(2));
+  const files = writeFixture(directory, { sessions, tasks });
+  process.stdout.write(`${report}\nwrote ${files} files to ${directory}\n`);
+};
+
+main();

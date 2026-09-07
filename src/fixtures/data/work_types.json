@@ -1,0 +1,57 @@
+[
+  {
+    "key": "implementation",
+    "name": "Implementation",
+    "source": "vendored",
+    "acceptance_criterion": "A pull request was published",
+    "artefact_kinds": [
+      "pull_request",
+      "commit",
+      "file_changed",
+      "line_changed"
+    ]
+  },
+  {
+    "key": "bugfix",
+    "name": "Bug fix",
+    "source": "vendored",
+    "acceptance_criterion": "A pull request was published",
+    "artefact_kinds": [
+      "pull_request",
+      "commit",
+      "file_changed",
+      "line_changed"
+    ]
+  },
+  {
+    "key": "refactor",
+    "name": "Refactor",
+    "source": "user_tuned",
+    "acceptance_criterion": "A pull request was published",
+    "artefact_kinds": [
+      "pull_request",
+      "commit",
+      "file_changed",
+      "line_changed"
+    ]
+  },
+  {
+    "key": "review",
+    "name": "Review",
+    "source": "vendored",
+    "acceptance_criterion": "A review was submitted with an outcome",
+    "artefact_kinds": [
+      "pr_comment"
+    ]
+  },
+  {
+    "key": "deploy",
+    "name": "Deploy",
+    "source": "api_provided",
+    "acceptance_criterion": "A commit landed on the default branch",
+    "artefact_kinds": [
+      "commit",
+      "pr_comment"
+    ]
+  }
+]

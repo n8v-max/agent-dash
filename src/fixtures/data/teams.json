@@ -1,0 +1,58 @@
+[
+  {
+    "id": "team_platform",
+    "github_id": 4820011,
+    "slug": "platform",
+    "name": "Platform",
+    "member_ids": [
+      "mem_ncastells",
+      "mem_aruiz",
+      "mem_mpena",
+      "mem_jdominguez",
+      "mem_sibanez",
+      "mem_dnavarro"
+    ]
+  },
+  {
+    "id": "team_product",
+    "github_id": 4820012,
+    "slug": "product",
+    "name": "Product",
+    "member_ids": [
+      "mem_mpena",
+      "mem_lbermejo",
+      "mem_ccruz",
+      "mem_pherrera",
+      "mem_esaez",
+      "mem_ngallego"
+    ]
+  },
+  {
+    "id": "team_data",
+    "github_id": 4820013,
+    "slug": "data",
+    "name": "Data",
+    "member_ids": [
+      "mem_esaez",
+      "mem_ivazquez",
+      "mem_rmarin",
+      "mem_blorenzo",
+      "mem_aquintana",
+      "mem_hcamps"
+    ]
+  },
+  {
+    "id": "team_infrastructure",
+    "github_id": 4820014,
+    "slug": "infrastructure",
+    "name": "Infrastructure",
+    "member_ids": [
+      "mem_sibanez",
+      "mem_aquintana",
+      "mem_sroldan",
+      "mem_tferran",
+      "mem_deploybot",
+      "mem_nightlybot"
+    ]
+  }
+]

@@ -1,0 +1,1720 @@
+[
+  {
+    "id": "ses_0001",
+    "started_at": "2026-04-12T18:53:52+02:00",
+    "ended_at": "2026-04-12T22:42:55+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#191",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 8.23,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 13743,
+    "machine_allocation_duration_s": 13743,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 6,
+      "line_changed": 252
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 94073,
+        "cache_read": 1837707,
+        "cache_write": 173376,
+        "output": 37587
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 50654,
+        "cache_read": 989534,
+        "cache_write": 93356,
+        "output": 20239
+      }
+    ]
+  },
+  {
+    "id": "ses_0007",
+    "started_at": "2026-04-15T10:37:01+02:00",
+    "ended_at": "2026-04-15T13:23:00+02:00",
+    "member_id": "mem_ccruz",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#201",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 4.67,
+    "interactive_duration_s": 5205,
+    "idle_duration_s": 1822,
+    "afk_duration_s": 2932,
+    "machine_allocation_duration_s": 9959,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 7,
+      "line_changed": 322
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 121256,
+        "cache_read": 4009016,
+        "cache_write": 448935,
+        "output": 53619
+      }
+    ]
+  },
+  {
+    "id": "ses_0018",
+    "started_at": "2026-04-22T09:25:04+02:00",
+    "ended_at": "2026-04-22T12:06:35+02:00",
+    "member_id": "mem_ccruz",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#201",
+    "execution_mode": "headless",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 2.48,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 9691,
+    "machine_allocation_duration_s": 9691,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 8,
+      "file_changed": 17,
+      "line_changed": 374
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 53786,
+        "cache_read": 1259006,
+        "cache_write": 204071,
+        "output": 39607
+      }
+    ]
+  },
+  {
+    "id": "ses_0033",
+    "started_at": "2026-05-01T13:19:33+02:00",
+    "ended_at": "2026-05-01T15:27:46+02:00",
+    "member_id": "mem_jdominguez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#211",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 1.09,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 7693,
+    "machine_allocation_duration_s": 7693,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 1,
+      "line_changed": 36
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 39725,
+        "cache_read": 586474,
+        "cache_write": 64242,
+        "output": 30167
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 21390,
+        "cache_read": 315793,
+        "cache_write": 34592,
+        "output": 16243
+      }
+    ]
+  },
+  {
+    "id": "ses_0075",
+    "started_at": "2026-05-18T11:07:49+02:00",
+    "ended_at": "2026-05-18T12:45:57+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#224",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 24,
+    "cost": 1.22,
+    "interactive_duration_s": 1680,
+    "idle_duration_s": 1531,
+    "afk_duration_s": 2677,
+    "machine_allocation_duration_s": 5888,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 1,
+      "line_changed": 40
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 88401,
+        "cache_read": 1428810,
+        "cache_write": 155023,
+        "output": 43694
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 47601,
+        "cache_read": 769359,
+        "cache_write": 83474,
+        "output": 23528
+      }
+    ]
+  },
+  {
+    "id": "ses_0087",
+    "started_at": "2026-05-20T13:19:32+02:00",
+    "ended_at": "2026-05-20T15:14:27+02:00",
+    "member_id": "mem_dnavarro",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#226",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 20,
+    "cost": 1.83,
+    "interactive_duration_s": 1184,
+    "idle_duration_s": 3787,
+    "afk_duration_s": 1924,
+    "machine_allocation_duration_s": 6895,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 3,
+      "line_changed": 45
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 72665,
+        "cache_read": 1291467,
+        "cache_write": 150274,
+        "output": 47856
+      }
+    ]
+  },
+  {
+    "id": "ses_0150",
+    "started_at": "2026-06-04T13:40:46+02:00",
+    "ended_at": "2026-06-04T17:05:40+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#255",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 5,
+    "cost": 1.5,
+    "interactive_duration_s": 6850,
+    "idle_duration_s": 2206,
+    "afk_duration_s": 3238,
+    "machine_allocation_duration_s": 12294,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 9,
+      "line_changed": 432
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 28042,
+        "cache_read": 735369,
+        "cache_write": 44228,
+        "output": 16001
+      }
+    ]
+  },
+  {
+    "id": "ses_0153",
+    "started_at": "2026-06-05T10:50:24+02:00",
+    "ended_at": "2026-06-05T12:28:09+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#257",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 7,
+    "cost": 11.59,
+    "interactive_duration_s": 2078,
+    "idle_duration_s": 1398,
+    "afk_duration_s": 2389,
+    "machine_allocation_duration_s": 5865,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 2,
+      "line_changed": 96
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 538055,
+        "cache_read": 13844761,
+        "cache_write": 1489855,
+        "output": 353406
+      }
+    ]
+  },
+  {
+    "id": "ses_0160",
+    "started_at": "2026-06-08T20:53:41+02:00",
+    "ended_at": "2026-06-08T22:27:31+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#260",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 17,
+    "cost": 84.25,
+    "interactive_duration_s": 3414,
+    "idle_duration_s": 1088,
+    "afk_duration_s": 1128,
+    "machine_allocation_duration_s": 5630,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 8,
+      "line_changed": 128
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 1490158,
+        "cache_read": 22399074,
+        "cache_write": 1338930,
+        "output": 594953
+      }
+    ]
+  },
+  {
+    "id": "ses_0187",
+    "started_at": "2026-06-15T18:54:29+02:00",
+    "ended_at": "2026-06-15T23:18:53+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#273",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 1.72,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 15864,
+    "machine_allocation_duration_s": 15864,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 12,
+      "line_changed": 528
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 20330,
+        "cache_read": 534811,
+        "cache_write": 45238,
+        "output": 13717
+      }
+    ]
+  },
+  {
+    "id": "ses_0210",
+    "started_at": "2026-06-19T18:46:30+02:00",
+    "ended_at": "2026-06-19T20:14:34+02:00",
+    "member_id": "mem_esaez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#268",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 2.39,
+    "interactive_duration_s": 1546,
+    "idle_duration_s": 987,
+    "afk_duration_s": 2751,
+    "machine_allocation_duration_s": 5284,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 4,
+      "line_changed": 88
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 78918,
+        "cache_read": 1600704,
+        "cache_write": 114622,
+        "output": 30057
+      }
+    ]
+  },
+  {
+    "id": "ses_0248",
+    "started_at": "2026-06-30T18:34:28+02:00",
+    "ended_at": "2026-06-30T20:40:17+02:00",
+    "member_id": "mem_ccruz",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#281",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 53,
+    "cost": 12.7,
+    "interactive_duration_s": 2516,
+    "idle_duration_s": 2555,
+    "afk_duration_s": 2478,
+    "machine_allocation_duration_s": 7549,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 3,
+      "file_changed": 8,
+      "line_changed": 288
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 619166,
+        "cache_read": 19064283,
+        "cache_write": 1217211,
+        "output": 366279
+      }
+    ]
+  },
+  {
+    "id": "ses_0260",
+    "started_at": "2026-07-02T18:49:16+02:00",
+    "ended_at": "2026-07-02T20:49:12+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#285",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 19,
+    "cost": 1.84,
+    "interactive_duration_s": 943,
+    "idle_duration_s": 3804,
+    "afk_duration_s": 2449,
+    "machine_allocation_duration_s": 7196,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 3,
+      "line_changed": 99
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 114662,
+        "cache_read": 2063404,
+        "cache_write": 234630,
+        "output": 48588
+      }
+    ]
+  },
+  {
+    "id": "ses_0312",
+    "started_at": "2026-07-10T08:15:03+02:00",
+    "ended_at": "2026-07-10T09:36:30+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#307",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 13,
+    "cost": 0.66,
+    "interactive_duration_s": 1219,
+    "idle_duration_s": 2204,
+    "afk_duration_s": 1464,
+    "machine_allocation_duration_s": 4887,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 5,
+      "file_changed": 14,
+      "line_changed": 308
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 81310,
+        "cache_read": 1606151,
+        "cache_write": 137660,
+        "output": 74645
+      },
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 43783,
+        "cache_read": 864851,
+        "cache_write": 74125,
+        "output": 40193
+      }
+    ]
+  },
+  {
+    "id": "ses_0326",
+    "started_at": "2026-07-13T01:01:24+02:00",
+    "ended_at": "2026-07-13T03:23:51+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#310",
+    "execution_mode": "headless",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 5.53,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8547,
+    "machine_allocation_duration_s": 8547,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 24,
+      "line_changed": 528
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 152751,
+        "cache_read": 6476395,
+        "cache_write": 438166,
+        "output": 176528
+      }
+    ]
+  },
+  {
+    "id": "ses_0365",
+    "started_at": "2026-07-20T20:17:15+02:00",
+    "ended_at": "2026-07-20T22:46:43+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#317",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 13,
+    "cost": 1.64,
+    "interactive_duration_s": 3292,
+    "idle_duration_s": 2628,
+    "afk_duration_s": 3048,
+    "machine_allocation_duration_s": 8968,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 10,
+      "line_changed": 450
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 43555,
+        "cache_read": 1056633,
+        "cache_write": 117512,
+        "output": 30242
+      }
+    ]
+  },
+  {
+    "id": "ses_0397",
+    "started_at": "2026-07-27T13:50:15+02:00",
+    "ended_at": "2026-07-27T18:34:37+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#329",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 5.38,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 17062,
+    "machine_allocation_duration_s": 17062,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 3,
+      "file_changed": 6,
+      "line_changed": 132
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 190503,
+        "cache_read": 8137280,
+        "cache_write": 417210,
+        "output": 90459
+      }
+    ]
+  },
+  {
+    "id": "ses_0414",
+    "started_at": "2026-07-28T22:18:13+02:00",
+    "ended_at": "2026-07-28T23:45:18+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#340",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 24,
+    "cost": 9.63,
+    "interactive_duration_s": 1625,
+    "idle_duration_s": 1750,
+    "afk_duration_s": 1850,
+    "machine_allocation_duration_s": 5225,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 19,
+      "line_changed": 646
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 330918,
+        "cache_read": 9266970,
+        "cache_write": 518521,
+        "output": 343507
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 178186,
+        "cache_read": 4989907,
+        "cache_write": 279204,
+        "output": 184966
+      }
+    ]
+  },
+  {
+    "id": "ses_0421",
+    "started_at": "2026-07-29T15:18:13+02:00",
+    "ended_at": "2026-07-29T17:02:24+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#340",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": true,
+    "prompt_count": 24,
+    "cost": 12.14,
+    "interactive_duration_s": 1583,
+    "idle_duration_s": 1645,
+    "afk_duration_s": 3023,
+    "machine_allocation_duration_s": 6251,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 7,
+      "line_changed": 259
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 363459,
+        "cache_read": 14731755,
+        "cache_write": 1017784,
+        "output": 133446
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 195709,
+        "cache_read": 7932483,
+        "cache_write": 548038,
+        "output": 71855
+      }
+    ]
+  },
+  {
+    "id": "ses_0444",
+    "started_at": "2026-08-01T15:13:08+02:00",
+    "ended_at": "2026-08-01T16:58:13+02:00",
+    "member_id": "mem_rmarin",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#348",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 2.38,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6305,
+    "machine_allocation_duration_s": 6305,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 10,
+      "line_changed": 290
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 47121,
+        "cache_read": 2982579,
+        "cache_write": 192509,
+        "output": 65458
+      }
+    ]
+  },
+  {
+    "id": "ses_0465",
+    "started_at": "2026-08-04T18:59:50+02:00",
+    "ended_at": "2026-08-04T21:22:44+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#362",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 0.75,
+    "interactive_duration_s": 4194,
+    "idle_duration_s": 3103,
+    "afk_duration_s": 1277,
+    "machine_allocation_duration_s": 8574,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 24,
+      "line_changed": 336
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 52885,
+        "cache_read": 2164200,
+        "cache_write": 129107,
+        "output": 43257
+      }
+    ]
+  },
+  {
+    "id": "ses_0490",
+    "started_at": "2026-08-07T10:45:56+02:00",
+    "ended_at": "2026-08-07T11:43:28+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#381",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 0.36,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 3452,
+    "machine_allocation_duration_s": 3452,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 24,
+      "line_changed": 480
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 1695,
+        "cache_read": 46932,
+        "cache_write": 5444,
+        "output": 2135
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 913,
+        "cache_read": 25271,
+        "cache_write": 2932,
+        "output": 1150
+      }
+    ]
+  },
+  {
+    "id": "ses_0496",
+    "started_at": "2026-08-07T14:16:43+02:00",
+    "ended_at": "2026-08-07T16:16:34+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#386",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 7,
+    "cost": 4.52,
+    "interactive_duration_s": 3804,
+    "idle_duration_s": 2464,
+    "afk_duration_s": 923,
+    "machine_allocation_duration_s": 7191,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 7,
+      "line_changed": 42
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 41828,
+        "cache_read": 778027,
+        "cache_write": 104696,
+        "output": 27152
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 22523,
+        "cache_read": 418937,
+        "cache_write": 56374,
+        "output": 14621
+      }
+    ]
+  },
+  {
+    "id": "ses_0504",
+    "started_at": "2026-08-08T16:43:55+02:00",
+    "ended_at": "2026-08-08T18:50:16+02:00",
+    "member_id": "mem_ccruz",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#374",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 15,
+    "cost": 0.75,
+    "interactive_duration_s": 4002,
+    "idle_duration_s": 3071,
+    "afk_duration_s": 508,
+    "machine_allocation_duration_s": 7581,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 20,
+      "line_changed": 140
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 51951,
+        "cache_read": 574985,
+        "cache_write": 129107,
+        "output": 26361
+      }
+    ]
+  },
+  {
+    "id": "ses_0521",
+    "started_at": "2026-08-10T18:11:18+02:00",
+    "ended_at": "2026-08-10T19:44:59+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#370",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 2.79,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 5621,
+    "machine_allocation_duration_s": 5621,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 7,
+      "line_changed": 315
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 46515,
+        "cache_read": 1018826,
+        "cache_write": 79233,
+        "output": 33738
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 27909,
+        "cache_read": 611295,
+        "cache_write": 47540,
+        "output": 20242
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 18606,
+        "cache_read": 407530,
+        "cache_write": 31693,
+        "output": 13495
+      }
+    ]
+  },
+  {
+    "id": "ses_0542",
+    "started_at": "2026-08-13T09:11:22+02:00",
+    "ended_at": "2026-08-13T11:38:14+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#404",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 15,
+    "cost": 3.75,
+    "interactive_duration_s": 2178,
+    "idle_duration_s": 1123,
+    "afk_duration_s": 5511,
+    "machine_allocation_duration_s": 8812,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 9,
+      "line_changed": 234
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 136366,
+        "cache_read": 4784650,
+        "cache_write": 414542,
+        "output": 75334
+      }
+    ]
+  },
+  {
+    "id": "ses_0557",
+    "started_at": "2026-08-14T13:21:19+02:00",
+    "ended_at": "2026-08-14T15:35:28+02:00",
+    "member_id": "mem_esaez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#407",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 3.45,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8049,
+    "machine_allocation_duration_s": 8049,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 7,
+      "line_changed": 56
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 100530,
+        "cache_read": 882823,
+        "cache_write": 87141,
+        "output": 34169
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 54131,
+        "cache_read": 475366,
+        "cache_write": 46922,
+        "output": 18398
+      }
+    ]
+  },
+  {
+    "id": "ses_0560",
+    "started_at": "2026-08-14T17:34:03+02:00",
+    "ended_at": "2026-08-14T19:53:51+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#408",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 10,
+    "cost": 4.04,
+    "interactive_duration_s": 5368,
+    "idle_duration_s": 632,
+    "afk_duration_s": 2388,
+    "machine_allocation_duration_s": 8388,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 22,
+      "line_changed": 308
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 168717,
+        "cache_read": 5055557,
+        "cache_write": 416418,
+        "output": 95637
+      }
+    ]
+  },
+  {
+    "id": "ses_0572",
+    "started_at": "2026-08-17T17:52:23+02:00",
+    "ended_at": "2026-08-17T19:52:43+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#417",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 8,
+    "cost": 33.49,
+    "interactive_duration_s": 1478,
+    "idle_duration_s": 706,
+    "afk_duration_s": 5036,
+    "machine_allocation_duration_s": 7220,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 8,
+      "file_changed": 21,
+      "line_changed": 672
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 284553,
+        "cache_read": 8836344,
+        "cache_write": 617690,
+        "output": 167876
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 170731,
+        "cache_read": 5301806,
+        "cache_write": 370614,
+        "output": 100725
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 113821,
+        "cache_read": 3534537,
+        "cache_write": 247076,
+        "output": 67150
+      }
+    ]
+  },
+  {
+    "id": "ses_0574",
+    "started_at": "2026-08-18T09:27:32+02:00",
+    "ended_at": "2026-08-18T11:26:32+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#425",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 6,
+    "cost": 1.67,
+    "interactive_duration_s": 3194,
+    "idle_duration_s": 1391,
+    "afk_duration_s": 2555,
+    "machine_allocation_duration_s": 7140,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 5,
+      "file_changed": 5,
+      "line_changed": 210
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 46071,
+        "cache_read": 953464,
+        "cache_write": 173335,
+        "output": 28133
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 24807,
+        "cache_read": 513403,
+        "cache_write": 93334,
+        "output": 15149
+      }
+    ]
+  },
+  {
+    "id": "ses_0582",
+    "started_at": "2026-08-18T13:52:23+02:00",
+    "ended_at": "2026-08-18T15:25:01+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#417",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": true,
+    "prompt_count": 6,
+    "cost": 4.69,
+    "interactive_duration_s": 1571,
+    "idle_duration_s": 1669,
+    "afk_duration_s": 2318,
+    "machine_allocation_duration_s": 5558,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 6,
+      "line_changed": 36
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 169907,
+        "cache_read": 5857241,
+        "cache_write": 752684,
+        "output": 83789
+      }
+    ]
+  },
+  {
+    "id": "ses_0584",
+    "started_at": "2026-08-18T14:54:56+02:00",
+    "ended_at": "2026-08-18T17:24:27+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#432",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 17,
+    "cost": 15.63,
+    "interactive_duration_s": 3682,
+    "idle_duration_s": 3359,
+    "afk_duration_s": 1930,
+    "machine_allocation_duration_s": 8971,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 4,
+      "file_changed": 22,
+      "line_changed": 418
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 539329,
+        "cache_read": 20856965,
+        "cache_write": 2256851,
+        "output": 399268
+      }
+    ]
+  },
+  {
+    "id": "ses_0586",
+    "started_at": "2026-08-18T15:48:41+02:00",
+    "ended_at": "2026-08-18T17:35:40+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#425",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 22,
+    "cost": 2.34,
+    "interactive_duration_s": 2049,
+    "idle_duration_s": 961,
+    "afk_duration_s": 3409,
+    "machine_allocation_duration_s": 6419,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 9,
+      "line_changed": 378
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 6947,
+        "cache_read": 312509,
+        "cache_write": 16725,
+        "output": 7915
+      }
+    ]
+  },
+  {
+    "id": "ses_0615",
+    "started_at": "2026-08-21T10:13:38+02:00",
+    "ended_at": "2026-08-21T12:36:10+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#438",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 31,
+    "cost": 5.69,
+    "interactive_duration_s": 2631,
+    "idle_duration_s": 1498,
+    "afk_duration_s": 4423,
+    "machine_allocation_duration_s": 8552,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 5,
+      "line_changed": 105
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 142415,
+        "cache_read": 5640335,
+        "cache_write": 248572,
+        "output": 80208
+      }
+    ]
+  },
+  {
+    "id": "ses_0653",
+    "started_at": "2026-08-26T13:35:30+02:00",
+    "ended_at": "2026-08-26T15:26:12+02:00",
+    "member_id": "mem_sibanez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#460",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 4,
+    "cost": 4.6,
+    "interactive_duration_s": 1168,
+    "idle_duration_s": 2831,
+    "afk_duration_s": 2643,
+    "machine_allocation_duration_s": 6642,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 1,
+      "line_changed": 48
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 181485,
+        "cache_read": 5340474,
+        "cache_write": 284387,
+        "output": 104885
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 97722,
+        "cache_read": 2875640,
+        "cache_write": 153132,
+        "output": 56477
+      }
+    ]
+  },
+  {
+    "id": "ses_0662",
+    "started_at": "2026-08-27T12:46:49+02:00",
+    "ended_at": "2026-08-27T15:51:28+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#464",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 6,
+    "cost": 2.12,
+    "interactive_duration_s": 3612,
+    "idle_duration_s": 4339,
+    "afk_duration_s": 3128,
+    "machine_allocation_duration_s": 11079,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 14,
+      "line_changed": 182
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 70146,
+        "cache_read": 1689226,
+        "cache_write": 103661,
+        "output": 44091
+      },
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 37771,
+        "cache_read": 909583,
+        "cache_write": 55818,
+        "output": 23742
+      }
+    ]
+  },
+  {
+    "id": "ses_0669",
+    "started_at": "2026-08-28T13:08:28+02:00",
+    "ended_at": "2026-08-28T14:48:07+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#475",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 29,
+    "cost": 2.33,
+    "interactive_duration_s": 1390,
+    "idle_duration_s": 2750,
+    "afk_duration_s": 1839,
+    "machine_allocation_duration_s": 5979,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 11,
+      "line_changed": 110
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 26575,
+        "cache_read": 475022,
+        "cache_write": 29696,
+        "output": 11150
+      }
+    ]
+  },
+  {
+    "id": "ses_0691",
+    "started_at": "2026-08-31T18:43:57+02:00",
+    "ended_at": "2026-08-31T21:06:32+02:00",
+    "member_id": "mem_ccruz",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#485",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 8,
+    "cost": 2.34,
+    "interactive_duration_s": 2487,
+    "idle_duration_s": 1973,
+    "afk_duration_s": 4095,
+    "machine_allocation_duration_s": 8555,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 4,
+      "line_changed": 108
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 28692,
+        "cache_read": 1191483,
+        "cache_write": 42856,
+        "output": 18633
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 15450,
+        "cache_read": 641568,
+        "cache_write": 23077,
+        "output": 10033
+      }
+    ]
+  },
+  {
+    "id": "ses_0706",
+    "started_at": "2026-09-01T16:40:31+02:00",
+    "ended_at": "2026-09-01T19:15:33+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#499",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 21,
+    "cost": 3.25,
+    "interactive_duration_s": 3185,
+    "idle_duration_s": 3794,
+    "afk_duration_s": 2323,
+    "machine_allocation_duration_s": 9302,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 23,
+      "line_changed": 897
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 38815,
+        "cache_read": 949694,
+        "cache_write": 75843,
+        "output": 46959
+      }
+    ]
+  },
+  {
+    "id": "ses_0718",
+    "started_at": "2026-09-03T22:39:34+02:00",
+    "ended_at": "2026-09-03T23:47:09+02:00",
+    "member_id": "mem_dnavarro",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#502",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 12.96,
+    "interactive_duration_s": 1164,
+    "idle_duration_s": 2011,
+    "afk_duration_s": 880,
+    "machine_allocation_duration_s": 4055,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 6,
+      "line_changed": 126
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 1365405,
+        "cache_read": 24013737,
+        "cache_write": 865950,
+        "output": 275112
+      }
+    ]
+  },
+  {
+    "id": "ses_0720",
+    "started_at": "2026-09-04T00:17:46+02:00",
+    "ended_at": "2026-09-04T02:56:38+02:00",
+    "member_id": "mem_esaez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#513",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 16,
+    "cost": 4.23,
+    "interactive_duration_s": 5502,
+    "idle_duration_s": 2151,
+    "afk_duration_s": 1879,
+    "machine_allocation_duration_s": 9532,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 8,
+      "file_changed": 14,
+      "line_changed": 434
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 98939,
+        "cache_read": 2305875,
+        "cache_write": 196138,
+        "output": 69943
+      }
+    ]
+  },
+  {
+    "id": "ses_0727",
+    "started_at": "2026-09-04T19:38:42+02:00",
+    "ended_at": "2026-09-04T22:07:30+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#518",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 3.96,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 8928,
+    "machine_allocation_duration_s": 8928,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 5,
+      "line_changed": 180
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 55009,
+        "cache_read": 1173206,
+        "cache_write": 117495,
+        "output": 41990
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 29620,
+        "cache_read": 631727,
+        "cache_write": 63266,
+        "output": 22610
+      }
+    ]
+  },
+  {
+    "id": "ses_0731",
+    "started_at": "2026-09-05T17:26:48+02:00",
+    "ended_at": "2026-09-05T19:01:07+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#519",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 11,
+    "cost": 2.46,
+    "interactive_duration_s": 1339,
+    "idle_duration_s": 1044,
+    "afk_duration_s": 3276,
+    "machine_allocation_duration_s": 5659,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 19,
+      "line_changed": 114
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 20061,
+        "cache_read": 875406,
+        "cache_write": 84079,
+        "output": 15218
+      }
+    ]
+  },
+  {
+    "id": "ses_0732",
+    "started_at": "2026-09-05T18:39:30+02:00",
+    "ended_at": "2026-09-05T20:34:38+02:00",
+    "member_id": "mem_aquintana",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#520",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 13,
+    "cost": 22.96,
+    "interactive_duration_s": 1607,
+    "idle_duration_s": 1240,
+    "afk_duration_s": 4061,
+    "machine_allocation_duration_s": 6908,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 3,
+      "file_changed": 13,
+      "line_changed": 91
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 415926,
+        "cache_read": 4920751,
+        "cache_write": 459603,
+        "output": 205598
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 249555,
+        "cache_read": 2952451,
+        "cache_write": 275762,
+        "output": 123358
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 166370,
+        "cache_read": 1968301,
+        "cache_write": 183841,
+        "output": 82239
+      }
+    ]
+  },
+  {
+    "id": "ses_0743",
+    "started_at": "2026-09-07T17:39:52+02:00",
+    "ended_at": "2026-09-07T19:19:36+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#533",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 48.39,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 5984,
+    "machine_allocation_duration_s": 5984,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 2,
+      "line_changed": 66
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 1091229,
+        "cache_read": 35198432,
+        "cache_write": 2888959,
+        "output": 1240451
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 654737,
+        "cache_read": 21119059,
+        "cache_write": 1733375,
+        "output": 744270
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 436491,
+        "cache_read": 14079373,
+        "cache_write": 1155583,
+        "output": 496180
+      }
+    ]
+  },
+  {
+    "id": "ses_0757",
+    "started_at": "2026-09-08T23:28:43+02:00",
+    "ended_at": "2026-09-09T01:15:23+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_mobile_app",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/mobile-app#558",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 8,
+    "cost": 3.35,
+    "interactive_duration_s": 1720,
+    "idle_duration_s": 2453,
+    "afk_duration_s": 2227,
+    "machine_allocation_duration_s": 6400,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 1,
+      "line_changed": 9
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 66711,
+        "cache_read": 1440317,
+        "cache_write": 149508,
+        "output": 42126
+      }
+    ]
+  }
+]

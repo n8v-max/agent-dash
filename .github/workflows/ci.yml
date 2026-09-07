@@ -41,6 +41,13 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # T-F9 / R-T21 / R-T35 — the committed fixture must still match the seed. This is the
+      # only place the generator runs in CI; every other test reads the committed JSON.
+      - name: Fixture output matches the seed
+        run: |
+          pnpm fixtures:generate --out "${RUNNER_TEMP}/fixtures"
+          diff -r src/fixtures/data "${RUNNER_TEMP}/fixtures"
+
       - name: Unit tests with coverage
         run: pnpm test:coverage
 

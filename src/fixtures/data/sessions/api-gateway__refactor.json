@@ -1,0 +1,1079 @@
+[
+  {
+    "id": "ses_0009",
+    "started_at": "2026-04-16T14:18:14+02:00",
+    "ended_at": "2026-04-16T20:49:05+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#461",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 7.83,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 23451,
+    "machine_allocation_duration_s": 23451,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 3,
+      "line_changed": 54
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 543,
+        "cache_read": 14536,
+        "cache_write": 879,
+        "output": 216
+      }
+    ]
+  },
+  {
+    "id": "ses_0010",
+    "started_at": "2026-04-17T10:46:02+02:00",
+    "ended_at": "2026-04-17T12:54:17+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#464",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 15,
+    "cost": 2.83,
+    "interactive_duration_s": 3576,
+    "idle_duration_s": 2316,
+    "afk_duration_s": 1803,
+    "machine_allocation_duration_s": 7695,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 19,
+      "line_changed": 684
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 55386,
+        "cache_read": 1364334,
+        "cache_write": 83841,
+        "output": 31146
+      }
+    ]
+  },
+  {
+    "id": "ses_0020",
+    "started_at": "2026-04-23T17:01:14+02:00",
+    "ended_at": "2026-04-23T18:57:41+02:00",
+    "member_id": "mem_dnavarro",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#466",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 78.46,
+    "interactive_duration_s": 1909,
+    "idle_duration_s": 2729,
+    "afk_duration_s": 2349,
+    "machine_allocation_duration_s": 6987,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 3,
+      "file_changed": 4,
+      "line_changed": 68
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 1599387,
+        "cache_read": 23200419,
+        "cache_write": 2123179,
+        "output": 794619
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 861209,
+        "cache_read": 12492533,
+        "cache_write": 1143250,
+        "output": 427872
+      }
+    ]
+  },
+  {
+    "id": "ses_0041",
+    "started_at": "2026-05-06T00:44:34+02:00",
+    "ended_at": "2026-05-06T04:19:58+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#473",
+    "execution_mode": "headless",
+    "machine_spec": "storage",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 2.62,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 12924,
+    "machine_allocation_duration_s": 12924,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 0,
+      "line_changed": 0
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 31387,
+        "cache_read": 897802,
+        "cache_write": 121961,
+        "output": 45527
+      }
+    ]
+  },
+  {
+    "id": "ses_0072",
+    "started_at": "2026-05-17T08:01:47+02:00",
+    "ended_at": "2026-05-17T10:59:50+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#486",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 6,
+    "cost": 4.86,
+    "interactive_duration_s": 4761,
+    "idle_duration_s": 1290,
+    "afk_duration_s": 4632,
+    "machine_allocation_duration_s": 10683,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 1,
+      "file_changed": 22,
+      "line_changed": 902
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 666533,
+        "cache_read": 10012307,
+        "cache_write": 809139,
+        "output": 258494
+      }
+    ]
+  },
+  {
+    "id": "ses_0073",
+    "started_at": "2026-05-17T10:01:47+02:00",
+    "ended_at": "2026-05-17T11:41:34+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#486",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": true,
+    "prompt_count": 9,
+    "cost": 4.27,
+    "interactive_duration_s": 2322,
+    "idle_duration_s": 948,
+    "afk_duration_s": 2717,
+    "machine_allocation_duration_s": 5987,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 8,
+      "line_changed": 224
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 101727,
+        "cache_read": 3212149,
+        "cache_write": 286215,
+        "output": 71336
+      }
+    ]
+  },
+  {
+    "id": "ses_0203",
+    "started_at": "2026-06-18T12:52:32+02:00",
+    "ended_at": "2026-06-18T15:41:55+02:00",
+    "member_id": "mem_rmarin",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#532",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 1,
+    "cost": 0.99,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 10163,
+    "machine_allocation_duration_s": 10163,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 8,
+      "line_changed": 264
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 788058,
+        "cache_read": 7621139,
+        "cache_write": 393031,
+        "output": 164339
+      }
+    ]
+  },
+  {
+    "id": "ses_0204",
+    "started_at": "2026-06-18T18:15:18+02:00",
+    "ended_at": "2026-06-18T20:48:02+02:00",
+    "member_id": "mem_rmarin",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#541",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 12,
+    "cost": 3.15,
+    "interactive_duration_s": 5382,
+    "idle_duration_s": 796,
+    "afk_duration_s": 2986,
+    "machine_allocation_duration_s": 9164,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 12,
+      "line_changed": 192
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 57616,
+        "cache_read": 974540,
+        "cache_write": 134645,
+        "output": 21513
+      }
+    ]
+  },
+  {
+    "id": "ses_0243",
+    "started_at": "2026-06-30T01:12:03+02:00",
+    "ended_at": "2026-06-30T02:34:16+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#552",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 1.17,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 4933,
+    "machine_allocation_duration_s": 4933,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 11,
+      "line_changed": 132
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 14009,
+        "cache_read": 405028,
+        "cache_write": 22921,
+        "output": 6332
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 8406,
+        "cache_read": 243017,
+        "cache_write": 13752,
+        "output": 3799
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 5604,
+        "cache_read": 162011,
+        "cache_write": 9168,
+        "output": 2533
+      }
+    ]
+  },
+  {
+    "id": "ses_0265",
+    "started_at": "2026-07-03T09:25:18+02:00",
+    "ended_at": "2026-07-03T14:32:37+02:00",
+    "member_id": "mem_ncastells",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#545",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 6.15,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 18439,
+    "machine_allocation_duration_s": 18439,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 7,
+      "line_changed": 98
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 286,
+        "cache_read": 6010,
+        "cache_write": 881,
+        "output": 264
+      }
+    ]
+  },
+  {
+    "id": "ses_0352",
+    "started_at": "2026-07-16T18:13:56+02:00",
+    "ended_at": "2026-07-16T20:09:13+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#583",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 4,
+    "cost": 3.33,
+    "interactive_duration_s": 3745,
+    "idle_duration_s": 1727,
+    "afk_duration_s": 1445,
+    "machine_allocation_duration_s": 6917,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 6,
+      "line_changed": 78
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 89525,
+        "cache_read": 1482384,
+        "cache_write": 136157,
+        "output": 66815
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 48205,
+        "cache_read": 798207,
+        "cache_write": 73315,
+        "output": 35977
+      }
+    ]
+  },
+  {
+    "id": "ses_0361",
+    "started_at": "2026-07-20T10:03:25+02:00",
+    "ended_at": "2026-07-20T11:47:59+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#586",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 6,
+    "cost": 6.13,
+    "interactive_duration_s": 1770,
+    "idle_duration_s": 2509,
+    "afk_duration_s": 1995,
+    "machine_allocation_duration_s": 6274,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 2,
+      "line_changed": 26
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 52079,
+        "cache_read": 1277943,
+        "cache_write": 125802,
+        "output": 44636
+      }
+    ]
+  },
+  {
+    "id": "ses_0379",
+    "started_at": "2026-07-22T02:53:31+02:00",
+    "ended_at": "2026-07-22T08:05:53+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#587",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 6.9,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 18742,
+    "machine_allocation_duration_s": 18742,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 8,
+      "line_changed": 80
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 54768,
+        "cache_read": 1162195,
+        "cache_write": 47243,
+        "output": 18766
+      }
+    ]
+  },
+  {
+    "id": "ses_0380",
+    "started_at": "2026-07-22T13:50:40+02:00",
+    "ended_at": "2026-07-22T17:09:15+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#591",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 4,
+    "cost": 2.39,
+    "interactive_duration_s": 4105,
+    "idle_duration_s": 3140,
+    "afk_duration_s": 4670,
+    "machine_allocation_duration_s": 11915,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 2,
+      "file_changed": 2,
+      "line_changed": 76
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 28785,
+        "cache_read": 1393745,
+        "cache_write": 63441,
+        "output": 21681
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 15500,
+        "cache_read": 750478,
+        "cache_write": 34160,
+        "output": 11675
+      }
+    ]
+  },
+  {
+    "id": "ses_0417",
+    "started_at": "2026-07-29T11:45:12+02:00",
+    "ended_at": "2026-07-29T12:46:20+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#606",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 4,
+    "cost": 1.25,
+    "interactive_duration_s": 1858,
+    "idle_duration_s": 705,
+    "afk_duration_s": 1105,
+    "machine_allocation_duration_s": 3668,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 3,
+      "line_changed": 39
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 100836,
+        "cache_read": 2088255,
+        "cache_write": 264213,
+        "output": 60690
+      }
+    ]
+  },
+  {
+    "id": "ses_0429",
+    "started_at": "2026-07-29T23:34:13+02:00",
+    "ended_at": "2026-07-30T00:40:32+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#620",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 12.43,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 3979,
+    "machine_allocation_duration_s": 3979,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 4,
+      "line_changed": 180
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 348306,
+        "cache_read": 8608250,
+        "cache_write": 539181,
+        "output": 345171
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 187549,
+        "cache_read": 4635212,
+        "cache_write": 290328,
+        "output": 185861
+      }
+    ]
+  },
+  {
+    "id": "ses_0503",
+    "started_at": "2026-08-08T13:45:44+02:00",
+    "ended_at": "2026-08-08T15:47:49+02:00",
+    "member_id": "mem_dnavarro",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#642",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 15,
+    "cost": 0.77,
+    "interactive_duration_s": 2393,
+    "idle_duration_s": 1839,
+    "afk_duration_s": 3093,
+    "machine_allocation_duration_s": 7325,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 7,
+      "file_changed": 17,
+      "line_changed": 408
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 9251,
+        "cache_read": 328234,
+        "cache_write": 18808,
+        "output": 3077
+      }
+    ]
+  },
+  {
+    "id": "ses_0525",
+    "started_at": "2026-08-11T13:14:16+02:00",
+    "ended_at": "2026-08-11T17:33:58+02:00",
+    "member_id": "mem_aruiz",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#651",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 5,
+    "cost": 7.18,
+    "interactive_duration_s": 11040,
+    "idle_duration_s": 3341,
+    "afk_duration_s": 1201,
+    "machine_allocation_duration_s": 15582,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 13,
+      "line_changed": 585
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 174227,
+        "cache_read": 5149790,
+        "cache_write": 350448,
+        "output": 90650
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 93814,
+        "cache_read": 2772964,
+        "cache_write": 188702,
+        "output": 48811
+      }
+    ]
+  },
+  {
+    "id": "ses_0537",
+    "started_at": "2026-08-12T14:47:51+02:00",
+    "ended_at": "2026-08-12T17:13:39+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#652",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 11,
+    "cost": 3.06,
+    "interactive_duration_s": 3451,
+    "idle_duration_s": 3343,
+    "afk_duration_s": 1954,
+    "machine_allocation_duration_s": 8748,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 2,
+      "file_changed": 16,
+      "line_changed": 768
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 23332,
+        "cache_read": 1282694,
+        "cache_write": 50996,
+        "output": 18593
+      },
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 13999,
+        "cache_read": 769616,
+        "cache_write": 30597,
+        "output": 11156
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 9333,
+        "cache_read": 513078,
+        "cache_write": 20398,
+        "output": 7437
+      }
+    ]
+  },
+  {
+    "id": "ses_0576",
+    "started_at": "2026-08-18T10:16:28+02:00",
+    "ended_at": "2026-08-18T11:49:49+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#665",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 9,
+    "cost": 1.11,
+    "interactive_duration_s": 2296,
+    "idle_duration_s": 2228,
+    "afk_duration_s": 1077,
+    "machine_allocation_duration_s": 5601,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 8,
+      "file_changed": 5,
+      "line_changed": 65
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 19576,
+        "cache_read": 534123,
+        "cache_write": 67387,
+        "output": 19000
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 10541,
+        "cache_read": 287604,
+        "cache_write": 36286,
+        "output": 10230
+      }
+    ]
+  },
+  {
+    "id": "ses_0591",
+    "started_at": "2026-08-18T23:48:04+02:00",
+    "ended_at": "2026-08-19T01:56:11+02:00",
+    "member_id": "mem_esaez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#672",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 17,
+    "cost": 3.69,
+    "interactive_duration_s": 1654,
+    "idle_duration_s": 3060,
+    "afk_duration_s": 2973,
+    "machine_allocation_duration_s": 7687,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 6,
+      "line_changed": 144
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 164438,
+        "cache_read": 3573974,
+        "cache_write": 369846,
+        "output": 107820
+      }
+    ]
+  },
+  {
+    "id": "ses_0604",
+    "started_at": "2026-08-20T11:22:23+02:00",
+    "ended_at": "2026-08-20T12:16:05+02:00",
+    "member_id": "mem_ncastells",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#650",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 18,
+    "cost": 2.38,
+    "interactive_duration_s": 1164,
+    "idle_duration_s": 1153,
+    "afk_duration_s": 905,
+    "machine_allocation_duration_s": 3222,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 2,
+      "line_changed": 88
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 45296,
+        "cache_read": 1090388,
+        "cache_write": 129651,
+        "output": 24621
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 27177,
+        "cache_read": 654232,
+        "cache_write": 77791,
+        "output": 14773
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 18118,
+        "cache_read": 436155,
+        "cache_write": 51860,
+        "output": 9848
+      }
+    ]
+  },
+  {
+    "id": "ses_0611",
+    "started_at": "2026-08-20T22:15:58+02:00",
+    "ended_at": "2026-08-21T00:29:27+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#684",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 11,
+    "cost": 3.34,
+    "interactive_duration_s": 3821,
+    "idle_duration_s": 1829,
+    "afk_duration_s": 2359,
+    "machine_allocation_duration_s": 8009,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 5,
+      "file_changed": 19,
+      "line_changed": 228
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 217622,
+        "cache_read": 4621130,
+        "cache_write": 608746,
+        "output": 156757
+      }
+    ]
+  },
+  {
+    "id": "ses_0622",
+    "started_at": "2026-08-24T00:00:40+02:00",
+    "ended_at": "2026-08-24T02:49:59+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#694",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 0.93,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 10159,
+    "machine_allocation_duration_s": 10159,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 5,
+      "file_changed": 17,
+      "line_changed": 782
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 229302,
+        "cache_read": 3867683,
+        "cache_write": 252156,
+        "output": 140161
+      }
+    ]
+  },
+  {
+    "id": "ses_0677",
+    "started_at": "2026-08-28T23:25:01+02:00",
+    "ended_at": "2026-08-29T01:30:48+02:00",
+    "member_id": "mem_aquintana",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#702",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 6,
+    "cost": 4.68,
+    "interactive_duration_s": 3200,
+    "idle_duration_s": 2869,
+    "afk_duration_s": 1478,
+    "machine_allocation_duration_s": 7547,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 0,
+      "file_changed": 3,
+      "line_changed": 117
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 813580,
+        "cache_read": 11194490,
+        "cache_write": 634628,
+        "output": 420634
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 438081,
+        "cache_read": 6027803,
+        "cache_write": 341723,
+        "output": 226495
+      }
+    ]
+  },
+  {
+    "id": "ses_0684",
+    "started_at": "2026-08-31T10:23:43+02:00",
+    "ended_at": "2026-08-31T11:48:52+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#704",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 26,
+    "cost": 15.59,
+    "interactive_duration_s": 1137,
+    "idle_duration_s": 1110,
+    "afk_duration_s": 2862,
+    "machine_allocation_duration_s": 5109,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 3,
+      "file_changed": 22,
+      "line_changed": 264
+    },
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 172467,
+        "cache_read": 4540315,
+        "cache_write": 158124,
+        "output": 112969
+      }
+    ]
+  },
+  {
+    "id": "ses_0697",
+    "started_at": "2026-09-01T10:25:28+02:00",
+    "ended_at": "2026-09-01T12:18:34+02:00",
+    "member_id": "mem_mpena",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#714",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 2.42,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 6786,
+    "machine_allocation_duration_s": 6786,
+    "artefacts": {
+      "pull_request": 0,
+      "commit": 1,
+      "file_changed": 5,
+      "line_changed": 190
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 72034,
+        "cache_read": 3024574,
+        "cache_write": 242865,
+        "output": 49448
+      }
+    ]
+  },
+  {
+    "id": "ses_0717",
+    "started_at": "2026-09-03T12:46:14+02:00",
+    "ended_at": "2026-09-03T14:32:22+02:00",
+    "member_id": "mem_sroldan",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#717",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 23,
+    "cost": 2.04,
+    "interactive_duration_s": 2700,
+    "idle_duration_s": 1843,
+    "afk_duration_s": 1825,
+    "machine_allocation_duration_s": 6368,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 9,
+      "file_changed": 2,
+      "line_changed": 28
+    },
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 502007,
+        "cache_read": 21838427,
+        "cache_write": 766649,
+        "output": 280536
+      }
+    ]
+  },
+  {
+    "id": "ses_0729",
+    "started_at": "2026-09-05T05:42:56+02:00",
+    "ended_at": "2026-09-05T09:11:56+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "refactor",
+    "task_key": "equilibrio/api-gateway#711",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": true,
+    "hidden": false,
+    "prompt_count": 2,
+    "cost": 1.64,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 12540,
+    "machine_allocation_duration_s": 12540,
+    "artefacts": {
+      "pull_request": 1,
+      "commit": 6,
+      "file_changed": 20,
+      "line_changed": 200
+    },
+    "token_usage": [
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 98498,
+        "cache_read": 1420130,
+        "cache_write": 80818,
+        "output": 49990
+      }
+    ]
+  }
+]
