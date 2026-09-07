@@ -4,9 +4,10 @@
 // second copy here. A test that re-derives "which Member is the restricted account" can agree
 // with itself while disagreeing with the product, and a test that re-implements signing stops
 // proving that the server's verification accepts the server's own tokens.
+//
+// The cost search set is the deliberate exception and lives in `./costs`: what a test *allows*
+// must not be decided by the code the test is checking. See that file's header.
 
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
 import type { BrowserContext, Page } from "@playwright/test";
 import { signInAccounts, type Account } from "../../src/data/accounts";
 import { loadDataset } from "../../src/data/load";
@@ -84,37 +85,3 @@ export const ungrantedNames = (viewerMemberId: string): readonly string[] =>
   loadDataset()
     .members.filter((member) => member.id !== viewerMemberId)
     .map((member) => member.full_name);
-
-const SESSIONS_DIRECTORY = join(process.cwd(), "src", "fixtures", "data", "sessions");
-
-type CostRow = { member_id: string; cost: number };
-
-const costRows = (): readonly CostRow[] =>
-  readdirSync(SESSIONS_DIRECTORY)
-    .filter((name) => name.endsWith(".json"))
-    .flatMap(
-      (name) =>
-        JSON.parse(readFileSync(join(SESSIONS_DIRECTORY, name), "utf8")) as readonly CostRow[],
-    );
-
-/**
- * Cost figures the viewer holds no grant over, as the exact decimal literals the fixture
- * carries. Values that also occur on one of the viewer's *own* sessions are dropped: the
- * restricted account may legitimately render those, and a shared value would make this
- * assertion fire on granted data.
- */
-export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<string> => {
-  const rows = costRows();
-  const granted = new Set(
-    rows.filter((row) => row.member_id === viewerMemberId).map((row) => row.cost.toString()),
-  );
-  const ungranted = new Set(
-    rows.filter((row) => row.member_id !== viewerMemberId).map((row) => row.cost.toString()),
-  );
-  for (const value of granted) ungranted.delete(value);
-  return ungranted;
-};
-
-/** Every decimal literal the payload contains, as written. */
-export const decimalsIn = (payload: string): ReadonlySet<string> =>
-  new Set(payload.match(/(?<![\d.])\d+\.\d+(?![\d.])/g) ?? []);

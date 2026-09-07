@@ -11,34 +11,63 @@
 // resolves no other Member by name, and it carries no `cost` at all: the only name that may
 // appear in its payload is its own, and the only cost figures are its own.
 //
-// **What this file cannot yet assert, and does not pretend to.** The panels that carry Member
-// rows and cost figures do not exist — ticket 28 supplies `src/data/queries.ts` and wave 9 the
-// panels. Until they do, the negative assertions below run against routes that render a shell.
-// The positive control exists so that this is not a vacuous pass: it proves the search finds a
-// Member name in the payload when one is genuinely there, so a failure to find the other
-// nineteen is a fact about the payload and not about the search.
+// **The two halves are not symmetric, and only one of them had a collision problem.** A Member's
+// full name is an identifier: it appears in the payload because the payload named that Member.
+// A cost is a *number*, and `self` over `cost` grants the viewer every aggregate of its own
+// rows — so a legitimate own-aggregate can equal some other Member's session cost by arithmetic
+// coincidence. The name half is untouched and sharp. The cost half now subtracts what the
+// viewer's own granted rows can legitimately add up to; `./support/costs` computes that from the
+// raw committed fixture, never from `src/data/queries.ts`, and its header says why.
 //
-// TODO(ticket 28 / wave 9): once `/[org]/people` and `/[org]/spend` render rows, add the
-// assertions that cannot be made today — that the restricted payload carries exactly two rows
-// (own + Team aggregate, T-E2) and that the open account's payload carries the other Members'
-// names, which is the positive control for the negative assertions on the restricted one.
+// **What this file cannot yet assert, and does not pretend to.** The panels that carry Member
+// rows and cost figures do not exist — wave 9 supplies them. Until they do, the negative
+// assertions below run against routes that render a shell. The positive control exists so that
+// this is not a vacuous pass: it proves the search finds a Member name in the payload when one
+// is genuinely there, so a failure to find the other nineteen is a fact about the payload and
+// not about the search. The two set-shape tests below do the same job for the cost half.
+//
+// TODO(wave 9): once `/[org]/people` and `/[org]/spend` render rows, add the assertions that
+// cannot be made today — that the restricted payload carries exactly two rows (own + Team
+// aggregate, T-E2) and that the open account's payload carries the other Members' names, which
+// is the permanent positive control for the negative assertions on the restricted one.
 
 import { expect, test } from "@playwright/test";
-import {
-  RESTRICTED_ACCOUNT,
-  decimalsIn,
-  orgRoutes,
-  payloadFor,
-  ungrantedCostLiterals,
-  ungrantedNames,
-  useSession,
-} from "./support/session";
+import { decimalsIn, ungrantedCostLiterals } from "./support/costs";
+import { RESTRICTED_ACCOUNT, orgRoutes, payloadFor, ungrantedNames, useSession } from "./support/session";
 
 const BASE = "http://localhost:3000";
 
 const ROUTES = orgRoutes(RESTRICTED_ACCOUNT.orgSlug);
 const UNGRANTED_NAMES = ungrantedNames(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
+
+/**
+ * The floor the residual cost set must clear. Measured on the committed fixture: **484**
+ * candidate ungranted literals, **459** after subtracting every figure the viewer's own granted
+ * rows can produce — 25 removed, each one a value those rows genuinely aggregate to. (The set
+ * the earlier construction searched held 439; subtracting aggregates alone takes it to 417, and
+ * it is larger here only because an ungranted cost is now also searched for in the two-decimal
+ * shape a money formatter would print it in.)
+ *
+ * **400 is the line below which this stops being a search of the money range.** If a fixture or
+ * a subtraction change ever drops the set under it, the cost assertion has become theatre and
+ * the answer is to investigate, not to lower the number.
+ */
+const UNGRANTED_COST_FLOOR = 400;
+
+/**
+ * `24.39` is `ses_0032`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
+ * over — and it is the literal ticket 29's falsification probe leaked to prove T-E4 can fail.
+ * It must survive the subtraction, or the probe would no longer fire and neither would a leak.
+ */
+const KNOWN_UNGRANTED_LITERAL = "24.39";
+
+/**
+ * `13.04` is another Member's session cost **and** the viewer's own 2026-08-03 implementation
+ * total. It is one of the 15 false positives ticket 31 measured on `/demo/spend`, and it is the
+ * defect this file exists to fix: value identity is not fact identity.
+ */
+const OWN_AGGREGATE_COLLISION = "13.04";
 
 test.describe("T-E4 — the restricted account's payload", () => {
   test.beforeEach(async ({ context, baseURL }) => {
@@ -60,7 +89,24 @@ test.describe("T-E4 — the restricted account's payload", () => {
   test("the fixture holds names and costs to look for", () => {
     // Guards the two suites below against becoming assertions over empty sets.
     expect(UNGRANTED_NAMES.length).toBeGreaterThan(10);
-    expect(UNGRANTED_COSTS.size).toBeGreaterThan(100);
+    expect(UNGRANTED_COSTS.size).toBeGreaterThanOrEqual(UNGRANTED_COST_FLOOR);
+  });
+
+  // The permanent regression guard on the subtraction itself. The set-size floor above catches
+  // a subtraction that swallows the range wholesale; these two catch the subtraction drifting
+  // in either direction on a specific, named value, which a size check cannot see.
+  test("the search set still holds a real ungranted cost literal", () => {
+    expect(
+      UNGRANTED_COSTS.has(KNOWN_UNGRANTED_LITERAL),
+      `${KNOWN_UNGRANTED_LITERAL} is another Member's session cost and must remain searched for`,
+    ).toBe(true);
+  });
+
+  test("the search set excludes a figure the viewer's own rows aggregate to", () => {
+    expect(
+      UNGRANTED_COSTS.has(OWN_AGGREGATE_COLLISION),
+      `${OWN_AGGREGATE_COLLISION} is a total of the viewer's own sessions; self scope grants it`,
+    ).toBe(false);
   });
 
   for (const route of ROUTES) {
