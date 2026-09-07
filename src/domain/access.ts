@@ -185,8 +185,17 @@ export type Viewer = {
 /** Member id → the Teams that Member belongs to. Built from fixture Teams, never guessed. */
 export type TeamMembership = ReadonlyMap<string, readonly string[]>;
 
-/** Inverts `Team.member_ids` into the lookup the relation needs. */
-export function membershipFromTeams(teams: readonly Team[]): TeamMembership {
+/**
+ * Inverts `Team.member_ids` into the lookup the relation needs.
+ *
+ * The parameter is the structural minimum rather than `Team` so that `domain/aggregate.ts` can
+ * invert membership through *this* function instead of writing a second one. Teams and Members
+ * are many-to-many in one place, and the permission filter and the non-additive Team roll-up
+ * (R-V3) must not be able to reach different conclusions about who is on a Team.
+ */
+export function membershipFromTeams(
+  teams: readonly Readonly<Pick<Team, "id" | "member_ids">>[],
+): TeamMembership {
   const byMember = new Map<string, string[]>();
   for (const team of teams) {
     for (const memberId of team.member_ids) {
