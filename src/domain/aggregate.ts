@@ -136,8 +136,15 @@ export type AggregationInput<Row extends MemberKeyed> = {
 const NO_KEYS: readonly string[] = [];
 const NO_MEMBERS: readonly MemberFacts[] = [];
 
-/** R-M14's denominator, one Member at a time. A service account holds no seat; nor does a lapsed one. */
-const isSeatHolder = (member: MemberFacts): boolean =>
+/**
+ * Who the Organization pays a seat for. A service account holds no seat; nor does a lapsed one.
+ *
+ * Exported because it answers one question for two callers who must not disagree: R-M14's
+ * per-capita denominator here, and R-M5's seat charge in `metrics/spend.ts`. Two copies of this
+ * predicate would let the number of people the Organization pays for differ between the figure
+ * that divides by it and the figure that bills it.
+ */
+export const isSeatHolder = (member: MemberFacts): boolean =>
   member.kind === "human" && member.seat_active;
 
 /**

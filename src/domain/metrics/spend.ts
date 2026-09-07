@@ -50,7 +50,7 @@
 //
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
-import type { MemberFacts } from "../aggregate";
+import { isSeatHolder, type MemberFacts } from "../aggregate";
 import type { PeriodGrain } from "../periods";
 
 // --- What a spend figure reads --------------------------------------------------------------
@@ -188,15 +188,14 @@ export const sessionCost = (rows: readonly CostBearing[]): number =>
 // --- Seats (R-M5) ---------------------------------------------------------------------------
 
 /**
- * R-M5 — **seats attach to `human` Members only**; a service account holds none. Read exactly
- * as `aggregate.ts` reads the per-capita denominator, so the seat charge and the per-capita
- * figure cannot come to different conclusions about how many people the Organization pays for.
+ * The Members a seat fee is charged for (R-M5) — `human` only; a service account holds none.
+ *
+ * The predicate is `aggregate.ts`'s, imported rather than restated, so the seat charge and R-M14's
+ * per-capita denominator cannot come to different conclusions about how many people the
+ * Organization pays for.
  */
-const holdsSeat = (member: MemberFacts): boolean => member.kind === "human" && member.seat_active;
-
-/** The Members a seat fee is charged for. A `service_account` is never among them. */
 export const seatHolders = (members: readonly MemberFacts[]): readonly MemberFacts[] =>
-  members.filter(holdsSeat);
+  members.filter(isSeatHolder);
 
 // --- Total spend (R-M1, R-M5, A25) ----------------------------------------------------------
 
