@@ -1,43 +1,73 @@
-// R-T13 — `POST` issues one of the two seeded accounts' JWTs as the session cookie and
-// redirects to that account's Organization; `DELETE` clears it.
+// R-T13 — `POST` issues one of the two seeded accounts' JWTs as the session cookie and redirects
+// the browser back where it came from; `DELETE` clears it.
 //
-// The redirect target is `/${account.orgSlug}`, read from the account rather than written as
-// `/demo`: `demo` is a slug, not a prefix (R-A1), and a literal here is the first place a
-// second Organization would break.
+// **R-A5 — the switch happens in place.** The header account switcher posts from whatever page
+// the viewer is reading, and this endpoint sends them back to it, so the difference reads as *the
+// same page with fewer rows* rather than as a trip through the summary. `/sign-in` has nowhere to
+// return to and lands on the Organization root, which is the same rule with an empty input.
+//
+// **The return path is validated, not trusted.** It is honoured only if it is same-origin and
+// under the Organization the freshly-issued token names — so it cannot be used as an open
+// redirect, and it cannot be used to land a viewer on another tenant's path (R-A2, R-A7).
+//
+// The fallback is `/${account.orgSlug}`, read from the account rather than written as `/demo`:
+// `demo` is a slug, not a prefix (R-A1), and a literal here is the first place a second
+// Organization would break.
 
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from "@/data/session-cookie";
 import { issueSession } from "@/data/session";
 import { signInAccounts } from "@/data/accounts";
 
+/** The name the return path travels under, when a caller states it rather than implying it. */
+const RETURN_FIELD = "return_to";
+
 /**
- * `/sign-in` posts a plain HTML form, so this must read form encoding; the header account
- * switcher (R-A5, ticket 30) will post JSON from a client component. Both name the same
- * field, and neither is trusted further than "which of the two offered accounts".
+ * `/sign-in` and the account switcher both post plain HTML forms; a JSON caller is supported
+ * because the endpoint's contract should not be "whatever a `<form>` sends". Neither encoding is
+ * trusted further than "which of the two offered accounts", and every value is a string or absent.
  */
-const requestedMemberId = async (request: Request): Promise<string | undefined> => {
-  if (request.headers.get("content-type")?.includes("json")) {
-    const body: unknown = await request.json();
-    if (typeof body !== "object" || body === null || !("member_id" in body)) return undefined;
-    const value: unknown = body.member_id;
-    return typeof value === "string" ? value : undefined;
-  }
-  const value = (await request.formData()).get("member_id");
-  return typeof value === "string" ? value : undefined;
+const fieldsOf = async (request: Request): Promise<Readonly<Record<string, string>>> => {
+  const entries: readonly (readonly [string, unknown])[] = request.headers
+    .get("content-type")
+    ?.includes("json")
+    ? Object.entries((await request.json()) as Record<string, unknown>)
+    : [...(await request.formData()).entries()];
+  return Object.fromEntries(
+    entries.filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+  );
+};
+
+/**
+ * Where to send the browser after the cookie is set.
+ *
+ * The candidate is the caller's explicit `return_to` if it sent one, and otherwise the request's
+ * own `Referer` — which is what the account switcher relies on, and which the browser recomputes
+ * for **every** submission. A hidden field written at render time could not: a layout renders once
+ * and is preserved across client-side navigations, so the field would be stale the moment the
+ * viewer moved off the page the document was served for.
+ */
+const returnPath = (request: Request, orgSlug: string, stated: string | undefined): string => {
+  const home = `/${orgSlug}`;
+  const target = URL.parse(stated ?? request.headers.get("referer") ?? "", request.url);
+  if (!target || target.origin !== new URL(request.url).origin) return home;
+  const inOrg = target.pathname === home || target.pathname.startsWith(`${home}/`);
+  return inOrg ? `${target.pathname}${target.search}` : home;
 };
 
 export async function POST(request: Request): Promise<Response> {
-  const memberId = await requestedMemberId(request).catch(() => undefined);
+  const fields = await fieldsOf(request).catch(() => ({}) as Record<string, string>);
   // Only the accounts `/sign-in` offers. Any other Member id is not a sign-in, so no token
   // is minted for it — the endpoint issues tokens, it does not accept an identity claim.
-  const account = signInAccounts().find((candidate) => candidate.memberId === memberId);
+  const account = signInAccounts().find((candidate) => candidate.memberId === fields.member_id);
   if (!account) {
     return NextResponse.json({ error: "unknown account" }, { status: 400 });
   }
 
   const token = await issueSession({ member_id: account.memberId, org_slug: account.orgSlug });
+  const destination = returnPath(request, account.orgSlug, fields[RETURN_FIELD]);
   // 303: a form POST must become a GET, or the browser re-posts to the dashboard route.
-  const response = NextResponse.redirect(new URL(`/${account.orgSlug}`, request.url), 303);
+  const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
   return response;
 }

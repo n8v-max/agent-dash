@@ -1,11 +1,28 @@
-// Route shell only. Ticket 28 supplies `src/data/queries.ts` and wave 9 the panels; this
-// exists so the route exists behind the authorization boundary in `layout.tsx`.
+// `/[org]` — the summary (R-N4…R-N8). Month-locked; the period control is the only one it
+// declares, so the toolbar carries one control and nothing else (R-C1).
 
-export default function OrgSummaryPage() {
+import { PendingPanels } from "@/components/panels/pending-panels";
+import { pageRequest } from "@/components/controls/request";
+import { PageFrame } from "@/components/shell/page-frame";
+
+const PANELS = [
+  "Total spend",
+  "Completed Jobs",
+  "Cost per completed Job",
+  "Completed Jobs by template",
+];
+
+export default async function OrgSummaryPage(props: PageProps<"/[org]">) {
+  const { org } = await props.params;
+  const request = await pageRequest("summary", org, await props.searchParams);
+
   return (
-    <section>
-      <h1>Summary</h1>
-      <p>Four tiles land here (R-N4).</p>
-    </section>
+    <PageFrame
+      request={request}
+      title="Summary"
+      lede="Four tiles, each a link to the page carrying its evidence."
+    >
+      <PendingPanels panels={PANELS} />
+    </PageFrame>
   );
 }

@@ -80,3 +80,36 @@ satisfied.
 Recommended handling until a human decides: implement R-A10 (both accounts reach the matrix, each
 showing its own grants), and leave the T-E8 assertion **unwritten and named** rather than written to
 either reading — a test written to the losing side would pin the wrong behaviour.
+
+### 2026-09-08 — T-E4 will start failing on decimals when charts land (from ticket 30, wave 7)
+
+**Read this before rendering a chart. It is the one thing likely to stop wave 9 being green.**
+
+T-E4's cost assertion scans the **raw response payload** for the fixture's ungranted cost literals.
+Any decimal anywhere in that payload can collide with one. Ticket 30 hit this in ordinary shell
+work: a Tailwind class of `py-1.5` matched a real ungranted cost of `1.5`, and T-E4 failed on a page
+that had leaked nothing at all.
+
+Ticket 30 fixed it **without touching the test** — every decimal was removed from the shell's
+Tailwind classes (integer spacing, `text-[11px]`, `calc(100%+8px)`). That works for CSS classes.
+**It will not work for charts.** Recharts emits decimal path coordinates, viewBox values, tick
+offsets and transforms by the dozen, and those cannot be authored away.
+
+**Do not weaken T-E4 to a DOM query.** `testing-spec.md` § 10 is explicit that doing so makes the
+product's central privacy claim untested while appearing tested, and ticket 29 demonstrated the
+difference empirically: a probe leaking a name and a cost inside a `hidden` section failed T-E4 and
+**passed** a `not.toBeVisible()` check.
+
+**Refine the exclusion, do not relax the claim.** The defensible direction is to keep scanning the
+whole payload but subtract the contexts that cannot carry a leaked figure — SVG geometry attributes
+(`d`, `points`, `viewBox`, `transform`, `x`/`y`/`cx`/`cy`/`r`/`width`/`height`), `class`/`className`
+values, and inline `style`. A cost that has actually leaked arrives either as a raw number in the
+RSC props or as rendered text, and both survive that subtraction. Note the opposite temptation —
+requiring costs to look like formatted currency (`$24.39`) — **is** a weakening: the RSC flight
+payload carries raw props, so a leaked `24.39` would never match.
+
+Whatever is chosen, keep ticket 29's two properties: the **positive control** (the payload does
+contain the viewer's *own* name, so the negatives cannot pass vacuously) and the **non-emptiness
+guards** on the search sets. And re-run ticket 29's falsification probe afterwards — render a
+name and a cost in a `hidden` section and confirm T-E4 still fails — because an exclusion list is
+exactly the kind of change that can quietly make an assertion unable to fire.

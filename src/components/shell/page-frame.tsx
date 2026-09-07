@@ -1,0 +1,38 @@
+// The shape every controlled page takes: the sticky toolbar, then the page.
+//
+// It exists so that the toolbar's placement is decided once. R-N3 puts it **below the header and
+// above the page**, and it is rendered here — outside `<main>` — because it is chrome for the
+// page rather than content in it, and because a page that had to remember to render its own
+// toolbar is a page that can forget.
+//
+// The toolbar is **absent** rather than empty where the page declares no controls: `PageToolbar`
+// returns `null` and this frame renders `<main>` directly under the header.
+
+import type { ReactNode } from "react";
+import { PageToolbar } from "@/components/controls/page-toolbar";
+import type { PageRequest } from "@/components/controls/request";
+
+export function PageFrame(props: {
+  readonly request: PageRequest;
+  readonly title: string;
+  /** One line saying what question this page answers (R-N1: the route axis is the question). */
+  readonly lede: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <>
+      <PageToolbar
+        controls={props.request.controls}
+        options={props.request.options}
+        window={props.request.window}
+      />
+      <main className="mx-auto w-full max-w-[110rem] px-4 py-8 sm:px-6">
+        <div className="mb-6 max-w-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{props.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{props.lede}</p>
+        </div>
+        {props.children}
+      </main>
+    </>
+  );
+}

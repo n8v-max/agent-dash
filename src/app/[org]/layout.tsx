@@ -11,26 +11,19 @@
 // is the fact a tenancy boundary is there to withhold. The two 404 cases are indistinguishable
 // from outside, which is what makes the boundary hold rather than merely be checked.
 //
-// The shell here is deliberately minimal — ticket 30 owns the real header, toolbar and account
-// switcher. What it must already be is **identical for both accounts** (R-A8): the nav below
-// is built from one list, with no grant consulted, so no item can be hidden or disabled for
-// the restricted account. Fewer rows, never fewer doors.
+// The same three outcomes are taken again in `pageRequest`, because a layout and its page render
+// in parallel: the page does not wait for this and cannot read its result.
+//
+// **The shell is here; the toolbar is not.** R-N3 separates them, and so does this file: the
+// header holds *who you are* and is rendered once for every page, while the page toolbar holds
+// *what is in the URL* and is rendered by the page, which is the only thing that knows which
+// controls it declares.
 
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { AppHeader } from "@/components/shell/app-header";
 import { SESSION_COOKIE } from "@/data/session-cookie";
 import { resolveViewer } from "@/data/viewer";
-
-/** R-N1/R-N3: the route axis is the question. Nothing here is grant-dependent (R-A8). */
-const NAV = [
-  { segment: "", label: "Summary" },
-  { segment: "/spend", label: "Spend" },
-  { segment: "/work", label: "Work" },
-  { segment: "/people", label: "People" },
-  { segment: "/history", label: "History" },
-  { segment: "/projection", label: "Projection" },
-] as const;
 
 export default async function OrgLayout({ children, params }: LayoutProps<"/[org]">) {
   const { org } = await params;
@@ -41,25 +34,14 @@ export default async function OrgLayout({ children, params }: LayoutProps<"/[org
   if (resolution.outcome === "not-found") notFound();
 
   return (
-    <div>
-      <header>
-        <Link href={`/${org}`}>agent-dash</Link>
-        <nav aria-label="Sections">
-          <ul>
-            {NAV.map((item) => (
-              <li key={item.segment}>
-                <Link href={`/${org}${item.segment}`}>{item.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        {/*
-          The viewer's own name. `self` is granted over every class to every Role (R-A3.1), so
-          this is in grant for both accounts and is the one identity on the page that always is.
-        */}
-        <p data-testid="viewer">{resolution.account.fullName}</p>
-      </header>
-      <main>{children}</main>
+    <div className="min-h-dvh bg-background text-foreground">
+      {/*
+        The viewer's own name rides in the switcher. `self` is granted over every class to every
+        Role (R-A3.1), so it is in grant for both accounts and is the one identity on the page
+        that always is.
+      */}
+      <AppHeader orgSlug={org} account={resolution.account} />
+      {children}
     </div>
   );
 }

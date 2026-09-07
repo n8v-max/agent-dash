@@ -64,7 +64,12 @@ const SELF_ROW_NOTE =
   "data and their own permissions, and restriction bites on other people (R-A3.1).";
 
 /** R-N15 — Member · Team · kind · Completed Jobs · Sessions · Tokens · Cost. Numeric columns sort. */
-const COLUMNS = [
+/**
+ * Exported because the toolbar's sort control offers exactly these columns (R-C3, R-N15). A
+ * second list of column keys in the control layer would be a second answer to "what is
+ * sortable", and the two would drift the first time a column is added.
+ */
+export const PEOPLE_COLUMNS = [
   { key: "member", label: "Member", numeric: false, sortable: false },
   { key: "team", label: "Team", numeric: false, sortable: false },
   { key: "kind", label: "Kind", numeric: false, sortable: false },
@@ -132,7 +137,7 @@ const peopleTable = (context: PageContext): TableViewModel => {
   const unnamed = context.population.filter((member) => !resolvesName(request, member.id));
 
   return tableViewModel({
-    columns: [...COLUMNS],
+    columns: [...PEOPLE_COLUMNS],
     rows: named.map((member) => ({ key: member.id, cells: cellsFor(context, member) })),
     sort: context.params.sort,
     note: unnamedNote(context, unnamed),

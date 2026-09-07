@@ -21,11 +21,23 @@
 // `now` rides along on the params because P5 makes it an argument everywhere: no query and no
 // module below reads a clock. It is **not a control** and never serialises to the query string.
 
-import type { ModelLevel, RollupLevel } from "@/domain/aggregate";
-import type { OutcomeFilter } from "@/domain/metrics/spend";
-import { availableGrains, type PeriodGrain, type PeriodRange } from "@/domain/periods";
-import type { ExecutionMode, MemberKind, WorkTypeKey } from "@/domain/types";
-import type { TableSort } from "@/domain/viewmodel";
+import { MODEL_LEVELS, ROLLUP_LEVELS, type ModelLevel, type RollupLevel } from "@/domain/aggregate";
+import { OUTCOME_FILTERS, type OutcomeFilter } from "@/domain/metrics/spend";
+import {
+  availableGrains,
+  PERIOD_GRAINS,
+  type PeriodGrain,
+  type PeriodRange,
+} from "@/domain/periods";
+import {
+  EXECUTION_MODES,
+  MEMBER_KINDS,
+  WORK_TYPE_KEYS,
+  type ExecutionMode,
+  type MemberKind,
+  type WorkTypeKey,
+} from "@/domain/types";
+import { SORT_DIRECTIONS, type TableSort } from "@/domain/viewmodel";
 
 /** The six routes of R-N1 that carry a query. `/` and `/sign-in` carry none. */
 export const PAGES = ["summary", "spend", "work", "people", "history", "projection"] as const;
@@ -74,6 +86,29 @@ export const DECLARED_CONTROLS: Readonly<Record<PageKey, readonly ControlKey[]>>
   history: ["dateRange", "member", "workType", "repository"],
   projection: [],
 };
+
+/**
+ * The closed vocabularies a URL parser validates against, in one place.
+ *
+ * They are re-exported through the data layer rather than read from `src/domain` by the parser
+ * because **`src/components/**` may import `src/domain` for types only** (R-T6), and R-T26 puts
+ * the parser in `components/controls/`. A value outside these lists therefore has no URL
+ * representation at all: the parser cannot spell it, so no page can render it.
+ *
+ * The open vocabularies — Repository, Team and Member ids — are deliberately absent. They are
+ * fixture rows, not a closed set, and an id that resolves to nothing narrows the population to
+ * nothing, which is a legitimate empty selection rather than an invalid URL (R-V9).
+ */
+export const CONTROL_VOCABULARIES = {
+  grain: PERIOD_GRAINS,
+  subject: ROLLUP_LEVELS,
+  workType: WORK_TYPE_KEYS,
+  accepted: OUTCOME_FILTERS,
+  modelLevel: MODEL_LEVELS,
+  executionMode: EXECUTION_MODES,
+  memberKind: MEMBER_KINDS,
+  sortDirection: SORT_DIRECTIONS,
+} as const;
 
 /**
  * A parsed, validated control set. Every field is resolved: a query reads it and never re-parses,

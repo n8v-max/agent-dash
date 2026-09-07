@@ -1,11 +1,31 @@
-// Route shell only. Ticket 28 supplies `src/data/queries.ts` and wave 9 the panels; this
-// exists so the route exists behind the authorization boundary in `layout.tsx`.
+// `/[org]/history` — the raw rows under every aggregate (R-N19…R-N22).
+//
+// The only page whose period control is a free date range rather than a named period, which is
+// why `dateRange` and not `period` is what it declares (R-C1).
 
-export default function HistoryPage() {
+import { pageRequest } from "@/components/controls/request";
+import { DataTable } from "@/components/panels/data-table";
+import { PageFrame } from "@/components/shell/page-frame";
+import { historyPage } from "@/data/queries";
+
+export default async function HistoryPage(props: PageProps<"/[org]/history">) {
+  const { org } = await props.params;
+  const request = await pageRequest("history", org, await props.searchParams);
+  const view = historyPage(request.viewer, request.controls);
+
   return (
-    <section>
-      <h1>History</h1>
-      <p>The raw rows under every aggregate (R-N19).</p>
-    </section>
+    <PageFrame
+      request={request}
+      title="History"
+      lede="One row per session. Hidden sessions appear here as nowhere else: not at all."
+    >
+      {view.surface === "table" ? (
+        <DataTable table={view.table} caption="Agent sessions, newest first" />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          {view.surface === "withheld" ? view.message : `Session ${view.row.key}`}
+        </p>
+      )}
+    </PageFrame>
   );
 }

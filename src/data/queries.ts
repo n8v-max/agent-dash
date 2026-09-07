@@ -25,6 +25,9 @@ export { workPage } from "./queries/work";
 export { peoplePage } from "./queries/people";
 export { historyPage } from "./queries/history";
 export { projectionPage } from "./queries/projection";
+// The toolbar's own ViewModel (R-C1, ticket 30). Seventh entry point, same shape as the six:
+// a `Viewer` first, a `ControlSet` second, and a fully-resolved structure back.
+export { controlOptions, PEOPLE_SORT_COLUMNS } from "./queries/controls";
 
 export type { SummaryPageViewModel, SummaryTile } from "./queries/summary";
 export type {
@@ -58,3 +61,4 @@ export type {
 } from "./queries/profile";
 export type { HistoryPageViewModel, HistoryRow, SessionDetail } from "./queries/history";
 export type { ProjectionFigures, ProjectionPageViewModel } from "./queries/projection";
+export type { ControlOption, ControlOptions } from "./queries/controls";
