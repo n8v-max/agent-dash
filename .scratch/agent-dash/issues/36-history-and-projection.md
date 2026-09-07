@@ -51,3 +51,24 @@ off the core surfaces rather than to dress it**. Do not add it to `/demo` or `/d
 Model mix appear on **no surface**, because the expandable row that would have exposed them was
 declined in favour of extra selectors on a flat table. That is a known cost (`spec.md` § 13), not an
 oversight to fix here.
+
+## Comments
+
+### 2026-09-08 — T-U21 moves to ticket 28 (AFK build, wave 5)
+
+**`src/domain/metrics/projection.ts` and T-U21 are built by ticket 28, not here.**
+
+`technical-spec.md` § 2 lists the module, but every other domain module has an owner in an earlier
+wave and this one did not — T-U21 sits in this ticket's Done-when, and this ticket is blocked by 31,
+so it would land in wave 9. Ticket 28's Done-when is "every panel in `spec.md` § 3 has a query
+returning a complete ViewModel", and § 3.6 is `/demo/projection`, so the façade cannot be complete
+without it. Building it in 28 is the smaller change and keeps the wave order intact.
+
+**What this ticket still owns:** rendering `/demo/projection` per R-N23/R-N24 — the method stated in
+one sentence, the elapsed fraction shown as a share, the incomplete-period flag, **no confidence
+band**, and the "estimated" label that R-V8 gives to Projected cost and to nothing else attributed.
+Plus all of `/demo/history`, and **T-E9** finding no compute-rate-card values on either route.
+
+**Verify T-U21 rather than re-deriving it.** Check that ticket 28's tests assert what T-U21 asks:
+the method is identical at 10% elapsed and at 90% while the elapsed fraction differs — both
+asserted, because they are two different claims — and that no confidence band is produced.
