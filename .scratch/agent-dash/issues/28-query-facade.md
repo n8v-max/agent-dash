@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 24, 25, 26, 27
-Label: ready-for-agent
+Label: resolved
 
 # The query façade and the ViewModel boundary
 
@@ -151,3 +151,141 @@ still has nothing in scope to compute with.
 not import `src/components`. Ticket 28 therefore defines the validated control-set **type**; ticket
 30 builds the parser that produces it. `periods.ts` already exposes `availableGrains` and
 `parseGrain` for exactly this handover.
+
+### 2026-09-08 — implemented (AFK build, wave 6)
+
+Built on `main`, uncommitted. Gates: `pnpm lint` (0 errors, the one pre-existing `e2e/payload`
+TODO warning) · `typecheck` · `test` 680 (594 before) · `test:coverage` 95.2 statements / 84.8 branches, every
+per-file `src/domain/**` threshold met · `build` · `e2e` 22.
+
+**What the seam is made of.**
+
+- `src/domain/viewmodel.ts` — **new domain module**, the ViewModel assembly R-T7 requires to sit
+  below the seam: the chart ViewModel, the mirror, `stackable`, the tile and the (generic,
+  sorted-here) table.
+- `src/domain/metrics/projection.ts` — **new**, plus T-U21 in substance. `PROJECTION_METHOD` is a
+  **constant** so "the method is identical at 10% and at 90% elapsed" is expressible as an
+  assertion rather than as prose; the elapsed fraction is a separate field, and there is no band,
+  interval or bound on the type (R-N24), asserted as an absence over the returned keys.
+- `src/domain/periods.ts` gains `civilDayIn` and `civilDaysBetween`, so projection does its
+  civil-date arithmetic through the module that owns the program's single `Intl` conversion
+  rather than opening a second one.
+- `src/domain/metrics/duration.ts` gains `medianOf`, so R-N17's comparator median is the same
+  nearest-rank median a duration is read with.
+- `src/data/params.ts` — the **validated control-set type** (ticket 30 builds the parser),
+  `DECLARED_CONTROLS` as R-C1's table in data, and `coerceGrain` for R-M11.
+- `src/data/queries.ts` re-exports six page queries from `src/data/queries/**` (the 300-line
+  budget; `queries.ts` alone would spend it).
+
+**The panel → query map, for wave 9.** `summaryPage` → R-N4's four tiles (`tiles[3].chart` is the
+stacked WorkType mix). `spendPage` → `costPerCompletedTask`, `totalSpend`, `costPerSession`,
+`costPerCompletedTaskByWorkType`, `costByRepository`, `adoption.{tokensOverTime,modelMix,rateCard}`.
+`workPage` → `velocity`, `acceptance` (five, `acceptanceAxis` shared), `taskRates`,
+`incompleteAges`, `duration`, `presenceSpans`. `peoplePage` → `{surface: table | profile |
+withheld}` plus `matrix` on every arm. `historyPage` → `{surface: table | session | withheld}`,
+every row carrying R-N20.1's detail. `projectionPage` → `elapsed`, `method`, `actual`, `projected`,
+`tiles`, `chart`.
+
+**Three decisions recorded, not re-decided.**
+
+1. **The seat charge is not extrapolated** on `/demo/projection`. R-M5 charges seats by whole
+   months and R-D2 forbids pro-rating one across elapsed days, so a month's seat cost is final on
+   day one; only session Cost is elapsed-proportional, and the ViewModel says so in `note`.
+2. **A member-level grouping collapses subjects the viewer cannot name into one "Unnamed Members"
+   series.** `team`/`org`/`peer-team` are *aggregated* scopes, so one series per unnamed person
+   would be an identified breakdown built out of an aggregated grant. The rows stay in the totals;
+   the identity does not appear. Same rule gives `/demo/people` and `/demo/history` their row sets
+   and their "counted and not named" notes.
+3. **`?session=` addresses R-N20.1's expanded row.** It is a surface switch, not a toolbar
+   control, so it is deliberately absent from `DECLARED_CONTROLS.history` (R-C1) — exactly as
+   `?member=` is absent from `DECLARED_CONTROLS.people`. The detail also rides on every row, so a
+   purely client-side expansion needs nothing further.
+
+**One argument against a spec line, recorded rather than acted on.** R-N8 stacks *Completed Tasks*
+by WorkType and justifies it with "WorkType is a true partition — every AgentSession references
+exactly one". That is true of sessions and not of Tasks: a Task whose accepted sessions span two
+WorkTypes is counted in both, so the five columns can sum past the Organization's Completed Task
+count. The implementation follows R-N8 (`stackable: true`) because the spec is the fixed point;
+the honest alternatives are to measure sessions there, or to key a Task to its first accepted
+session's WorkType. Ratio panels are separately never stackable, whatever their grouping.
+
+### 2026-09-08 — implemented (AFK build, wave 6)
+
+All six gates green: `lint` (0 errors; the one warning is ticket 29's T-E4 TODO) · `typecheck` ·
+`test` (**680 tests**, up from 594) · `test:coverage` (statements 95.2 / branches 84.8 / functions
+96.3 / lines 97.0, no threshold error; every per-file `src/domain/**` 95/90 met — `viewmodel.ts`
+96.55/95, `projection.ts` 100) · `build` · `e2e` (22 passed).
+
+`src/data/queries.ts` re-exports eleven modules under `src/data/queries/`, with `context.ts`
+carrying `pageContext(viewer, params)` — the once-per-page load, permission filter and bucketing
+the design called for. All six page queries take `(viewer: Viewer, params: ControlSet)` with
+`Viewer` first, and `Viewer` is producible only by `resolveViewer`, so R-T16's "an unfiltered query
+does not typecheck" is structural.
+
+`ControlSet` lives in `src/data/params.ts` alongside `DECLARED_CONTROLS` (R-C1 expressed as data)
+and `coerceGrain` (R-M11). Ticket 30 builds the parser that produces it.
+
+**Every panel has a query.** `/demo` four tiles each with an R-N7 change figure · `/demo/spend`
+panels 1–7 in R-N9 order with the ratio first (R-N10) plus the R-N11 rate card · `/demo/work`
+panels 1–6 including the five acceptance small multiples on a shared axis and the `interactive`-only
+presence spans · `/demo/people` table, `?member=` profile, comparator and the R-A10 matrix on every
+arm · `/demo/history` the ten-column table with `detail` on every row (R-N20.1) · `/demo/projection`
+actual, extrapolation, elapsed share and the incomplete flag. Nothing omitted — this was the wave-9
+precondition and it is met.
+
+**The mirror's independence.** The aggregation result is a `Cell[]` — (bucket key × group key) →
+value — built once per panel. Two paths leave it: the series through `capSeries` (whole-range
+ranking, cap, painting), and the mirror summed straight out of a `Map<group, Map<bucket, number>>`
+grid. The mirror takes only **column identity and order** from the capped set; every number comes
+from the grid, and the "Other" column is an independent sum over exactly the groups the cap did not
+name. `mirrorFrom` never reads a `SeriesPoint`. `queries.test.ts` walks **every chart on every
+page** and compares `fromMirror(chart)` against `fromSeries(chart)` on real data with the cap
+engaged.
+
+**`stackable` is three domain facts ANDed** — `STACKABLE_GROUPINGS[grouping] && measure ===
+"additive" && (rollup.partition ?? true)`. R-V1's table is data. **Team is false three times over**:
+declared false, and `aggregate.ts` reports `partition: false` for it. Asserted for team-subject
+`/demo/spend` and `/demo/work`, which also carry R-V3's overlap note. A **ratio is never stackable**
+however cleanly its grouping partitions the rows — which R-V1 does not say and which follows from
+what stacking claims.
+
+**T-U21** (19 tests): elapsed-proportional extrapolation with `now` injected, the civil day read in
+the Organization's timezone rather than UTC; at 10% and 90% elapsed the `method` is *identical* (it
+is a constant, so this is expressible) while `elapsed.fraction` differs, both asserted; and **no
+confidence band** — no key matching `band|confidence|interval|lower|upper|margin`, with the exact
+key set pinned and the method sentence asserted to carry no interval word.
+
+One correctness fix worth a reviewer's eye: whole-range figures read `ClassView.rows`, the buckets'
+own rows flattened, so a summary figure and the chart beside it cannot disagree about which sessions
+are in the period.
+
+### Spec problem — R-N8 stacks a measure its own justification does not cover
+
+**R-N8 makes the fourth summary tile a stacked area of *Completed Tasks* by WorkType**, and
+justifies the stacking with *"WorkType is a true partition — every AgentSession references exactly
+one"*. That is true of **sessions**. It is not true of **Tasks**: a Task with accepted sessions in
+two WorkTypes is a Completed Task under both, so the five columns can sum past the Organization's
+Completed Task count — which is exactly the false claim R-V1 exists to prevent, and the same shape
+as the Team problem R-V3 makes explicit.
+
+The fixture makes this real, not hypothetical: ticket 25 found **118 Tasks spanning more than one
+WorkType**.
+
+**R-N8 was followed** (`stackable: true`), because the spec is the fixed point and this is not an
+implementer's call. The two honest alternatives, for whoever decides: measure **sessions** in that
+tile, where the partition genuinely holds — but R-N4 names Completed Tasks and ticket 05 rejected
+session counts as a velocity measure; or **key each Task to its first accepted session's WorkType**,
+which restores the partition at the cost of a rule nothing else in the product uses.
+
+### Three decisions recorded rather than re-decided
+
+1. **The seat charge is not extrapolated on `/demo/projection`** — only session Cost is. R-M5 makes
+   seat cost a whole-month charge and R-D2 forbids pro-rating it, so projecting a fraction of it
+   would invent the precision both refuse.
+2. **Member-level groupings collapse subjects reached only through an *aggregated* grant into one
+   "Unnamed Members" series.** A per-person breakdown built from a `team` grant would be an
+   identified reading of an aggregated scope, which is precisely the distinction T-U10 exists to
+   keep.
+3. **`?session=` addresses R-N20.1's expanded row** as a surface switch, and is deliberately absent
+   from `DECLARED_CONTROLS.history` exactly as `?member=` is absent from `people` — neither is a
+   control, and R-C1 says a page shows only its declared controls.

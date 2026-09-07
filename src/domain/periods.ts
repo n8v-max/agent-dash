@@ -250,6 +250,33 @@ export function availableGrains(range: PeriodRange): readonly PeriodGrain[] {
   return dayGrainFits(bounds) ? PERIOD_GRAINS : COARSE_GRAINS;
 }
 
+/**
+ * An instant → the civil date it fell on in `timezone` (R-M10), or `undefined` where either is
+ * unreadable.
+ *
+ * Exported because `metrics/projection.ts` has to know which civil day `now` is in the
+ * Organization's zone, and this module owns the single `Intl` conversion in the program. A
+ * second one there would be a second answer to "what day is it in Madrid", which is exactly the
+ * disagreement the conversion was centralised to prevent.
+ */
+export function civilDayIn(timezone: string, instant: string): string | undefined {
+  const day = localDayFactory(timezone)?.(instant);
+  return day === undefined ? undefined : civilDateOf(day);
+}
+
+/**
+ * Whole civil days from `from` to `to`, inclusive of neither end — `2026-09-01` to `2026-09-08`
+ * is 7. `undefined` where either is not a `YYYY-MM-DD` civil date.
+ *
+ * Civil-date subtraction, not instant subtraction: the two differ across a DST boundary, and a
+ * period elapsed is counted in days a person worked, not in 86 400-second units.
+ */
+export function civilDaysBetween(from: string, to: string): number | undefined {
+  const start = parseCivilDate(from);
+  const end = parseCivilDate(to);
+  return start === undefined || end === undefined ? undefined : end - start;
+}
+
 /** Parses a grain out of a URL segment or query string. An unknown grain is not a grain. */
 export function parseGrain(text: string | undefined): PeriodGrain | undefined {
   return PERIOD_GRAINS.find((grain) => grain === text);

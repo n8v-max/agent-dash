@@ -37,6 +37,8 @@ import {
   PERIOD_GRAINS,
   availableGrains,
   bucketRows,
+  civilDayIn,
+  civilDaysBetween,
   parseGrain,
   planPeriods,
   type PeriodBucket,
@@ -390,5 +392,37 @@ describe("T-U8 — the aggregate over a timezone-bounded range (R-M10)", () => {
       const sum = Object.values(totals(timezone)).reduce((left, right) => left + right, 0);
       expect(sum).toBe(1110);
     }
+  });
+});
+
+// The two civil-date helpers `metrics/projection.ts` reads. They exist here rather than there
+// because this module owns the program's single `Intl` conversion (R-M10): a second one would
+// be a second answer to "what day is it in Madrid".
+describe("civil days, in the Organization's declared timezone", () => {
+  it("reads the civil day an instant fell on in that timezone, not in UTC", () => {
+    expect(civilDayIn("Europe/Madrid", "2026-09-02T22:30:00Z")).toBe("2026-09-03");
+    expect(civilDayIn("UTC", "2026-09-02T22:30:00Z")).toBe("2026-09-02");
+  });
+
+  it("has no day for an unknown timezone, and none for a string that is not an instant", () => {
+    expect(civilDayIn("Mars/Olympus_Mons", "2026-09-02T22:30:00Z")).toBeUndefined();
+    expect(civilDayIn("Europe/Madrid", "yesterday")).toBeUndefined();
+  });
+
+  it("counts whole civil days between two dates, signed", () => {
+    expect(civilDaysBetween("2026-09-01", "2026-09-08")).toBe(7);
+    expect(civilDaysBetween("2026-09-08", "2026-09-08")).toBe(0);
+    expect(civilDaysBetween("2026-09-30", "2026-09-01")).toBe(-29);
+  });
+
+  it("counts across a month boundary and across the CEST/CET change alike", () => {
+    // 2026-10-25 is the DST change in Madrid; the count is in civil days, so it is unaffected.
+    expect(civilDaysBetween("2026-10-24", "2026-10-26")).toBe(2);
+    expect(civilDaysBetween("2026-08-31", "2026-09-01")).toBe(1);
+  });
+
+  it("has no count where either end is not a civil date", () => {
+    expect(civilDaysBetween("September", "2026-09-08")).toBeUndefined();
+    expect(civilDaysBetween("2026-09-01", "2026-02-31")).toBeUndefined();
   });
 });

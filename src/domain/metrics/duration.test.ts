@@ -22,6 +22,7 @@ import {
   sessionDurationSummary,
   spanComposition,
   spanFaults,
+  medianOf,
   spansOf,
   type SpanRow,
 } from "./duration";
@@ -224,5 +225,21 @@ describe("T-U20 — the composition is computed over interactive sessions only (
       0,
     );
     expect(composition.total).toBe(machine);
+  });
+});
+
+describe("the median R-N17's comparator reads", () => {
+  it("is the nearest-rank median — an observation, never the mean of two", () => {
+    expect(medianOf([4, 1, 3, 2])).toBe(2);
+    expect(medianOf([10, 20, 30])).toBe(20);
+  });
+
+  it("is `null` over an empty sample — a median of nothing is not zero", () => {
+    expect(medianOf([])).toBeNull();
+  });
+
+  it("is the same arithmetic a duration is read with, on the same sample", () => {
+    const sample = [90, 30, 60, 5000];
+    expect(medianOf(sample)).toBe(durationSummary(sample).median);
   });
 });

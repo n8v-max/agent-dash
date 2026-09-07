@@ -106,6 +106,16 @@ export function durationSummary(seconds: readonly number[]): DurationSummary {
 }
 
 /**
+ * The median of any sample, on the same nearest-rank rule.
+ *
+ * It lives in this module because this is where percentile arithmetic is defined
+ * (`DURATION_PERCENTILES`), and R-N17's comparator — a Member's value beside their Comparison
+ * group's **median** — must be the same median a duration is read with. Two implementations
+ * would let one surface interpolate where the other does not, on the same fixture.
+ */
+export const medianOf = (values: readonly number[]): number | null => durationSummary(values).median;
+
+/**
  * **Session duration — wall-clock from start to end**, `CONTEXT.md` § Metric Concepts. Read off
  * the two stored instants rather than off `machine_allocation_duration_s`: the two are the same
  * number on every committed row and `src/data/duration.fixture.test.ts` asserts it, but they
