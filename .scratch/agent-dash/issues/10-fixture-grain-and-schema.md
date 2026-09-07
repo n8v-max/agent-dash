@@ -1,6 +1,6 @@
 Type: grilling
 Status: open
-Blocked by: 13, 16
+Blocked by: 16
 Label: wayfinder:grilling
 
 # Fixture grain and schema

@@ -1,5 +1,5 @@
 Type: grilling
-Status: open
+Status: wontfix
 Label: wayfinder:grilling
 
 # Cross-vendor token-class normalisation
@@ -87,3 +87,19 @@ storage grain it no longer is — the canonical shape is fixed and the fixture i
 What survives is a scoping question about how much of the normalisation boundary this project
 builds versus documents. Cheaper than it looked, and it should be resolved before 10 so the
 fixture knows whether it needs vendor-shaped input cases at all.
+
+## Closed 2026-09-07 — wontfix
+
+Scope cut to the top three tickets. Safe to close, because the convergence pass above had already
+reduced this from a correctness question to a scoping one.
+
+**The default that now applies.** The vendor-mapping boundary is **documented, not built.**
+`CONTEXT.md` § Models & Money already states the canonical four disjoint classes, the collapsed
+cache-write TTL, the collapsed rate-card key and the precision this loses. Fixtures are authored
+directly in the canonical shape, so no vendor reading is ever parsed and no normalisation function
+exists to test. There are no vendor-shaped input cases in the fixture — which is the answer
+ticket 10 was waiting on.
+
+**What that costs.** The product is multi-vendor by assertion rather than by demonstration. The
+un-normalisable-reading question is not answered, but nothing can trigger it either, so it cannot
+produce a silently wrong total.

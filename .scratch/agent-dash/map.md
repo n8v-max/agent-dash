@@ -260,26 +260,28 @@ and no ticket has discharged.
 Five tickets are open and unblocked; two are blocked behind them. The path is not flat — **05 is
 the keystone and gates most of the remainder.**
 
-**Updated 2026-09-07 after ticket 05 resolved.** Seven tickets remain, four of them unblocked.
+**Updated 2026-09-07, twice.** Ticket 05 resolved, then **scope cut to three tickets.** Four
+were closed `wontfix` — not answered, but defaulted, with each default and its cost recorded in
+the ticket file. The map now closes after 10.
 
-| Order | Ticket | Type | Blocks |
+| Order | Ticket | Type | State |
 |---|---|---|---|
-| ~~1~~ | ~~05 metric set~~ | grilling | **Resolved 2026-09-07** |
-| 1 | [07](issues/07-information-architecture.md) IA and route map | grilling | 11 |
-| 2 | [16](issues/16-work-domain-and-model-roster.md) vocabularies and roster | grilling | 10 |
-| 2 | [13](issues/13-token-class-normalisation.md) token normalisation | grilling | 10 |
-| 2 | [06](issues/06-role-preset-table.md) role presets | grilling | — |
-| 3 | [10](issues/10-fixture-grain-and-schema.md) fixture grain and schema | grilling | — |
-| 4 | [11](issues/11-empty-state.md) zero-data state | prototype | — |
-| 5 | [09](issues/09-testing-architecture.md) testing architecture and seams | grilling | — |
+| 1 | [07](issues/07-information-architecture.md) IA and route map | grilling | open |
+| 2 | [16](issues/16-work-domain-and-model-roster.md) vocabularies and roster | grilling | open |
+| 3 | [10](issues/10-fixture-grain-and-schema.md) fixture grain and schema | grilling | blocked by 16 |
+| — | ~~05 metric set~~ | grilling | resolved |
+| — | ~~06 role presets~~ | grilling | **wontfix** — one permissive preset ships; the matrix is documented, never exercised |
+| — | ~~09 testing architecture~~ | grilling | **wontfix** — unit targets inherited from 05 and 08; the computation/rendering seam is undrawn |
+| — | ~~11 zero-data state~~ | prototype | **wontfix** — no designed empty state; `/demo` always carries data |
+| — | ~~13 token normalisation~~ | grilling | **wontfix** — boundary documented, not built; no vendor-shaped fixture rows |
 
 07 leads because 05 handed it three decisions outright — view grouping, page layout, and what
-occupies the fourth headline tile when rework rate flatlines. 13, 16 and 06 are mutually
-independent. 09 is unblocked today but placed last on purpose: 05 named three pure functions for
-it, and the seam is easiest to draw once the fixture shape exists.
+occupies the fourth headline tile when rework rate flatlines. 16 then unblocks 10, and 10 is the
+last thing the spec needs.
 
-**11 is a prototype, not a conversation**, and its own constraint says whoever resolves it must
-build the options and not pick one. Budget for that when 05 and 07 land.
+**The discard with the most exposure is 09.** Test coverage is one of the three stated grading
+criteria, and while five unit-test targets are already named by 05 and 08, nobody has drawn the
+seam between metric computation and rendering. Recorded there in full.
 
 ## Handoff shape
 

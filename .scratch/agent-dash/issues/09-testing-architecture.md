@@ -1,5 +1,5 @@
 Type: grilling
-Status: open
+Status: wontfix
 Label: wayfinder:grilling
 
 # Testing architecture and seams
@@ -83,3 +83,30 @@ most obvious unit-test targets:
 Also relevant: **hidden sessions** — infra-failed sessions absent from every metric — are a
 filtering rule that must hold across the whole data layer, which is the kind of invariant that is
 cheap to assert once and expensive to click through.
+
+## Closed 2026-09-07 — wontfix
+
+Scope cut to the top three tickets. **Recorded with a reservation**: test coverage is one of the
+three stated grading criteria in the assignment, so this is the discard with the most exposure.
+
+**The default that now applies**, assembled from decisions already made rather than from this
+ticket:
+
+- **Unit tests target the three pure functions ticket 05 named**: `(rows, timezone) → period
+  buckets`, session pricing across the token and compute rate cards, and the change-floor rule.
+  Plus the two ticket 08 named: the `WorkType → artefact kind` comparability intersection, and
+  the hidden-session filter.
+- **Chart output is asserted through the visually-hidden `<table>` mirror** that ticket 14 put in
+  scope as an accessibility requirement. It is queryable DOM, so no SVG parsing and no fallback
+  to Playwright.
+- **Fixed numeric `width`/`height` for charts under test**, not `initialDimension`. This was the
+  one item genuinely still open here, and it is settled by default on ticket 04's finding that
+  the `ResizeObserver`-polyfill failure mode is confusing rather than loud.
+- **Determinism** comes from fixtures being authored and committed rather than generated at test
+  time.
+
+**What that costs.** Nobody has decided where the seam between metric computation and rendering
+sits. The intent — pure functions over fixture rows, isolated from React — is implied by the list
+above but is not architecture until someone draws it. The specific risk ticket 14 flagged also
+goes untested: shadcn's default legend uses `key={index}`, so React will reconcile "Team A" into
+"Team B" in place across a roll-up switch, and only a test pinning legend *identity* catches it.

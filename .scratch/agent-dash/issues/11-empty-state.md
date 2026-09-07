@@ -1,6 +1,6 @@
 Type: prototype
-Status: open
-Blocked by: 07
+Status: wontfix
+Blocked by: —
 Label: wayfinder:prototype
 
 # Zero-data state
@@ -40,3 +40,16 @@ proposes, length is the variable that kills it.
 ## Blocked by
 
 05 and 07 — the panels and surfaces have to exist before their empty form can be designed.
+
+## Closed 2026-09-07 — wontfix
+
+Scope cut to the top three tickets.
+
+**The default that now applies.** No designed zero-data state. The demo always carries data, and
+surfaces fall back to plain "no data for this selection" text where a filter empties a panel.
+The shell, navigation and controls stay present in that case.
+
+**What that costs.** The first-run experience is undesigned. NNG's *"explore with demo data"*
+affordance is not taken, and an organisation with no data would see a functioning dashboard full
+of empty panels. Acceptable here because `/demo` is the only surface a reviewer will reach, and
+it is never empty.

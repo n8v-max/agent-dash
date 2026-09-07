@@ -1,5 +1,5 @@
 Type: grilling
-Status: open
+Status: wontfix
 Label: wayfinder:grilling
 
 # The role preset table
@@ -99,3 +99,21 @@ what the restricted presets actually withhold. A preset granting `jobs` but not 
 Total spend, cost per session and cost per completed Task — including **the third headline
 tile**, which is the product's differentiator. Whether a restricted preset that removes the
 differentiator is worth shipping on `/demo` is a real question for this ticket.
+
+## Closed 2026-09-07 — wontfix
+
+Scope cut to the top three tickets. This one is **not answered; it is defaulted.**
+
+**The default that now applies.** One preset ships: the permissive one ADR-0003 already
+specifies — every Member holds `org-member` scope over `jobs`, `tokens` and `cost`. The
+permission matrix is rendered read-only as documentation of the model, and nothing restricts.
+
+**What that costs.** `CONTEXT.md` calls the two-dimensional matrix a central, non-obvious idea,
+and with no restricted preset it demonstrates nothing: a grid where every cell is granted is
+indistinguishable from having no grid. The mechanism is described but never exercised, in the
+demo or in tests. If one thing is later reinstated from this ticket, it should be a **single**
+restricted preset — a contractor scoped to `self` is the cheapest — purely so the switcher on
+`/demo` has two states to switch between.
+
+Also unanswered and now defaulted: `org-member` × `access` survives by default, and a Member
+holds exactly one preset.
