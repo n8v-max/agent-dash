@@ -1,0 +1,67 @@
+// **R-X1 — the visually-hidden `<table>` mirror of a chart's grouped data.**
+//
+// It is a product requirement first: a screen-reader user gets the chart's actual figures as a
+// table rather than an SVG they cannot read. That it is simultaneously the most robust assertion
+// target in the suite — chart *output* as queryable DOM, with no SVG parsing (`testing-spec.md`
+// P2, T-C1) — is a consequence, not the reason.
+//
+// **`sr-only`, not `hidden`.** The table is removed from the visual layout and kept in the
+// accessibility tree. `display: none` or `aria-hidden` would take it out of the tree and leave
+// the requirement satisfied only in the markup.
+//
+// **The values are the domain layer's** (R-T7). `mirror` is summed out of the aggregation grid
+// on a path that never reads a `SeriesPoint`, so this component prints a second, independent
+// statement of what the chart claims — which is what makes T-C1 a cross-check rather than one
+// array printed twice. Nothing here recomputes, reorders or re-derives a cell.
+
+import type { MirrorViewModel } from "@/domain/viewmodel";
+
+/** Deterministic and locale-pinned: a server's locale must not decide what a figure reads as. */
+const number = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
+
+const text = (cell: string | number): string =>
+  typeof cell === "number" ? number.format(cell) : cell;
+
+export function TableMirror(props: {
+  readonly mirror: MirrorViewModel;
+  /** What the table is of — the chart's title and its roll-up level, said in words. */
+  readonly caption: string;
+}) {
+  const { columns, rows } = props.mirror;
+
+  return (
+    <table className="sr-only">
+      <caption>{props.caption}</caption>
+      <thead>
+        <tr>
+          {/*
+            Keyed by the column heading, never by position (R-T8). The mirror's headings are the
+            bucket column plus the series labels, and a repeated heading would be an unreadable
+            table before it was a duplicate key.
+          */}
+          {columns.map((column) => (
+            <th key={column} scope="col">
+              {column}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={String(row[0])}>
+            {columns.map((column, at) => {
+              const cell = row[at];
+              return at === 0 ? (
+                <th key={column} scope="row">
+                  {cell === undefined ? "" : text(cell)}
+                </th>
+              ) : (
+                <td key={column}>{cell === undefined ? "" : text(cell)}</td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}

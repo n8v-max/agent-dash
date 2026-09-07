@@ -133,3 +133,57 @@ contain the viewer's *own* name, so the negatives cannot pass vacuously) and the
 guards** on the search sets. And re-run ticket 29's falsification probe afterwards — render a
 name and a cost in a `hidden` section and confirm T-E4 still fails — because an exclusion list is
 exactly the kind of change that can quietly make an assertion unable to fire.
+
+### 2026-09-08 — T-E4 measured, and the predicted decimal hazard does not exist
+
+**The premise of the note above is wrong on this stack, and the remedy it proposes would have
+removed nothing.** Recorded rather than re-decided: T-E4 is unchanged and green.
+
+Measured with **ten `ChartFrame`s** — all five shapes, twice — temporarily rendered on
+`/[org]/spend` and `/[org]/work` against real query output, in a **production build**
+(`next build` + `next start`, which is what CI runs). The probes were reverted afterwards.
+
+- `hasSvg: false`, `hasPath: false` on **both** routes. **Recharts emits no SVG into the response
+  payload at all.** Recharts 3 delivers the chart's width and height to its store from a
+  `useEffect` (`chartLayoutContext.js`), effects do not run during SSR, so `MainChartSurface`
+  returns `null` and the entire chart — surface, paths, ticks, transforms, legend — exists only
+  after hydration. T-E4 reads response bodies (`page.goto().text()` plus a raw `RSC: 1` fetch),
+  never the hydrated DOM. **There are no chart geometry decimals in the payload to collide with
+  anything.**
+- Of the decimals T-E4 *did* flag, **zero** sat in any context the note proposed subtracting —
+  SVG geometry attributes, `class`/`className`, inline `style`. The proposed exclusion would have
+  been pure loss of coverage.
+
+**The real hazard is different, and it is not about charts.** The 15 values flagged on
+`/demo/spend` were all `<td>` cells of the R-X1 **mirror**: the viewer's **own** weekly cost
+aggregates (verified — the Repository chart's series sum equals the viewer's own session total
+exactly, 746.41, so the access model is correct), coinciding by value with *other* Members'
+individual session-cost literals. `ungrantedCostLiterals` holds **443** distinct two-decimal
+literals in a narrow money range, so **any page that renders a money figure at 2dp has a high
+chance of tripping T-E4 whether or not it leaked anything** — chart or table, mirror or tile.
+T-E4 has been green only because no page renders money yet. **Wave 9 hits this on its first
+panel, and it is a question about T-E4's construction, not about the panels.** Left for whoever
+owns `testing-spec.md` § 5; nothing here re-decides it.
+
+**Ticket 29's falsification probe was re-run with the ten charts present**, in the same production
+build: a Member name and an ungranted cost rendered inside a `<section hidden>` on `/[org]/work`.
+Both assertions failed — `["Nuria Castells Vidal"]` and `["2.44"]` — so T-E4 still fires, and the
+charts do not mask it. Probe reverted.
+
+### 2026-09-08 — two smaller notes from the same wave
+
+**Ticket 18's recorded patch-3 diff does not typecheck as written.**
+`key={item.dataKey ?? item.name ?? index}` fails `TS2322`: Recharts 3 types `dataKey` as
+`string | number | ((obj) => unknown)`, and a function is not a `React.Key`. Applied as
+`key={String(item.dataKey ?? item.name ?? index)}` — the minimal change that keeps the stable
+identity. The legend site is exactly as recorded (`key={key}`, and the now-unused `index`
+binding removed).
+
+**The `base-nova` chart palette is a monochrome ramp, and it reads badly for categorical series.**
+`--chart-1` is `oklch(0.87 0 0)` against a `--background` of `oklch(1 0 0)` — roughly 1.2:1 — and
+it is the variable `series.ts` assigns to the *top-ranked* series. Five greys are also not
+categorically distinguishable, which is the one job a series palette has. R-V7 caps the palette at
+**five**; it says nothing about their hues, so redefining the five values in `globals.css` is
+permitted and would not extend anything. Not done here: the charts are not on a page yet, no
+component hard-codes a colour (every mark reads `var(--color-<key>)` off the `ChartConfig`), so
+this stays a one-file change for whoever owns the panels' visual pass. Recorded, not re-decided.
