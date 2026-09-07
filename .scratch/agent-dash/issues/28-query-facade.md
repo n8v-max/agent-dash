@@ -95,3 +95,59 @@ checkable rather than judged:
   comparator (R-N17) · the permission matrix (R-A10).
 - **`/demo/history`** — the flat session table (R-N19) · the expandable row (R-N20.1).
 - **`/demo/projection`** — actual to date plus the extrapolation (R-N23).
+
+### 2026-09-08 — design pass before implementing (AFK build, wave 6)
+
+The handover calls for the extra design pass here and nowhere else. Recorded in the deep-module
+vocabulary, because the choice that matters is **where the seam is and how wide the interface is**,
+not what goes behind it.
+
+**Decision: one query per page, not one per panel.**
+
+The obvious shape is one exported function per panel — around twenty of them,
+`costPerCompletedTaskOverTime(viewer, params)` and so on. Rejected. It is a **shallow** interface:
+twenty entry points for a caller to learn, each a thin wrapper, and the route has to know which
+seven to call and in what order. Worse, each would independently load rows, resolve the viewer's
+grants, and bucket the range — so seven panels on one page could disagree about the population or
+the bucket edges, which is the same failure `aggregate.ts` avoided by computing the overlap note in
+the grouping pass that did the double counting.
+
+**One function per page** — `spendPage(viewer, params) → SpendPageViewModel` — is the deeper
+interface. A route learns one call. The load, the permission filter (R-T17, before aggregation),
+and the bucketing happen **once per page**, so the panels on it cannot disagree. The page ViewModel
+holds one fully-resolved panel ViewModel per panel, and the page component's whole job is to hand
+each panel its slice.
+
+Six functions, one per route in R-N1. `/demo/people` and `/demo/history` return discriminated
+results where a param switches the surface (`?member=` → profile rather than table).
+
+**The deletion test.** Delete `queries.ts` and the complexity does not vanish — it reappears in
+every route, each loading, filtering, bucketing, aggregating, capping and comparing for itself.
+It earns its keep.
+
+**The interface is the test surface.** A page ViewModel is a single assertion target, and it is the
+same surface the panels consume. There is nothing to test *past* it.
+
+**R-T16 is enforced by the type, not by convention.** `Viewer` is producible only by ticket 29's
+`resolveViewer`, which verifies the JWT. Every query takes it as its first parameter, so a query
+callable without a viewer has no expression — "an unfiltered query does not typecheck" is
+structural rather than aspirational.
+
+**R-T7 — the mirror's independence is in the derivation path, not in the values.** T-C1 requires
+the mirror's values to *equal* the rendered series, so they cannot be allowed to differ. What
+R-T7 forbids is deriving the mirror *from the series array*, which would make it a second printing
+of one array and prove nothing. The mirror is therefore built from the **aggregation result**
+(bucket keys × group keys → values) on its own path, while the series are built from the same
+aggregation through capping, ordering and painting. They share the arithmetic and not the array,
+which is what makes T-C1 a real cross-check.
+
+**A new domain module carries this**, because R-T7 says the mirror is built in the domain layer and
+no module builds one yet. `queries.ts` stays orchestration — load, filter, bucket, measure, assemble
+— over deep domain modules, and the ViewModel assembly itself lives below the seam so a component
+still has nothing in scope to compute with.
+
+**The params type must sit at or below `src/data`.** R-T26 puts the parse/serialise module in
+`components/controls/` (ticket 30), but `queries.ts` consumes what it produces, and `src/data` may
+not import `src/components`. Ticket 28 therefore defines the validated control-set **type**; ticket
+30 builds the parser that produces it. `periods.ts` already exposes `availableGrains` and
+`parseGrain` for exactly this handover.
