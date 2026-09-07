@@ -15,7 +15,13 @@ platform and manages Members. All analytics are scoped to an Organization. It de
 for Team and Member import.
 
 **Team** — A group of Members within an Organization, imported from a GitHubTeam in the linked
-GitHubOrg. A Member belongs to one or more Teams. Hierarchy: Organization → Team → Member.
+GitHubOrg. A Member belongs to one or more Teams.
+
+**Teams and Members are many-to-many, so Team is a non-additive grouping.** The sum of every
+Team's figures exceeds the Organization's, because an overlapping Member is counted in each Team
+they belong to. There is no primary Team and no partition: Organization → Team → Member is a
+containment hierarchy, not a roll-up. Any surface grouping by Team must therefore avoid forms
+whose geometry asserts a partition, and must state how many Members overlap.
 
 **Member** — An account that belongs to an Organization and runs Tasks. Carries a Role and a
 **kind**: `human` or `service_account`. Kind is a roll-up level on the Member dimension, in the
@@ -26,10 +32,11 @@ denominator.
 **Repository** — A GitHub repo within the linked GitHubOrg. Tasks are tagged to a Repository.
 Surfaced in the UI as "Project".
 
-A Repository carries a **work domain** label — e.g. mobile, data science, backend, frontend,
-infrastructure config. The domain, not the repo identity, is what makes this dimension
-analytically valuable: agent efficacy and cost profile differ sharply by the *nature of the
-work*. The domain vocabulary is an open decision.
+A Repository carries **no work-domain label**, and no roll-up level: it is a flat dimension. The
+nature of the work is expressed by `Repository × WorkType` instead. One label per repository would
+be false — a real repository runs several technologies at once — and several labels would break
+additivity on every chart grouped by them. The technology signal survives in the repository name.
+See `docs/adr/0004-repository-carries-no-work-domain.md`.
 
 ---
 
@@ -40,8 +47,8 @@ A Task is addressed by one **or more** AgentSessions. **UI alias: "Job".** `Task
 canonical term in code, schemas and specs; `Job` is the label shown to users and the name of
 the corresponding datapoint class.
 
-A Task is **externally keyed**: it *is* an issue in an external tracker (Jira, GitHub Issues),
-referenced by its real key. The platform **refuses to launch an AgentSession without one**, for
+A Task is **externally keyed**: it *is* a GitHub Issue in the linked GitHubOrg, referenced by its
+real key in `owner/repo#number` form. GitHub is the only tracker integration. The platform **refuses to launch an AgentSession without one**, for
 accountability; a Member with no existing issue creates one ad hoc at launch, seeded from the
 session's opening intent. The key is therefore never absent and never synthetic, which is what
 makes multi-session analysis trustworthy.
@@ -52,8 +59,13 @@ of scope. What the platform observes is the sessions it ran against the Task.
 
 **AgentSession** — A single *attempt* at a Task, and the atomic unit of platform activity: the
 grain at which cost is incurred and the grain everything is stored at. It is launched under a
-fixed set of labels — Member, Repository, WorkType, Task, and `execution_mode` — and accumulates
-measures as it runs.
+fixed set of labels — Member, Repository, WorkType, Task, `execution_mode` and `machine_spec` —
+and accumulates measures as it runs.
+
+**Machine spec** — The class of machine allocated to a session: `general`, `compute`, `memory` or
+`storage`. It is fixed at launch and it is the key of the compute rate card. It is **not an
+aggregation dimension**: nothing is grouped by it, in the same way `WorkType.source` is provenance
+rather than a level.
 
 **Execution mode** — Whether a human is at the keyboard: `interactive` | `headless`. It is a
 **property of the session, not of the Member**: a human runs headless sessions, and a service
@@ -67,15 +79,16 @@ session end, which is what keeps session rows immutable and every metric free of
 
 - **`accepted`** — Whether the session met its WorkType's acceptance criterion. **This is the
   session's only outcome field.** Each WorkType defines its own criterion, and the criterion names
-  the artefact that actually matters: for `implementation` it is a **published pull request**, not
-  the presence of a branch or a commit.
+  the artefact that actually matters, never the presence of a branch. `implementation`, `bugfix`
+  and `refactor` accept on a **published pull request**; `review` on a **submitted review with an
+  outcome**; `deploy` on a **commit landed on the default branch**.
 - **`prompt_count`** — User messages sent during the session. The single interaction-volume
   measure; there is deliberately **no interruption counter**, because no surveyed vendor ships
   one and Devin documents `num_user_messages` as the standing proxy for "frequent interruptions
   or course corrections".
-- **Output artefacts** — Typed counts of permanent objects produced: `pull_request`, `commit`,
-  `file_changed`, `line_changed`, `comment`, `document`. Permitted kinds are declared per
-  WorkType. See Output comparability, below.
+- **Output artefacts** — Typed counts of permanent objects produced. Every artefact lives on
+  GitHub: `pull_request`, `commit`, `file_changed`, `line_changed`, `pr_comment`. Permitted kinds
+  are declared per WorkType. See Output comparability, below.
 - **TokenUsage** — See § Models & Money.
 - **Duration spans** — See below.
 
@@ -97,10 +110,10 @@ Because the partition is keyed on the *human* rather than on the actor doing the
 execution time is **not separately recoverable** from these three spans. That is accepted, and
 noted here because it is the change machine-use analysis will require.
 
-**Machine allocation** — Wall-clock time a session held a machine. It is **priced**, against a
-compute rate card keyed on the machine specification allocated, and the resulting figure folds
-into the session's Cost alongside token cost. The compute rate card is **never surfaced**: rates
-vary by specification and the breakdown is not something a viewer is asked to reason about.
+**Machine allocation** — Wall-clock time a session held a machine. It is **priced**, against the
+compute rate card keyed on the session's `machine_spec`, and the resulting figure folds into the
+session's Cost alongside token cost. The compute rate card is **never surfaced**: rates vary by
+specification and the breakdown is not something a viewer is asked to reason about.
 
 Pricing it is what lets token spend and machine spend disagree. A CPU-heavy, token-light session —
 CI-shaped work that burns machine time without consuming models — is invisible to a token figure
@@ -113,14 +126,16 @@ with no platform noise in it, and it is why the session model needs no terminal-
 
 **Output comparability** — Output artefact counts are comparable only across WorkTypes that
 share an artefact kind. `refactor` and `implementation` both produce changed lines; `review` and
-`refactor` share nothing, so no chart may put them on one axis. The `WorkType → [artefact kind]`
+`refactor` share nothing, so no chart may put them on one axis. The three code WorkTypes —
+`implementation`, `bugfix`, `refactor` — also share an *acceptance criterion*, so their acceptance
+rates are comparable with each other; `review` and `deploy` are comparable with neither. The `WorkType → [artefact kind]`
 map is **data**, and comparability is its intersection, evaluated in the data layer rather than
 enforced by convention inside a chart component. In the UI the dependency runs the other way
 round: **choosing a datapoint conditions which WorkTypes are offered**, so an incomparable
 selection cannot be expressed in the first place.
 
 **Rework** — A Task on which a **non-accepted** session was followed by **another session** —
-of any WorkType. The follow-up need not attempt the same class of work: a failed `research`
+of any WorkType. The follow-up need not attempt the same class of work: a failed `review`
 session followed by an `implementation` session is still a second attempt at the same Task.
 The distinction between Task and AgentSession exists so that Rework is *measurable* at all —
 three retries of one Task and three first-time-successful Tasks are otherwise indistinguishable.
@@ -140,11 +155,13 @@ interpretable — the raw count alone cannot tell a retry from a split.
 **WorkType** — The class of work a session is launched to do. **UI alias: "template".** It is
 one dimension, not two: the agent configuration *is* the work type, so choosing "bugfix" both
 declares intent and bootstraps the session — loading the appropriate skills and prefixing the
-first prompt with framing such as *"implementing Jira ABC-42"*. Every AgentSession references
+first prompt with framing such as *"implementing acme/api-gateway#412"*. Every AgentSession references
 exactly one WorkType.
 
-The vocabulary is **global and flat**: `research`, `implementation`, `refactor`, `bugfix`,
-`review`, `deploy`. Deliberately **not repo-scoped** — a WorkType may well behave differently on
+The vocabulary is **global and flat**: `implementation`, `refactor`, `bugfix`, `review`, `deploy`.
+`research` was cut: with every artefact on GitHub it could produce nothing but a comment, and a
+WorkType whose acceptance criterion cannot name a real artefact weakens the efficacy metric
+everywhere. Deliberately **not repo-scoped** — a WorkType may well behave differently on
 a mobile repo than on an infra one, but that interaction is a *finding to surface*, not a reason
 to multiply the values by the repository count.
 
@@ -190,14 +207,20 @@ now, since FOCUS notes that `ModelId` is *"not guaranteed to match across servic
 which is precisely the gap a capability tier exists to close.
 
 **Rate card** — The pricing that converts a measured quantity into Cost. There are two: the
-**token rate card**, keyed on (model × token class), and the **compute rate card**, keyed on the
-machine specification allocated. Only the token card is ever surfaced to a viewer.
+**token rate card**, keyed on (model × token class), and the **compute rate card**, keyed on
+`machine_spec`. Both are **inputs to the upstream system that attributes Cost**, not to this
+application, which prices nothing — see Cost, below. Only the token card is ever surfaced to a
+viewer, as a reference table showing the rates the attributed figures were priced against.
+
+Both cards are **period-stable**: a rate does not change inside a reporting window. A mid-window
+change would make a rise in spend ambiguous between more usage and a higher price, and no surface
+can tell the reader which it was.
 
 The token card **is not keyed on Model alone**: in the real market the key is (model × token class × service tier × context tier ×
 region × speed). How much of that key this project models is an open decision.
 
-Rate cards here are **illustrative** and must be labelled as such wherever they are surfaced.
-Useful stable ratios: output ≈ 5× input, cache read ≈ 0.1× input, cache write 1.25–2× input,
+Rate cards here are **illustrative** — see the labelling rule under Cost, below. Useful stable
+ratios: output ≈ 5× input, cache read ≈ 0.1× input, cache write 1.25–2× input,
 batch ≈ 50% off. The spread from the fastest to the frontier tier is roughly **200× on input** —
 which is why Model mix, not token volume, dominates cost variance.
 
@@ -206,8 +229,8 @@ may consume tokens across more than one Model.
 
 Stored as **four raw, disjoint counts** per (AgentSession × Model): uncached input, cache read
 (hits), cache write (creation/misses), and output. Disjointness is the property that matters —
-it is the only shape that sums safely. Cost is **derived** from these against the rate card,
-never stored alongside them.
+it is the only shape that sums safely. The counts are kept because token volume is an adoption
+measure in its own right, not because Cost is computed from them here — it is not.
 
 For display the four are **summed into one "tokens processed" figure**, because four numbers per
 model is more than a viewer needs. That the sum weights a cache read the same as an output token
@@ -236,10 +259,15 @@ period, viewable at any of the three roll-up levels. It is a **breakdown, not a 
 axis**: a single AgentSession may span several Models, so no per-session metric can be grouped
 or filtered by Model without attributing a session's cost to one of them unsoundly.
 
-**Cost** — Monetary spend. At AgentSession grain it is **token cost plus machine cost**, both
-derived — token cost from TokenUsage against the token rate card, machine cost from machine
-allocation against the compute rate card. The two are **blended by default**; a session presents
-one figure.
+**Cost** — Monetary spend. At AgentSession grain it is **token cost plus machine cost**, blended
+into one figure; a session never presents the two separately.
+
+**Cost is attributed upstream and stored on the session row.** The platform's billing system
+prices each session against the two rate cards and hands the figure over; this application
+aggregates it and prices nothing. Analytics that computed its own money would contradict the rule
+below that authoritative money lives in billing. The consequence — that the pricing function is no
+longer this project's cleanest unit-test target — is recorded in
+`docs/adr/0005-session-cost-is-attributed-not-derived.md`.
 
 **Seat cost** — The recurring per-seat subscription fee. Seats attach to Members of kind `human`
 only; service accounts hold none. Seat cost is **not a metric of its own and not part of session
@@ -253,10 +281,14 @@ pays. It rolls up to Member, Team, and Organization.
 Seat cost is what makes a low-usage Member legible: a seat held against near-zero usage is the
 highest cost per unit of work in the Organization, and a consumption-only model cannot see it.
 
-Cost derived from usage telemetry is **estimated**, and every surveyed vendor labels it so —
-authoritative money lives in billing, not in analytics. This product surfaces estimates only,
-and says so. Note also that vendors report usage down to the minute but **cost only at daily
-grain**; whether this product inherits that asymmetry is an open decision.
+Authoritative money lives in billing, not in analytics — which is why this product reads an
+attributed figure rather than computing one. An attributed figure is the bill, so it is **not**
+labelled "estimated"; only **Projected cost** carries that label, because a forecast is the one
+money figure here that really is an estimate.
+
+The rates themselves are **illustrative** and are labelled so wherever the token rate card is
+displayed. That label and the projection label warn about two different things: the rates are
+invented, and the forecast is uncertain. The attributed costs are neither.
 
 ---
 
@@ -318,16 +350,17 @@ without being re-stored. Selecting a level is a user-facing control, not a schem
 |---|---|
 | Member | Member → Team → Organization; `kind` (`human` / `service_account`) |
 | Model | exact model → family → tier |
-| Repository | repository → work domain |
+| Repository | flat — no roll-up levels |
 | WorkType | flat — no roll-up levels; `source` is provenance, not a level |
-| Cohort | Repository work domain, WorkType, or both — **viewer-selected** |
 
-**Cohort** — Not an access scope. A comparison group: the population it is *meaningful* to measure
-a Member against, being those doing comparable work. Its key is viewer-selected, so membership is
-computed per view rather than stored, and a Member belongs to as many cohorts as they do kinds of
-work. It answers *"am I heavy or light on work like mine"*, which a Team-level or org-level
-average cannot — the sole engineer doing mobile work has no meaningful comparator on their own
-Team. Access does not gate it; relevance is what it is for.
+**Team is the one non-additive level.** Members are many-to-many with Teams, so Team figures
+overlap and do not sum to the Organization. Every other level named here is a true partition.
+
+**`Cohort` is cut.** It was a viewer-keyed comparison group over Repository work domain and
+WorkType. Work domain no longer exists, and once the filter set is fixed at
+`Repository × Team × WorkType` on every analytical surface, `Cohort` named nothing the filters do
+not already name. The similarity relation it expressed — *"people doing work like mine"* — is now
+carried by Repository. See `docs/adr/0004-repository-carries-no-work-domain.md`.
 
 ## Metric Concepts
 
@@ -368,6 +401,10 @@ the period elapsed. A forecast, not a measurement.
 
 **Period** — Day, week, or month. Boundaries are computed in the **Organization's declared
 timezone**, so an Organization's "last month" is the month its people worked, not a UTC artefact.
+
+**Day is available only over ranges of two months or less.** Over a longer range a daily bucket
+holds too few sessions to read, and every surveyed vendor reports cost at daily grain and no
+finer for the same reason.
 
 **Period-over-period comparison** — Any period may be compared with any other; the product
 imposes no restriction on the base. A period that has not finished is **flagged as incomplete**

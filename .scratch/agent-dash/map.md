@@ -64,9 +64,10 @@ Settled at charting (2026-09-05), before any ticket existed:
   labels and a user-facing zoom control. Model choice is the speed/cost lever, so abstracting
   it away destroys the insight. Rate cards are illustrative and labelled as such.
   → `CONTEXT.md` § Models & Money
-- **Repository is a first-class aggregation dimension**, carrying a *work domain* label
-  (mobile / DS / BE / FE / infra config). Nature-of-work is what makes it analytically
-  valuable. → `CONTEXT.md` § Aggregation Dimensions
+- **Repository is a first-class aggregation dimension**, ~~carrying a *work domain* label
+  (mobile / DS / BE / FE / infra config)~~. **The work-domain label was reversed 2026-09-07 by
+  ticket 16**: Repository is flat, and nature-of-work is carried by `Repository × WorkType` plus
+  the repository name. → `docs/adr/0004-repository-carries-no-work-domain.md`
 - **Public surface thinned**: `/demo` and a minimal landing earn their place; the OAuth-like
   signup flow does not.
 
@@ -229,7 +230,61 @@ Resolved tickets:
   per-page filters, default ordering, projection ships) and 06 (restricted preset reinstated).
   **Recorded gap:** the four disjoint token classes and per-session model mix appear on no surface.
 
-**Research tickets 01–05 are resolved (01–04, 15), and four HITL tickets (14, 12, 08, 05) are answered.**
+- **Repository work-domain vocabulary and the Model roster** ([ticket
+  16](issues/16-work-domain-and-model-roster.md), 2026-09-07, HITL): **half the ticket was cut
+  rather than filled.** **Repository carries no work-domain label and no roll-up level** — one
+  label per repo is false because a repo runs several technologies at once, and several labels
+  break additivity on every chart grouped by them. `Repository × WorkType` already meets the
+  standard brief 15 set, and the technology signal survives in the repository *name*:
+  `terraform-infra` at 0.44 acceptance against `web-console` at 0.78 is a finding the reader
+  discovers rather than reads off an axis label. → `docs/adr/0004`. **`Cohort` is cut entirely** —
+  with the filter set fixed at `Repository × Team × WorkType` on every surface it named nothing the
+  filters do not; Repository now carries the similarity relation. **Model roster: seven models,
+  three vendors, every tier cross-vendor (2/2/3)** — `tier` has no precedent, so a tier holding one
+  vendor would be a coincidence rather than a claim. **`family` carries the vendor** (`Claude
+  Opus`, `OpenAI GPT-5`, `Gemini Pro`), because vendor appears at no other level and a bare
+  `Opus` legend makes the reader supply it. **Real model names**, since the tier bet is only
+  checkable against models a reader has opinions about. **Token card: one input price per model,
+  uniform ratios (read 0.1× / write 1.25× / output 5×), frontier over fast exactly 200×.**
+  **Compute card `general`/`compute`/`memory`/`storage` at $0.30/$1.20/$0.90/$0.45 per hour, never
+  displayed**; `machine_spec` added to the session's launch labels, because the card had no key
+  without it. **Seat fee $39/human/month, flat.** **Both cards period-stable** — a mid-window change
+  would make a spend rise ambiguous between usage and price, and no surface can say which. Token
+  card displays on `/demo/spend` only; **"illustrative rates" on the card, "estimated" on projection
+  alone.** → `CONTEXT.md` §§ Organisation & People, Work, Models & Money, Aggregation Dimensions.
+
+- **Fixture grain and schema** ([ticket 10](issues/10-fixture-grain-and-schema.md), 2026-09-07,
+  HITL): the last ticket on the map. **Equilibrio**, slug `demo`, `Europe/Madrid`, **12 Apr – 8 Sep
+  2026**, 4 Teams / 20 Members (18 human, 2 service) / 5 Repositories / 5 WorkTypes / ~600 Tasks /
+  **~750 sessions on an adoption ramp** — median 0 sessions per Member-week in April rising to 2 in
+  August. That is 10× smaller than first proposed and the trade runs both ways: charts are sparse,
+  so **day grain is restricted to ranges of two months or less**; but seat cost lands at ~48% of
+  Total spend and dominates April outright, which is the sharpest finding in the product and a
+  high-volume fixture would have buried it. **Cost is attributed upstream and stored on the session
+  row; the application prices nothing** — this **reverses ticket 08** and the previous `CONTEXT.md`
+  position that cost is derived and never stored. → `docs/adr/0005`. The cost is recorded rather
+  than discovered: the pricing function was this map's named "cleanest unit-test target", and the
+  tests that replace it assert **aggregations, not billing totals**. **Teams and Members are
+  many-to-many and Team is non-additive** — a primary Team was proposed and rejected as an
+  invention, so the product states the overlap instead. **Every artefact is on GitHub**: no
+  `document`, no Jira, Tasks are GitHub Issues keyed `owner/repo#number`, and **`research` was cut
+  from the WorkType vocabulary** as collateral, since with no document it could accept on nothing
+  but a comment. `deploy` accepts on a **default-branch commit**, not a merged PR it never opens;
+  the three code types now share "PR published" and are therefore comparable with each other.
+  **Findings the data must carry**: acceptance 0.86 review → 0.34 deploy, and 0.78 `web-console` →
+  0.44 `terraform-infra`; frontier models take **56% of token spend on 15% of tokens**, falling
+  25%→10% across the window; rework 18%, decomposition 12%; all four Incomplete-Task age buckets
+  occupied; one seat-holder under 5 sessions; ~20 CPU-heavy token-light sessions; ~2% hidden
+  sessions **generated then excluded**, so the exclusion rule has something to be tested against.
+  **Files follow provenance**: sessions as platform events, one file per (repo × work_type) ordered
+  by timestamp, all 25 present with `[]` for empty pairs; members/teams/repos/issues as
+  GitHub-shaped mocks with a simplified envelope; the rest as internal-API mocks. Seeded generator,
+  **committed output**, tests read the output and never run the generator.
+  **Chart rules handed to the build**: no stacking anywhere, no pie charts anywhere, side-by-side is
+  fine, Team groupings state the overlap, and the **top-4 + "Other" cap applies only above five
+  series**.
+
+**Research tickets 01–05 are resolved (01–04, 15), and six HITL tickets (14, 12, 08, 05, 16, 10) are answered.**
 
 **Collision discharged, then re-opened and discharged again.** Brief 15 was gathered clean-slate
 against the `CONTEXT.md` and ADR-0001 that predate ticket 12, and its ticket asserted ADR-0001
@@ -293,8 +348,8 @@ the ticket file. The map now closes after 10.
 
 | Order | Ticket | Type | State |
 |---|---|---|---|
-| 1 | [16](issues/16-work-domain-and-model-roster.md) vocabularies and roster | grilling | open |
-| 2 | [10](issues/10-fixture-grain-and-schema.md) fixture grain and schema | grilling | blocked by 16 |
+| — | ~~16 vocabularies and roster~~ | grilling | **resolved 2026-09-07** |
+| — | ~~10 fixture grain and schema~~ | grilling | **resolved 2026-09-07** |
 | — | ~~07 IA and route map~~ | grilling | **resolved 2026-09-07** |
 | — | ~~05 metric set~~ | grilling | resolved |
 | — | ~~06 role presets~~ | grilling | **wontfix, partly amended by 07** — a second, restricted preset is reinstated so the matrix is exercised |
@@ -305,6 +360,26 @@ the ticket file. The map now closes after 10.
 **Updated again 2026-09-07: 07 resolved.** 16 now leads, unblocks 10, and 10 is the last thing
 the spec needs. 07 also handed 10 two new fixture requirements — an Organization slug, and two
 Member accounts holding distinct scopes.
+
+## The map is closed — 2026-09-07
+
+**16 and 10 both resolved. No open tickets remain, and nothing is left to decide before specs can
+be written.** The destination stated at charting is reached.
+
+Two settled positions were reversed on the way out, and both are recorded as ADRs because a future
+reader will otherwise wonder what happened to them:
+
+- **ADR-0004** — Repository carries no work-domain label. Contradicts this map's own charting
+  decision and brief 15's argument for the dimension.
+- **ADR-0005** — session cost is attributed upstream, not derived. Contradicts ticket 08 and the
+  previous `CONTEXT.md`. **This is the map's largest outstanding exposure**, and it compounds the
+  one already recorded against ticket 09: the project has now discarded both its named cleanest
+  unit-test target *and* the ticket that would have drawn the computation/rendering seam, while
+  test coverage remains one of three stated grading criteria. The replacement targets — non-additive
+  Team roll-ups, the comparability intersection, timezone-bounded period edges, per-capita
+  denominators excluding service accounts — are named in ticket 10 but have no owning ticket.
+
+Next step is the manual `/to-spec` handoff described under **Handoff shape**.
 
 **The discard with the most exposure is 09.** Test coverage is one of the three stated grading
 criteria, and while five unit-test targets are already named by 05 and 08, nobody has drawn the
@@ -329,8 +404,10 @@ have decided. It is recorded here rather than left to be discovered at the bound
 
 - **Landing copy and positioning.** The hero currently reads "Ship faster. Know why." — written
   before the product had a point of view. Revisit once 01/03 land.
-- **In-browser performance envelope.** 180 days at session grain across 20 members may or may
-  not be tractable client-side. Sharpens once fixture grain (10) is decided.
+- ~~**In-browser performance envelope.**~~ **Closed 2026-09-07 by ticket 10.** 150 days at
+  session grain across 20 Members is ~750 rows — comfortably tractable client-side. The live
+  constraint turned out to be the opposite one: too *few* rows per bucket, which is why day grain
+  is restricted to ranges of two months or less.
 - **Onboarding beyond the empty state.** Distinct from ticket 11, which is only the zero-data
   *view*. Whether there is a first-run flow at all is downstream of IA (07).
 - **Demo-mode role switching UX.** How a visitor moves between role presets on `/demo` without
