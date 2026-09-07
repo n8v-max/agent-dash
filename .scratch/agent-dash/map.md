@@ -45,6 +45,11 @@ Settled at charting (2026-09-05), before any ticket existed:
 - **Prior Q1–Q22 are a draft, not settled input.** Cheap-to-reverse choices carried forward
   (Next.js, Vercel, local JSON fixtures, Vitest + Playwright); load-bearing ones reopened.
   → `.scratch/_archive/handover-v1.md`
+  - **Scaffolded 2026-09-07** (commit `69dad0c`), infra only. **Next 16.3.4, not 15** —
+    Turbopack is the stable default there, so ticket 14's bundler constraint is satisfied by
+    construction rather than by a flag. Verified against Recharts 3.10.1.
+    → ticket 14 § Amendment. Node pinned to **24.x** (Vercel's current default; 20.x
+    deprecates 2026-10-01). Hosting still Vercel, still uncontested.
 - **Access is a two-dimensional matrix**, not a role ladder: (subject scope × datapoint class).
   Roles are named presets over it, expressed as data. → `CONTEXT.md` § Access
 - ~~**Peer visibility covers `jobs`, never `cost`.**~~ **Reversed 2026-09-05 by ticket 12**, in

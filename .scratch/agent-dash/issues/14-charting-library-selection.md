@@ -162,3 +162,33 @@ answer can be output, without needing to parse SVG.
   constraint: aggregation, roll-up and permission filtering are pure functions over fixture rows
   and belong in a Server Component, passing a small serialised result to a thin client chart.
   The seam matters more than the library — ticket 09.
+
+---
+
+## Amendment — 2026-09-07: the stack moved to Next 16
+
+Recorded when the app was scaffolded (commit `69dad0c`), after this ticket resolved.
+
+**This ticket's Turbopack requirement is unchanged in substance and satisfied by default.**
+It was written against Next **15**, where Turbopack is opt-in and both open Recharts 3
+blockers ([#6117](https://github.com/recharts/recharts/issues/6117),
+[#6316](https://github.com/recharts/recharts/issues/6316)) are webpack-specific. Next
+**16.3.4** makes Turbopack the stable default bundler for dev and build; webpack is now the
+opt-in path (`next build --webpack`). The risk class this ticket set out to avoid no longer
+depends on remembering a flag.
+
+**Verified, not assumed.** A Recharts `3.10.1` `BarChart` on a real route compiled and
+prerendered clean under `next build` on 16.3.4. The first build attempt used `src/app/_smoke/`
+and proved nothing — Next treats `_`-prefixed directories as private and never routed it.
+Re-run at `src/app/smoke/` it appeared in the route table and passed. Route since removed.
+
+**Recharts is installed at `3.10.1`, not the `3.8.0` this ticket names.** That figure was the
+version the shadcn `v4`/`base-*` scaffold pinned at the time of writing. The hard requirement
+here is the **scaffold style**, not the version number: the legacy `default`/`new-york` styles
+still pin the deprecated `recharts@2.15.4`, and landing there would silently reverse this
+ticket. `components.json` has not been created yet — that requirement passes to whoever runs
+`shadcn init`.
+
+**Costs the bump carries, none of which touch this ticket:** `next lint` is removed (ESLint is
+invoked directly, which lands in ticket 09's territory), `middleware.ts` is renamed `proxy.ts`,
+`params`/`cookies`/`headers` are async-only, and several `next/image` defaults changed.
