@@ -207,6 +207,28 @@ Resolved tickets:
   **Handed to 07**: view grouping, page layout, and what occupies the fourth tile when rework
   rate flatlines at 0%.
 
+- **Information architecture and route map** ([ticket 07](issues/07-information-architecture.md),
+  2026-09-07, HITL): the keystone's successor, settled over five rounds. **Routes vary by question
+  only** — the subject never appears in a path, which is what the archived v1 map got wrong by
+  mixing three datapoint classes with one subject scope. **The product is multi-tenant and `demo`
+  is an Organization slug**, not a demo mode: the org sits in the path, the org root *is* the
+  summary, and tenancy that lived only in a token would be invisible in exactly the artefact a
+  reviewer inspects. Six surfaces — `/` landing, `/sign-in`, `/demo`, `/demo/spend`, `/demo/work`,
+  `/demo/people` — with `/demo/history` (raw AgentSession rows) and `/demo/projection` **behind a
+  header ellipsis** as secondary. **The fourth headline tile is Completed Tasks by WorkType**, top
+  4 + "Other": rework rate leaves the headline because it can flatline, and session counts were
+  refused because 05 established they rise when work goes badly. **Controls are declared per page**
+  and every one serialises to the query string, so a bare route is valid and a shared link
+  reproduces what the sender saw; state does not persist across pages. **Series cap is top 4 +
+  "Other", ranked over the whole range and fixed across buckets**, which closes 14's `key={index}`
+  legend-identity bug by construction — filtering is how a viewer reaches past the cap, and the cap
+  never lifts. **Acceptance rate renders as small multiples**, one per WorkType, so its
+  incomparability is visible in the layout rather than in a caption. **Two accounts, two JWTs,
+  server-side enforcement**, a 404 rather than a 403 on org mismatch so tenancy does not leak, and
+  navigation identical for both so the matrix acts in the data layer. → amends 05 (fourth tile,
+  per-page filters, default ordering, projection ships) and 06 (restricted preset reinstated).
+  **Recorded gap:** the four disjoint token classes and per-session model mix appear on no surface.
+
 **Research tickets 01–05 are resolved (01–04, 15), and four HITL tickets (14, 12, 08, 05) are answered.**
 
 **Collision discharged, then re-opened and discharged again.** Brief 15 was gathered clean-slate
@@ -271,18 +293,18 @@ the ticket file. The map now closes after 10.
 
 | Order | Ticket | Type | State |
 |---|---|---|---|
-| 1 | [07](issues/07-information-architecture.md) IA and route map | grilling | open |
-| 2 | [16](issues/16-work-domain-and-model-roster.md) vocabularies and roster | grilling | open |
-| 3 | [10](issues/10-fixture-grain-and-schema.md) fixture grain and schema | grilling | blocked by 16 |
+| 1 | [16](issues/16-work-domain-and-model-roster.md) vocabularies and roster | grilling | open |
+| 2 | [10](issues/10-fixture-grain-and-schema.md) fixture grain and schema | grilling | blocked by 16 |
+| — | ~~07 IA and route map~~ | grilling | **resolved 2026-09-07** |
 | — | ~~05 metric set~~ | grilling | resolved |
-| — | ~~06 role presets~~ | grilling | **wontfix** — one permissive preset ships; the matrix is documented, never exercised |
+| — | ~~06 role presets~~ | grilling | **wontfix, partly amended by 07** — a second, restricted preset is reinstated so the matrix is exercised |
 | — | ~~09 testing architecture~~ | grilling | **wontfix** — unit targets inherited from 05 and 08; the computation/rendering seam is undrawn |
-| — | ~~11 zero-data state~~ | prototype | **wontfix** — no designed empty state; `/demo` always carries data |
+| — | ~~11 zero-data state~~ | prototype | **wontfix** — no designed empty state; the `demo` org always carries data |
 | — | ~~13 token normalisation~~ | grilling | **wontfix** — boundary documented, not built; no vendor-shaped fixture rows |
 
-07 leads because 05 handed it three decisions outright — view grouping, page layout, and what
-occupies the fourth headline tile when rework rate flatlines. 16 then unblocks 10, and 10 is the
-last thing the spec needs.
+**Updated again 2026-09-07: 07 resolved.** 16 now leads, unblocks 10, and 10 is the last thing
+the spec needs. 07 also handed 10 two new fixture requirements — an Organization slug, and two
+Member accounts holding distinct scopes.
 
 **The discard with the most exposure is 09.** Test coverage is one of the three stated grading
 criteria, and while five unit-test targets are already named by 05 and 08, nobody has drawn the

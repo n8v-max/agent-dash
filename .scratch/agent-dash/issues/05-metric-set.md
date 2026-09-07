@@ -339,3 +339,26 @@ page rather than to dress it.
 - **16 (roster)** — the compute rate card joins the token rate card in scope.
 - **09 (testing)** — three pure functions named: (rows, timezone) → period buckets, session
   pricing over two rate cards, and the change-floor rule.
+
+## Amended 2026-09-07 by ticket 07 (information architecture)
+
+Three positions taken here were changed downstream. Recorded so the change is visible rather than
+discovered.
+
+1. **The fourth headline tile is Completed Tasks by WorkType**, not Rework rate. The slot was left
+   provisional here because rework may flatline at 0%. Rework rate leaves the headline entirely;
+   it keeps its place on `/demo/work`. Session counts were rejected as the tile's measure, on this
+   ticket's own grounds that they are not velocity.
+2. **"Filters are per-metric" is superseded by per-page declared control sets.** Each page
+   declares the dimensions its panels use; a control applies to every panel on that page using
+   that dimension. This is not the unified combinatorial set this ticket rejected — no page shows
+   a control its panels cannot use — but it is a coarser grain than "per metric".
+3. **"No surface defaults to a ranking" is amended.** `/demo/people` defaults to Completed Tasks
+   descending. That is an ordering by output rather than by spend, and no percentile label is
+   computed, but it is an ordering the product chose. The rest of the position holds: no tile is
+   titled "top spenders", and no surface defaults to sort-by-cost.
+4. **Projection ships.** Left MVP-optional here; it ships as a secondary surface behind the header
+   ellipsis at `/demo/projection`, with the method and the elapsed fraction stated and no
+   confidence band. Nothing else depends on it.
+
+Also discharged: **human-presence spans and machine time share one view**, on `/demo/work`.

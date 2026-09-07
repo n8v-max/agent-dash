@@ -117,3 +117,18 @@ restricted preset — a contractor scoped to `self` is the cheapest — purely s
 
 Also unanswered and now defaulted: `org-member` × `access` survives by default, and a Member
 holds exactly one preset.
+
+## Amended 2026-09-07 by ticket 07 (information architecture)
+
+**The restricted preset is reinstated** — the single item this ticket named as worth recovering.
+Two accounts ship in the demo Organization: the permissive one ADR-0003 specifies, and a
+**contractor scoped to `self`**.
+
+They are **accounts, not client-side personas**: each holds its own JWT, issued at `/sign-in`, and
+enforcement is server-side. The header switcher re-issues the token in place. Navigation is
+identical for both; the restricted account simply receives fewer rows, so the matrix acts in the
+data layer rather than in the menu. The read-only matrix renders collapsed at the foot of
+`/demo/people`.
+
+The rest of this ticket stays `wontfix`: no further presets, a Member holds exactly one, and
+`org-member` × `access` survives by default.
