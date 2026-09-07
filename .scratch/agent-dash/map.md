@@ -379,7 +379,10 @@ reader will otherwise wonder what happened to them:
   Team roll-ups, the comparability intersection, timezone-bounded period edges, per-capita
   denominators excluding service accounts — are named in ticket 10 but have no owning ticket.
 
-Next step is the manual `/to-spec` handoff described under **Handoff shape**.
+**The `/to-spec` handoff is done — 2026-09-07.** Three specs and 22 implementation tickets landed;
+see **Handoff shape** for what was decided at the boundary and what the specs had to settle
+themselves. Both exposures recorded above — ticket 09's undrawn seam and ADR-0005's unowned
+replacement test targets — are now carried by named artefacts rather than by this map.
 
 **The discard with the most exposure is 09.** Test coverage is one of the three stated grading
 criteria, and while five unit-test targets are already named by 05 and 08, nobody has drawn the
@@ -388,17 +391,71 @@ seam between metric computation and rendering. Recorded there in full.
 ## Handoff shape
 
 `/to-spec` and `/to-tickets` are named in this map's Destination but **are not installed skills in
-this environment**. The handoff is therefore manual, and per `docs/agents/issue-tracker.md` it
-lands as files in this repo rather than in a tool. The assignment's step 1–4 map onto four
-artefacts:
+this environment**. The handoff was therefore manual, and per `docs/agents/issue-tracker.md` it
+landed as files in this repo rather than in a tool.
 
-- `.scratch/agent-dash/spec.md` — requirements
-- the technical implementation spec
-- the testing spec, which is ticket 09's output written as requirements rather than as a decision
-- the step-by-step plan, which becomes `.scratch/<slug>/issues/NN-*.md` implementation tickets
+**Done 2026-09-07.** The naming and splitting this section left unsettled — *"the first thing
+`/to-spec` would have decided"* — was decided as **three specs plus tickets**, mirroring the
+assignment's steps 1–4 one to one, because the second interview reads the work against those steps:
 
-Naming and splitting of the middle two is itself unsettled and is the first thing `/to-spec` would
-have decided. It is recorded here rather than left to be discovered at the boundary.
+- `.scratch/agent-dash/spec.md` — requirements (step 1)
+- `.scratch/agent-dash/technical-spec.md` — technical implementation (step 2)
+- `.scratch/agent-dash/testing-spec.md` — testing (step 3)
+- `.scratch/agent-dash/issues/17-*.md` … `38-*.md` — 22 implementation tickets (step 4), numbered
+  on from this map's own ticket 16 in the same feature directory
+
+**Two things the specs settled that no ticket owned.** Both were recorded here as exposure on the
+way out, and both were carried, not inherited:
+
+- **The computation/rendering seam** — ticket 09's largest open item. Drawn in `technical-spec.md`
+  § 3 as a **ViewModel boundary**: components receive fully resolved, serialisable ViewModels and
+  have nothing in scope to compute with. Enforced by an ESLint import rule, not by convention.
+- **The four ADR-0005 replacement unit-test targets** — non-additive Team roll-ups, the
+  comparability intersection, timezone-bounded period edges, per-capita denominators excluding
+  service accounts. Named by ticket 10 with no owning ticket; now first-class in
+  `testing-spec.md` § 3.2 and owned by tickets 23 and 26.
+
+**Five conflicts between settled sources were found and resolved**, each in favour of the later
+decision, and each recorded in `spec.md` § 11 rather than silently applied: the series cap's
+threshold (07 vs 10), "Cost by Repository work domain" (07 vs ADR-0004), the "estimated" marker on
+attributed money (07 vs ADR-0005), the comparator's key (07 vs ADR-0004), and the restricted
+preset's grants (06/07 vs 10). The fourth is the only one resolved by judgement rather than by
+recency, and is flagged as an open question for the human.
+
+### Grilled to close — 2026-09-07
+
+The handoff's own open questions were then grilled, with two facts checked by sub-agent rather than
+asserted: the model roster against live vendor lists, and the whole settled corpus swept for
+contradictions the spec author missed. Ten decisions, all confirmed by the human.
+
+**Three more 07-vs-later conflicts surfaced and are recorded in `spec.md` § 11** as C6–C8: who holds
+`access`, `quarter` as a period, and stacking. All three had been resolved silently by the first
+draft, two of them wrongly.
+
+- **`self` is now granted over every class, to every Role, always** — a model invariant, not a preset
+  property. It fixes a real defect: scopes are not a ladder, so the restricted preset as ticket 10
+  wrote it resolved *no* Member by name, and `/demo/people` would have rendered with no people on
+  it. It also puts the permission matrix in front of the one viewer who needs it. → `CONTEXT.md`
+  § Access
+- **Stacking is narrowed, not banned.** Ticket 10's "no stacking, anywhere" was reasoned from *"Team
+  is not a partition"* — an argument about false claims, not about stacking. WorkType and the three
+  duration spans are partitions, so the rule became **stack only partitions**, and the ViewModel
+  carries `stackable` as a domain fact rather than a styling choice.
+- **`quarter` is dropped** — it never entered the glossary and yields two partial buckets over the
+  window.
+- **The comparator survives, re-keyed**, and its population is now a glossary term: **Comparison
+  group**. → `CONTEXT.md` § Aggregation Dimensions
+- **The expandable `/demo/history` row is reinstated**, closing the recorded gap that the four token
+  classes and per-session Model mix appeared on no surface.
+- **ADR-0006** — the computation/rendering seam is a ViewModel, not a function call. Ticket 09's
+  open item, finally owned.
+- **ADR-0007** — the model roster is re-picked so the 200× spread is real. Ticket 16's own
+  version check found three of its seven strings did not exist and its "exactly 200×" was
+  manufactured by compounding errors at both ends; the true spread was ~20×. Shape kept, contents
+  replaced.
+
+Six mechanical errors were also fixed, the sharpest being a rate-card row whose input price
+contradicted its own derived columns and had been propagated into two specs as a hard invariant.
 
 ## Not yet specified
 

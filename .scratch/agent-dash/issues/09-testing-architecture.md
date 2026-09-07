@@ -110,3 +110,30 @@ sits. The intent — pure functions over fixture rows, isolated from React — i
 above but is not architecture until someone draws it. The specific risk ticket 14 flagged also
 goes untested: shadcn's default legend uses `key={index}`, so React will reconcile "Team A" into
 "Team B" in place across a roll-up switch, and only a test pinning legend *identity* catches it.
+
+
+## Comments
+
+**2026-09-07 — the wontfix default has been superseded by a testing spec.** This ticket stays
+`wontfix`: it was never answered as a decision. But its stated cost has been paid down at the spec
+boundary rather than left standing.
+
+- **The seam is drawn.** `technical-spec.md` § 3 makes it a **ViewModel boundary** — components
+  receive fully resolved, serialisable ViewModels and have nothing in scope to compute with. The
+  weaker form this ticket implied (components importing pure helpers) was rejected precisely
+  because it leaves aggregation reachable from React. Enforced by an ESLint import rule
+  (`technical-spec.md` R-T33), not by convention.
+- **Chart output is asserted through the table mirror**, as this ticket's default proposed — and the
+  mirror is built in the domain layer, independent of the rendered series, so it is a genuine
+  cross-check rather than the same array printed twice (R-T7).
+- **Fixed numeric `width`/`height`** — the one item genuinely still open here — is settled that way
+  in `testing-spec.md` T-C0, on this ticket's own reasoning from ticket 04.
+- **The `key={index}` legend risk** this ticket flagged as going untested is now `testing-spec.md`
+  **T-C3**, written before the patch and required to fail if `key={index}` is reintroduced. Ticket
+  18 runs the roll-up spike before any panel is built.
+- **The five unit targets** named here survive minus the pricing function, which ADR-0005 removed;
+  the four replacement targets ticket 10 named are now first-class in `testing-spec.md` § 3.2.
+- **What is deliberately not tested** — the question this ticket asked and never answered — is
+  `testing-spec.md` § 7.
+
+Owning tickets: 19–28 (unit and fixture layers), 31 (component), 38 (E2E and gates).

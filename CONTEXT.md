@@ -30,7 +30,10 @@ service accounts hold no seat, so any per-capita figure that includes them has a
 denominator.
 
 **Repository** — A GitHub repo within the linked GitHubOrg. Tasks are tagged to a Repository.
-Surfaced in the UI as "Project".
+**No UI alias**: "Repository" is the word this product's audience already uses, and ADR-0004 makes
+repository *names* load-bearing precisely because a reader reads them as repositories. Renaming
+them adds a translation layer for no gain. (Contrast `Task`/"Job" and `WorkType`/"template", which
+rename terms whose technical form would confuse a viewer.)
 
 A Repository carries **no work-domain label**, and no roll-up level: it is a flat dimension. The
 nature of the work is expressed by `Repository × WorkType` instead. One label per repository would
@@ -189,8 +192,8 @@ same underlying data can be viewed at three zoom levels:
 
 | Label | Meaning | Example |
 |---|---|---|
-| exact | the addressable model version — the storage grain | `claude-sonnet-5-20250929` |
-| `family` | the vendor's model line | `Sonnet` |
+| exact | the addressable model version — the storage grain | `claude-sonnet-5` |
+| `family` | the vendor's model line, **carrying the vendor** | `Claude Sonnet` |
 | `tier` | cross-vendor capability class | `frontier` \| `balanced` \| `fast` |
 
 Model selection is a **speed/cost lever**, not an implementation detail: it is the mechanism
@@ -219,10 +222,17 @@ can tell the reader which it was.
 The token card **is not keyed on Model alone**: in the real market the key is (model × token class × service tier × context tier ×
 region × speed). How much of that key this project models is an open decision.
 
-Rate cards here are **illustrative** — see the labelling rule under Cost, below. Useful stable
-ratios: output ≈ 5× input, cache read ≈ 0.1× input, cache write 1.25–2× input,
-batch ≈ 50% off. The spread from the fastest to the frontier tier is roughly **200× on input** —
-which is why Model mix, not token volume, dominates cost variance.
+Rate cards here are **illustrative** — see the labelling rule under Cost, below. Ratios: output ≈ 5× input,
+cache read ≈ 0.1× input, cache write 1.25–2× input, batch ≈ 50% off. **These are Anthropic's
+ratios and do not generalise** — OpenAI prices output at ~8× input, Google at ~6×. This project
+applies them uniformly across all three vendors so the card stays one authored number per model;
+the precision lost is stated rather than discovered.
+
+The spread from the fastest to the frontier tier is **200× on input**, which is why Model mix, not
+token volume, dominates cost variance. That figure is a property of this project's roster rather
+than a constant of the market: it is reachable only with a roster spanning a genuine premium
+reasoning model and a genuine nano model, and a roster of mid-range models spans nearer 20×.
+See `docs/adr/0007-model-roster-spans-a-real-200x.md`.
 
 **TokenUsage** — Tokens consumed by an AgentSession, **keyed by Model**. A single AgentSession
 may consume tokens across more than one Model.
@@ -328,6 +338,16 @@ happens *in this product* is a separate question from how the model is expressed
 visible to everyone on the same terms. There is no minimum-population floor and no class that
 resolves less sharply than another.
 
+**`self` is granted over every class, to every Role, always.** A Member can always see their own
+data and their own permissions. This is an invariant of the model rather than a property of a
+preset: restriction bites on *other people*, never on the acting Member's view of themselves.
+
+It is load-bearing in two places. Because scopes are not a ladder, a Role holding `team` over
+`jobs` would otherwise hold no grant resolving the acting Member by name, and a restricted account
+would meet a page with no people on it. And because `access` is a class like any other, a Member
+whose view has just narrowed can always reach the matrix explaining why — which is the whole reason
+the matrix is sited where a viewer notices the narrowing.
+
 The matrix is therefore **the mechanism, not the default** — it exists so that visibility *can* be
 restricted, and the shipped presets include genuinely restricted Roles precisely so the mechanism
 is demonstrable. See `docs/adr/0003-individual-visibility-is-open-by-default.md`, which records
@@ -361,6 +381,16 @@ WorkType. Work domain no longer exists, and once the filter set is fixed at
 `Repository × Team × WorkType` on every analytical surface, `Cohort` named nothing the filters do
 not already name. The similarity relation it expressed — *"people doing work like mine"* — is now
 carried by Repository. See `docs/adr/0004-repository-carries-no-work-domain.md`.
+
+**Comparison group** — The Members who worked a given `Repository × WorkType` pair in the selected
+period. It is what survives of `Cohort`, re-keyed onto dimensions that still exist, and it is
+**computed per view, never stored**. A Member belongs to as many comparison groups as they do kinds
+of work.
+
+It is not an access scope and gates nothing; it is relevance, not permission. Nor is it a filter:
+a filter shows a population's aggregate, where a comparison group yields a **median set beside the
+acting Member's own value**. That is the one comparison a filter cannot express, and it is why the
+group survived ADR-0004's cut of `Cohort` rather than being subsumed by the filter set.
 
 ## Metric Concepts
 
