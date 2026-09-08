@@ -65,7 +65,7 @@ export type ProjectionPageViewModel = {
 
 const SEAT_NOTE =
   "Only session Cost is extrapolated. A seat is charged by whole months and is never pro-rated " +
-  "across elapsed days (R-M5), so this month's seat cost is already its final figure.";
+  "across elapsed days, so this month's seat cost is already its final figure.";
 
 const NO_ELAPSED: Elapsed = { days: 0, totalDays: 0, fraction: 0 };
 

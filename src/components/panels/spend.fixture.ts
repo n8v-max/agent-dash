@@ -29,9 +29,9 @@ export const MONTH_BUCKETS = ["Apr 2026", "May 2026", "Jun 2026"];
 /** The note the ViewModel carries on the Total spend panel — R-M5's reason, in its words. */
 export const MONTHLY_NOTE =
   "Total spend is reported monthly whatever the page grain is: a seat fee apportioned across " +
-  "days is invented precision, so the figure exists at monthly grain and coarser only (R-M5).";
+  "days is invented precision, so the figure exists at monthly grain and coarser only.";
 
-/** R-N9's one line for the Adoption section (R-M9). */
+/** R-N9's one line for the Adoption section. */
 export const ADOPTION_STATEMENT =
   "These measure use, not money: tokens processed is an adoption measure and never a cost proxy.";
 

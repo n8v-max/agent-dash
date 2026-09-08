@@ -29,7 +29,7 @@ import {
 import type { PageContext } from "./context";
 import { aggregationCells, bucketAxis, subjectGrouping, sumOf } from "./panels";
 
-/** One roll-up level's mix, with each slice's share resolved (R-M7). */
+/** One roll-up level's mix, with each slice's share resolved. */
 export type DistributionViewModel = {
   readonly level: ModelLevel;
   readonly slices: readonly {
@@ -65,7 +65,7 @@ export type RateCardViewModel = {
 
 export type AdoptionSection = {
   readonly heading: string;
-  /** R-N9 — the one line that says these measure use and not money (R-M9). */
+  /** R-N9 — the one line that says these measure use and not money. */
   readonly statement: string;
   readonly tokensOverTime: ChartViewModel;
   readonly volume: TokenVolume;
@@ -205,7 +205,7 @@ export function adoptionSection(context: PageContext): AdoptionSection {
   return {
     heading: "Adoption",
     statement:
-      "These measure use, not money: tokens processed is an adoption measure and never a cost proxy (R-M9).",
+      "These measure use, not money: tokens processed is an adoption measure and never a cost proxy.",
     tokensOverTime: chartViewModel({
       title: "Tokens processed over time",
       rollUpLevel: subject.rollUpLevel,

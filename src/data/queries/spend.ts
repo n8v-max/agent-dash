@@ -28,7 +28,7 @@ import { adoptionSection, type AdoptionSection } from "./adoption";
 import { pageContext, type PageContext } from "./context";
 import { aggregationCells, bucketAxis, subjectGrouping, sumOf } from "./panels";
 
-/** R-N9 panel 2 — Total spend, split into session Cost and Seat cost (R-M5). */
+/** R-N9 panel 2 — Total spend, split into session Cost and Seat cost. */
 export type TotalSpendPanel = {
   readonly chart: ChartViewModel;
   readonly sessionCost: number;
@@ -40,11 +40,11 @@ export type TotalSpendPanel = {
   /** `seatCost / total` — R-D4's headline. `null` over a period that cost nothing. */
   readonly seatShare: number | null;
   readonly partial: boolean;
-  /** Why this panel is monthly whatever the page grain is (R-M5). */
+  /** Why this panel is monthly whatever the page grain is. */
   readonly note: string;
 };
 
-/** R-N9 panel 3 — Cost per session, under the `accepted` filter (R-M1). */
+/** R-N9 panel 3 — Cost per session, under the `accepted` filter. */
 export type CostPerSessionPanel = {
   readonly chart: ChartViewModel;
   readonly outcome: OutcomeFilter;
@@ -67,7 +67,7 @@ const SEAT_GROUPS = { session: "session", seat: "seat" } as const;
 
 const MONTHLY_NOTE =
   "Total spend is reported monthly whatever the page grain is: a seat fee apportioned across " +
-  "days is invented precision, so the figure exists at monthly grain and coarser only (R-M5).";
+  "days is invented precision, so the figure exists at monthly grain and coarser only.";
 
 /**
  * **Cost per completed Task, per bucket.** The join, one bucket at a time: every session's cost

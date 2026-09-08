@@ -42,7 +42,7 @@ const SCOPE_RESOLUTION: Readonly<Record<SubjectScope, Resolution>> = {
 
 export const MATRIX_NOTE =
   "`self` is granted over every class, to every Role, always: a Member can always see their own " +
-  "data and their own permissions, and restriction bites on other people (R-A3.1).";
+  "data and their own permissions, and restriction bites on other people.";
 
 const cellsFor = (
   granted: readonly Permission[],
@@ -133,7 +133,7 @@ export const RESTRICTED_TABLE: TableViewModelOf<TableRow> = {
 export const COMPARATOR_NOTE =
   "Compared with the median of the Members who worked the same Repository and template in this " +
   "period. Acceptance rate is not compared: a comparison group spans several templates, and one " +
-  "acceptance figure would average incommensurable criteria (R-N18).";
+  "acceptance figure would average incommensurable criteria.";
 
 /**
  * R-N16's profile. Four tiles, the WorkType mix, and R-N17's three paired bars — with no fourth

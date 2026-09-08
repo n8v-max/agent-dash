@@ -42,7 +42,7 @@ const TOKEN_CLASS_ORDER: readonly TokenClass[] = [
 
 const WITHHELD =
   "Token volumes and Model mix for this session are outside your grants: your scope reaches it " +
-  "in aggregate only, so there is a figure here and it is not yours to read (R-A6).";
+  "in aggregate only, so there is a figure here and it is not yours to read.";
 
 // Whole-step spacing utilities only. A class like `py-1.5` puts the literal `1.5` in the
 // response body, where T-E4's decimal search cannot tell it from a leaked cost figure — a
@@ -112,7 +112,7 @@ function ModelMix(props: {
   return (
     <DetailTable
       caption="Model mix"
-      lede="This session's models, as volumes. Model is a per-session breakdown and never a comparison axis (R-M7)."
+      lede="This session's models, as volumes. Model is a per-session breakdown and never a comparison axis."
     >
       <tbody data-testid="model-mix">
         {props.mix.map((model) => (

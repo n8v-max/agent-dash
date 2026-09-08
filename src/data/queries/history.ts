@@ -34,9 +34,9 @@ export type SessionDetail = {
   readonly taskKey: string;
   /** `null` where the viewer holds no identifying grant over `tokens` for this session's Member. */
   readonly tokensByClass: Readonly<Record<TokenClass, number>> | null;
-  /** The four classes summed (R-M9). Equal to the class volumes added, by construction. */
+  /** The four classes summed. Equal to the class volumes added, by construction. */
   readonly tokensProcessed: number | null;
-  /** Per-session Model mix — legal *only* here (R-M7). `null` under the same grant test. */
+  /** Per-session Model mix — legal *only* here. `null` under the same grant test. */
   readonly modelMix:
     | readonly { readonly key: string; readonly label: string; readonly value: number }[]
     | null;
@@ -50,7 +50,7 @@ export type HistoryRow = {
 
 export type HistoryPageViewModel = {
   readonly orgSlug: string;
-  /** R-N20 — client pagination at 50, for readability rather than for performance (R-T36). */
+  /** R-N20 — client pagination at 50, for readability rather than for performance. */
   readonly pageSize: number;
 } & (
   | { readonly surface: "table"; readonly table: TableViewModelOf<HistoryRow> }
@@ -61,7 +61,7 @@ export type HistoryPageViewModel = {
 /** R-N20 — client pagination at 50. */
 const PAGE_SIZE = 50;
 
-/** R-N19's ten columns, in that order. Started is in the Organization's timezone (R-M10). */
+/** R-N19's ten columns, in that order. Started is in the Organization's timezone. */
 const COLUMNS = [
   { key: "startedAt", label: "Started", numeric: false, sortable: true },
   { key: "member", label: "Member", numeric: false, sortable: true },
@@ -137,7 +137,7 @@ const withheldNote = (context: PageContext, shown: number): string | null => {
   if (hidden === 0) return null;
   return (
     `${hidden} ${hidden === 1 ? "session is" : "sessions are"} counted in this period's totals ` +
-    "and not listed: your grants reach them aggregated, so they have no row here (R-A6)."
+    "and not listed: your grants reach them aggregated, so they have no row here."
   );
 };
 
@@ -160,7 +160,7 @@ export function historyPage(viewer: Viewer, params: ControlSet): HistoryPageView
         sessionId: params.session,
         message:
           "No session with that id is listed for you in this period: it is outside the range, " +
-          "outside the filters, or reached only by an aggregated grant (R-A6).",
+          "outside the filters, or reached only by an aggregated grant.",
       };
     }
     return { orgSlug: params.orgSlug, pageSize: PAGE_SIZE, surface: "session", row: found };
@@ -180,5 +180,5 @@ export function historyPage(viewer: Viewer, params: ControlSet): HistoryPageView
   };
 }
 
-/** The four disjoint classes, in the order the expanded row lists them (R-N20.1). */
+/** The four disjoint classes, in the order the expanded row lists them. */
 export const SESSION_TOKEN_CLASSES = TOKEN_CLASSES;

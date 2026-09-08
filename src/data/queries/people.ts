@@ -55,13 +55,13 @@ export type PeoplePageViewModel = {
 } & (
   | { readonly surface: "table"; readonly table: TableViewModel }
   | { readonly surface: "profile"; readonly profile: MemberProfileViewModel }
-  /** A Member the viewer cannot resolve by name has no profile to show (R-A6). */
+  /** A Member the viewer cannot resolve by name has no profile to show. */
   | { readonly surface: "withheld"; readonly memberId: string; readonly message: string }
 );
 
 const SELF_ROW_NOTE =
   "`self` is granted over every class, to every Role, always: a Member can always see their own " +
-  "data and their own permissions, and restriction bites on other people (R-A3.1).";
+  "data and their own permissions, and restriction bites on other people.";
 
 /** R-N15 — Member · Team · kind · Completed Jobs · Sessions · Tokens · Cost. Numeric columns sort. */
 /**
@@ -186,7 +186,7 @@ export function peoplePage(viewer: Viewer, params: ControlSet): PeoplePageViewMo
       memberId: params.member,
       message:
         "This Member is not resolved by name under your grants: their work reaches the totals " +
-        "on this page and their profile does not exist for you (R-A6). The matrix below says why.",
+        "on this page and their profile does not exist for you. The matrix below says why.",
     };
   }
 
