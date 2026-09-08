@@ -102,9 +102,17 @@ product are aggregation failures.
 - **Prior period incomplete → suppressed, with its reason** (R-M13, C13). Asserted separately from
   the zero floor, and asserted to be *distinguishable* from it: the two suppressions carry different
   reasons, because "no prior data" and "prior month unfinished" are different facts about the page.
-- **Current period incomplete → shown, and flagged** (R-E2). The asymmetry is the assertion. A test
-  that only checked `incomplete` was carried would pass against a rule that suppressed both sides,
-  which is the rule C13 rejected.
+- **Current period incomplete → suppressed, with its own reason** (R-M13, C13 as amended). The
+  earlier rule showed this figure with a flag, and the assertion here was the *asymmetry*; C13's
+  amendment withdrew it once the current month became `/demo`'s default period, because eight days
+  against a whole month reads as a collapse in spend on the page owning the ten-second read. Three
+  claims: it suppresses, it suppresses under `current-period-incomplete` and not under one of the
+  prior-period reasons, and a comparison failing on *both* sides reports the baseline. The reasons
+  are asserted distinguishable for the same purpose as the pair above — the copy on the tile is
+  different in each case.
+- **Neither suppression is a magnitude rule.** The sweep over the committed roster asserts every
+  month-over-month figure shown when, and only when, its base is non-zero and finished **and** the
+  month on screen is finished, so a cut-off placed at any magnitude fails it.
 
 **T-U4 — The `WorkType → artefact kind` comparability intersection** (`domain/comparability.ts`,
 R-M8) — also one of the § 3.2 four; stated once here.
@@ -355,8 +363,20 @@ request per account per route, asserting rows rather than pixels."*
 - **T-E7 — `/demo` renders four tiles and nothing else**, each linking to its evidence page (A1,
   A2). The one E2E test about layout, because "nothing else" is a structural claim about the page.
   **Three tiles carry a headline figure, not four** (R-N8, C11): the WorkType tile carries a title,
-  a breakdown and a link, and asserting a figure on it would re-admit the duplicate of tile 2 that
-  C11 removed.
+  a breakdown and a link, and asserting a figure on it would re-admit the duplicate C11 removed.
+  Four further claims about the page belong here for the same reason — they are about the whole
+  document, or about the running control:
+  - **The tile order is R-N4's**, breakdown third, and the titles are asserted as a list rather
+    than searched for.
+  - **The period control offers the fixture's months and no "All data"** (R-N6). The whole offered
+    list is asserted, so an extra option fails; `?period=window` is asserted to drop to the current
+    month here and to be honoured on `/demo/spend`, because "on this page only" is the requirement.
+  - **The month in progress carries four flags and no percentage; a finished month carries three
+    percentages and no flag** (C13). Both halves, because either alone passes against a page that
+    simply lost its change figures.
+  - **The breakdown tile draws five labelled bars at 1440px and at 390px**, with no axis element
+    at all and every label inside the card. R-N8 states the narrow width, and a clipped label is a
+    failure that only appears at one of the two.
 - ~~**T-E8 — The permission matrix renders for the open account and not for the restricted one.**~~
   **Withdrawn 2026-09-09 by C9**, which removes the matrix from the product. It asserted a claim
   (A28) that the spec contradicted in two other places, and it is replaced by T-E2.1. The ID is
@@ -452,7 +472,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A5 Team totals exceed Org; overlap stated | T-U6, T-C8 |
 | A6 Per-capita excludes service accounts | T-U7 |
 | A7 00:30 Madrid buckets to the local day | T-U1, T-U8, T-F6 |
-| A8 Change suppressed iff prior period is zero or incomplete | T-U3 |
+| A8 Change suppressed iff the prior period is zero, or either period is incomplete | T-U3 |
 | A9 Restricted account: fewer rows, same nav | T-E1, T-E2 |
 | A10 No ungranted figure in the payload | T-E4, T-U10 |
 | A11 Org mismatch → 404 | T-E3 |

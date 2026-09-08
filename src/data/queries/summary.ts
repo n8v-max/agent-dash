@@ -5,13 +5,19 @@
 // to avoid. The period control offers month and nothing else, so this query reads month buckets
 // and ignores the page grain entirely.
 //
-// **Every figure tile carries a change** (R-N7), subject to the change floor (R-M12) and C13's
-// partial baseline — both `change.ts`'s decisions, carried here and never re-made. The fourth
-// tile is not a figure tile and carries neither (C11).
+// **Every figure tile carries a change** (R-N7), subject to the change floor (R-M12) and to C13's
+// two unfinished periods — all of them `change.ts`'s decisions, carried here and never re-made.
+// The breakdown tile is not a figure tile and carries neither (C11).
 //
 // **The comparison reads outside the selection** (C12): `monthsOf` takes the prior month from
 // `comparisonMonths`, so choosing a single month no longer leaves the page with nothing to
-// compare against.
+// compare against. On the month the page opens on that comparison is *withheld* rather than
+// shown, because the month in progress is a fragment (C13, as ticket 39 amended it) — and the
+// tiles say so with R-E2's flag standing where the figure would have been.
+//
+// **The order is R-N4's** and it is the argument in sequence: what the month cost, what it
+// produced, what kind of work that was, and the rate joining the first two. The breakdown sits
+// beside the count it breaks down, which is the only tile it is a breakdown *of*.
 
 import type { Change } from "@/domain/change";
 import {
@@ -51,9 +57,9 @@ type SummaryTileBase = {
 /**
  * **Two kinds of tile, not one kind with optional halves** (C11).
  *
- * The fourth tile carries a breakdown and *no headline figure*: it was built from the Completed
- * Tasks tile's own reading, so `/demo` printed the same number and the same delta twice on the
- * page graded for the ten-second read. Modelled as a union rather than as a nullable `value`,
+ * The breakdown tile carries no headline figure: it was built from the Completed Tasks tile's own
+ * reading, so `/demo` printed the same number and the same delta twice on the page graded for
+ * the ten-second read. Modelled as a union rather than as a nullable `value`,
  * because `null` already means *withheld or undefined* on `TileViewModel` (R-A6) — reusing it
  * for "this tile has no figure by design" would make two different absences indistinguishable to
  * the component rendering them.
@@ -73,7 +79,7 @@ export type SummaryPageViewModel = {
   readonly orgName: string;
   /** The month reported, and R-E2's flag on it. September is unfinished in the committed window. */
   readonly period: BucketViewModel;
-  /** The four tiles of R-N4, in that order. */
+  /** The four tiles of R-N4, in that order — the breakdown third, beside its own count. */
   readonly tiles: readonly SummaryTile[];
 };
 
@@ -191,14 +197,6 @@ export function summaryPage(viewer: Viewer, params: ControlSet): SummaryPageView
         period,
         ...tasks,
       }),
-      tile({
-        key: "cost-per-completed-task",
-        title: "Cost per completed Job",
-        unit: "usd_per_task",
-        href: `/${slug}/spend`,
-        period,
-        ...ratio,
-      }),
       {
         kind: "breakdown",
         key: "completed-tasks-by-work-type",
@@ -209,6 +207,14 @@ export function summaryPage(viewer: Viewer, params: ControlSet): SummaryPageView
         // same figure and the same delta on two tiles side by side.
         chart: workTypeMix(context, jobs.current),
       },
+      tile({
+        key: "cost-per-completed-task",
+        title: "Cost per completed Job",
+        unit: "usd_per_task",
+        href: `/${slug}/spend`,
+        period,
+        ...ratio,
+      }),
     ],
   };
 }

@@ -10,10 +10,11 @@
 // heading, a list or a table with it, and every one of those is pinned here.
 //
 // **A2 — month only.** `/demo` declares one control (R-C1, R-N6) and the values it offers are
-// months and the whole window. `quarter` was dropped in `spec.md` § 11 C7: it never entered the
-// glossary and over the 150-day window it yields two buckets, both partial. This asserts both
-// halves — that nothing on the surface offers one, and that asking for one in the URL does not
-// produce one either (R-T26: an unknown token is dropped and the default stands).
+// **the fixture's months, and nothing else** (ticket 39): no whole window, because every figure
+// on the page is a month against the month before, and no `quarter` — dropped in `spec.md` § 11
+// C7, having never entered the glossary and yielding two partial buckets over a 150-day window.
+// This asserts both halves — that nothing on the surface offers either, and that asking for one
+// in the URL does not produce one either (R-T26: an unknown token is dropped, the default stands).
 
 import { expect, test, type Page } from "@playwright/test";
 import { OPEN_ACCOUNT, useSession } from "./support/session";
@@ -21,16 +22,22 @@ import { OPEN_ACCOUNT, useSession } from "./support/session";
 const BASE = "http://localhost:3000";
 const SLUG = OPEN_ACCOUNT.orgSlug;
 
-/** R-N4's four tiles, in the order they make the argument. */
+/**
+ * R-N4's four tiles, in the order they make the argument — the breakdown **third**, beside the
+ * count it breaks down (ticket 39), and the ratio last, where the sentence ends.
+ */
 const TILE_TITLES = [
   "Total spend",
   "Completed Jobs",
-  "Cost per completed Job",
   "Completed Jobs by template",
+  "Cost per completed Job",
 ];
 
 /** R-N5 — where each tile's evidence lives. Two pages, four tiles. */
-const EVIDENCE = [`/${SLUG}/spend`, `/${SLUG}/work`, `/${SLUG}/spend`, `/${SLUG}/work`];
+const EVIDENCE = [`/${SLUG}/spend`, `/${SLUG}/work`, `/${SLUG}/work`, `/${SLUG}/spend`];
+
+/** A finished month, and the only kind that carries a change figure at all (C13). */
+const WHOLE_MONTH = "?period=2026-08";
 
 const main = (page: Page) => page.getByRole("main");
 const toolbar = (page: Page) => page.getByTestId("page-toolbar");
@@ -81,14 +88,14 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     await expect(main(page).getByRole("list")).toHaveCount(1);
     // The page heading plus one per tile. A panel heading would be a sixth.
     await expect(main(page).getByRole("heading")).toHaveCount(1 + TILE_TITLES.length);
-    // Exactly one chart (R-N8's, in the fourth tile), hence exactly one R-X1 mirror.
+    // Exactly one chart (R-N8's, in the breakdown tile), hence exactly one R-X1 mirror.
     await expect(main(page).getByRole("group", { name: /grouped by/ })).toHaveCount(1);
     await expect(main(page).locator("table")).toHaveCount(1);
     // R-N5 — the tiles do both jobs, so there is no other link anywhere below them.
     await expect(main(page).getByRole("link")).toHaveCount(4);
   });
 
-  test("the fourth tile is the WorkType mix, unstacked and unlabelled at tile size (R-N8, C11)", async ({
+  test("the breakdown tile is the WorkType mix, with no axis at tile size (R-N8, C11)", async ({
     page,
   }) => {
     await page.goto(`/${SLUG}`);
@@ -105,22 +112,61 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     // range; narrowing it to one bucket is what makes R-V5's ranking the bars' sorted order.
     await expect(mix.locator("table tbody tr")).toHaveCount(1);
 
-    // R-N8 — no axis labels at tile size. Recharts 3 puts every tick label in its own layer,
-    // one per axis, and the assertion is over those layers' computed `display`: neither
-    // Playwright's visibility heuristics nor `Element.checkVisibility()` reports an SVG `<text>`
-    // as hidden when it is an unrendered descendant of a `display: none` ancestor — both say
-    // "visible" for a node whose bounding box is 0×0. The count above zero is what keeps this
-    // from passing on a selector that matches nothing at all.
-    const axisLabels = await mix
-      .locator(".recharts-cartesian-axis-tick-labels")
-      .evaluateAll((held) => held.map((layer) => window.getComputedStyle(layer).display));
+    // R-N8 — **no axis at tile size**, and none drawn rather than one hidden with CSS. The
+    // difference is layout: a rendered-but-invisible axis keeps its reserved width, which was a
+    // third of the card at 1440 and half of it at 390, and the bars had what was left. The grid
+    // goes with it — a dashed grid against no scale is a texture, not a reading aid.
+    await expect(mix.locator(".recharts-cartesian-axis")).toHaveCount(0);
+    await expect(mix.locator(".recharts-cartesian-grid")).toHaveCount(0);
 
-    expect(axisLabels.length).toBeGreaterThan(0);
-    expect(axisLabels.filter((display) => display !== "none")).toEqual([]);
+    // …and the panels that *do* carry a scale still carry one, so this is a decision about a
+    // tile rather than a rule the product acquired by accident.
+    await page.goto(`/${SLUG}/work`);
+    await expect(
+      page.getByRole("main").locator(".recharts-cartesian-axis").first(),
+    ).toBeAttached();
+  });
+
+  /**
+   * Ticket 39 — the tile has to *read*, and at the narrow breakpoint as well as the wide one.
+   *
+   * With no axis, the value on the bar is the only figure on the picture, so the claim is five
+   * bars and five labels — at 1440 where the tile is two columns of a five-column grid, and at
+   * 390 where it is the whole width of a phone. Asserted at both, because the failure mode is
+   * a label drawn past the plot's edge and clipped, and that only happens at one of them.
+   */
+  test("shows five labelled bars, at 1440 and at 390 (R-N8)", async ({ page }) => {
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${SLUG}`);
+
+      const mixTile = main(page)
+        .getByRole("listitem")
+        .filter({ hasText: "Completed Jobs by template" });
+
+      await expect(mixTile.locator(".recharts-bar-rectangle")).toHaveCount(5);
+
+      const labels = mixTile.locator(".recharts-label-list text");
+      await expect(labels).toHaveCount(5);
+
+      // Inside the card, not spilling out of it: a label past the right edge of the plot is
+      // drawn into the margin, and without room for it the longest bar loses its figure.
+      const card = await mixTile.boundingBox();
+      const drawn = await labels.evaluateAll((held) =>
+        held.map((label) => label.getBoundingClientRect()),
+      );
+      expect(drawn).toHaveLength(5);
+      for (const box of drawn) {
+        expect(box.width).toBeGreaterThan(0);
+        expect(box.right).toBeLessThanOrEqual((card?.x ?? 0) + (card?.width ?? 0));
+      }
+    }
   });
 
   test("the mix tile carries no figure of its own, and does not stack (C11)", async ({ page }) => {
-    await page.goto(`/${SLUG}`);
+    // Over a *finished* month: on the month in progress every change is withheld (C13), and a
+    // page carrying no percentages at all would satisfy the first assertion vacuously.
+    await page.goto(`/${SLUG}${WHOLE_MONTH}`);
 
     const tiles = main(page).getByRole("listitem");
     const mixTile = tiles.filter({ hasText: "Completed Jobs by template" });
@@ -150,11 +196,38 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     await expect(periodMenu(page)).toHaveCount(1);
 
     await periodMenu(page).locator("summary").click();
-    const offered = await periodMenu(page).getByRole("link").allTextContents();
+    const offered = periodMenu(page).getByRole("link");
 
-    expect(offered.length).toBeGreaterThan(1);
-    expect(offered.filter((label) => !/^(All data|[A-Z][a-z]+ \d{4})$/.test(label))).toEqual([]);
-    expect(offered.filter((label) => /quarter|\bQ[1-4]\b/i.test(label))).toEqual([]);
+    // The fixture's six months, newest first, and nothing else on the list: no whole window and
+    // no period the committed data does not hold (ticket 39). Asserted as the whole list rather
+    // than as a search through it, so an extra option fails here rather than passing unnoticed.
+    await expect(offered).toHaveText([
+      "September 2026",
+      "August 2026",
+      "July 2026",
+      "June 2026",
+      "May 2026",
+      "April 2026",
+    ]);
+  });
+
+  /**
+   * Ticket 39 — "All data" is dropped **on this page only**, and a URL still carrying it is a
+   * viewer's link rather than an error: the token names no period `/demo` offers, so the page
+   * default stands (R-C4, R-T26). The other pages keep the option, which is asserted beside it
+   * so that dropping it everywhere would fail here too.
+   */
+  test("drops a whole-window period, and opens on the current month instead", async ({ page }) => {
+    for (const token of ["all", "window"]) {
+      await page.goto(`/${SLUG}?period=${token}`);
+
+      await expect(periodMenu(page).locator("summary")).toHaveText(/^PeriodSeptember 2026/);
+      await expect(page.getByTestId("summary-period")).toHaveText(/^Sep 2026/);
+      await expect(main(page).getByRole("listitem")).toHaveCount(4);
+    }
+
+    await page.goto(`/${SLUG}/spend?period=window`);
+    await expect(page.getByTestId("control-period")).toHaveText(/^PeriodAll data/);
   });
 
   // R-N6 read from the page rather than from the control: the surface reports one month, and
@@ -191,10 +264,41 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     await expect(main(page).getByRole("listitem").filter({ hasText: /%/ })).toHaveCount(0);
   });
 
-  test("reports a single month, flagged as unfinished (R-N6, R-E2)", async ({ page }) => {
+  /**
+   * C13 as ticket 39 amended it, read off the running page.
+   *
+   * The bare route opens on the current month, which the committed window leaves eight days
+   * into: every tile carries R-E2's flag where its change figure would have been, and **no tile
+   * carries a percentage**. Eight days against a whole August is the calendar rather than the
+   * spend, and this page is the one graded for the ten-second read.
+   */
+  test("flags every tile and shows no change on the month in progress (C13, R-E2)", async ({
+    page,
+  }) => {
     await page.goto(`/${SLUG}`);
 
-    await expect(page.getByTestId("summary-period")).toHaveText(/^Sep 2026Partial month/);
+    const tiles = main(page).getByRole("listitem");
+
+    await expect(page.getByTestId("summary-period")).toHaveText(/^Sep 2026/);
+    await expect(tiles.filter({ hasText: "Partial month" })).toHaveCount(4);
+    await expect(tiles.filter({ hasText: /%/ })).toHaveCount(0);
+    // The reason, once, above the row — not four times inside it.
+    await expect(page.getByTestId("summary-period")).toHaveText(/unfinished/);
+  });
+
+  /**
+   * The contrast case, and the one that stops the test above passing against a page that simply
+   * lost its change figures. August is whole, July is whole, so the three figure tiles carry
+   * three percentages — and the breakdown tile carries none, which is C11 and not an omission.
+   */
+  test("shows a change on every figure tile of a finished month (R-N7)", async ({ page }) => {
+    await page.goto(`/${SLUG}${WHOLE_MONTH}`);
+
+    const tiles = main(page).getByRole("listitem");
+
+    await expect(page.getByTestId("summary-period")).toHaveText(/^Aug 2026/);
+    await expect(tiles.filter({ hasText: "Partial month" })).toHaveCount(0);
+    await expect(tiles.filter({ hasText: /%/ })).toHaveCount(3);
   });
 
   test("a quarter asked for in the URL is dropped, not rendered (A2, R-T26)", async ({ page }) => {
@@ -202,7 +306,7 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
 
     // The token names no period the glossary defines, so the page default stands and the surface
     // is the one a bare route renders (R-C4).
-    await expect(periodMenu(page).locator("summary")).toHaveText(/^PeriodAll data/);
+    await expect(periodMenu(page).locator("summary")).toHaveText(/^PeriodSeptember 2026/);
     await expect(main(page).getByRole("listitem")).toHaveCount(4);
   });
 

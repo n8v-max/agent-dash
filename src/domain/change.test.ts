@@ -10,7 +10,8 @@
 // metric set explicitly rejected."* So there is no expectation anywhere below that a change is
 // hidden for being small, or for being implausibly large. The opposite is asserted, repeatedly
 // and at both ends of the scale: +999 off a base of one is shown, and so is +1% off a base of
-// a thousand. The only thing that suppresses a figure is a prior period holding nothing.
+// a thousand. What suppresses a figure is a period that cannot carry a comparison — one that
+// does not exist, holds nothing, or has not finished — never the size of the move between them.
 //
 // Figures are authored so every expectation is exact — no floating-point tolerance is needed
 // and no expectation restates the implementation's own arithmetic.
@@ -120,19 +121,21 @@ describe("the floor is a count of one (R-M12, T-U3, A8)", () => {
     expect(change.shown ? "" : change.message).toContain("2026-04");
   });
 
-  it("admits exactly three reasons to suppress, every one about the prior period", () => {
+  it("admits exactly four reasons to suppress, none of them about the size of the change", () => {
     // The canary for the rule this ticket exists to keep out: a magnitude cut-off would have to
     // name itself here, and naming it breaks this expectation before it reaches a chart. C13
-    // added the third — still a statement about the prior period, still not about size.
+    // added the third and, on its amendment, the fourth — one about each period being
+    // unfinished, and neither about how big the move is.
     expect(CHANGE_SUPPRESSIONS).toEqual([
       "no-prior-period",
       "prior-period-holds-nothing",
       "prior-period-incomplete",
+      "current-period-incomplete",
     ]);
   });
 });
 
-describe("incompleteness: flagged on the current period, withheld on the prior (R-M13, C13)", () => {
+describe("incompleteness suppresses on either side of the comparison (R-M13, C13)", () => {
   it("compares two periods that are not adjacent", () => {
     const change = shown(between(figure("2026-04", 200), figure("2026-09", 250)));
 
@@ -141,11 +144,27 @@ describe("incompleteness: flagged on the current period, withheld on the prior (
     expect(change.current.key).toBe("2026-09");
   });
 
-  it("shows the figure for an unfinished current period, and flags it", () => {
-    const change = shown(between(figure("2026-08", 80), partialFigure("2026-09", 20)));
+  it("suppresses the figure for an unfinished current period, and names it (C13, amended)", () => {
+    // Eight days of September against the whole of August is a −75% fall the data does not
+    // contain: the fall is the calendar, not the spend. C13 originally showed it with its flag,
+    // on the grounds that the viewer chose to look at the part-month — but the flag qualifies
+    // the *figure*, and this figure is wrong rather than provisional. The month picker makes the
+    // current month the page default, so this is the reading `/demo` opens on.
+    const change = between(figure("2026-08", 80), partialFigure("2026-09", 20));
 
+    expect(change).toMatchObject({ shown: false, reason: "current-period-incomplete" });
+    expect(change.shown ? "" : change.message).toContain("2026-09");
     expect(change.incomplete).toBe(true);
-    expect(change.ratio).toBe(-0.75);
+    // The ratio is unreachable, so no renderer can print the −75% this suppresses.
+    expect("ratio" in change).toBe(false);
+  });
+
+  it("reports the prior period first where both periods are unfinished", () => {
+    // Both rules fire. The prior one is reported, because a baseline that is not a baseline is
+    // the more fundamental of the two facts: there is nothing to compare against at all.
+    const change = between(partialFigure("2026-04", 50), partialFigure("2026-09", 75));
+
+    expect(change).toMatchObject({ shown: false, reason: "prior-period-incomplete" });
   });
 
   it("suppresses against a clipped prior period, and says which month was unfinished", () => {

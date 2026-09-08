@@ -83,6 +83,14 @@ export type ChartFrameProps = {
    * (`acceptanceAxis`), so the scale stays a domain fact rather than a panel's choice.
    */
   readonly measureDomain?: readonly [number, number];
+  /**
+   * Put each bar's own figure on the bar, for a panel rendered without a measure axis — R-N8's
+   * `/demo` tile is the one. Presentational, and the only prop here that is: see
+   * `chart-shapes.tsx`, which says why it is not a fact on the ViewModel.
+   */
+  readonly valueLabels?: boolean;
+  /** Draw the axes and their grid. Off for a panel too small to carry a scale — see R-N8's tile. */
+  readonly axes?: boolean;
   readonly className?: string;
 };
 
@@ -115,6 +123,8 @@ export function ChartFrame(props: ChartFrameProps) {
             shape: props.shape,
             tickFormat: props.tickFormat ?? defaultTickFormat,
             measureDomain: props.measureDomain,
+            valueLabels: props.valueLabels,
+            axes: props.axes,
           })}
         </ChartContainer>
       </ChartBox>

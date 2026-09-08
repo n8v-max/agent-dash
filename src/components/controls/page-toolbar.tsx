@@ -105,7 +105,9 @@ const filterMenu = (input: {
 };
 
 const periodControl = (context: Context): ReactNode => {
-  const offered = periodOptions(context.window);
+  // The offer is the page's, not the product's: `/demo` is month-locked and offers no whole
+  // window (R-N6, ticket 39). The list is never narrowed by the current selection.
+  const offered = periodOptions(context.controls.page, context.window);
   const options: readonly LinkOption[] = offered.map((option) => ({
     value: option.value,
     label: option.label,

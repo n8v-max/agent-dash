@@ -142,8 +142,14 @@ horizontal space.
 
 ### 3.1 `/demo` — the summary
 
-**R-N4 — Four tiles, nothing below them.** Total spend · Completed Tasks · Cost per completed
-Task · Completed Tasks by WorkType.
+**R-N4 — Four tiles, nothing below them.** Total spend · Completed Tasks · Completed Tasks by
+WorkType · Cost per completed Task.
+
+**The breakdown sits beside the count it breaks down** (amended 2026-09-09). It was fourth, two
+cards away from the only tile it is a breakdown *of*, so reading it meant carrying a number across
+the ratio. The order is now the argument in sequence — what the month cost, what it produced, what
+kind of work that was, and the rate joining the first two — and the differentiator still ends the
+sentence rather than opening it.
 
 **R-N5 — Each tile is itself the link to the page carrying its evidence.** The tiles do both jobs
 — the ten-second read and the route into detail — so no separate link row exists.
@@ -157,20 +163,35 @@ unaccepted-spend tile was cut to avoid.
 yields exactly two buckets, **both partial**, so every quarter figure on the surface that owns the
 ten-second read would carry an incompleteness flag. See § 11 C7.
 
+**The picker offers the Organization's months and nothing else, and opens on the current one**
+(amended 2026-09-09). "All data" is dropped **on this page only**; every other page keeps it. A
+whole-window option here was a period the page's own argument could not be read over — five months
+of spend beside a change figure measured on the last of them — and it made the page's default a
+figure no tile could compare. The months offered are the *fixture's* months, so a period holding
+no data is not on the list. A token the page does not offer, `?period=window` among them, is
+dropped and the default stands (R-C4).
+
 **R-N7 — Each tile carries a period-over-period change figure**, subject to the change floor
-(R-M12) and to R-M13's partial-baseline rule.
+(R-M12) and to R-M13's two unfinished periods. On a month still running there is no change figure
+on any tile, and **every tile carries the partial flag in its place** (R-E2, § 11 C13) — the flag
+stands where the figure would have been, so a tile with no delta on it explains itself.
 
 **The comparison reads outside the selected window.** The prior month is the month before the
 selection, whether or not the selection contains it — a comparison is not a filtered view. Without
 this, choosing any single month clips the range so no prior bucket exists and all four change
 figures suppress at once, which made the page's only control degrade the page. See § 11 C12.
 
-**R-N8 — The fourth tile is Completed Tasks by WorkType**, rendered **unstacked** as sorted
-horizontal bars over the reported month, longest first, with no axis labels at tile size. **All five
-WorkTypes render; no "Other" bucket appears**, because the cap engages only above five series
-(R-V4). It is never empty, which Rework rate — the slot's original occupant — could not guarantee.
-Session counts were rejected as the measure: they are not velocity, because they *rise* when work
-goes badly.
+**R-N8 — The breakdown tile is Completed Tasks by WorkType**, rendered **unstacked** as sorted
+horizontal bars over the reported month, longest first, **with no axis and a value label on each
+bar**. **All five WorkTypes render; no "Other" bucket appears**, because the cap engages only above
+five series (R-V4). It is never empty, which Rework rate — the slot's original occupant — could not
+guarantee. Session counts were rejected as the measure: they are not velocity, because they *rise*
+when work goes badly.
+
+The axis is **not drawn**, not drawn-and-hidden: an axis that renders nothing still reserves its
+width, which was a third of the card at 1440px and half of it at 390px. With it gone the bars have
+the card, and the figure a tick scale would have carried is on the bar instead. The tile must read
+at 390px, which is the width the requirement is stated at.
 
 **The tile carries no headline figure and no change figure.** Its subject is the mix; the count is
 the tile beside it. Building this tile from that one's reading printed the same number and the same
@@ -350,15 +371,17 @@ therefore a pure function of `(rows, timezone)`.
 daily bucket holds too few sessions to read.
 
 **R-M12 — The change floor is one.** A change figure is suppressed when the prior period holds
-*nothing at all*, and when the prior period is *incomplete* (R-M13). Above zero and complete it is
-shown: two to three sessions week-over-week really is +50%, and on a narrow self-view that is the
-honest reading, not noise.
+*nothing at all*, and when either period is *incomplete* (R-M13). Above zero, with both periods
+finished, it is shown: two to three sessions week-over-week really is +50%, and on a narrow
+self-view that is the honest reading, not noise. The floor is never a magnitude threshold.
 
-**R-M13 — Comparison is unrestricted. An incomplete *current* period is flagged; an incomplete
-*prior* period is withheld.** Any period may be compared with any other. The asymmetry is the point:
-a part-month on screen is visible, flagged and chosen by the viewer, whereas a part-month used as a
-baseline is none of those things and inflates the comparison without bound. Withholding is not
-pro-rating — R-E2 forbids inventing the missing days, not declining to divide by them. See § 11 C13.
+**R-M13 — Comparison is unrestricted. An unfinished period on *either* side of it withholds the
+change figure.** Any period may be compared with any other. A part-month used as a baseline inflates
+the comparison without bound; a part-month on screen deflates it by exactly the days it has not
+reached yet, and the second is the one the reader meets by default on `/demo`. Both are flagged
+(R-E2) and neither is compared. Withholding is not pro-rating — R-E2 forbids inventing the missing
+days, not declining to divide by them. See § 11 C13, which drew this asymmetrically at first and
+says why the asymmetry fell.
 
 **R-M14 — Per-capita divides by active *human* Members**, excluding service accounts, which hold
 no seat and would give the denominator the wrong size. Raw is the default; per-capita is offered
@@ -623,7 +646,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A5 | Team-grouped totals exceed the Organization total, and the overlap statement is present | R-V3, R-D14 |
 | A6 | Per-capita denominators exclude `service_account` Members | R-M14, R-D3 |
 | A7 | A session at 00:30 Europe/Madrid buckets to that local day, not the previous UTC day it falls in | R-M10, R-D5 |
-| A8 | A change figure is suppressed when and only when the prior period holds zero or is incomplete | R-M12, R-M13 |
+| A8 | A change figure is suppressed when and only when the prior period holds zero, or either period is incomplete | R-M12, R-M13 |
 | A9 | The restricted account receives strictly fewer rows on `/demo/people` and `/demo/spend`, with identical navigation | R-A3, R-A8, R-D18 |
 | A10 | A restricted-account payload contains no figure outside its grants | R-A6 |
 | A11 | A token whose Organization does not match the path segment yields 404 | R-A7 |
@@ -766,7 +789,7 @@ count: 1 against 20, with C9's sentence carrying the explanation.
 
 ---
 
-**C11 — The fourth `/demo` tile does not stack.** R-N8 stacked Completed Tasks by WorkType,
+**C11 — The `/demo` breakdown tile does not stack.** R-N8 stacked Completed Tasks by WorkType,
 justified by "every AgentSession references exactly one WorkType". True of sessions; the tile counts
 Tasks, and a Task's sessions may span several WorkTypes — 118 of the fixture's do. Measured through
 the real query, open account, August 2026: `58+35+25+32+12 = 162` against the Completed Tasks tile's
@@ -781,8 +804,10 @@ part-to-whole claim, so the slices need not sum. C8 stands: the human-presence s
 a legitimate stack, and R-V1 still permits stacking where the grouping genuinely partitions the
 measure. Only this ViewModel's claim to partition was false.
 
-The tile also loses its headline figure and change figure, which were built from tile 2's reading
-and printed the same number and delta twice.
+The tile also loses its headline figure and change figure, which were built from the Completed
+Tasks tile's reading and printed the same number and delta twice. It **moves next to that tile**
+under R-N4's amended order, which is where a breakdown belongs: the tile it is a breakdown of is
+now the one beside it rather than two cards away.
 
 ---
 
@@ -798,7 +823,7 @@ inherit the first's bounds.
 
 ---
 
-**C13 — Incompleteness is withheld on the baseline and flagged on the current period.** R-M13 said
+**C13 — Incompleteness withholds the change figure, on either side of the comparison.** R-M13 said
 incompleteness is *flagged, never withheld*, which C12 turns into a defect: the fixture window opens
 and closes on partial months, so comparing against the month before the selection can silently take
 a part-month as its baseline and report a large fake rise.
@@ -812,6 +837,32 @@ alongside the existing zero floor.
 Rejected: comparing equal elapsed days of each month. It is honest and non-empty, but it invents a
 second comparison mode and sits against R-E2's *never pro-rated*. `change.ts` already computed an
 `incomplete` flag over either side and deliberately did not act on it; this is the rule that acts.
+
+**Amended, and the asymmetry withdrawn** (2026-09-09, second round). The half that survived is the
+baseline rule above, unchanged. The half that fell is *"a partial current month renders with its
+flag"*, and R-N6's month picker is what fell it: **the current month is now the page default**, so
+the flagged part-month is not a period the viewer chose to look at but the first thing they see.
+Measured on the committed fixture, eight days of September against the whole of August: Total spend
+**−46%**, Completed Tasks **−73%**, and Cost per completed Task **+96%**. Every one of those is the
+calendar rather than the work, and the last is the worst of them — a whole month of seat cost
+(R-M5) over eight days of Tasks reads as the product's central metric nearly doubling, on the
+opening claim of the page graded for the ten-second read.
+
+The argument that carried the asymmetry — *the viewer chose this, and it is flagged* — was about
+what qualifies a figure. A flag qualifies a figure that is provisional. This one is not
+provisional, it is wrong: a whole month's worth of days is missing from one side of a ratio. So a
+fourth suppression reason, **`current-period-incomplete`**, joins the closed vocabulary in
+`change.ts`, and **every tile shows the "Partial month" flag where its change figure would have
+been** (R-N7). Four flags, no percentages — the flag is now the copy for the suppression rather
+than a qualifier beside a figure, and the reason is stated once above the row.
+
+The order of the checks is a decision in itself: the prior-period rules are tested first, so a
+comparison failing on both sides reports the *baseline*. A period with nothing to compare against
+is the more fundamental fact of the two.
+
+Not withdrawn: R-E2. The month is still flagged rather than withheld or pro-rated, and the figures
+themselves — the spend, the count, the ratio — are the month so far and are shown as such. What is
+withheld is only the comparison, which is what C13 was always about.
 
 ---
 

@@ -157,7 +157,21 @@ describe("Controls are links, and the link is the whole mechanism (R-T25)", () =
       .getAllByRole("link")
       .map((link) => link.textContent);
 
-    expect(labels).toEqual(periodOptions(WINDOW).map((option) => option.label));
+    expect(labels).toEqual(periodOptions("spend", WINDOW).map((option) => option.label));
+    expect(labels).toContain("All data");
+  });
+
+  it("offers `/demo` the fixture's months and no whole window (R-N6, ticket 39)", () => {
+    // R-C1's other half, read from the surface: a page shows the options its own control has,
+    // and "All data" is not one of `/demo`'s. The current month is selected, being its default.
+    toolbar("summary");
+    const control = within(screen.getByTestId("control-period"));
+
+    expect(control.getAllByRole("link").map((link) => link.textContent)).toEqual(
+      periodOptions("summary", WINDOW).map((option) => option.label),
+    );
+    expect(control.queryByRole("link", { name: "All data" })).toBeNull();
+    expect(screen.getByTestId("control-period")).toHaveTextContent("September 2026");
   });
 
   it("carries the page's other parameters through the date-range form (R-N20)", () => {

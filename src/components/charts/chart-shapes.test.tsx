@@ -11,8 +11,8 @@
 // This is the test that keeps R-V1's narrowing honest. Ticket 10 wrote the rule as "no stacking,
 // anywhere" and `spec.md` § 11 C8 narrowed it to its own reasoning — *stacking encodes a
 // partition; Team is not one* — because WorkType and the three duration spans **are** partitions
-// and two shipped panels depend on stacking them (R-N8's fourth summary tile, R-N12 panel 6). A
-// blanket `no stackId` assertion would have been easier and would have forbidden both. So the
+// and one shipped panel depends on stacking them (R-N12 panel 6, the human-presence spans). A
+// blanket `no stackId` assertion would have been easier and would have forbidden it. So the
 // dangerous direction is asserted precisely: **Team never stacks, and a Team-grouped ViewModel
 // carrying `stackable: true` is itself the failure.**
 //
