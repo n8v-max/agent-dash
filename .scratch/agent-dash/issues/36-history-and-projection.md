@@ -72,3 +72,67 @@ Plus all of `/demo/history`, and **T-E9** finding no compute-rate-card values on
 **Verify T-U21 rather than re-deriving it.** Check that ticket 28's tests assert what T-U21 asks:
 the method is identical at 10% elapsed and at 90% while the elapsed fraction differs — both
 asserted, because they are two different claims — and that no confidence band is produced.
+
+### 2026-09-08 — implemented (AFK build, wave 9, worktree `agent-dash-t36`)
+
+`lint` 0 errors · `typecheck` clean · `test` **956** across 42 files · `test:coverage` 97.9% / 89.0%
+· `build` both routes dynamic · `PORT=3136 pnpm e2e` 58 passed, 1 failed — **T-E4 on `["3.1","3.5"]`,
+which was a defect in the test's regex and is fixed on `main` (`fb0c936`)**: both literals come from
+the model ids `gemini-3.1-pro-preview` and `gemini-3.5-flash-lite`, and the decimal pattern excluded
+digits and dots either side but not letters. Diagnosed here, correctly left unfixed because
+`e2e/support/costs.ts` was off-limits to this wave, and verified by measurement — the set difference
+between the loose and strict patterns on the restricted `/demo/history` payload is exactly
+`{3.1, 3.5}`.
+
+**T-U21 was verified, not re-derived.** Ticket 28's tests assert the method is identical at 10% and
+90% (three separate expectations, and the method is a `typeof PROJECTION_METHOD` constant on the
+return type so it *cannot* vary with the figure) while the elapsed fraction differs — asserted as a
+separate `it`, which is the "two different claims" point. No confidence band is asserted two ways:
+a key-name filter over the object and its `elapsed`, and an exact `Object.keys().sort()` equality,
+so a new field of *any* name fails. Nothing there was changed.
+
+**T-E9's literal wording is unsatisfiable against this fixture, and the crawl was rebuilt to make
+the same claim discriminate.** Crawling for the compute card's bare rate values finds `1.2` and
+`0.9` on `/demo/history` — both are session `cost` values on R-N19's rows. `0.3` will appear on
+`/demo/spend` too, because it is also `gemini-3.5-flash-lite`'s uncached-input rate. That is
+`support/costs.ts`'s own "value identity is not fact identity" defect in a new place. T-E9 instead
+asserts, over all six routes as the open account, across HTML **and** RSC flight: **no structural
+marker** (`machine_spec`, `usd_per_hour`, the card's `unit` and `label` — deliberately not "per
+hour" or a bare "compute", since a marker trippable by honest copy is a marker someone deletes
+rather than investigates); **no (specification, rate) pairing** within 80 characters in either
+order, which is one row of the card and survives a renamed header; and **not the whole card** —
+no payload holds all four rates. Three positive controls: a synthetic serialised card trips all
+three, a synthetic row of session costs equal to two rates trips none. Recorded as an argument in
+the spec file's header; no spec was edited.
+
+**T-C9.1** reads the four token-class volumes back **out of the DOM**, strips separators, sums them
+and compares against the rendered "Tokens processed" figure — never against a fixture literal, so
+dropping or duplicating a class fails. It also asserts exactly four named rowheaders in R-N20.1's
+order and that **no `%` appears**, since a share would be a division and components do not compute.
+
+**"Estimated" is driven off the ViewModel's own tile key**, so which figure is the forecast is not
+re-decided in copy. Three assertions: it is on the projected figure; spend-to-date does not match
+`/estimat/i`; and the marker occurs **exactly once** in the panel — repeated live in e2e. The token
+rate card does not render here (asserted absent).
+
+`data-table.tsx` was read and deliberately left a Server Component: making the shared table
+client-side to serve one page's row expansion would push every page's rows into the flight payload.
+
+**Design notes.** The task key renders in the mono face so `owner/repo#412` reads as an identifier
+rather than prose; the expanded row is a full-width band with a `--chart-1` left rule holding
+Token classes and Model mix side by side. On projection, the method sentence and the elapsed share
+sit in one band because together they are the whole uncertainty statement R-N24 leaves available —
+and the share is **text, not a meter**: a data mark there would have to argue with R-T28, and the
+spec asks for a share, not a visualisation. `ChartFrame`'s `aspect-video` was overridden to 16/5 via
+a child selector (no `!important`) because at dashboard width it produced a ~790px-tall chart.
+
+### Two things reachable but not clickable, recorded
+
+1. **R-N20 asks for "default sort newest first", but § 5 gives `/demo/history` four controls and
+   none of them is sort.** The ViewModel sorts and the table exposes `aria-sort`, but a viewer can
+   only change it by hand-editing the URL. Header sort links were **not** added: sorting is URL
+   state, and adding a control the page does not declare cuts across R-C1.
+2. **The `surface: "session"` arm renders and works** (`?session=ses_0001` shows the detail, an
+   unknown id shows the withheld note — both verified live) **but nothing in the app constructs
+   that link.** Building it properly means preserving the date range and filters through
+   `components/controls/schema.ts`'s href builder, a shared file this wave could not touch.
