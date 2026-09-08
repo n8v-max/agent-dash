@@ -195,3 +195,51 @@ coverage already calls covered.
 
 `prototype/18-rollup-spike` (the spike, deliberately unmerged) and the nine `ticket/*` branches,
 all merged into `main` with `--no-ff`. All worktrees removed.
+
+---
+
+## Resolved 2026-09-09
+
+Everything under *Waiting for a human* and *Spec defects found and recorded* was decided in one
+session and is now in the specs and in the code. `spec.md` § 11 carries the reasoning as **C9–C14**;
+this section is only the index.
+
+| Open item above | Decision | Where |
+|---|---|---|
+| 1 — landing copy | **"Agent spend, measured per finished task. Not per token, not per seat."** | ticket 37, `spec.md` § 13 |
+| 2 — production `AUTH_JWT_SECRET` | Provisioned | — |
+| 3 — A28 vs R-A10 | **The permission matrix does not ship.** One sentence on `/demo/people` instead | C9 |
+| 4 — R-N8's non-partition | **Unstacked**, sorted bars over one month | C11 |
+| 5 — T-E2's row count | **One row**, no aggregate restated on this page | C10 |
+| 6 — `/demo` tiles 2 and 4 | Tile 4 loses its headline figure and change | C11 |
+| 7 — the period control vs R-N7 | The comparison reads **outside** the selected window | C12 |
+| 8 — `perCapita` unread on `/demo/spend` | **Wired**, to the two additive money panels | C14 |
+
+**Three of the eight were not resolved as the report framed them**, which is worth recording because
+the framing was the work:
+
+- **A28 was not decided either way.** Both readings were arguments about who should see a
+  permissions grid, and the answer was that an MVP ships no grid. The sentence that replaced it does
+  a job the matrix never did — it explains a one-row table — so it is an empty-state affordance
+  first and an access disclosure second.
+- **T-E2 got neither the shipped shape nor the specified one.** The Team aggregate row was buildable
+  (the grant is real), and was declined: an aggregate beside a named row in one column set is the
+  subtraction R-M17 exists to prevent.
+- **C12 opened a defect C13 had to close.** Reading the prior month outside the window means the
+  baseline can be a month the fixture only half covers, which inflates without bound and is
+  invisible to the viewer. Incompleteness is now **withheld on the baseline and flagged on the
+  current period** — an asymmetry, deliberately, and `change.ts` argues it.
+
+Also corrected, none of them behavioural: R-D5's premise was false at UTC+2, so A7's own worked
+example could not fail (the illustration is fixed, the rule stands); R-D6 and R-D7 now state the
+grand total they share; R-D4 wins over ticket 10's unreachable session-cost percentiles; and five
+plain mismatches (`90+`/`91+`, "five of six", T-U4 contradicting its next bullet, T-E6 citing A5
+where it meant R-A5, T-E9's unsatisfiable wording).
+
+**Gates after the change**: lint 0 problems · typecheck clean · **1,102** unit tests, 52 files ·
+coverage statements 97.95 · branches 87.32 · functions 98.76 · lines 99.48 · build 10 routes ·
+**102** e2e, verified under `CI=1` against the production build.
+
+The test count fell by one file and rose by three tests: `permission-matrix.test.tsx` was deleted
+with its component, and T-E8 was retired rather than rewritten.
+

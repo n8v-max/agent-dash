@@ -91,3 +91,13 @@ A judgement call, recorded in the component: the Model mix distribution list ren
 including ones the chart folded into "Other". R-V4's cap is read as a rule about *series* (five
 colours, R-V7), and R-V6 already discloses the tail by name in Other's tooltip; the list has no
 swatches, no expansion and no click.
+
+### 2026-09-09 — resolved by the human: C14
+
+Per-capita was declared for this page by R-C1 and read by nothing on it, so the control rendered and
+changed nothing. It now divides **Total spend** and **Cost by Repository** — the page's two additive
+money panels — and deliberately not the three ratios, which are already normalised.
+
+Total spend stays stackable under the toggle, unlike `/demo/work`'s velocity panel: session cost per
+Member and seat cost per Member sum exactly to total spend per Member, so R-V1 has no reason to veto
+the geometry. The denominator is R-M14's, now shared with `work.ts` rather than copied.

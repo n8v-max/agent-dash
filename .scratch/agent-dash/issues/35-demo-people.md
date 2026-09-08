@@ -148,3 +148,18 @@ the regex was given a word-boundary guard on `main`.
 
 **`TableColumn` carries no unit**, so the Cost column renders `746.41` with no currency mark while
 the tiles render `$746.41`. No requirement is violated, but the two surfaces disagree in tone.
+
+### 2026-09-09 — resolved by the human: C9 and C10
+
+**The permission matrix does not ship.** A28 said the open account saw it and the restricted one did
+not; R-A10 and § 11 C6 said both saw it. The disagreement was about the audience for a table that
+should not exist in an MVP — a second information architecture explaining a mechanism the account
+switcher already demonstrates. Component, unit test, acceptance criterion and T-E8 are all gone.
+
+**One sentence replaces it**, read off `grantMatrix` rather than keyed on the preset, so a third Role
+would get a true sentence without anyone remembering to write one. It carries no digits.
+
+**The restricted account's table is one row.** Not the two `testing-spec.md` described, and not the
+row-plus-aggregate-sentence that shipped: the aggregated grant is real and stays legible on
+`/demo/work` and `/demo/spend`, but restating it beside a named row in one column set invites the
+subtraction R-M17 exists to prevent. T-E2 asserts 1 against 20 exactly, where it asserted a range.

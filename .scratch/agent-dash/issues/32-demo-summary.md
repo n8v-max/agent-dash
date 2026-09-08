@@ -120,3 +120,19 @@ Two shared-file gaps recorded: `ChartFrame` has no way to express R-N8's "no axi
 size" (worked around with arbitrary variants from the panel; a `labels?: boolean` or `dense` prop
 would be the clean fix), and `ChartLegendContent` is a single unwrapped flex row that rendered five
 WorkTypes outside the card at tile width.
+
+### 2026-09-09 — resolved by the human: C11
+
+**Unstacked.** Neither of the two alternatives recorded above was taken. Re-keying each Task to its
+completing session's WorkType would have restored the partition at the price of a definition nothing
+else uses; switching the measure to sessions would have contradicted R-N4 and ticket 05. Sorted
+horizontal bars over the reported month make no part-to-whole claim, so the slices need not sum, and
+the 162-against-150 over-count is no longer a false statement — it is just five bars.
+
+**The tile also lost its headline figure and its change figure**, which is the second finding on
+this ticket and was decided at the same time: it was built from tile 2's reading, so `/demo` printed
+one number and one delta twice. `SummaryTile` is now a union on `kind`, so the breakdown tile has no
+`value` in scope to render.
+
+One bucket, not six, is what makes R-V5's whole-range ranking the sort — "longest first" is written
+nowhere and cannot disagree with the legend. See `spec.md` § 11 C11.

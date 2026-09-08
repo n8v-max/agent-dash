@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-human
+Status: resolved
 Blocked by: 32
-Label: ready-for-human
+Label: resolved
 
 # Landing copy and positioning
 
@@ -50,3 +50,21 @@ comparison table; those are out of scope and were argued out.
 
 The human has written the line. Do not pre-answer this — the standing preference on this map is
 that the human answers HITL tickets, and v1 was archived for exactly that failure.
+
+### 2026-09-09 — the human wrote it
+
+> **Agent spend, measured per finished task. Not per token, not per seat.**
+
+The direction held: the ratio leads, waste is the supporting line, and nothing on the page says
+anything about speed. `/` is the line, one supporting sentence and one link to sign-in.
+
+**One word was changed on review, and one ambiguity was left in deliberately.** The first draft read
+*"priced per finished task"*; "priced" is a vendor's verb and on a hero it reads as how this product
+charges you, so it became "measured". *"Not per seat"* is a claim about the **unit reported**, not
+about what the numerator holds — Total spend does include seat cost, about 48% of it, which is
+R-D4's own headline finding. Kept, because the contrast is with per-seat and per-token *pricing
+models*; recorded here and in `src/app/page.tsx` because a reader who takes it the other way will
+find the apparent contradiction one click in.
+
+`e2e/smoke.spec.ts` asserts the line and the absence of any productivity claim; `page.test.tsx`
+asserts R-N1's scope — one link, and it goes to `/sign-in`.
