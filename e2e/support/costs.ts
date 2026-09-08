@@ -150,8 +150,22 @@ const grantedTotals = (rows: readonly SessionRow[], timezone: string): readonly 
 /** Locale-pinned exactly as `table-mirror.tsx` and `data-table.tsx` pin it. */
 const MONEY = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
-/** Every decimal literal a string contains, as written. */
-const DECIMAL_LITERAL = /(?<![\d.])\d+\.\d+(?![\d.])/g;
+/**
+ * Every decimal literal a string contains, as written.
+ *
+ * The lookarounds exclude letters and hyphens as well as digits and dots, so a decimal that is
+ * part of a longer *identifier* is not read as a number. Without that, `gemini-3.1-pro-preview`
+ * contributes `3.1` — and some Member's session cost is 3.1, so R-N20.1's Model mix (the one
+ * surface in the product allowed to carry a per-session Model breakdown) tripped T-E4 on a model
+ * version string. Measured on the restricted `/demo/history` payload: the difference between the
+ * loose and strict forms is exactly `{3.1, 3.5}`, both from model ids.
+ *
+ * This does not narrow the search for a leak. A cost that has actually escaped reaches the wire as
+ * `,24.39]`, `"24.39"`, `>24.39<` or `$24.39` — every one of those still matches, because none of
+ * the excluded characters can sit against the digits. The named guards hold either way: `24.39`
+ * stays in the search set and `13.04` stays out.
+ */
+const DECIMAL_LITERAL = /(?<![\d.\-A-Za-z])\d+\.\d+(?![\d.\-A-Za-z])/g;
 
 export const decimalsIn = (payload: string): ReadonlySet<string> =>
   new Set(payload.match(DECIMAL_LITERAL) ?? []);
