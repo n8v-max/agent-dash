@@ -182,6 +182,7 @@ export const spendPageFixture = (
       // from the Total spend panel's session Cost, which a shared literal would confuse.
       cost: 12_990.4,
       value: 9.2,
+      message: null,
     },
   },
   costPerCompletedTaskByWorkType: chartFixture({

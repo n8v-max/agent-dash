@@ -131,7 +131,9 @@ describe("T-U20 — the composition is interactive sessions only (R-N14, A27)", 
     expect(composition.slices.reduce((running, slice) => running + slice.total, 0)).toBe(
       composition.total,
     );
-    expect(composition.slices.reduce((running, slice) => running + slice.share, 0)).toBeCloseTo(1, 12);
+    expect(
+      composition.slices.reduce((running, slice) => running + (slice.share ?? 0), 0),
+    ).toBeCloseTo(1, 12);
   });
 
   it("says so, in words, with the counts it was computed from (A27)", () => {

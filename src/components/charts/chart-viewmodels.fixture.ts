@@ -30,7 +30,12 @@ export const OTHER_KEY = "other";
 export type SeriesSpec = {
   readonly key: string;
   readonly label: string;
-  readonly values: readonly number[];
+  /**
+   * One value per bucket. **`null` is a bucket the chart has no reading for** (R-M18) — a ratio
+   * whose denominator was zero — and it travels onto both the series point and the mirror cell,
+   * because the domain layer puts it on both and a component must render the pair consistently.
+   */
+  readonly values: readonly (number | null)[];
 };
 
 export type ChartSpec = {
@@ -89,7 +94,13 @@ export function chartFixture(spec: ChartSpec = {}): ChartViewModel {
     label: held.label,
     colorVar: PALETTE[at] ?? "--chart-5",
     inert: held.key === OTHER_KEY,
-    points: buckets.map((bucket, index) => ({ bucket: bucket.key, value: held.values[index] ?? 0 })),
+    points: buckets.map((bucket, index) => ({
+      bucket: bucket.key,
+      // `=== undefined`, never `??`: a spec shorter than the bucket list is an *unwritten*
+      // value and reads as zero, where an absent reading is written `null` and survives.
+      // `held.values[index] ?? 0` would collapse the two and delete every gap a test writes.
+      value: held.values[index] === undefined ? 0 : held.values[index],
+    })),
   }));
 
   return {
@@ -105,7 +116,7 @@ export function chartFixture(spec: ChartSpec = {}): ChartViewModel {
       columns: [spec.bucketColumn ?? "Period", ...specs.map((held) => held.label)],
       rows: buckets.map((bucket, index) => [
         bucket.label,
-        ...specs.map((held) => held.values[index] ?? 0),
+        ...specs.map((held) => (held.values[index] === undefined ? 0 : held.values[index])),
       ]),
     },
   };

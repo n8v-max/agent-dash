@@ -373,6 +373,33 @@ describe("Cost per session, with the accepted filter (R-M1, R-M4)", () => {
     expect(empty.partial).toBe(true);
   });
 
+  // R-M18 — the absence carries its own reason, because a headline em dash with nothing beside
+  // it reads as a rendering fault rather than as a period that held no session.
+  it("names the period and the filter that emptied it, in words", () => {
+    const empty = { key: "2026-W17", partial: true, rows: [] };
+
+    expect(costPerSession(empty).message).toBe("2026-W17 holds no session to average");
+    expect(costPerSession(empty, "accepted").message).toBe(
+      "2026-W17 holds no accepted session to average",
+    );
+    expect(costPerSession(empty, "not-accepted").message).toBe(
+      "2026-W17 holds no unaccepted session to average",
+    );
+  });
+
+  it("names the filter even where the period held rows the filter removed", () => {
+    // Four sessions, none of them a third kind: the `accepted` filter is what emptied it, and
+    // saying "holds no session" would be false about the period.
+    const accepted = costPerSession({ key: "2026-W16", partial: false, rows: ROWS }, "accepted");
+
+    expect(accepted.value).not.toBeNull();
+    expect(accepted.message).toBeNull();
+  });
+
+  it("carries no reason where there is a figure", () => {
+    expect(costPerSession(period).message).toBeNull();
+  });
+
   it("sums the attributed figures and nothing else", () => {
     expect(sessionCost(ROWS)).toBe(100);
     expect(sessionCost([])).toBe(0);

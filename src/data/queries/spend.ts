@@ -259,8 +259,11 @@ export function spendPage(viewer: Viewer, params: ControlSet): SpendPageViewMode
   // C14 — the toggle divides only where a division states something. `available` is false over a
   // population of one, so a single-Member view is offered nothing rather than offered identity.
   const population = populationPerCapita(context);
-  const on = context.params.perCapita && population.available;
-  const divisor = on ? perCapitaDivisor(population) : 1;
+  // R-M18 — `perCapitaDivisor` is `null` where there is nothing to divide by, so `on` is the
+  // one place that decides, and `divisor` is 1 only where it multiplies nothing.
+  const perMember = context.params.perCapita ? perCapitaDivisor(population) : null;
+  const on = perMember !== null;
+  const divisor = perMember ?? 1;
 
   return {
     orgSlug: params.orgSlug,

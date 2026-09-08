@@ -16,10 +16,13 @@
 //     (`spec.md` § 1). A configurable threshold defaulting to zero would be the same rule with
 //     a switch on it, so there is no option object and no parameter to widen.
 //
-//   * **Suppression is a closed vocabulary** (`CHANGE_SUPPRESSIONS`), and all three of its members
-//     say something about the *prior* period: it does not exist, it holds nothing, or it is
-//     unfinished. None of them is about the size of the change. Any future reason would have to be
-//     named here, in a list a reader compares against R-M12.
+//   * **Suppression is a closed vocabulary** (`CHANGE_SUPPRESSIONS`), and none of its members is
+//     about the size of the change. Three say something about the *prior* period — it does not
+//     exist, it holds nothing, or it is unfinished — and the fourth, added by ticket 40, says that
+//     one of the two periods has **no figure at all**: R-M18 makes a ratio over a zero denominator
+//     `null`, and a `null` coerced to `0` here would report a fall to nothing where nothing was
+//     measured. A tile printing "—" beside "−100% on the prior period" is the failure it prevents.
+//     Any further reason would have to be named here, in a list a reader compares against R-M12.
 //
 //   * **The ratio is unreachable when the figure is suppressed.** `Change` is a discriminated
 //     union: a renderer that has not narrowed on `shown` has no `ratio` in scope to print, so
@@ -64,6 +67,14 @@ export type PeriodFigure = {
 };
 
 /**
+ * A period whose measure may have **no reading at all** — R-M18's ratio over a zero denominator
+ * (`ratio.ts`). It is what `changeBetween` accepts, so a caller cannot be tempted to hand it a
+ * `null` coerced to `0`; a `PeriodFigure` is one of these that happens to have a figure, and is
+ * what a *shown* change carries, so the two absences never meet on the same field.
+ */
+export type PeriodReading = Omit<PeriodFigure, "value"> & { readonly value: number | null };
+
+/**
  * The two periods being compared. **No adjacency is required or implied** (R-M13): the type
  * names a current and a prior figure and nothing else about their relationship.
  *
@@ -72,8 +83,8 @@ export type PeriodFigure = {
  * period holding nothing: there is no basis.
  */
 export type Comparison = {
-  readonly current: PeriodFigure;
-  readonly prior: PeriodFigure | undefined;
+  readonly current: PeriodReading;
+  readonly prior: PeriodReading | undefined;
 };
 
 /** Which way the figure moved. Read off the absolute difference, so it is sign-honest. */
@@ -81,11 +92,13 @@ export const CHANGE_DIRECTIONS = ["up", "down", "flat"] as const;
 export type ChangeDirection = (typeof CHANGE_DIRECTIONS)[number];
 
 /**
- * Why a change figure is suppressed. R-M12 and R-M13 admit exactly these three, and each is a
- * statement about the prior period — that it does not exist, holds nothing, or has not finished
- * — never about the size of the change.
+ * Why a change figure is suppressed. R-M12, R-M13 and R-M18 admit exactly these four. Three are
+ * statements about the prior period — that it does not exist, holds nothing, or has not finished
+ * — and one is a statement about a period having no figure at all. **None is about the size of
+ * the change**, which is the property this list exists to make visible.
  */
 export const CHANGE_SUPPRESSIONS = [
+  "no-figure-to-compare",
   "no-prior-period",
   "prior-period-holds-nothing",
   "prior-period-incomplete",
@@ -112,8 +125,9 @@ export type ChangeSuppressed = {
   readonly reason: ChangeSuppression;
   /** Why, in words, for the copy that stands where the figure would have been. */
   readonly message: string;
-  readonly current: PeriodFigure;
-  readonly prior: PeriodFigure | null;
+  /** A *reading*, not a figure: one arm of the suppression is that there is no figure (R-M18). */
+  readonly current: PeriodReading;
+  readonly prior: PeriodReading | null;
   readonly incomplete: boolean;
 };
 
@@ -124,15 +138,23 @@ const directionOf = (absolute: number): ChangeDirection => {
   return absolute < 0 ? "down" : "flat";
 };
 
-const incompleteIn = (current: PeriodFigure, prior: PeriodFigure | undefined): boolean =>
+const incompleteIn = (current: PeriodReading, prior: PeriodReading | undefined): boolean =>
   current.partial || (prior?.partial ?? false);
 
+/** A reading that has a figure, as the shown arm carries it. Narrowed by its caller, never cast. */
+const figure = (reading: PeriodReading, value: number): PeriodFigure => ({
+  key: reading.key,
+  value,
+  partial: reading.partial,
+});
+
 /**
- * **R-M12 — the change floor, and C13's partial baseline.** The figure is suppressed when, and
- * only when, the prior period is not a baseline: it does not exist, it holds zero, or it has not
- * finished. Everything else is shown.
+ * **R-M12 — the change floor, C13's partial baseline, and R-M18's absent reading.** The figure is
+ * suppressed when, and only when, there is nothing to divide by: one of the two periods has no
+ * figure at all (R-M18), or the prior period is not a baseline — it does not exist, it holds
+ * zero, or it has not finished. Everything else is shown.
  *
- * There is deliberately no second condition. A prior period of 2 against a current of 3 returns
+ * There is deliberately no condition on the *size* of the change. A prior period of 2 against a current of 3 returns
  * `+0.5` and a prior of 1 against a current of 1000 returns `+999`; both are shown, because the
  * product's position is that a large change off a small base is the honest reading rather than
  * noise to be filtered. A current period of zero against a prior that held something is shown
@@ -142,6 +164,20 @@ export function changeBetween(comparison: Comparison): Change {
   const { current, prior } = comparison;
   const incomplete = incompleteIn(current, prior);
 
+  // R-M18 — checked first, and on either side. A period the measure is undefined over is not a
+  // period holding zero: coercing it would report a fall to nothing that nobody measured, under a
+  // headline figure already printing an em dash for the same absence.
+  if (current.value === null) {
+    return {
+      shown: false,
+      reason: "no-figure-to-compare",
+      message: `${current.key} has no figure, so there is nothing to compare`,
+      current,
+      prior: prior ?? null,
+      incomplete,
+    };
+  }
+
   if (prior === undefined) {
     return {
       shown: false,
@@ -149,6 +185,19 @@ export function changeBetween(comparison: Comparison): Change {
       message: `${current.key} has no prior period to compare against`,
       current,
       prior: null,
+      incomplete,
+    };
+  }
+
+  // The other half of R-M18, after the existence rule above so that "there is no earlier period"
+  // is never reported as "the earlier period has no figure".
+  if (prior.value === null) {
+    return {
+      shown: false,
+      reason: "no-figure-to-compare",
+      message: `${prior.key} has no figure to compare ${current.key} against`,
+      current,
+      prior,
       incomplete,
     };
   }
@@ -180,9 +229,12 @@ export function changeBetween(comparison: Comparison): Change {
   const absolute = current.value - prior.value;
   return {
     shown: true,
-    current,
-    prior,
+    current: figure(current, current.value),
+    prior: figure(prior, prior.value),
     absolute,
+    // Guarded above: `prior.value` is neither null nor zero here, which is what R-M12's floor
+    // *is*. `ratio.ts` is not consulted because a suppression already stands where it would
+    // have returned `null` — and it carries a reason, which a bare `null` could not.
     ratio: absolute / prior.value,
     direction: directionOf(absolute),
     incomplete,

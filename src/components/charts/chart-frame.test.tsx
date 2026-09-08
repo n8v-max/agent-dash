@@ -31,6 +31,7 @@ import {
   TEAM_SERIES,
 } from "./chart-viewmodels.fixture";
 import { LEGEND_LABEL } from "./series-legend";
+import { NO_READING } from "./table-mirror";
 
 const SIZE = { width: 640, height: 320 };
 
@@ -125,6 +126,30 @@ describe("T-C1 — every chart renders a visually-hidden table mirror", () => {
     expect(
       within(screen.getByRole("table")).getByRole("columnheader", { name: "Other" }),
     ).toBeInTheDocument();
+  });
+
+  /**
+   * **R-M18 — a cell with no reading is an em dash, never a zero** (ticket 40).
+   *
+   * The chart beside this table breaks its line at the same bucket (`connectNulls={false}`), and
+   * the two have to make one claim: a week the restricted account finished no Job in has no Cost
+   * per completed Job, so the table says so rather than saying the work was free.
+   */
+  it("prints an em dash where the chart has no reading, and zero where it has one", () => {
+    const gappy = chartFixture({
+      title: "Cost per completed Job",
+      rollUpLevel: "Organization",
+      buckets: ["Week 15, 2026", "Week 16, 2026", "Week 17, 2026"],
+      series: [{ key: "organization", label: "Equilibrio", values: [null, 0, 14.83] }],
+    });
+    render(<ChartFrame chart={gappy} shape="line" dimension={SIZE} />);
+
+    expect(mirrorRows()).toEqual([
+      ["Week 15, 2026", NO_READING],
+      // A measured zero is still a measurement, and stays a zero.
+      ["Week 16, 2026", "0"],
+      ["Week 17, 2026", "14.83"],
+    ]);
   });
 });
 

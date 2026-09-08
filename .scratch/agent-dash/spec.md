@@ -350,9 +350,14 @@ therefore a pure function of `(rows, timezone)`.
 daily bucket holds too few sessions to read.
 
 **R-M12 — The change floor is one.** A change figure is suppressed when the prior period holds
-*nothing at all*, and when the prior period is *incomplete* (R-M13). Above zero and complete it is
-shown: two to three sessions week-over-week really is +50%, and on a narrow self-view that is the
-honest reading, not noise.
+*nothing at all*, when the prior period is *incomplete* (R-M13), and when **either period has no
+figure at all** (R-M18). Above zero and complete it is shown: two to three sessions week-over-week
+really is +50%, and on a narrow self-view that is the honest reading, not noise.
+
+The third condition is not a fourth kind of floor: it is R-M18 reaching the comparison. A ratio
+over a zero denominator is `null`, and a `null` read as `0` reports a *fall to nothing* off a
+period whose measure was never defined — under a headline figure already printing an em dash for
+the same absence. The floor itself is still a count of one, and still never a magnitude.
 
 **R-M13 — Comparison is unrestricted. An incomplete *current* period is flagged; an incomplete
 *prior* period is withheld.** Any period may be compared with any other. The asymmetry is the point:
@@ -372,6 +377,27 @@ as the headline, not the ability to sort a table.
 **R-M16 — Incomplete Tasks are reported bucketed by age since the last session**: 0–7 · 8–30 ·
 31–90 · **91+** days. The buckets are half-open and must not double-cover day 90. The platform does not own the external Task's lifecycle and cannot tell
 in-flight from abandoned, so age carries what the label cannot claim.
+
+**R-M18 — A ratio with a zero denominator is `null`, never `0`.** A bucket that finished nothing
+has no Cost per completed Task; a week with no session has no Cost per session; a WorkType that ran
+nothing has no Acceptance rate. Drawn at zero, each of them claims a measurement that was never
+taken — that the work was free, or that every attempt failed — and the claim is louder than any
+caption beside it.
+
+It applies to **every** ratio the product computes: Cost per completed Task at every grouping,
+Cost per session, Acceptance rate within each WorkType, Rework rate, Decomposition rate, the
+per-capita variants (R-M14), Projected cost before any of the period has elapsed (R-N23), the seat
+share of Total spend, the Model-mix shares (R-M7) and the human-presence span shares (R-N12
+item 6).
+
+**It is one expression in the domain layer**, not a guard repeated at each site: nine
+`denominator === 0` checks are nine chances to write `0`, and a reader cannot tell from any one of
+them what the product's rule is. Expressed once, the rule has a single test and a property a
+future suite can bind to — *the reading is `null` if and only if the denominator is zero*.
+
+**A measured zero is not an absence.** An acceptance rate of 0 over five sessions is a
+measurement and renders as `0%`; over no sessions there is nothing to render. Nothing in this rule
+rounds, clamps or hides a real zero.
 
 ---
 
@@ -473,6 +499,21 @@ See § Conflicts resolved C3.
 
 **R-V9 — Where a filter empties a panel, it renders plain "no data for this selection" text.** The
 shell, navigation and controls stay present.
+
+**R-V10 — R-M18's `null` renders as an absence, in three places and one way.**
+
+- **Charts break at it.** A line or area mark is drawn with `connectNulls={false}`, so the series
+  has a gap where there is no reading. Connecting it would invent the readings it spans, which is
+  the zero-claim with interpolation on top.
+- **Table mirrors (R-X1) hold an em dash**, so the accessible statement of the chart and the chart
+  itself make one claim rather than two.
+- **A headline figure shows "—" and the reason beside it**, in the words the metric computed —
+  *"September holds $412.60 of spend and no Completed Job to divide it by"*. A bare dash reads as
+  a rendering fault; the sentence is what makes it read as an absence.
+
+**A missing bucket on an *additive* measure is still a zero.** A Repository that ran nothing in a
+week cost nothing, and that line belongs on the floor. Which of the two a missing bucket is
+follows from the measure, which the ViewModel already carries as a domain fact (R-V1).
 
 ---
 
@@ -623,7 +664,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A5 | Team-grouped totals exceed the Organization total, and the overlap statement is present | R-V3, R-D14 |
 | A6 | Per-capita denominators exclude `service_account` Members | R-M14, R-D3 |
 | A7 | A session at 00:30 Europe/Madrid buckets to that local day, not the previous UTC day it falls in | R-M10, R-D5 |
-| A8 | A change figure is suppressed when and only when the prior period holds zero or is incomplete | R-M12, R-M13 |
+| A8 | A change figure is suppressed when and only when the prior period holds zero, is incomplete, or either period has no figure | R-M12, R-M13, R-M18 |
 | A9 | The restricted account receives strictly fewer rows on `/demo/people` and `/demo/spend`, with identical navigation | R-A3, R-A8, R-D18 |
 | A10 | A restricted-account payload contains no figure outside its grants | R-A6 |
 | A11 | A token whose Organization does not match the path segment yields 404 | R-A7 |
@@ -644,6 +685,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A26 | April and September render the partial-period flag | R-D2, R-E2 |
 | A27 | Human-presence spans render for `interactive` sessions only, and say so | R-N14 |
 | A28 | No permission matrix renders on any surface; `/demo/people` states the acting account's visibility in words | R-A10 |
+| A29 | A ratio over a zero denominator is absent everywhere it appears — a gap in the chart, an em dash in the mirror, "—" and a reason on a headline figure — and never a zero | R-M18, R-V10 |
 
 ---
 
@@ -652,10 +694,10 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 Two settled sources disagreed. Each resolution takes the later decision, and each is recorded
 because a future reader will otherwise think the spec drifted.
 
-C1–C8 were settled at the handoff. **C9–C14 were settled on 2026-09-09**, after the unattended build
+C1–C8 were settled at the handoff. **C9–C15 were settled on 2026-09-09**, after the unattended build
 implemented the spec as written and reported where the spec contradicted itself or its own
-reasoning. Those six take the *better decision* rather than the later one, because in each case both
-sides were the same author.
+reasoning. Those seven take the *better decision* rather than the later one, because in each case
+both sides were the same author.
 
 **C1 — Series cap: "fixed everywhere" vs "only above five series".** Ticket 07 § Controls states
 the top-4 + "Other" cap applies everywhere. Ticket 10 § Chart rules — resolved *after* 07 —
@@ -837,9 +879,23 @@ argues at length, and the subject control does not reach either of the two panel
 
 ---
 
+**C15 — A period with no figure suppresses its change, alongside the zero floor.** R-M12 and A8
+both said a change figure is suppressed *when and only when* the prior period holds zero or is
+incomplete. R-M18 makes a ratio over a zero denominator `null`, and the query layer coerced that
+`null` to `0` on its way to the floor — so a tile printing "—" printed "−100% on the prior period"
+beside it, reporting a fall to nothing off a month whose measure was never defined.
+
+**Resolved by widening the vocabulary rather than by coercing the reading** (2026-09-09, ticket 40).
+`changeBetween` now takes a *reading* on either side and suppresses with its own reason where one is
+absent, so the suppression carries a fact rather than an arithmetic accident. This is not a
+magnitude threshold and does not become one: R-M12's floor is still a count of one on the base, and
+a *measured* fall to zero is still shown, which is the case a reader most needs.
+
+---
+
 ## 12. Open questions
 
-None. Fourteen conflicts have been resolved, C9–C14 of them on 2026-09-09 after the unattended
+None. Fifteen conflicts have been resolved, C9–C15 of them on 2026-09-09 after the unattended
 build surfaced them; each is recorded above with the reasoning that decided it, and each is
 reflected in `testing-spec.md`.
 

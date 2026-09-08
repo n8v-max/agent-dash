@@ -71,6 +71,7 @@
 //
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
+import { ratio, type Ratio } from "../ratio";
 import type { WorkTypeKey } from "../types";
 
 // --- Acceptance rate: within a WorkType, always (R-M6, A21) --------------------------------
@@ -95,8 +96,8 @@ export type AcceptanceRate = {
   /** Sessions of this WorkType. The denominator, and never another WorkType's. */
   readonly sessions: number;
   readonly accepted: number;
-  /** `accepted / sessions`, or `null` where the WorkType ran nothing. Never a divide by zero. */
-  readonly rate: number | null;
+  /** `accepted / sessions`, or `null` where the WorkType ran nothing (`ratio.ts`, R-M18). */
+  readonly rate: Ratio;
 };
 
 /**
@@ -117,7 +118,7 @@ export function acceptanceRateWithin(
     work_type: workType,
     sessions: within.length,
     accepted,
-    rate: within.length === 0 ? null : accepted / within.length,
+    rate: ratio(accepted, within.length),
   };
 }
 
@@ -256,8 +257,8 @@ export type TaskShare = {
   /** Every Task in the population — the denominator, Completed and Incomplete alike. */
   readonly tasks: number;
   readonly count: number;
-  /** `count / tasks`, or `null` over an empty population. Never a divide by zero. */
-  readonly rate: number | null;
+  /** `count / tasks`, or `null` over an empty population (`ratio.ts`, R-M18). */
+  readonly rate: Ratio;
 };
 
 const shareOf = (
@@ -265,7 +266,7 @@ const shareOf = (
   holds: (task: TaskFacts) => boolean,
 ): TaskShare => {
   const count = tasks.filter(holds).length;
-  return { tasks: tasks.length, count, rate: tasks.length === 0 ? null : count / tasks.length };
+  return { tasks: tasks.length, count, rate: ratio(count, tasks.length) };
 };
 
 /** **Rework rate** — the share of Tasks exhibiting Rework. Task grain, never session grain. */

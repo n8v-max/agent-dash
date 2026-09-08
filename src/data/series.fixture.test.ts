@@ -248,7 +248,7 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
     expect(
       byTeam.series
         .flatMap((series) => series.points)
-        .reduce((running, point) => running + point.value, 0),
+        .reduce((running, point) => running + (point.value ?? 0), 0),
     ).toBeGreaterThan(sessions.length);
   });
 });

@@ -19,8 +19,23 @@ import type { MirrorViewModel } from "@/domain/viewmodel";
 /** Deterministic and locale-pinned: a server's locale must not decide what a figure reads as. */
 const number = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
-const text = (cell: string | number): string =>
-  typeof cell === "number" ? number.format(cell) : cell;
+/**
+ * **R-M18 — a cell the chart has no reading for is an em dash, never a zero** (ticket 40).
+ *
+ * `null` reaches here from the domain layer for a ratio whose denominator was zero: a week
+ * with no Completed Job has no Cost per completed Job. The chart beside this table breaks its
+ * line at the same bucket (`connectNulls={false}`), so the two make one claim; printing `0`
+ * here would make the table say the work was free while the line said nothing at all.
+ *
+ * `undefined` — a row shorter than the column set — stays blank. That is a malformed mirror
+ * rather than an absent reading, and the two should not read alike.
+ */
+export const NO_READING = "—";
+
+const text = (cell: string | number | null): string => {
+  if (cell === null) return NO_READING;
+  return typeof cell === "number" ? number.format(cell) : cell;
+};
 
 export function TableMirror(props: {
   readonly mirror: MirrorViewModel;

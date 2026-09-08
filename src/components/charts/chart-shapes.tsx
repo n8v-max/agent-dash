@@ -19,6 +19,15 @@
 // row-major shape Recharts reads; it sums nothing, sorts nothing and drops nothing. Every number
 // that reaches a mark is the one `src/domain/` put on the series.
 //
+// **R-M18 — `connectNulls={false}`, stated rather than inherited.** A series point is `null`
+// where the domain layer had no reading for that bucket: a week with no Completed Job has no
+// Cost per completed Job, and the rule is that such a figure is absent, never zero. A connected
+// line would draw straight through the gap and invent the readings it spans, which is the same
+// false claim as drawing the gap at zero with one more step of interpolation in it. Recharts'
+// own default is `false`, and that is exactly why it is written out: a default is not a decision,
+// and this one is load-bearing enough that a future version flipping it must fail a test rather
+// than change what the product claims.
+//
 // **Animation is off.** Ticket 18's one unresolved residual was whether Recharts interpolates a
 // series' geometry from the previous series' across a roll-up switch when animating — jsdom
 // produces no mid-transition geometry, so the spike could not see it. With animation off the
@@ -160,6 +169,7 @@ const linesFor = (chart: ChartViewModel): readonly ReactElement[] =>
       stroke={colorOf(series)}
       strokeWidth={2}
       dot={false}
+      connectNulls={false}
       isAnimationActive={false}
     />
   ));
@@ -178,6 +188,7 @@ const areasFor = (
       stroke={colorOf(series)}
       strokeWidth={2}
       fill={stackId === undefined ? softFill(series) : colorOf(series)}
+      connectNulls={false}
       isAnimationActive={false}
     />
   ));

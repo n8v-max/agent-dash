@@ -272,3 +272,81 @@ describe("the table ViewModel sorts in the domain layer (R-T6)", () => {
     expect(table.note).toBeNull();
   });
 });
+
+// --- R-M18 — a ratio chart breaks at a bucket it has no reading for (ticket 40) --------------
+//
+// `aggregationCells` emits **no cell** where a metric module returned `null`, so the hole is
+// already in the aggregation result by the time it reaches here. What this settles is what the
+// two paths out of that result do with it, and they must agree: the series carries `null` so the
+// chart breaks its line (`connectNulls={false}`), and the mirror carries `null` so the table
+// prints an em dash. `MeasureKind` decides — an *additive* measure's missing cell is a real zero
+// (a Repository with no session in a week cost nothing), a *ratio*'s is no reading at all.
+
+describe("R-M18 — a zero denominator reaches the chart as a gap, not as a zero", () => {
+  const ratioChart = (cells: readonly Cell[]) =>
+    chart({ measure: "ratio", buckets: buckets("2026-W15", "2026-W16"), cells });
+
+  const pointsOf = (view: ReturnType<typeof chart>, key: string) =>
+    view.series.find((series) => series.key === key)?.points.map((point) => point.value);
+
+  it("carries null on the series where a ratio bucket held no reading", () => {
+    const view = ratioChart([cell("2026-W16", "organization", 14.83)]);
+
+    expect(pointsOf(view, "organization")).toEqual([null, 14.83]);
+  });
+
+  it("carries null in the mirror for the same bucket, so the table prints a dash", () => {
+    const view = ratioChart([cell("2026-W16", "organization", 14.83)]);
+
+    expect(view.mirror.rows).toEqual([
+      ["2026-W15", null],
+      ["2026-W16", 14.83],
+    ]);
+  });
+
+  it("still draws an additive measure's missing bucket at zero — nothing spent is a reading", () => {
+    const view = chart({
+      measure: "additive",
+      buckets: buckets("2026-W15", "2026-W16"),
+      cells: [cell("2026-W16", "web-console", 40)],
+    });
+
+    expect(pointsOf(view, "web-console")).toEqual([0, 40]);
+    expect(view.mirror.rows).toEqual([
+      ["2026-W15", 0],
+      ["2026-W16", 40],
+    ]);
+  });
+
+  it("keeps a ratio that really was zero as zero, and never as a gap", () => {
+    // An acceptance rate of 0 over five sessions is a measurement; 0 sessions is not.
+    const view = ratioChart([
+      cell("2026-W15", "deploy", 0),
+      cell("2026-W16", "deploy", 0.5),
+    ]);
+
+    expect(pointsOf(view, "deploy")).toEqual([0, 0.5]);
+    expect(view.mirror.rows).toEqual([
+      ["2026-W15", 0],
+      ["2026-W16", 0.5],
+    ]);
+  });
+
+  it("agrees between the two paths where the cap swept the gap into 'Other' (R-T7)", () => {
+    const view = chart({
+      measure: "ratio",
+      buckets: buckets("b1", "b2", "b3"),
+      cells: [
+        ...["a", "b", "c", "d", "e", "f"].map((group, at) => cell("b1", group, 60 - at * 10)),
+        cell("b2", "a", 6),
+        cell("b2", "e", 5),
+        cell("b3", "a", 1),
+      ],
+    });
+    const other = view.series.find((series) => series.inert);
+    const mirrorOther = view.mirror.rows.map((row) => row[row.length - 1]);
+
+    expect(other?.points.map((point) => point.value)).toEqual([30, 5, null]);
+    expect(mirrorOther).toEqual([30, 5, null]);
+  });
+});
