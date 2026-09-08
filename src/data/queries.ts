@@ -60,5 +60,5 @@ export type {
   MemberProfileViewModel,
 } from "./queries/profile";
 export type { HistoryPageViewModel, HistoryRow, SessionDetail } from "./queries/history";
-export type { ProjectionFigures, ProjectionPageViewModel } from "./queries/projection";
+export type { ProjectionComponents, ProjectionPageViewModel } from "./queries/projection";
 export type { ControlOption, ControlOptions } from "./queries/controls";

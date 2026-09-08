@@ -234,6 +234,13 @@ against.
 - **T-U21 — Projection** (R-N23, P5). Elapsed-proportional extrapolation with "now" injected. At
   10% elapsed and at 90% elapsed the method is identical and the elapsed fraction differs — both
   asserted, because they are different claims. **No confidence band is produced** (R-N24).
+- **T-U21.1 — The projection's components** (R-N23.1, R-M5). The `/demo/projection` ViewModel
+  carries `sessionToDate`, `seat`, `projectedSession` and `projectedTotal`, and
+  **`projectedTotal === projectedSession + seat`** — asserted as an equality, not a tolerance,
+  because the total is *assigned* that sum rather than summed a second time. The seat charge is
+  identical in both figures (it is never extrapolated), and the daily chart carries one series,
+  session Cost, unstacked. It sits in `src/data/queries.test.ts` because the ViewModel is
+  assembled at the seam; the extrapolation itself is T-U21's, in the domain layer.
 
 ---
 
@@ -320,6 +327,12 @@ product's central interaction.
     **greater** than the Completed Tasks tile against the committed fixture (162 against 150 for the
     open account in August 2026). A future change that made them equal would mean the measure had
     silently been re-keyed, and that should fail here rather than pass quietly.
+- **T-C12 — The projection tiles print their components** (R-N23.1, R-M5). Both tiles render a
+  `Session cost` / `Seat cost` pair under the headline, the seat figure is the **same string in
+  both** because it is never extrapolated, and the arithmetic line carries the month's real
+  numbers. R-N24's "one figure, no bound" claim is restated rather than dropped: the projected
+  tile's money figures are exactly the headline and its two named components, so a fourth number
+  fails the test. The seat charge is asserted **beside** the chart, never as a series in it.
 
 ---
 
@@ -369,6 +382,12 @@ request per account per route, asserting rows rather than pixels."*
   wording: at 525 money literals in a narrow range, a rate value collides with legitimate figures on
   pages that render no rate card at all. The card is identified by its structure, and its values stay
   in T-E4's search set so that shipping it fails both tests at once.
+
+- **T-E10 — The projection's four numbers are on the page and sum** (R-N23.1). Read off the
+  rendered text of `/demo/projection`: session cost to date, the seat charge, the projected
+  session cost and the projected total, with the two totals equal to their components to within
+  the cent the strings are rounded to. The exact identity is T-U21.1's; what this test adds is
+  that the figures a reader can *see* are the ones it holds between.
 
 ---
 
