@@ -119,7 +119,7 @@ vary *inside* a page, in the query string. They never appear in a path.
 | Route | Renders | Period control |
 |---|---|---|
 | `/` | Landing: positioning line, one link to sign-in | — |
-| `/sign-in` | Two "continue as" buttons | — |
+| `/sign-in` | Two "continue as" buttons, and a link back to `/` | — |
 | `/demo` | Org root — the summary. Four tiles, nothing else | Month |
 | `/demo/spend` | What we spend, and what we get for it | Day, week, month |
 | `/demo/work` | Whether the agents are working | Day, week, month |

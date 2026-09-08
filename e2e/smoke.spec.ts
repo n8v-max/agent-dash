@@ -19,3 +19,18 @@ test("the landing page makes no productivity claim", async ({ page }) => {
   await expect(page.getByRole("link")).toHaveCount(1);
   await expect(page.getByRole("link")).toHaveAttribute("href", "/sign-in");
 });
+
+test("/sign-in is the landing's second screen (ticket 47)", async ({ page }) => {
+  // Structure, not styling: the shape a visitor with no JavaScript needs. Two plain forms —
+  // one per seeded account (R-A3, R-A4) — each with its own submit, and a way back to `/`.
+  // The button *labels* are asserted where they matter, in enforcement.spec.ts, which clicks
+  // one and checks where the browser lands.
+  const response = await page.goto("/sign-in");
+
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Continue as");
+  await expect(page.locator("main form")).toHaveCount(2);
+  await expect(page.locator("main button[type=submit]")).toHaveCount(2);
+  await expect(page.getByRole("link")).toHaveCount(1);
+  await expect(page.getByRole("link")).toHaveAttribute("href", "/");
+});
