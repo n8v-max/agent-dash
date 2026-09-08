@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 31
-Label: ready-for-agent
+Label: resolved
 
 # `/demo` — the summary
 
@@ -80,3 +80,43 @@ Note this also touches T-C11, which asserts stacking follows the partition: a Vi
 `stackable: true` for a grouping that does not partition the measure is exactly what T-C11 calls a
 failure. As things stand the tile satisfies R-N8 and sits awkwardly against T-C11's principle.
 **Flagged for the human; not re-decided.**
+
+### 2026-09-08 — implemented (AFK build, wave 9)
+
+All six gates green; T-E7 passes with 9 new e2e tests. "Nothing else" is asserted as **exact counts
+over `main`** — 1 list, 5 headings, 1 chart group, 1 mirror table, 4 links — because any fifth
+panel brings at least one of those with it. Month-only is asserted on the *offered options*
+(`All data` or `Mon YYYY`, none matching `/quarter|\bQ[1-4]\b/i`) rather than on the absence of a
+quarter, so a quarter reappearing fails. `?period=2026-Q3` is dropped and the default stands.
+
+**The R-N8 over-count is now measured, not argued.** Through the real query: open account, Aug 2026,
+the stacked mirror columns sum to `58+35+25+32+12 = 162` against the Completed Jobs tile's **150**;
+restricted account, `15+17+13+7+3 = 55` against **49**. The geometry claims a whole the measure does
+not have, in the shape R-V1 exists to prevent and T-C11 calls a failure. Rendered as the ViewModel
+says and flagged; not re-decided.
+
+**A second consequence, rendered rather than resolved: tiles 2 and 4 show the same figure and the
+same change** (`41 · −73%` twice on the open account), because the ViewModel builds tile 4 from the
+same reading as tile 2. R-N7 requires a change on each tile and R-T6 forbids a component dropping
+what the ViewModel carries. It is a real cost on the page graded for the ten-second read, and both
+honest fixes live above the panel: drop `value` from the mix tile, or measure something else there.
+
+**The period control fights R-N7 on this page.** The shared toolbar offers "All data" plus each
+month; selecting one clips the range to that month, so no prior bucket exists and **all four
+changes suppress** (`/demo?period=2026-08` renders four "no prior period" messages and collapses
+the stacked area to a single column). R-N7 therefore holds only on the default range. Either the
+summary's period control should choose the *reported* month while the query keeps reading a
+comparator, or `/demo` should declare no period control at all — "month-locked" arguably means
+there is nothing to choose.
+
+Design: the period and comparison basis are identical on all four tiles, so they are said **once**
+above the row rather than four times. The mix tile lays out *across* (figure left, chart right) so
+all four figures sit on one baseline. **No colour on the change** — up is good for Completed Jobs
+and bad for Cost per completed Job, the ViewModel carries no polarity, and colouring it would be
+the component editorialising; direction is a sign a screen reader reads plus an `aria-hidden` glyph.
+No emphasis on the differentiator: equal weight is what makes the four read as one argument.
+
+Two shared-file gaps recorded: `ChartFrame` has no way to express R-N8's "no axis labels at tile
+size" (worked around with arbitrary variants from the panel; a `labels?: boolean` or `dense` prop
+would be the clean fix), and `ChartLegendContent` is a single unwrapped flex row that rendered five
+WorkTypes outside the card at tile width.

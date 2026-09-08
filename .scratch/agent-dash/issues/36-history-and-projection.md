@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 31
-Label: ready-for-agent
+Label: resolved
 
 # `/demo/history` and `/demo/projection` — the two secondary surfaces
 

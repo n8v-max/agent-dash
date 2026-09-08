@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 31
-Label: ready-for-agent
+Label: resolved
 
 # `/demo/work` — whether the agents are working
 
@@ -54,3 +54,43 @@ Both are time-shaped, both are secondary, and splitting them duplicates chrome f
 The fixture's acceptance spread is the product's sharpest claim: `review` 0.86 · `bugfix` 0.79 ·
 `implementation` 0.71 · `refactor` 0.58 · `deploy` 0.34 (R-D6). `deploy` at 0.34 says agents are
 poor at deploys — and deploys are where a service account runs *interactive* sessions.
+
+### 2026-09-08 — implemented (AFK build, wave 9)
+
+All six gates green; 48 new tests. **A21 is asserted as an absence, four ways**, because an absence
+needs a set of things that would be present if it were violated. The fixture gives the five
+WorkTypes five distinct rates over equal denominators, so every shape a synthesised cross-WorkType
+figure could take is an identifiable value: the mean of the five (66%) and the pooled counts it
+would be made of appear nowhere; no region or heading name matches
+`/\ball\b|overall|average|combined|every|aggregate|total/i` and exactly five regions exist; the
+panel is handed five tiles and renders five (asserted again at two); and the authored modules are
+scanned for any `reduce`/`filter`/`sort`/`concat`/`flatMap`/`Math.max|min` and for any non-`import
+type` reach into `@/domain` or `@/data`. **There is no expression in the rendering layer that could
+produce the figure.**
+
+**Panel 6 states its restriction twice and neither sentence is authored in the rendering layer** —
+the ViewModel's own note, and a pill whose text is the field's literal type (`"interactive"`), so
+the label cannot be wrong. Both survive an emptied chart, because R-V9 replaces the chart and not
+the panel. T-C1 holds on its mirror, and the panel-level cross-check T-U20 makes possible is
+asserted too: each mirror column summed equals the slice total printed beside it, and the three
+together equal the printed machine allocation.
+
+Stacking is asserted as an absence in the panel's own source — `work-presence.tsx` contains no
+`stackId` and no `stackable`; the stack arrives through `chart.stackable`.
+
+**R-N13's shared axis was not actually honoured, and this ticket found it.** `ChartFrame` had no
+way to be told a measure extent, so Recharts scaled each of the five multiples to its own maximum.
+At `?grain=month` they render 0–100%, 0–80%, 0–100%, 0–100%, 0–60% — **`deploy` at 33% draws
+exactly as tall as `implementation` at 67%**. Fixed on `main` afterwards (`measureDomain` on
+`ChartFrame`, fed from the ViewModel's `acceptanceAxis`, so the scale stays a domain fact). Until
+then the panel carried a `role="meter"` rail per tile with `aria-valuemin`/`max` from the same
+axis, which is the comparison the panel exists for on a genuinely shared scale — and it is retained,
+because it is machine-readable where the chart geometry is not.
+
+Design: durations lead and shares follow on panel 6, because three percentages rounded
+independently sum to 101% as often as 100%, and a panel whose case for stacking is that its parts
+sum exactly should not print a total that looks wrong.
+
+**Spec note:** R-N13 says a selector "would hide four of five values"; this ticket's text says
+"five of six". Five is right — `research` was cut, so there are five WorkTypes, and `spec.md` says
+four hidden. Nothing depends on it; the ticket carries the other number.

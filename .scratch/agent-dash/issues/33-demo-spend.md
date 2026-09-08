@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 31
-Label: ready-for-agent
+Label: resolved
 
 # `/demo/spend` — what we spend, and what we get for it
 
@@ -56,3 +56,38 @@ the data rather than asserted over it.
 The rate card is the evidence for every money figure in the product and costs one collapsed table.
 Asking a viewer to trust invented prices whose basis is withheld is worse here than in a real
 product.
+
+### 2026-09-08 — implemented (AFK build, wave 9)
+
+All six gates green. **T-C9 is three separate statements** because R-V8 makes three separate
+claims: no attributed figure carries "estimated" (checked against `innerHTML` as well as
+`textContent`, so a marker in an `aria-label` or `title` cannot hide, with a non-vacuity guard that
+real money rendered); Projected cost does (asserted on the rule, both arms, since that figure lives
+on ticket 36's page — so the marker can be neither always-on nor never-on); and the rate card
+carries "illustrative rates" (the label is a component constant, not a fixture string, so it cannot
+be edited out of the data).
+
+**A25 needs no defending in the panel.** The ViewModel refuses sub-monthly Total spend, so at
+`grain=day` the ratio panel buckets by day while Total spend still buckets by month and renders the
+R-M5 note. There is no expression in the panel that could re-bucket.
+
+Money ticks are **whole grouped dollars, not compact**: compact rendered two identical ticks
+(`$1k, $2k, $2k`), and the decimal form would put a bare decimal in the payload T-E4 scans.
+
+Three defects found here were fixed on `main` afterwards, in files this wave could not touch: the
+**Model mix rendered unpainted bars** at `family`/`exact` (the display label was the series key, so
+shadcn minted `--color-Claude Sonnet`); the T-E4 **rate-card and model-id collisions**; and
+`ChartFrame`'s `tickFormat` **cannot cross the RSC boundary** — it typechecks, builds, passes every
+jsdom test, and throws in the browser. That last one cost four e2e failures before it was found and
+is worth a line in `chart-frame.tsx`'s header.
+
+**Two things recorded, not re-decided.** `perCapita` is declared for this page in
+`DECLARED_CONTROLS` but `spendPage` never reads it, so the toolbar's Raw/Per-capita control changes
+nothing — in tension with R-C1's "no page shows a control its panels cannot use". And a requirement
+ID reaches user-facing copy: the Adoption statement ends "…never a cost proxy (R-M9)" and renders
+verbatim from the data layer.
+
+A judgement call, recorded in the component: the Model mix distribution list renders every slice,
+including ones the chart folded into "Other". R-V4's cap is read as a rule about *series* (five
+colours, R-V7), and R-V6 already discloses the tail by name in Other's tooltip; the list has no
+swatches, no expansion and no click.
