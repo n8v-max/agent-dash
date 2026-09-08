@@ -13,6 +13,12 @@
 //   4. **The R-V9 empty fallback** — plain "no data for this selection" text. The shell,
 //      navigation and controls are outside this component and stay exactly where they were.
 //
+// **`bare` is R-V10, and it is a fifth thing this component decides for the panels.** A chart
+// rendered inside a tile drops its axes, its grid and its legend, and keeps everything in the list
+// above. It is a prop here rather than a class name because it changes what is *drawn*, not how it
+// looks — and because a panel that could reach into the shape factory to remove an axis could also
+// reach in to remove the mirror.
+//
 // It also renders **R-V3's overlap note** where the ViewModel carries one. That is a fifth thing,
 // and it is here deliberately: the note is computed with the totals it sits under
 // (`aggregate.ts`), it travels on the ChartViewModel, and putting it in the frame makes "any Team
@@ -78,11 +84,19 @@ export type ChartFrameProps = {
   /** How a measure-axis tick reads. Decimal-free by default — see `chart-shapes.tsx`. */
   readonly tickFormat?: (value: number) => string;
   /**
-   * Pin the measure axis to a fixed extent, for panels read against a scale they do not own.
-   * R-N13's acceptance small multiples are the case; the value comes from the ViewModel
-   * (`acceptanceAxis`), so the scale stays a domain fact rather than a panel's choice.
+   * Pin the measure axis to a fixed extent, for a panel that draws an axis whose scale it does
+   * not own. The value comes from the ViewModel, so the scale stays a domain fact rather than a
+   * panel's choice. **No panel sets it today** — see `chart-shapes.tsx`'s `ShapeInput` for why it
+   * is kept.
    */
   readonly measureDomain?: readonly [number, number];
+  /**
+   * **R-V10 — no axes, no ticks, no grid and no legend.** Set by a panel rendering a chart *inside
+   * a tile*, where the furniture is larger than the mark and restates a figure the tile already
+   * prints. The tooltip, `accessibilityLayer` (R-X3) and the R-X1 mirror are unaffected, so the
+   * values stay reachable; what goes is the chrome. See `chart-shapes.tsx`'s `ShapeInput.bare`.
+   */
+  readonly bare?: boolean;
   readonly className?: string;
 };
 
@@ -115,6 +129,7 @@ export function ChartFrame(props: ChartFrameProps) {
             shape: props.shape,
             tickFormat: props.tickFormat ?? defaultTickFormat,
             measureDomain: props.measureDomain,
+            bare: props.bare,
           })}
         </ChartContainer>
       </ChartBox>

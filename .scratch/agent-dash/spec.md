@@ -215,10 +215,19 @@ something a viewer should reason about.
 2. **Acceptance rate as small multiples**, one chart per WorkType on a shared axis
 3. Rework rate and Decomposition rate as two lines on one chart (both Task-grain rates)
 4. Incomplete Tasks as a horizontal bar by age bucket
-5. Session duration — median and p95
+5. Session duration — median and p95, as **two small multiples, one per statistic, each on its
+   own axis**
 6. Human-presence spans and machine time as one **stacked** composition, **restricted to
    `interactive` sessions and labelled so**. The three spans are disjoint and sum exactly to
    `machine_allocation_duration_s`, so they are a true partition and stack legitimately (R-V1)
+
+**Panel 5 is one panel holding two charts, not two panels.** R-N12's order is a requirement and
+this is still its fifth item. The split is a *scale* decision, added 2026-09-09: the p95 is several
+times the median — ~4.4× over the committed fixture — so on one shared linear axis the axis belongs
+to the p95 and the median draws as a flat rule along the floor of the panel, which is the one thing
+a trend line exists to show being unreadable. The two are compared by *magnitude* in the figure
+strip above the charts, which is where a comparison of two unlike readings belongs; each chart is
+read for its own shape. A log axis was the alternative and was rejected — see ticket 41.
 
 **R-N13 — Acceptance rate uses small multiples, never a single chart with a WorkType selector.**
 Acceptance rate is defined only *within* a WorkType, and the layout makes that visible with no
@@ -236,6 +245,13 @@ numeric column sortable. **Default sort: Completed Tasks descending.**
 
 That is an ordering by output rather than by spend, and no percentile label is computed — but it
 is an ordering the product chose, and it is recorded as a decision rather than left as drift.
+
+**Each column reads in its own unit, and the unit is the domain's.** The Cost column is currency —
+symbol, grouped thousands, exactly two decimals — from the **same formatter the summary tiles use**;
+there is one money formatter in the product and no surface spells its own. The `kind` column reads
+"Human" and "Service account": `human` and `service_account` are a closed vocabulary and a URL
+value, and **the raw enum never reaches a reader** on any surface. Added 2026-09-09 (ticket 41),
+after `/demo/people` shipped a Cost column reading `310.5` one click from a tile reading `$310.50`.
 
 **R-N16 — `?member=…` replaces the list with that Member's profile**: the four headline tiles at
 their scope, their WorkType mix, and the comparator (R-N17).
@@ -325,6 +341,13 @@ prices nothing.** It aggregates an attributed figure. (ADR-0005.)
 **R-M5 — Seat cost sits outside session Cost**, as a component of Total spend, at monthly grain
 and coarser only. Seats attach to `human` Members only. Apportioning a monthly fee across days is
 invented precision.
+
+**The quantity the fee is charged per is the seat-month, and a seat-month is one month held by one
+seat** — so the count over a population is `seats × months` and Seat cost is exactly
+`seats × months × fee`. Over the committed fixture that is 18 human Members × 6 months = **108**
+seat-months, not 6. Stated because a surface said otherwise: `/demo/spend`'s Total spend panel
+printed a bare month count under a seat-month label, understating the quantity by the size of the
+Organization. Added 2026-09-09 (ticket 41).
 
 **R-M6 — There is no Organization-level acceptance rate.** Averaging across criteria that measure
 different things produces a number that means nothing.
@@ -473,6 +496,15 @@ See § Conflicts resolved C3.
 
 **R-V9 — Where a filter empties a panel, it renders plain "no data for this selection" text.** The
 shell, navigation and controls stay present.
+
+**R-V10 — A chart rendered inside a tile carries no axes, no ticks, no grid and no legend.** At tile
+size the furniture is larger than the mark and restates a figure the tile already prints beside it:
+R-N13's acceptance multiples are 144px tall, and a tick strip, a dashed grid and a one-entry legend
+took most of that to repeat the heading above them. What is left is a sparkline — a shape, read for
+its direction, beside the number it is the shape of. The **tooltip, `accessibilityLayer` (R-X3) and
+the R-X1 mirror are unaffected**: the chrome goes, the values do not. R-N8 already stated this for
+the summary tile's bars ("no axis labels at tile size"); R-V10 is the same rule, named once, for
+every tile in the product. Added 2026-09-09.
 
 ---
 
@@ -644,6 +676,8 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A26 | April and September render the partial-period flag | R-D2, R-E2 |
 | A27 | Human-presence spans render for `interactive` sessions only, and say so | R-N14 |
 | A28 | No permission matrix renders on any surface; `/demo/people` states the acting account's visibility in words | R-A10 |
+| A29 | A chart inside a tile renders no axis, no tick, no grid and no legend, and keeps its mirror | R-V10, R-N13 |
+| A30 | Every money figure renders with a currency symbol and two decimals, from one formatter; no raw `Member.kind` enum reaches a reader | R-N15, R-T9 |
 
 ---
 

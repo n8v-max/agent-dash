@@ -21,16 +21,19 @@
 // share of the same 0–100%, and each carrying that axis as `aria-valuemin` / `aria-valuemax` so
 // the scale is data rather than a visual convention. That is what makes the five figures
 // comparable *at a glance* — the panel's whole reason for existing — without a caption saying so.
-// **The tiles' time series do not yet share that axis, and cannot from here.** `ChartFrame` takes
-// a chart, a shape, a tick format and a class name; there is no prop for a measure-axis domain,
-// and `chart-shapes.tsx` renders `<YAxis>` with no `domain`, so Recharts falls back to
-// `[0, 'auto']` and every multiple scales to its own maximum. At week grain the fixture hides it
-// — every WorkType reaches 1.0 in some week, so all five land on 0–100% — but at month grain the
-// axes are 0–100%, 0–80%, 0–100%, 0–100% and 0–60%, and `deploy` at 33% draws as tall as
-// `implementation` at 67%. Closing it is a three-line additive change to a file this ticket may
-// not touch (`ChartFrame` takes `measureDomain?: readonly [number, number]`, `axesFor` passes it
-// to the numeric axis), fed from `acceptanceAxis` so the domain still supplies the scale. It is
-// reported rather than made here, and the rail above carries the comparison in the meantime.
+//
+// **The tile's chart is bare** (R-V10, ticket 41): no axis, no ticks, no grid, no legend. A
+// 144px-tall multiple was spending most of its height on a tick strip, a dashed grid and a
+// one-entry legend restating the `<h3>` two lines above it, leaving the trend itself unreadable.
+// What a multiple is *for* is the shape of the trend beside the figure and the rail, and a
+// sparkline is that; the values stay reachable in the R-X1 mirror below it.
+//
+// **That also settles the unshared measure axis this file used to report.** Every multiple scaled
+// to its own maximum, so at month grain `deploy` at 33% drew as tall as `implementation` at 67%.
+// With no axis drawn there is no axis to disagree about: the *comparison between templates* is
+// carried by the rail, which is on `acceptanceAxis` by construction, and each sparkline carries
+// its own template's direction and nothing else. `ChartFrame` has since grown `measureDomain` for
+// the case where a drawn axis must be pinned; these multiples no longer draw one.
 //
 // **It computes nothing** (R-T6). The rates, counts and labels all arrived resolved; the one
 // expression below is a scale mapping — a value's position on the axis the ViewModel declared,
@@ -40,7 +43,7 @@
 
 import { ChartFrame } from "@/components/charts/chart-frame";
 import type { AcceptancePanel, WorkPageViewModel } from "@/data/queries";
-import { countText, percentText, percentTick } from "./work-format";
+import { countText, percentText } from "./work-format";
 import { TILE_CHART, WorkPanel } from "./work-section";
 
 /** R-N12's own words for panel 2. "Template" is the UI alias of WorkType (`CONTEXT.md`). */
@@ -83,10 +86,19 @@ function AcceptanceRail(props: {
   );
 }
 
+/**
+ * **R-T29 / T-C0 — the fixed-dimension escape hatch, threaded through.** A page leaves it off and
+ * gets `ChartFrame`'s responsive path; a test sets it, because shadcn's `initialDimension` is the
+ * construct T-C0 rules out — and because a Recharts chart given no dimension in jsdom draws
+ * nothing at all, which would make R-V10's "no axis here" assertion pass against a blank tile.
+ */
+export type TileDimension = { readonly width: number; readonly height: number };
+
 /** One multiple. Its name, its figure, its rail and its trend — and one WorkType throughout. */
 function AcceptanceTile(props: {
   readonly panel: AcceptancePanel;
   readonly axis: AcceptanceAxis;
+  readonly dimension?: TileDimension;
 }) {
   const { panel } = props;
 
@@ -106,7 +118,8 @@ function AcceptanceTile(props: {
       <ChartFrame
         chart={panel.chart}
         shape="line"
-        tickFormat={percentTick}
+        bare
+        dimension={props.dimension}
         className={`mt-3 ${TILE_CHART}`}
       />
     </section>
@@ -120,12 +133,19 @@ function AcceptanceTile(props: {
 export function AcceptanceMultiples(props: {
   readonly panels: readonly AcceptancePanel[];
   readonly axis: AcceptanceAxis;
+  /** R-T29 / T-C0 — set by the suite, absent on a page. See `TileDimension`. */
+  readonly dimension?: TileDimension;
 }) {
   return (
     <WorkPanel title={ACCEPTANCE_TITLE}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {props.panels.map((panel) => (
-          <AcceptanceTile key={panel.workType} panel={panel} axis={props.axis} />
+          <AcceptanceTile
+            key={panel.workType}
+            panel={panel}
+            axis={props.axis}
+            dimension={props.dimension}
+          />
         ))}
       </div>
     </WorkPanel>

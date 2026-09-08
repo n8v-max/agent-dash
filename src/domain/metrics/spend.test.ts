@@ -204,9 +204,25 @@ describe("Total spend is session Cost + Seat cost (R-M1, R-M5, T-U12)", () => {
 
     expect(spend.sessionCost).toBe(100);
     expect(spend.seats).toBe(SEATS);
-    expect(spend.seatMonths).toBe(1);
+    expect(spend.months).toBe(1);
+    expect(spend.seatMonths).toBe(SEATS);
     expect(spend.seatCost).toBe(117);
     expect(spend.total).toBe(217);
+  });
+
+  /**
+   * **A seat-month is a month held by one seat** — so the count is `seats × months`, and the seat
+   * charge is that count times the fee. The panel that prints it read "18 human Members · 6
+   * seat-months" against the committed fixture, which is a *month* count under a seat-month
+   * label and out by a factor of the Organization's size (ticket 41).
+   */
+  it("counts a seat-month per seat per month, not one per month", () => {
+    const spend = totalSpend(april, ROSTER, SEAT_FEE);
+
+    expect(spend.seatMonths).toBe(spend.seats * spend.months);
+    expect(spend.seatCost).toBe(spend.seatMonths * SEAT_FEE);
+    // The shape of R-D4's finding at fixture scale: 18 seats over 6 months is 108, never 6.
+    expect(spend.seatMonths).not.toBe(spend.months);
   });
 
   it("reports the seat share, which is what makes a low-usage population legible", () => {
@@ -248,7 +264,8 @@ describe("Total spend is session Cost + Seat cost (R-M1, R-M5, T-U12)", () => {
     const spend = totalSpend(run, ROSTER, SEAT_FEE);
 
     expect(spend.key).toBe("2026-04..2026-09");
-    expect(spend.seatMonths).toBe(6);
+    expect(spend.months).toBe(6);
+    expect(spend.seatMonths).toBe(6 * SEATS);
     expect(spend.seatCost).toBe(6 * SEATS * SEAT_FEE);
     expect(spend.sessionCost).toBe(60);
     // R-E2 — one partial month makes the run partial. Flagged, never withheld (A26).
@@ -263,7 +280,7 @@ describe("Total spend is session Cost + Seat cost (R-M1, R-M5, T-U12)", () => {
       ]),
     );
 
-    expect(twice.seatMonths).toBe(1);
+    expect(twice.months).toBe(1);
     expect(twice.key).toBe("2026-04");
   });
 
@@ -303,8 +320,8 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12)", () 
   });
 
   it("counts whole months, so there is no fraction for a day count to reach", () => {
-    expect(april.seatMonths).toBe(1);
-    expect(Number.isInteger(april.seatMonths)).toBe(true);
+    expect(april.months).toBe(1);
+    expect(Number.isInteger(april.months)).toBe(true);
   });
 
   it("flags the period rather than correcting the figure", () => {

@@ -15,7 +15,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import type { HistoryRow } from "@/data/queries";
-import type { TableViewModelOf } from "@/domain/viewmodel";
+import type { TableColumn, TableViewModelOf } from "@/domain/viewmodel";
 import { SessionTable } from "./session-table";
 
 const COLUMNS = [
@@ -27,9 +27,9 @@ const COLUMNS = [
   { key: "executionMode", label: "Mode", numeric: false, sortable: true },
   { key: "accepted", label: "Accepted", numeric: false, sortable: true },
   { key: "duration", label: "Duration (s)", numeric: true, sortable: true },
-  { key: "tokens", label: "Tokens", numeric: true, sortable: true },
-  { key: "cost", label: "Cost", numeric: true, sortable: true },
-] as const;
+  { key: "tokens", label: "Tokens", numeric: true, sortable: true, unit: "tokens" },
+  { key: "cost", label: "Cost", numeric: true, sortable: true, unit: "usd" },
+] as const satisfies readonly TableColumn[];
 
 const rowAt = (at: number): HistoryRow => ({
   key: `ses_${String(at).padStart(4, "0")}`,
@@ -77,6 +77,21 @@ const sessionRows = (): readonly HTMLElement[] =>
   screen.getAllByRole("button", { name: /Token classes and Model mix/ });
 
 describe("R-N19 — one row per AgentSession, in ten columns", () => {
+  /**
+   * **The raw rows read as the same kind of figure the aggregates do** (ticket 41). The Cost
+   * column carried a bare `maximumFractionDigits: 2`, so `/demo/history` said `12.34` where
+   * `/demo/spend` said `$12.34` over the same sessions.
+   */
+  it("renders the Cost column as money, in the unit its column declares", () => {
+    table(1);
+
+    expect(screen.getByRole("cell", { name: "$12.34" })).toBeInTheDocument();
+    // Tokens are a grouped whole number, and the duration column — which names its unit in its
+    // own label — is untouched.
+    expect(screen.getByRole("cell", { name: "110,660" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "621" })).toBeInTheDocument();
+  });
+
   it("renders the ten columns the ViewModel declares, in that order", () => {
     table(3);
 

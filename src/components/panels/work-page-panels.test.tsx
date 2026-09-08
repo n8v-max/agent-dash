@@ -32,7 +32,11 @@ const EMPTY_VIEW = {
   acceptance: WORK_VIEW.acceptance.map((panel) => ({ ...panel, chart: emptied(panel.chart) })),
   taskRates: { ...WORK_VIEW.taskRates, chart: emptied(WORK_VIEW.taskRates.chart) },
   incompleteAges: { ...WORK_VIEW.incompleteAges, chart: emptied(WORK_VIEW.incompleteAges.chart) },
-  duration: { ...WORK_VIEW.duration, chart: emptied(WORK_VIEW.duration.chart) },
+  duration: {
+    ...WORK_VIEW.duration,
+    median: emptied(WORK_VIEW.duration.median),
+    p95: emptied(WORK_VIEW.duration.p95),
+  },
   presenceSpans: { ...WORK_VIEW.presenceSpans, chart: emptied(WORK_VIEW.presenceSpans.chart) },
 };
 
@@ -63,12 +67,72 @@ describe("R-N12 — the panels, in this order", () => {
   });
 });
 
+/**
+ * **R-N12 panel 5 — median and p95 are two multiples, on two axes** (ticket 41).
+ *
+ * On one shared linear axis the axis belongs to the p95 (~4.4× the median over the committed
+ * fixture) and the median draws as a flat rule along the floor, which is the one thing a trend
+ * line exists to show being unreadable. The assertion is that the panel is *one* panel — R-N12's
+ * order is a requirement and this is still its fifth item — holding *two* named charts.
+ */
+describe("R-N12 panel 5 — one panel, two charts, one axis each", () => {
+  const durationPanel = () => screen.getByRole("region", { name: PANEL_TITLES[4] });
+
+  it("stays one panel in R-N12's order, and does not become a seventh", () => {
+    render(<WorkPanels view={WORK_VIEW} />);
+
+    expect(headings()).toEqual(PANEL_TITLES);
+    expect(headings()).toHaveLength(6);
+  });
+
+  it("holds two charts, each naming the statistic it draws", () => {
+    render(<WorkPanels view={WORK_VIEW} />);
+
+    const charts = within(durationPanel())
+      .getAllByRole("group", { name: /grouped by Session$/ })
+      .map((frame) => frame.getAttribute("aria-label"));
+
+    expect(charts).toEqual([
+      "Median session duration, grouped by Session",
+      "p95 session duration, grouped by Session",
+    ]);
+  });
+
+  it("draws one series per chart, so neither is read against the other's scale", () => {
+    render(<WorkPanels view={WORK_VIEW} />);
+
+    const mirrors = within(durationPanel()).getAllByRole("table");
+    const headers = mirrors.map((table) =>
+      within(table)
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    );
+
+    expect(headers).toEqual([
+      ["Period", "Median"],
+      ["Period", "p95"],
+    ]);
+  });
+
+  it("keeps both figures in one strip, which is where the magnitudes are compared", () => {
+    render(<WorkPanels view={WORK_VIEW} />);
+    const panel = durationPanel();
+
+    // The two durations, side by side in words — 44 min against 3 hr 15 min is the ratio that
+    // one shared linear axis could not draw and a figure strip states plainly.
+    expect(within(panel).getByText("44 min")).toBeInTheDocument();
+    expect(within(panel).getByText("3 hr 15 min")).toBeInTheDocument();
+    expect(within(panel).getByText("486 sessions")).toBeInTheDocument();
+  });
+});
+
 describe("T-C7 — an emptying filter empties the charts, not the page", () => {
   it("keeps every heading and every note while the charts say there is no data", () => {
     render(<WorkPanels view={EMPTY_VIEW} />);
 
     expect(headings()).toEqual(PANEL_TITLES);
-    expect(screen.getAllByText(EMPTY_TEXT)).toHaveLength(10);
+    // Ten charts became eleven when panel 5 split its median and its p95 (ticket 41).
+    expect(screen.getAllByText(EMPTY_TEXT)).toHaveLength(11);
     expect(screen.getByText("interactive sessions only")).toBeInTheDocument();
   });
 });

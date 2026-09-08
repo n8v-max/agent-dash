@@ -110,14 +110,22 @@ export const INCOMPLETE_AGES: IncompleteAgesPanel = {
   },
 };
 
+/**
+ * R-N12 panel 5, as two multiples (ticket 41). The values are the fixture's real magnitudes: the
+ * p95 is ~4.4× the median, which is exactly the ratio that made one shared linear axis draw the
+ * median as a flat rule along the floor of the panel.
+ */
 export const DURATION: DurationPanel = {
-  chart: chartFixture({
-    title: "Session duration",
+  title: "Session duration",
+  median: chartFixture({
+    title: "Median session duration",
     rollUpLevel: "Session",
-    series: [
-      { key: "median", label: "Median", values: [2520, 2700, 2640] },
-      { key: "p95", label: "p95", values: [11400, 12000, 11700] },
-    ],
+    series: [{ key: "median", label: "Median", values: [2520, 2700, 2640] }],
+  }),
+  p95: chartFixture({
+    title: "p95 session duration",
+    rollUpLevel: "Session",
+    series: [{ key: "p95", label: "p95", values: [11400, 12000, 11700] }],
   }),
   summary: { count: 486, median: 2640, p95: 11700 },
 };
@@ -174,6 +182,6 @@ export const PANEL_TITLES: readonly string[] = [
   "Acceptance rate by template",
   TASK_RATES.chart.title,
   INCOMPLETE_AGES.chart.title,
-  DURATION.chart.title,
+  DURATION.title,
   PRESENCE_SPANS.chart.title,
 ];

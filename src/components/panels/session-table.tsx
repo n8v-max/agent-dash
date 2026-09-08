@@ -23,15 +23,23 @@
 
 import { useState } from "react";
 import type { HistoryRow } from "@/data/queries";
-import type { TableCell, TableViewModelOf } from "@/domain/viewmodel";
+import type { TableCell, TableColumn, TableViewModelOf } from "@/domain/viewmodel";
 import { cn } from "@/lib/utils";
+import { formatFigure, WITHHELD } from "./figures";
 import { SessionDetailPanel } from "./session-detail";
 
 /** Deterministic and locale-pinned: a server's locale must not decide what a figure reads as. */
 const number = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
-const cellText = (cell: TableCell): string =>
-  typeof cell === "number" ? number.format(cell) : (cell ?? "—");
+/**
+ * A cell, in its column's unit — `data-table.tsx`'s rule, applied to the same `TableColumn` type
+ * (ticket 41). The raw rows under an aggregate must read as the same kind of figure the aggregate
+ * does, or `/demo/history`'s Cost column says `24.39` where `/demo/spend` says `$24.39`.
+ */
+const cellText = (cell: TableCell, unit: TableColumn["unit"]): string => {
+  if (typeof cell !== "number") return cell ?? WITHHELD;
+  return unit ? formatFigure(cell, unit) : number.format(cell);
+};
 
 /** R-V9's words, the same sentence every other empty surface uses. */
 const EMPTY_TEXT = "No data for this selection.";
@@ -73,7 +81,7 @@ function SessionRow(props: {
               row.cells[at] === null && "text-muted-foreground",
             )}
           >
-            {cellText(row.cells[at] ?? null)}
+            {cellText(row.cells[at] ?? null, column.unit)}
           </td>
         ))}
       </tr>

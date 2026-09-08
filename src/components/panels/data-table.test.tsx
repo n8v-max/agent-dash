@@ -14,6 +14,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { TableColumn, TableRow, TableViewModelOf } from "@/domain/viewmodel";
 import { DataTable } from "./data-table";
+import { figureText } from "./figures";
 import { PEOPLE_TABLE, RESTRICTED_TABLE } from "./people-viewmodels.fixture";
 
 const CAPTION = "Members, with their Jobs, tokens and cost";
@@ -88,12 +89,62 @@ describe("R-T6 — the table renders the order it was given and produces none of
     expect(bodyRows()[0]).toEqual([
       "Ada Lovelace",
       "Platform",
-      "human",
+      "Human",
       "42",
       "90",
       "1,240,000",
-      "310.5",
+      "$310.50",
     ]);
+  });
+});
+
+/**
+ * **Ticket 41 — a column's `unit` decides how its figures read, and the domain layer supplies it.**
+ *
+ * The Cost column used to render through a bare `maximumFractionDigits: 2`, which printed `310.5`
+ * on a money column and `220.25` beside it: two different shapes of the same quantity, on one
+ * column, next to a summary tile reading `$310.50`. The `unit` is the fix, and it is the *same*
+ * `FigureUnit` a tile carries, so the two surfaces cannot disagree about what money looks like.
+ */
+describe("R-N15 — the Cost column is money, and it is the tiles' money", () => {
+  const costCells = (): readonly string[] => bodyRows().map((cells) => cells[6]);
+
+  it("renders every granted cost with a symbol and exactly two decimals", () => {
+    renderTable();
+
+    for (const cell of costCells().filter((text) => text !== "—")) {
+      expect(cell).toMatch(/^\$[\d,]+\.\d{2}$/);
+    }
+    expect(costCells()).toEqual(["$310.50", "$220.25", "—"]);
+  });
+
+  it("renders the same figure the tile formatter would, because it is that formatter", () => {
+    renderTable();
+
+    expect(costCells()[0]).toBe(figureText(310.5, "usd"));
+  });
+
+  it("leaves a column carrying no unit exactly as it was", () => {
+    renderTable();
+
+    // Completed Jobs, Sessions and Tokens are counts: grouped, decimal-free, no symbol.
+    expect(bodyRows()[0].slice(3, 6)).toEqual(["42", "90", "1,240,000"]);
+  });
+});
+
+/**
+ * **Ticket 41 — `kind` reaches the DOM as words.** `human` and `service_account` are a closed
+ * domain vocabulary and a URL value; neither is English, and `service_account` on screen reads as
+ * a leaked column name. The label arrives resolved on the cell (`MEMBER_KIND_LABELS`, in the
+ * query layer beside the column it fills), so there is nothing here that maps an enum.
+ */
+describe("R-N15 — the Kind column reads as words, never as the raw enum", () => {
+  it("renders no raw enum value in any cell", () => {
+    renderTable();
+
+    const text = screen.getByRole("table", { name: CAPTION }).textContent ?? "";
+    expect(text).not.toContain("service_account");
+    expect(text).toContain("Human");
   });
 });
 

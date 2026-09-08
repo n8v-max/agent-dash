@@ -288,12 +288,21 @@ export type TileViewModel = {
 
 // --- Tables -----------------------------------------------------------------------------------
 
-/** One column of a table. `numeric` drives alignment; `sortable` is R-N15's per-column fact. */
+/**
+ * One column of a table. `numeric` drives alignment; `sortable` is R-N15's per-column fact.
+ *
+ * **`unit` is the same domain fact `TileViewModel.unit` is** — whether a number is money, a count
+ * or a token volume is not a styling choice, and a table is the one surface where the column
+ * decides it rather than the figure. Without it `/demo/people` rendered its Cost column through a
+ * bare `maximumFractionDigits: 2` and printed `310.5` beside a tile reading `$310.50` (ticket
+ * 41). Optional, because a text column has no unit and neither does a bare count.
+ */
 export type TableColumn = {
   readonly key: string;
   readonly label: string;
   readonly numeric: boolean;
   readonly sortable: boolean;
+  readonly unit?: FigureUnit;
 };
 
 /** A cell. `null` is *withheld* — a figure the viewer holds no grant for (R-A6). */

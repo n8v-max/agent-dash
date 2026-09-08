@@ -10,6 +10,12 @@
 // restricted account can see that a figure exists and is not theirs, rather than reading a blank
 // as an absence of activity.
 //
+// **A figure reads in its column's unit** (`TableColumn.unit`, ticket 41). The unit is a domain
+// fact — `viewmodel.ts` settles that — so the Cost column is money because the query said so, not
+// because a cell recognised a column key. Before it, this file's own `Intl.NumberFormat` rendered
+// `/demo/people`'s Cost column as `310.5` beside a summary tile reading `$310.50`; the formatter
+// it now calls is `figures.ts`'s, which is the tiles' own.
+//
 // **Two optional links, and both are `href`s rather than handlers** (R-T25, R-C3):
 //
 //   * `sortHrefOf` makes a sortable heading a link to the same page with `?sort=` changed —
@@ -25,12 +31,19 @@
 import Link from "next/link";
 import type { TableCell, TableColumn, TableRow, TableViewModelOf } from "@/domain/viewmodel";
 import { cn } from "@/lib/utils";
+import { formatFigure, WITHHELD } from "./figures";
 
 /** Deterministic and locale-pinned: a server's locale must not decide what a figure reads as. */
 const number = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
-const cellText = (cell: TableCell): string =>
-  typeof cell === "number" ? number.format(cell) : (cell ?? "—");
+/**
+ * A cell, in its column's unit. A column carrying no `unit` renders as it always did — a grouped
+ * number for a figure, the text for a string, the em dash for a withheld one.
+ */
+const cellText = (cell: TableCell, unit: TableColumn["unit"]): string => {
+  if (typeof cell !== "number") return cell ?? WITHHELD;
+  return unit ? formatFigure(cell, unit) : number.format(cell);
+};
 
 const WITHHELD_TITLE = "Withheld — outside your grants";
 
@@ -81,7 +94,7 @@ function BodyCell(props: {
   readonly cell: TableCell;
   readonly href: string | null;
 }) {
-  const text = cellText(props.cell);
+  const text = cellText(props.cell, props.column.unit);
 
   return (
     <td

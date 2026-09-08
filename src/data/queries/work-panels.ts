@@ -1,7 +1,8 @@
 // `/demo/work` panels 4, 5 and 6 (R-N12), split out of `work.ts` for the file-size budget.
 //
 //   4. Incomplete Tasks by age bucket (R-M16) — the one chart whose columns are ages, not periods.
-//   5. Session duration, median and p95 (R-M1) — two readings on one chart, and no mean (T-U19).
+//   5. Session duration, median and p95 (R-M1) — two readings, **one chart each**, and no mean
+//      (T-U19). See `DurationPanel` for why they no longer share an axis.
 //   6. Human-presence spans, `interactive` sessions only (R-N14, A27) — the composition R-V1
 //      stacks, because the three spans sum to `machine_allocation_duration_s` exactly (R-T12).
 
@@ -30,8 +31,23 @@ export type IncompleteAgesPanel = {
   readonly ages: IncompleteTaskAges;
 };
 
+/**
+ * **R-N12 panel 5 — two small multiples, not one chart** (ticket 41).
+ *
+ * Median and p95 are the same measure at two very different magnitudes: over the committed
+ * fixture the p95 is roughly 4.4× the median, so on one shared linear axis the median line sits
+ * on the floor of the panel and its *shape* — the only thing a trend line is read for — is
+ * unreadable. The two alternatives were a log axis and two panels; two panels won, and the
+ * reasoning is in ticket 41's closing note.
+ *
+ * `title` is the panel's heading and belongs to neither chart, because with two charts under it
+ * there is no single `chart.title` for `WorkPanel` to take (`work-section.tsx`'s rule that the
+ * heading is the ViewModel's, not the component's, still holds — it just needs its own field).
+ */
 export type DurationPanel = {
-  readonly chart: ChartViewModel;
+  readonly title: string;
+  readonly median: ChartViewModel;
+  readonly p95: ChartViewModel;
   /** Median and p95 over the whole range. **There is no mean** (T-U19). */
   readonly summary: DurationSummary;
 };
@@ -42,13 +58,23 @@ export type PresenceSpansPanel = {
   readonly composition: SpanComposition;
 };
 
-const DURATION_SERIES = ["median", "p95"] as const;
-type DurationSeries = (typeof DURATION_SERIES)[number];
+/** The two order statistics R-M1 names. **There is no third, and no mean** (T-U19). */
+type DurationStatistic = "median" | "p95";
 
-const DURATION_LABELS: Readonly<Record<DurationSeries, string>> = {
+/** The series label inside each chart — what its legend and its mirror column read. */
+const DURATION_LABELS: Readonly<Record<DurationStatistic, string>> = {
   median: "Median",
   p95: "p95",
 };
+
+/** Each multiple's own title, so `aria-label` and the mirror caption name which one it is. */
+const DURATION_TITLES: Readonly<Record<DurationStatistic, string>> = {
+  median: "Median session duration",
+  p95: "p95 session duration",
+};
+
+/** The panel's heading. Two charts sit under it, so it is neither chart's title. */
+const DURATION_TITLE = "Session duration";
 
 const isSpan = (key: string): key is PresenceSpan =>
   PRESENCE_SPANS.some((span) => span === key);
@@ -92,27 +118,36 @@ export function incompleteAgesPanel(context: PageContext): IncompleteAgesPanel {
   };
 }
 
+/** One statistic, on its own axis. The two charts are built identically and read separately. */
+const durationChart = (
+  context: PageContext,
+  view: ReturnType<PageContext["view"]>,
+  statistic: DurationStatistic,
+): ChartViewModel =>
+  chartViewModel({
+    title: DURATION_TITLES[statistic],
+    rollUpLevel: "Session",
+    // One unlike reading of one population: an order statistic partitions nothing (R-V1).
+    grouping: "measure",
+    measure: "ratio",
+    buckets: bucketAxis(context, view.buckets),
+    cells: aggregationCells({
+      buckets: view.buckets,
+      keysOf: () => [statistic],
+      valueOf: (rows) => sessionDurationSummary(rows)[statistic],
+      groups: [statistic],
+    }),
+    labelOf: () => DURATION_LABELS[statistic],
+  });
+
 /** R-N12 panel 5 — Session duration, median and p95 (R-M1). Wall clock, per `duration.ts`. */
 export function durationPanel(context: PageContext): DurationPanel {
   const view = context.view("jobs");
 
   return {
-    chart: chartViewModel({
-      title: "Session duration",
-      rollUpLevel: "Session",
-      // Two unlike readings of one population: a median and a p95 partition nothing (R-V1).
-      grouping: "measure",
-      measure: "ratio",
-      buckets: bucketAxis(context, view.buckets),
-      cells: aggregationCells({
-        buckets: view.buckets,
-        keysOf: () => DURATION_SERIES,
-        valueOf: (rows, group) =>
-          group === "p95" ? sessionDurationSummary(rows).p95 : sessionDurationSummary(rows).median,
-        groups: DURATION_SERIES,
-      }),
-      labelOf: (key) => DURATION_LABELS[key as DurationSeries] ?? key,
-    }),
+    title: DURATION_TITLE,
+    median: durationChart(context, view, "median"),
+    p95: durationChart(context, view, "p95"),
     summary: sessionDurationSummary(view.rows),
   };
 }

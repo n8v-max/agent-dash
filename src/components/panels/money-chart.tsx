@@ -14,7 +14,7 @@
 
 import { ChartFrame } from "@/components/charts/chart-frame";
 import type { ChartViewModel } from "@/domain/viewmodel";
-import { usdTick } from "./money-figure";
+import { usdTick } from "./figures";
 
 export function MoneyChart(props: {
   readonly chart: ChartViewModel;

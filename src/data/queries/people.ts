@@ -28,7 +28,12 @@ import {
 import { sessionTokensProcessed } from "@/domain/metrics/adoption";
 import { completedTaskKeys, sessionCost } from "@/domain/metrics/spend";
 import type { AgentSession, Member } from "@/domain/types";
-import { tableViewModel, type TableCell, type TableViewModel } from "@/domain/viewmodel";
+import {
+  tableViewModel,
+  type TableCell,
+  type TableColumn,
+  type TableViewModel,
+} from "@/domain/viewmodel";
 import type { ControlSet } from "../params";
 import { pageContext, type PageContext, type RowClass } from "./context";
 import { memberProfile, type MemberProfileViewModel } from "./profile";
@@ -54,16 +59,20 @@ export type PeoplePageViewModel = {
  * Exported because the toolbar's sort control offers exactly these columns (R-C3, R-N15). A
  * second list of column keys in the control layer would be a second answer to "what is
  * sortable", and the two would drift the first time a column is added.
+ *
+ * **Each numeric column names its unit** (ticket 41). A `FigureUnit` is a domain fact, and it is
+ * declared here rather than recognised in the renderer, so the Cost column is money for the same
+ * reason the Total spend tile is: because the layer that computed the figure said what it is.
  */
 export const PEOPLE_COLUMNS = [
   { key: "member", label: "Member", numeric: false, sortable: false },
   { key: "team", label: "Team", numeric: false, sortable: false },
   { key: "kind", label: "Kind", numeric: false, sortable: false },
-  { key: "completedTasks", label: "Completed Jobs", numeric: true, sortable: true },
-  { key: "sessions", label: "Sessions", numeric: true, sortable: true },
-  { key: "tokens", label: "Tokens", numeric: true, sortable: true },
-  { key: "cost", label: "Cost", numeric: true, sortable: true },
-] as const;
+  { key: "completedTasks", label: "Completed Jobs", numeric: true, sortable: true, unit: "count" },
+  { key: "sessions", label: "Sessions", numeric: true, sortable: true, unit: "count" },
+  { key: "tokens", label: "Tokens", numeric: true, sortable: true, unit: "tokens" },
+  { key: "cost", label: "Cost", numeric: true, sortable: true, unit: "usd" },
+] as const satisfies readonly TableColumn[];
 
 const rowsOf = (rows: readonly AgentSession[], memberId: string): readonly AgentSession[] =>
   rows.filter((row) => row.member_id === memberId);
@@ -87,7 +96,7 @@ const figureFor = (input: {
 const cellsFor = (context: PageContext, member: Member): readonly TableCell[] => [
   context.label.member(member.id),
   (context.membership.get(member.id) ?? []).map((id) => context.label.team(id)).join(", "),
-  member.kind,
+  context.label.memberKind(member.kind),
   figureFor({
     context,
     datapoint: "jobs",

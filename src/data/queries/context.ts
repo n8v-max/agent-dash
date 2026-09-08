@@ -87,6 +87,8 @@ export type Labels = {
   readonly workType: (key: string) => string;
   readonly team: (id: string) => string;
   readonly member: (id: string) => string;
+  /** `Member.kind`, in words. The raw enum is a URL value and never reaches a page (ticket 41). */
+  readonly memberKind: (kind: Member["kind"]) => string;
   readonly model: (id: string, level: ModelLevel) => string;
 };
 
@@ -215,6 +217,19 @@ const instantIn = (timezone: string): ((iso: string) => string) => {
   };
 };
 
+/**
+ * **`Member.kind`, in the words a reader reads** (ticket 41).
+ *
+ * `human` and `service_account` are a closed domain vocabulary and a URL value; neither is
+ * English, and `service_account` on a page reads as a leaked column name rather than as a fact
+ * about a person. It sits with the other display labels because that is what it is, and it is
+ * resolved once so the People table and a Member's profile cannot disagree.
+ */
+const MEMBER_KIND_LABELS: Readonly<Record<Member["kind"], string>> = {
+  human: "Human",
+  service_account: "Service account",
+};
+
 const labelsFor = (data: Dataset, identifiedNames: ReadonlySet<string>): Labels => {
   const repositories = new Map<string, string>(data.repositories.map((row) => [row.id, row.name]));
   const workTypes = new Map<string, string>(data.workTypes.map((row) => [row.key, row.name]));
@@ -231,6 +246,7 @@ const labelsFor = (data: Dataset, identifiedNames: ReadonlySet<string>): Labels 
     repository: (id) => repositories.get(id) ?? id,
     workType: (key) => workTypes.get(key) ?? key,
     team: (id) => teams.get(id) ?? id,
+    memberKind: (kind) => MEMBER_KIND_LABELS[kind],
     // R-A6/R-A9 — a subject the viewer cannot resolve by name never carries one, at any grain.
     member: (id) => (identifiedNames.has(id) ? (members.get(id) ?? id) : "Unnamed Member"),
     model: (id, level) => {

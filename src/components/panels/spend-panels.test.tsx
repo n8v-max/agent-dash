@@ -77,6 +77,18 @@ describe("A25 — Total spend is unavailable below monthly grain on this page (R
     expect(screen.getByText("$3,600.00")).toBeVisible();
     expect(screen.getByText("22%")).toBeVisible();
   });
+
+  /**
+   * **Ticket 41 — the seat-month sentence says what the number is.** It read "20 human Members ·
+   * 60 seat-months" against a fixture whose *month* count is 3, so a reader who checked the
+   * arithmetic against the $39 fee could not reach the $3,600 above it. A seat-month is one month
+   * held by one seat, and the sentence now names all three quantities in the order they multiply.
+   */
+  it("says what a seat-month is, in the arithmetic the seat charge is made of", () => {
+    render(<SpendPanels page={spendPageFixture()} dimension={SIZE} />);
+
+    expect(screen.getByText("20 human Members × 3 months = 60 seat-months")).toBeVisible();
+  });
 });
 
 describe("the panels hand the ViewModel over unchanged (R-T6)", () => {
