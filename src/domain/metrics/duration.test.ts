@@ -202,7 +202,10 @@ describe("T-U20 — the composition is computed over interactive sessions only (
     expect(headlessOnly.sessions).toBe(0);
     expect(headlessOnly.excluded).toBe(1);
     expect(headlessOnly.total).toBe(0);
-    expect(headlessOnly.slices.map((slice) => slice.share)).toEqual([0, 0, 0]);
+    // Ticket 40 / R-M18 — a share over a population holding no machine time is `null`, not 0.
+    // Three spans reading 0% would claim a composition was measured and found empty; nothing
+    // was measured at all.
+    expect(headlessOnly.slices.map((slice) => slice.share)).toEqual([null, null, null]);
     expect(spanComposition([]).total).toBe(0);
   });
 
@@ -218,7 +221,9 @@ describe("T-U20 — the composition is computed over interactive sessions only (
     expect(composition.stackable).toBe(true);
     const summed = composition.slices.reduce((running, slice) => running + slice.total, 0);
     expect(summed).toBe(composition.total);
-    expect(composition.slices.reduce((running, slice) => running + slice.share, 0)).toBeCloseTo(1, 12);
+    expect(
+      composition.slices.reduce((running, slice) => running + (slice.share ?? 0), 0),
+    ).toBeCloseTo(1, 12);
     // And the total is the interactive population's machine allocation, read independently.
     const machine = SESSIONS.filter((session) => session.execution_mode === "interactive").reduce(
       (running, session) => running + session.machine_allocation_duration_s,

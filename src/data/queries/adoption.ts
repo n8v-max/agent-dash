@@ -26,6 +26,7 @@ import {
   type ChartViewModel,
   type TableViewModel,
 } from "@/domain/viewmodel";
+import { ratio, type Ratio } from "@/domain/ratio";
 import type { PageContext } from "./context";
 import { aggregationCells, bucketAxis, subjectGrouping, sumOf } from "./panels";
 
@@ -36,7 +37,8 @@ export type DistributionViewModel = {
     readonly key: string;
     readonly label: string;
     readonly value: number;
-    readonly share: number;
+    /** R-M18 — `null` over a mix holding no token at all. A share of nothing is not zero. */
+    readonly share: Ratio;
   }[];
   readonly total: number;
   /** Always true: exact → family → tier partitions the tokens exactly (R-V1, T-U17). */
@@ -86,7 +88,7 @@ const distributionOf = (distribution: Distribution): DistributionViewModel => ({
     key: slice.key,
     label: slice.key,
     value: slice.total,
-    share: distribution.total === 0 ? 0 : slice.total / distribution.total,
+    share: ratio(slice.total, distribution.total),
   })),
   total: distribution.total,
   stackable: distribution.partition,

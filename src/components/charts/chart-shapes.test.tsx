@@ -23,10 +23,19 @@
 // static assertion below is what stops a panel from reaching around both.
 
 import { render, screen } from "@testing-library/react";
+import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 import type { Grouping } from "@/domain/viewmodel";
 import { ChartFrame } from "./chart-frame";
-import { CHART_SHAPES, STACKING_SHAPES, STACK_ID, stackIdOf } from "./chart-shapes";
+import {
+  CHART_SHAPES,
+  STACKING_SHAPES,
+  STACK_ID,
+  chartElementFor,
+  chartRows,
+  stackIdOf,
+  type ChartShape,
+} from "./chart-shapes";
 import { chartFixture, MEMBER_SERIES } from "./chart-viewmodels.fixture";
 
 const SIZE = { width: 640, height: 320 };
@@ -151,5 +160,63 @@ describe("the five shapes render from a ViewModel and nothing else", () => {
 
     expect(screen.getAllByLabelText(/legend icon/)).toHaveLength(MEMBER_SERIES.length);
     expect(screen.getByRole("application")).toBeInTheDocument();
+  });
+});
+
+// --- R-M18 — a gap in the data is a gap in the chart (ticket 40) ----------------------------
+//
+// A series point is `null` where the domain layer had no reading for that bucket: a ratio whose
+// denominator was zero. Two things must then be true of the marks, and neither is a default to
+// be trusted — a connected line invents the readings it spans, and a zero claims the measure was
+// taken and came to nothing.
+
+describe("R-M18 — a null reading breaks the line rather than being drawn", () => {
+  /** Bucket 2 has no reading; buckets 1 and 3 do. The shape of every gap in the product. */
+  const GAPPY = [{ key: "organization", label: "Equilibrio", values: [12, null, 30] }];
+
+  const propsOf = (element: ReactElement): Record<string, unknown> =>
+    element.props as Record<string, unknown>;
+
+  /** Destructured rather than read off `.children`, which reads to a linter as a DOM node. */
+  const childrenOf = (element: ReactElement): ReactNode => {
+    const { children } = propsOf(element) as { readonly children?: ReactNode };
+    return children;
+  };
+
+  /** The marks of a shape's chart element — every child carrying one of the series' keys. */
+  const marksFor = (shape: ChartShape): readonly ReactElement[] => {
+    const element = chartElementFor({
+      chart: chartFixture({ series: GAPPY }),
+      shape,
+      tickFormat: (value: number) => String(value),
+    });
+    const keys = new Set(GAPPY.map((series) => series.key));
+
+    return Children.toArray(childrenOf(element))
+      .filter((child): child is ReactElement => isValidElement(child))
+      .filter((child) => keys.has(String(propsOf(child).dataKey)));
+  };
+
+  it("passes the null through to the mark rather than coercing it to zero", () => {
+    const rows = chartRows(chartFixture({ series: GAPPY }));
+
+    expect(rows.map((row) => row.organization)).toEqual([12, null, 30]);
+  });
+
+  it.each(["line", "area"] as const)("%s carries connectNulls={false}", (shape) => {
+    const marks = marksFor(shape);
+
+    expect(marks).toHaveLength(1);
+    for (const mark of marks) expect(propsOf(mark).connectNulls).toBe(false);
+  });
+
+  it("is never passed as anything but false, anywhere in the chart layer", () => {
+    const sources = import.meta.glob("./*.tsx", { query: "?raw", import: "default", eager: true });
+    const uses = Object.entries(sources)
+      .filter(([path]) => !path.includes(".test."))
+      .flatMap(([, source]) => String(source).match(/connectNulls=\{[^}]*\}/g) ?? []);
+
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) expect(use).toBe("connectNulls={false}");
   });
 });

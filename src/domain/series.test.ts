@@ -454,3 +454,64 @@ describe("series identity is a domain fact, stable across a roll-up switch (R-T8
     );
   });
 });
+
+// --- R-M18 — a bucket a series contributed nothing to (ticket 40) ---------------------------
+//
+// The cap fills every series' every bucket (R-V5, A14), so it has to say what a bucket a series
+// contributed *no row* to reads as. For a sum that is `0` — a Repository with no session in a
+// week cost nothing, and the line belongs on the floor. For a ratio it is `null`: a week with no
+// Completed Job has no Cost per completed Job, and a point drawn at zero claims the work was
+// free. `absent` is the parameter that says which, and it is supplied by `viewmodel.ts` from the
+// chart's own `MeasureKind` rather than chosen per panel.
+
+describe("R-M18 — `absent` says what a bucket with no row reads as", () => {
+  const gappy = chartOf([
+    ["b1", { a: 10, b: 4 }],
+    ["b2", { a: 20 }],
+  ]);
+
+  it("fills an untouched bucket with zero by default, which is the additive reading", () => {
+    const { series } = capSeries(inputOf(gappy));
+    const b = series.find((held) => held.key === "b");
+
+    expect(b?.points.map((point) => point.value)).toEqual([4, 0]);
+  });
+
+  it("fills it with null where the caller says the measure is a ratio", () => {
+    const { series } = capSeries({ ...inputOf(gappy), absent: null });
+    const b = series.find((held) => held.key === "b");
+
+    expect(b?.points.map((point) => point.value)).toEqual([4, null]);
+  });
+
+  it("keeps a real zero reading as zero — an absent bucket and a measured zero differ", () => {
+    const measuredZero = chartOf([
+      ["b1", { a: 10, b: 0 }],
+      ["b2", { a: 20 }],
+    ]);
+    const { series } = capSeries({ ...inputOf(measuredZero), absent: null });
+
+    expect(series.find((held) => held.key === "b")?.points.map((point) => point.value)).toEqual([
+      0,
+      null,
+    ]);
+  });
+
+  it("gives 'Other' a null bucket only where every series it swept is absent from it", () => {
+    // Six series, so the cap engages (R-V4). In `b2` one swept series has a reading and the
+    // other does not, so "Other" holds that one reading; in `b3` neither does.
+    const { series } = capSeries({
+      ...inputOf(
+        chartOf([
+          ["b1", { a: 60, b: 50, c: 40, d: 30, e: 20, f: 10 }],
+          ["b2", { a: 6, e: 5 }],
+          ["b3", { a: 1 }],
+        ]),
+      ),
+      absent: null,
+    });
+    const other = series.find((held) => held.key === OTHER_SERIES_KEY);
+
+    expect(other?.points.map((point) => point.value)).toEqual([30, 5, null]);
+  });
+});

@@ -18,7 +18,7 @@ import {
   type Rollup,
   type RollupLevel,
 } from "@/domain/aggregate";
-import { changeBetween, type Change, type PeriodFigure } from "@/domain/change";
+import { changeBetween, type Change, type PeriodReading } from "@/domain/change";
 import type { PeriodBucket } from "@/domain/periods";
 import type { AgentSession, Member } from "@/domain/types";
 import type { BucketViewModel, Cell, Grouping } from "@/domain/viewmodel";
@@ -218,9 +218,18 @@ export const populationPerCapita = (context: PageContext): PerCapita =>
     "organization",
   ).perCapita;
 
-/** A divisor that cannot be zero. `available` is what says whether the figure means anything. */
-export const perCapitaDivisor = (population: PerCapita): number =>
-  population.denominator === 0 ? 1 : population.denominator;
+/**
+ * **The divisor a page divides by, or `null` where there is none** (R-M14, R-M18).
+ *
+ * It read `population.denominator === 0 ? 1 : population.denominator` until ticket 40, which is
+ * a zero denominator producing a figure: dividing by one leaves the raw total in place under a
+ * "per Member" title, so a population holding no seat would have read as a population of one.
+ * `available` is already false over such a population — it requires a denominator above zero —
+ * so this returns that fact instead of papering over it, and a caller that has not checked it
+ * has nothing to divide by.
+ */
+export const perCapitaDivisor = (population: PerCapita): number | null =>
+  population.available ? population.denominator : null;
 
 /** One tile's figure, the words for its absence, and its period-over-period change (R-N7). */
 export type Reading = {
@@ -235,12 +244,12 @@ export type MonthReading = { readonly value: number | null; readonly caption?: s
 const NO_READING: MonthReading = { value: null };
 
 /** There is no month at all — an empty dataset. The floor suppresses on `no-prior-period`. */
-const MISSING_PERIOD: PeriodFigure = { key: "none", value: 0, partial: true };
+const MISSING_PERIOD: PeriodReading = { key: "none", value: 0, partial: true };
 
 const figureOf = (
   bucket: PeriodBucket<AgentSession> | undefined,
-  value: number,
-): PeriodFigure | undefined =>
+  value: number | null,
+): PeriodReading | undefined =>
   bucket === undefined ? undefined : { key: bucket.key, value, partial: bucket.partial };
 
 /**
@@ -259,9 +268,13 @@ export const readingOf = (
   return {
     value: current.value,
     caption: current.caption ?? null,
+    // R-M18 — the readings travel to the floor **as they are**. `?? 0` stood here until ticket
+    // 40, and it made a tile that prints "—" print "−100% on the prior period" beside it: a fall
+    // to nothing, reported off a month whose measure was never defined. `changeBetween`
+    // suppresses on either absence now, with its own reason.
     change: changeBetween({
-      current: figureOf(months.current, current.value ?? 0) ?? MISSING_PERIOD,
-      prior: figureOf(months.prior, prior.value ?? 0),
+      current: figureOf(months.current, current.value) ?? MISSING_PERIOD,
+      prior: figureOf(months.prior, prior.value),
     }),
   };
 };

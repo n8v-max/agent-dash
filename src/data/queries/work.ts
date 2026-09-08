@@ -19,6 +19,7 @@ import {
   type AcceptanceRate,
 } from "@/domain/metrics/efficacy";
 import { completedTaskKeys } from "@/domain/metrics/spend";
+import { ratio } from "@/domain/ratio";
 import { WORK_TYPE_KEYS, type AgentSession, type WorkTypeKey } from "@/domain/types";
 import { chartViewModel, type ChartViewModel } from "@/domain/viewmodel";
 import type { ControlSet } from "../params";
@@ -89,10 +90,14 @@ const completedTasks = (rows: readonly AgentSession[]): number => completedTaskK
 const velocityPanel = (context: PageContext): VelocityPanel => {
   const view = context.view("jobs");
   const subject = subjectGrouping(context, view, () => 0);
-  const perCapita = context.params.perCapita;
   // R-M14 — the denominator is the *population's* active human Members, never the rows' authors.
   const population = populationPerCapita(context);
-  const divisor = perCapitaDivisor(population);
+  // The gate `spend.ts` applies, applied here too: per-capita is *offered* only where more than
+  // one Member is aggregated and the denominator is above zero. Before ticket 40 this panel
+  // divided by a coerced 1 instead, so a population holding no seat would have rendered its raw
+  // totals under a "per Member" title — a zero denominator producing a figure (R-M18).
+  const divisor = context.params.perCapita ? perCapitaDivisor(population) : null;
+  const perCapita = divisor !== null;
 
   return {
     chart: chartViewModel({
@@ -105,7 +110,8 @@ const velocityPanel = (context: PageContext): VelocityPanel => {
       cells: aggregationCells({
         buckets: view.buckets,
         keysOf: subject.keysOf,
-        valueOf: (rows) => (perCapita ? completedTasks(rows) / divisor : completedTasks(rows)),
+        valueOf: (rows) =>
+          divisor === null ? completedTasks(rows) : ratio(completedTasks(rows), divisor),
       }),
       labelOf: subject.labelOf,
       partition: subject.partition,

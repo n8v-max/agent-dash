@@ -52,6 +52,7 @@
 
 import { isSeatHolder, type MemberFacts } from "../aggregate";
 import type { PeriodGrain } from "../periods";
+import { ratio, type Ratio } from "../ratio";
 
 // --- What a spend figure reads --------------------------------------------------------------
 
@@ -214,9 +215,10 @@ export type TotalSpend<Row> = SpendPeriod<Row> & {
   readonly seatMonths: number;
   /**
    * `seatCost / total` — R-D4's headline, and what makes a low-usage Member legible. `null`
-   * over a period that cost nothing at all, which is the only way the total can be zero.
+   * over a period that cost nothing at all, which is the only way the total can be zero
+   * (`ratio.ts`, R-M18).
    */
-  readonly seatShare: number | null;
+  readonly seatShare: Ratio;
 };
 
 /**
@@ -244,7 +246,7 @@ export function totalSpend<Row extends CostBearing>(
     total,
     seats,
     seatMonths: period.seatMonths,
-    seatShare: total === 0 ? null : seatCost / total,
+    seatShare: ratio(seatCost, total),
   };
 }
 
@@ -273,7 +275,22 @@ export type CostPerSession = {
   readonly sessions: number;
   readonly cost: number;
   /** `cost / sessions`, or `null` over no sessions — where the cost is necessarily zero too. */
-  readonly value: number | null;
+  readonly value: Ratio;
+  /**
+   * Why there is no reading, in the words a headline figure prints beside its em dash (ticket 40,
+   * R-M18). `null` where there *is* one, so a surface cannot print a reason under a figure.
+   */
+  readonly message: string | null;
+};
+
+/**
+ * What the period was missing, named by the outcome filter that was applied to it. Written as a
+ * function rather than a lookup for the reason `matches` is: a table keyed on `"not-accepted"`
+ * would put a control's URL value at the mercy of a naming convention.
+ */
+const noSessionPhrase = (outcome: OutcomeFilter): string => {
+  if (outcome === "any") return "no session";
+  return outcome === "accepted" ? "no accepted session" : "no unaccepted session";
 };
 
 /**
@@ -291,13 +308,15 @@ export function costPerSession<Row extends CostBearing & OutcomeBearing>(
 ): CostPerSession {
   const rows = period.rows.filter(matches(outcome));
   const cost = sessionCost(rows);
+  const value = ratio(cost, rows.length);
   return {
     key: period.key,
     partial: period.partial,
     outcome,
     sessions: rows.length,
     cost,
-    value: rows.length === 0 ? null : cost / rows.length,
+    value,
+    message: value === null ? `${period.key} holds ${noSessionPhrase(outcome)} to average` : null,
   };
 }
 
@@ -352,14 +371,19 @@ const perCompletedTask = <Row extends SpendRow>(
     sessions: period.rows.length,
     completedTasks,
   };
-  if (completedTasks === 0) {
+  // `ratio.ts` decides, so this figure cannot come to a different conclusion about a zero
+  // denominator than Cost per session, an Acceptance rate or a per-capita figure does. The
+  // discriminated union is the *stronger* statement of the same rule: R-M18 says a ratio over a
+  // zero denominator is `null`, and here there is not even a `value` field to hold the null.
+  const value = ratio(cost, completedTasks);
+  if (value === null) {
     return {
       ...reading,
       defined: false,
       message: `${period.key} holds $${cost.toFixed(2)} of spend and no Completed Task to divide it by`,
     };
   }
-  return { ...reading, defined: true, value: cost / completedTasks };
+  return { ...reading, defined: true, value };
 };
 
 /**

@@ -23,6 +23,7 @@ import {
   type Change,
   type ChangeShown,
   type PeriodFigure,
+  type PeriodReading,
 } from "./change";
 
 /** A finished period. `partial` is the R-E2 flag, and it is false unless a test is about it. */
@@ -39,8 +40,11 @@ const shown = (change: Change): ChangeShown => {
   return change;
 };
 
-const between = (prior: PeriodFigure | undefined, current: PeriodFigure): Change =>
+const between = (prior: PeriodReading | undefined, current: PeriodReading): Change =>
   changeBetween({ current, prior });
+
+/** R-M18 — a period the measure is undefined over. Not a period holding zero. */
+const noReading = (key: string): PeriodReading => ({ key, value: null, partial: false });
 
 describe("the floor is a count of one (R-M12, T-U3, A8)", () => {
   it("suppresses the figure when the prior period holds zero", () => {
@@ -120,15 +124,70 @@ describe("the floor is a count of one (R-M12, T-U3, A8)", () => {
     expect(change.shown ? "" : change.message).toContain("2026-04");
   });
 
-  it("admits exactly three reasons to suppress, every one about the prior period", () => {
+  it("admits exactly four reasons to suppress, and not one of them is about size", () => {
     // The canary for the rule this ticket exists to keep out: a magnitude cut-off would have to
     // name itself here, and naming it breaks this expectation before it reaches a chart. C13
-    // added the third — still a statement about the prior period, still not about size.
+    // added the third — still a statement about the prior period, still not about size — and
+    // ticket 40 the fourth, which is about a period having no figure at all (R-M18).
     expect(CHANGE_SUPPRESSIONS).toEqual([
+      "no-figure-to-compare",
       "no-prior-period",
       "prior-period-holds-nothing",
       "prior-period-incomplete",
     ]);
+  });
+});
+
+// --- R-M18 — a period with no figure is not a period holding zero (ticket 40) ---------------
+//
+// A ratio over a zero denominator is `null` (`ratio.ts`), and a tile prints it as an em dash
+// with the metric module's own reason under it. Before this rule the query layer coerced the
+// same `null` to `0` on its way to the floor, so the tile printed "—" and, beside it,
+// "−100% on the prior period": a fall to nothing, off a month whose measure was never defined.
+
+describe("a null reading suppresses the change, and does not read as a fall to zero", () => {
+  it("suppresses when the current period has no figure", () => {
+    const change = between(figure("2026-04", 200), noReading("2026-05"));
+
+    expect(change).toMatchObject({ shown: false, reason: "no-figure-to-compare" });
+    expect(change.shown ? "" : change.message).toContain("2026-05");
+  });
+
+  it("does not report it as a fall to nothing", () => {
+    const dropped = between(figure("2026-04", 200), figure("2026-05", 0));
+    const undefinedOver = between(figure("2026-04", 200), noReading("2026-05"));
+
+    // A measured zero *is* a fall, and R-M12 shows it: the floor is on the base, not the current
+    // period. An undefined reading is not a fall at all, and the two must not read alike.
+    expect(shown(dropped).ratio).toBe(-1);
+    expect(undefinedOver.shown).toBe(false);
+  });
+
+  it("suppresses when the prior period has no figure, naming the prior period", () => {
+    const change = between(noReading("2026-04"), figure("2026-05", 12));
+
+    expect(change).toMatchObject({ shown: false, reason: "no-figure-to-compare" });
+    expect(change.shown ? "" : change.message).toContain("2026-04");
+  });
+
+  it("prefers 'no prior period' to 'no figure' where there is no earlier period at all", () => {
+    expect(between(undefined, figure("2026-04", 42))).toMatchObject({
+      reason: "no-prior-period",
+    });
+  });
+
+  it("reports the current period's absence before the prior period's", () => {
+    // Both are absent. The useful thing to tell a reader is that the figure they are looking at
+    // does not exist, not that the one they cannot see does not either.
+    const change = between(noReading("2026-04"), noReading("2026-05"));
+
+    expect(change.shown ? "" : change.message).toContain("2026-05");
+  });
+
+  it("carries the incomplete flag through the suppression, as the other reasons do", () => {
+    const change = between(partialFigure("2026-04", 5), noReading("2026-05"));
+
+    expect(change).toMatchObject({ shown: false, incomplete: true });
   });
 });
 

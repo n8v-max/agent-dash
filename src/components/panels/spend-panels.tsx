@@ -129,7 +129,17 @@ export function CostPerSessionPanel(props: {
       question={`What one session costs on average. Seat cost is not in it — a monthly fee shared across sessions would be the apportioning R-M5 refuses. ${OUTCOME_SENTENCE[panel.outcome] ?? ""}`}
       figures={
         <FigureList>
-          <Figure label="Cost per session" value={usd(panel.range.value)} lead />
+          {/*
+            R-M18 — where the period holds no session the figure is `usd(null)`, an em dash, and
+            the hint is the domain layer's own reason for it. A headline dash with nothing beside
+            it reads as a rendering fault; the sentence is what makes it read as an absence.
+          */}
+          <Figure
+            label="Cost per session"
+            value={usd(panel.range.value)}
+            hint={panel.range.message}
+            lead
+          />
           <Figure label="Sessions" value={count(panel.range.sessions)} />
           <Figure label="Session cost" value={usd(panel.range.cost)} />
         </FigureList>

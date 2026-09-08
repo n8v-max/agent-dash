@@ -39,6 +39,7 @@
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 // `Date.parse` on a stored ISO string is deterministic — it reads a row, not a clock (P5).
 
+import { ratio, type Ratio } from "../ratio";
 import type { AgentSession } from "../types";
 
 /** The three spans, keyed on human presence. Disjoint, and a partition of machine allocation. */
@@ -165,8 +166,13 @@ export function spanFaults(row: SpanRow): readonly SpanFault[] {
 export type SpanSlice = {
   readonly key: PresenceSpan;
   readonly total: number;
-  /** Share of `total`. Zero over an empty population — a share of nothing is not one third. */
-  readonly share: number;
+  /**
+   * Share of `total`, or **`null` over a population that held no machine time at all**
+   * (`ratio.ts`, R-M18). It read `0` until ticket 40: a share of nothing is not one third, and
+   * it is not zero either — three spans each drawn at 0% claim a composition that was measured
+   * and found empty, where the truth is that nothing was measured.
+   */
+  readonly share: Ratio;
 };
 
 /**
@@ -217,7 +223,7 @@ export function spanComposition(sessions: readonly SpanRow[]): SpanComposition {
     slices: PRESENCE_SPANS.map((key) => ({
       key,
       total: totals[key],
-      share: total === 0 ? 0 : totals[key] / total,
+      share: ratio(totals[key], total),
     })),
     total,
     stackable: true,

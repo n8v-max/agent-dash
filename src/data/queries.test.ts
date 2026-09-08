@@ -86,7 +86,10 @@ const fromSeries = (chart: ChartViewModel): Record<string, Record<string, unknow
       Object.fromEntries(
         chart.series.map((series) => [
           series.label,
-          series.points.find((point) => point.bucket === bucket.key)?.value ?? 0,
+          // R-M18 — `?? null`, never `?? 0`: a bucket the chart has no reading for must read
+          // the same on both paths, and coercing one side to zero would hide exactly the
+          // disagreement this cross-check exists to catch.
+          series.points.find((point) => point.bucket === bucket.key)?.value ?? null,
         ]),
       ),
     ]),
@@ -147,7 +150,8 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
     // Asserted as arithmetic rather than as a flag: were these ever to agree, the measure would
     // have been silently re-keyed, and that should fail here rather than pass quietly.
     const slices = mix.chart.series.reduce(
-      (running, series) => running + series.points.reduce((sum, point) => sum + point.value, 0),
+      (running, series) =>
+        running + series.points.reduce((sum, point) => sum + (point.value ?? 0), 0),
       0,
     );
     expect(slices).toBeGreaterThan(tasks.value ?? 0);
@@ -631,3 +635,51 @@ describe("C14 — per-capita on `/demo/spend` divides the money panels, and only
   });
 });
 
+
+// --- R-M18 — the acceptance case, over the committed fixture (ticket 40) --------------------
+//
+// P6: a test that would pass against an empty fixture is not a test. The restricted account's
+// Cost per completed Job at week grain is the case ticket 40 names, and it is real data — the
+// account's own sessions are sparse enough that six weeks of the window hold spend, or nothing
+// at all, and no Completed Job to divide by. Every one of them drew `$0` before this rule.
+
+describe("R-M18 — a week with no Completed Job draws nothing, not zero", () => {
+  const weekly = spendPage(RESTRICTED, paramsFor("spend", { grain: "week" }));
+  const chart = weekly.costPerCompletedTask;
+
+  /** bucket key → the one series' reading, off the mirror. */
+  const readings = new Map(
+    chart.buckets.map((bucket, at) => [bucket.key, chart.mirror.rows[at]?.[1]]),
+  );
+
+  /** The weeks ticket 40 names as the acceptance case. */
+  const EMPTY_WEEKS = ["2026-W15", "2026-W16", "2026-W17", "2026-W20", "2026-W21", "2026-W23"];
+
+  it("holds no reading in exactly the weeks the ticket names", () => {
+    for (const week of EMPTY_WEEKS) {
+      expect(readings.has(week)).toBe(true);
+      expect(readings.get(week)).toBeNull();
+    }
+  });
+
+  it("still holds a reading in the weeks that finished something", () => {
+    const drawn = [...readings.entries()].filter(([, value]) => value !== null);
+
+    expect(drawn.length).toBeGreaterThan(EMPTY_WEEKS.length);
+    for (const [, value] of drawn) expect(typeof value).toBe("number");
+  });
+
+  it("puts the same absence on the series, so the line breaks where the table dashes", () => {
+    const points = new Map(
+      chart.series.flatMap((series) => series.points.map((point) => [point.bucket, point.value])),
+    );
+
+    for (const week of EMPTY_WEEKS) expect(points.get(week)).toBeNull();
+  });
+
+  it("never draws a zero it did not measure — no bucket reads 0 in this chart", () => {
+    // A Completed Job cannot cost nothing: every session on it carries an attributed cost. So a
+    // zero here would be the coercion this rule removed rather than a reading.
+    expect([...readings.values()]).not.toContain(0);
+  });
+});

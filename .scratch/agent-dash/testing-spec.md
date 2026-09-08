@@ -105,6 +105,12 @@ product are aggregation failures.
 - **Current period incomplete → shown, and flagged** (R-E2). The asymmetry is the assertion. A test
   that only checked `incomplete` was carried would pass against a rule that suppressed both sides,
   which is the rule C13 rejected.
+- **Either period has no figure → suppressed, with its own reason** (R-M18, R-M12, C15). A ratio
+  over a zero denominator is `null`, and a `null` read as `0` reports a fall to nothing off a
+  period whose measure was never defined. Asserted as *distinguishable* from a measured fall: a
+  current period of 0 against a prior of 200 is shown as −100%, and a current period of `null`
+  against the same prior is suppressed. A test asserting only "suppressed" would pass against a
+  rule that hid the measured fall too, which is the case a reader most needs.
 
 **T-U4 — The `WorkType → artefact kind` comparability intersection** (`domain/comparability.ts`,
 R-M8) — also one of the § 3.2 four; stated once here.
@@ -230,10 +236,33 @@ against.
   not computed, and a test asserts the API does not expose one.
 - **T-U20 — Human-presence spans** (R-N14). The three spans sum to
   `machine_allocation_duration_s`; `headless` sessions are 100% AFK with zero interactive and zero
-  idle; the composition is computed over `interactive` sessions only.
+  idle; the composition is computed over `interactive` sessions only. **Over a population holding
+  no machine time the three shares are `null`, not `0`** (R-M18): three spans each reading 0%
+  claim a composition that was measured and found empty.
 - **T-U21 — Projection** (R-N23, P5). Elapsed-proportional extrapolation with "now" injected. At
   10% elapsed and at 90% elapsed the method is identical and the elapsed fraction differs — both
-  asserted, because they are different claims. **No confidence band is produced** (R-N24).
+  asserted, because they are different claims. **No confidence band is produced** (R-N24). Before
+  any of the period has elapsed there is no elapsed share to divide by, so the projection is
+  `null` (R-M18) and not the actual figure.
+- **T-U22 — The zero-denominator rule** (`domain/ratio.ts`, R-M18, A29). The rule is one
+  expression, so it gets one test rather than nine, and the nine call sites get one assertion each
+  that they divide through it:
+  - `ratio(n, 0)` is `null` for every `n`, including `n = 0`. `-0` is a zero and is caught by the
+    same comparison, so no reading is ever `-Infinity`.
+  - **`null` if and only if the denominator is zero**, asserted over a grid of numerators and
+    denominators. This is the seed ticket 51 extends into a property at 200 runs; stating it as a
+    biconditional is why the function deliberately carries *no* guard for a `NaN` or infinite
+    denominator, neither of which any measure in this product can produce.
+  - **A measured zero survives.** `ratio(0, 5)` is `0`, an acceptance rate of 0 over five sessions
+    renders as `0%`, and a ratio cell holding a real zero is not turned into a gap.
+  - Each of Cost per completed Task, Cost per session, Acceptance rate, Rework rate, Decomposition
+    rate, per-capita, Projection, the seat share, the Model-mix shares and the span shares returns
+    `null` over its own zero denominator (`spend.test.ts`, `efficacy.test.ts`,
+    `aggregate.test.ts`, `projection.test.ts`, `duration.test.ts`).
+  - **Over the committed fixture** (P6): the restricted account's Cost per completed Job at week
+    grain holds no reading in weeks 15–17, 20, 21 and 23, and **no bucket of that chart reads
+    zero** — a finished Job cannot have cost nothing, so a zero there could only be the coercion
+    this rule removed. `src/data/queries.test.ts`.
 
 ---
 
@@ -255,6 +284,14 @@ polyfill lands in the setup file, and then fails **confusingly rather than loudl
 **T-C1 — Every chart renders a visually-hidden `<table>` mirror** whose values equal the rendered
 series (A15). Because the mirror is built in the domain layer independently of the series (R-T7),
 this is a real cross-check rather than the same array printed twice.
+
+**T-C1.1 — A bucket with no reading renders as an absence, in both places** (A29, R-M18, R-V10).
+The mirror cell is an **em dash** and the `line` and `area` marks carry **`connectNulls={false}`**,
+so the table and the chart make one claim. Both are asserted, and so is the contrast: a bucket
+whose reading really is `0` renders `0`, and a *missing* bucket on an **additive** measure still
+renders `0` — a Repository that ran nothing in a week cost nothing. `connectNulls` is Recharts'
+own default and is asserted anyway, because a default is not a decision and a future version
+flipping it should fail a test rather than change what the product claims.
 
 **T-C2 — Every chart's `aria-label` names the current roll-up level** (A16, R-X2), and changes when
 the level changes. The container is a plain `<div>`; this is the one piece of state a screen-reader
@@ -370,6 +407,14 @@ request per account per route, asserting rows rather than pixels."*
   pages that render no rate card at all. The card is identified by its structure, and its values stay
   in T-E4's search set so that shipping it fails both tests at once.
 
+- **T-E10 — A zero denominator survives the whole stack as an absence** (A29, R-M18, R-V10). The
+  restricted account, `/demo/spend?grain=week`, the R-X1 mirror of Cost per completed Job: week 15
+  holds an em dash. It is at this layer because every other layer proves a piece — the rule
+  (T-U22), the mirror (T-C1.1) — and none of them proves the absence survives the permission
+  filter, the bucketing, the ViewModel, the RSC boundary and the renderer to arrive on a running
+  page. A week the same account *did* finish work in is asserted to still carry its figure, so a
+  panel that rendered nothing could not pass.
+
 ---
 
 ## 6. Fixture invariant tests
@@ -473,6 +518,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A26 April and September flagged partial | T-U1, T-U12 |
 | A27 Spans are `interactive`-only and say so | T-U20, T-C1 |
 | A28 No matrix anywhere; visibility stated in words | T-E2.1 |
+| A29 A zero denominator is an absence, never a zero | T-U22, T-C1.1, T-E10 |
 
 ---
 

@@ -78,10 +78,17 @@ export const OTHER_SERIES_KEY = "other";
 /** What "Other" is called. The one label in this module that is not read off the data. */
 export const OTHER_SERIES_LABEL = "Other";
 
-/** One series' value in one bucket. `bucket` is the period key, so a point names its own column. */
+/**
+ * One series' value in one bucket. `bucket` is the period key, so a point names its own column.
+ *
+ * **`null` is a gap, never a zero** (R-M18, ticket 40). A ratio the domain layer had no
+ * denominator for reaches a chart as an absent point — the line breaks at it — where a drawn
+ * zero would claim the measure was taken and came to nothing. `absent` on `SeriesInput` is what
+ * decides which of the two a bucket with no row is.
+ */
 export type SeriesPoint = {
   readonly bucket: string;
-  readonly value: number;
+  readonly value: number | null;
 };
 
 /**
@@ -135,24 +142,36 @@ export type SeriesInput<Row> = {
   readonly measure: (row: Row) => number;
   /** Key → display label. Ties break on the label, so this is load-bearing, not cosmetic. */
   readonly labelOf?: (key: string) => string;
+  /**
+   * **What a bucket this series contributed no row to reads as** (R-M18, ticket 40). `0` — the
+   * default — is the additive reading: a Repository that ran nothing in a week cost nothing, and
+   * the line belongs on the floor. `null` is the ratio reading: a week with no Completed Job has
+   * no Cost per completed Job at all, and a point at zero is a false claim about it.
+   *
+   * It is a parameter rather than a per-panel choice because the answer follows the chart's
+   * `MeasureKind`, which `viewmodel.ts` already holds as a domain fact (R-V1's third conjunct).
+   */
+  readonly absent?: number | null;
 };
 
 /** A whole-range total plus the per-bucket values behind it. Mutable only inside this module. */
 type Tally = {
   readonly key: string;
   readonly label: string;
+  /** The ranking measure (R-V5). Always a number: an absent bucket adds nothing to a total. */
   total: number;
-  readonly values: number[];
+  readonly values: (number | null)[];
 };
 
-const emptyValues = (length: number): number[] => Array.from({ length }, () => 0);
+const emptyValues = (length: number, absent: number | null): (number | null)[] =>
+  Array.from({ length }, () => absent);
 
 /**
  * One pass over every bucket, accumulating the whole-range total and the per-bucket values
  * together. They are the same additions read twice, so a bucket's column cannot disagree with
  * the total that ranked its series.
  */
-const tally = <Row>(input: SeriesInput<Row>): readonly Tally[] => {
+const tally = <Row>(input: SeriesInput<Row>, absent: number | null): readonly Tally[] => {
   const labelOf = input.labelOf ?? ((key: string) => key);
   const held = new Map<string, Tally>();
   let index = 0;
@@ -162,10 +181,12 @@ const tally = <Row>(input: SeriesInput<Row>): readonly Tally[] => {
       for (const key of input.seriesKeysOf(row)) {
         const existing =
           held.get(key) ??
-          { key, label: labelOf(key), total: 0, values: emptyValues(input.buckets.length) };
+          { key, label: labelOf(key), total: 0, values: emptyValues(input.buckets.length, absent) };
         // The full figure into every key the row belongs to — never a share of it (R-V3).
         existing.total += value;
-        existing.values[index] += value;
+        // The first row in a bucket *replaces* the absent reading rather than adding to it, so a
+        // gap becomes a figure the moment there is one and a measured zero stays zero.
+        existing.values[index] = (existing.values[index] ?? 0) + value;
         held.set(key, existing);
       }
     }
@@ -184,13 +205,33 @@ const byWholeRangeMeasure = (left: Tally, right: Tally): number =>
   left.label.localeCompare(right.label) ||
   left.key.localeCompare(right.key);
 
+/**
+ * "Other" in one bucket: the sum of the tail's readings there, or the absent reading where the
+ * whole tail is absent from it. A gap survives being swept — sixteen Members with no Cost per
+ * completed Job in a week do not add up to zero.
+ */
+const otherValueAt = (
+  tail: readonly Tally[],
+  index: number,
+  absent: number | null,
+): number | null => {
+  const present = tail.filter((held) => held.values[index] !== null);
+  return present.length === 0
+    ? absent
+    : present.reduce((running, held) => running + (held.values[index] ?? 0), 0);
+};
+
 /** The bucket the cap sweeps the tail into. Its values are the tail's, bucket by bucket. */
-const otherTally = (tail: readonly Tally[], bucketCount: number): Tally => ({
+const otherTally = (
+  tail: readonly Tally[],
+  bucketCount: number,
+  absent: number | null,
+): Tally => ({
   key: OTHER_SERIES_KEY,
   label: OTHER_SERIES_LABEL,
   total: tail.reduce((running, held) => running + held.total, 0),
-  values: emptyValues(bucketCount).map((_zero, index) =>
-    tail.reduce((running, held) => running + held.values[index], 0),
+  values: emptyValues(bucketCount, absent).map((_absent, index) =>
+    otherValueAt(tail, index, absent),
   ),
 });
 
@@ -228,7 +269,11 @@ const paint = (
  * being read.
  */
 export function capSeries<Row>(input: SeriesInput<Row>): SeriesSet {
-  const ranked = [...tally(input)].sort(byWholeRangeMeasure);
+  // `?? 0` would be wrong here and silently: `null ?? 0` is `0`, so nullish coalescing
+  // would collapse the very reading this parameter exists to express. Only *omitting*
+  // `absent` takes the additive default.
+  const absent = input.absent === undefined ? 0 : input.absent;
+  const ranked = [...tally(input, absent)].sort(byWholeRangeMeasure);
   if (ranked.length <= SERIES_LIMIT) {
     return { series: paint(ranked, input.buckets), other: null };
   }
@@ -236,7 +281,7 @@ export function capSeries<Row>(input: SeriesInput<Row>): SeriesSet {
   const kept = ranked.slice(0, NAMED_SERIES_CAP);
   const swept = ranked.slice(NAMED_SERIES_CAP);
   return {
-    series: paint([...kept, otherTally(swept, input.buckets.length)], input.buckets),
+    series: paint([...kept, otherTally(swept, input.buckets.length, absent)], input.buckets),
     // R-V6 — what the tooltip lists, in the same ranked order the chart itself is in.
     other: { holds: swept.map((held) => held.label) },
   };

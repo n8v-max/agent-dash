@@ -25,6 +25,7 @@
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
 import { civilDayIn, civilDaysBetween } from "../periods";
+import { ratio, type Ratio } from "../ratio";
 
 /**
  * The period being projected: its identity and its own civil edges, unclipped by any range.
@@ -71,9 +72,10 @@ export type Projection = {
   readonly elapsed: Elapsed;
   /**
    * `actual / elapsed.fraction` — the whole method. `null` before the period has begun, where
-   * there is no elapsed share to divide by and therefore no basis for a claim.
+   * there is no elapsed share to divide by and therefore no basis for a claim (`ratio.ts`,
+   * R-M18: a zero denominator is an absent reading, never a zero one).
    */
-  readonly projected: number | null;
+  readonly projected: Ratio;
   /** R-N23's incomplete-period flag: the period has not finished as of `now`. */
   readonly incomplete: boolean;
   /**
@@ -154,7 +156,7 @@ export function projectPeriodSpend(input: ProjectionInput): ProjectionResult {
       key: period.key,
       actual: input.actual,
       elapsed: { days, totalDays, fraction },
-      projected: fraction === 0 ? null : input.actual / fraction,
+      projected: ratio(input.actual, fraction),
       incomplete: days < totalDays,
       method: PROJECTION_METHOD,
     },

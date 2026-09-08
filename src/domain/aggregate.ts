@@ -43,6 +43,7 @@
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
 import { membershipFromTeams } from "./access";
+import { ratio, type Ratio } from "./ratio";
 import type { Member, Model, Team } from "./types";
 
 /**
@@ -85,7 +86,7 @@ export type PerCapita = {
   /** Active human Members — the seat-holding denominator, and the only one. */
   readonly denominator: number;
   /** `total / denominator`, or `null` where per-capita is not offered. Never a divide by zero. */
-  readonly value: number | null;
+  readonly value: Ratio;
 };
 
 /** R-V3, computed from the placement that produced the totals. */
@@ -163,7 +164,9 @@ export function perCapita(total: number, population: readonly MemberFacts[]): Pe
     available,
     members: population.length,
     denominator,
-    value: available ? total / denominator : null,
+    // `ratio.ts` holds the rule; `available` is the extra condition R-M14 puts on top of it —
+    // a population of one has nothing to divide out even though the denominator is not zero.
+    value: available ? ratio(total, denominator) : null,
   };
 }
 

@@ -47,10 +47,14 @@ export type BucketViewModel = {
 /**
  * R-X1's visually-hidden table. `rows` is row-major and aligned to `columns`: the first cell of
  * each row is the bucket label, and the rest are the series' values in `columns` order.
+ *
+ * **A cell is `null` where the chart has no reading for that (bucket × series)** — R-M18's zero
+ * denominator, arriving as an absence rather than as a zero. `table-mirror.tsx` prints it as an
+ * em dash, which is the same claim the broken line makes in the chart beside it.
  */
 export type MirrorViewModel = {
   readonly columns: readonly string[];
-  readonly rows: readonly (readonly (string | number)[])[];
+  readonly rows: readonly (readonly (string | number | null)[])[];
 };
 
 /** A series as a chart renders it — `series.ts`'s shape, unchanged, so nothing re-spells it. */
@@ -129,6 +133,11 @@ export const STACKABLE_GROUPINGS: Readonly<Record<Grouping, boolean>> = {
  * Whether a chart's measure is a sum of row figures or a reading derived from two of them.
  * A **ratio is never stackable**: cost per completed Task by WorkType groups on a partition of
  * the sessions, and the five ratios still do not add up to an Organization ratio.
+ *
+ * It decides a second thing, and the two are the same fact seen twice: **what a bucket holding
+ * no cell reads as** (R-M18, ticket 40). An additive measure's missing bucket is a real `0` —
+ * nothing was spent, and the line belongs on the floor. A ratio's is `null` — there was no
+ * denominator, so no reading was taken, and a point at zero would claim one was.
  */
 export const MEASURE_KINDS = ["additive", "ratio"] as const;
 export type MeasureKind = (typeof MEASURE_KINDS)[number];
@@ -178,8 +187,17 @@ export type ChartInput = {
   readonly bucketColumn?: string;
 };
 
-/** group key → bucket key → value. The table both paths read; neither reads the other's output. */
+/**
+ * group key → bucket key → value. The table both paths read; neither reads the other's output.
+ *
+ * **Presence in this map is the whole of R-M18 at this layer.** A missing key is a bucket the
+ * aggregation had no reading for — `aggregationCells` emits no cell where a metric module
+ * returned `null` — and it is `absentOf` below, not a zero, that says what that reads as.
+ */
 type Grid = ReadonlyMap<string, ReadonlyMap<string, number>>;
+
+/** R-M18 — what a (bucket × group) the aggregation never produced reads as, per measure kind. */
+const absentOf = (measure: MeasureKind): number | null => (measure === "ratio" ? null : 0);
 
 const gridOf = (cells: readonly Cell[]): Grid => {
   const grid = new Map<string, Map<string, number>>();
@@ -191,8 +209,8 @@ const gridOf = (cells: readonly Cell[]): Grid => {
   return grid;
 };
 
-const valueAt = (grid: Grid, group: string, bucket: string): number =>
-  grid.get(group)?.get(bucket) ?? 0;
+const valueAt = (grid: Grid, group: string, bucket: string): number | undefined =>
+  grid.get(group)?.get(bucket);
 
 /**
  * Path one: the cells, bucketed, through `series.ts` — whole-range ranking, the top-4 + "Other"
@@ -210,6 +228,8 @@ const seriesFrom = (input: ChartInput): SeriesSet => {
     seriesKeysOf: (cell) => [cell.group],
     measure: (cell) => cell.value,
     labelOf: input.labelOf,
+    // R-M18 — the one place the measure kind reaches the cap.
+    absent: absentOf(input.measure),
   });
 };
 
@@ -223,12 +243,21 @@ const seriesFrom = (input: ChartInput): SeriesSet => {
  * compares two traversals of one table rather than one array printed twice.
  */
 const mirrorFrom = (input: ChartInput, set: SeriesSet, grid: Grid): MirrorViewModel => {
+  const absent = absentOf(input.measure);
   const named = new Set(set.series.filter((series) => !series.inert).map((series) => series.key));
   const swept = [...grid.keys()].filter((key) => !named.has(key));
-  const cellFor = (series: Series, bucket: string): number =>
-    series.inert
-      ? swept.reduce((running, key) => running + valueAt(grid, key, bucket), 0)
-      : valueAt(grid, series.key, bucket);
+  // R-M18 — "Other" holds the sum of the readings that *exist* in the bucket, and holds nothing
+  // where none of the groups it swept has one. Sixteen Members with no Cost per completed Job in
+  // a week do not add up to zero.
+  const sweptFor = (bucket: string): number | null => {
+    const present = swept.flatMap((key) => {
+      const value = valueAt(grid, key, bucket);
+      return value === undefined ? [] : [value];
+    });
+    return present.length === 0 ? absent : present.reduce((running, value) => running + value, 0);
+  };
+  const cellFor = (series: Series, bucket: string): number | null =>
+    series.inert ? sweptFor(bucket) : valueAt(grid, series.key, bucket) ?? absent;
 
   return {
     columns: [input.bucketColumn ?? "Period", ...set.series.map((series) => series.label)],
