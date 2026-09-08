@@ -99,14 +99,21 @@ product are aggregation failures.
   week-over-week is +50% and the product says so.
 - The floor is a count of one, not a magnitude threshold. A test asserting a percentage cut-off
   would encode the position the metric set explicitly rejected.
+- **Prior period incomplete → suppressed, with its reason** (R-M13, C13). Asserted separately from
+  the zero floor, and asserted to be *distinguishable* from it: the two suppressions carry different
+  reasons, because "no prior data" and "prior month unfinished" are different facts about the page.
+- **Current period incomplete → shown, and flagged** (R-E2). The asymmetry is the assertion. A test
+  that only checked `incomplete` was carried would pass against a rule that suppressed both sides,
+  which is the rule C13 rejected.
 
 **T-U4 — The `WorkType → artefact kind` comparability intersection** (`domain/comparability.ts`,
 R-M8) — also one of the § 3.2 four; stated once here.
 
 - `implementation`, `bugfix`, `refactor` share `pull_request`, `commit`, `file_changed`,
   `line_changed` — comparable with each other.
-- `review` produces only `pr_comment` — comparable with neither of the others. This is the one live
-  case the fixture keeps.
+- `review` produces only `pr_comment` — comparable with **none of the three code WorkTypes**. This
+  is the one live case the fixture keeps. (It *does* share `pr_comment` with `deploy`, per the next
+  bullet; the earlier wording said "neither of the others", which its own next bullet contradicted.)
 - `deploy` produces `commit` and `pr_comment` — shares `commit` with the code types and
   `pr_comment` with `review`, and shares an acceptance criterion with neither.
 - The three code WorkTypes share an **acceptance criterion**, so their acceptance rates are
@@ -166,7 +173,9 @@ of tests.
 
 ### 3.3 Permission filtering — the combinatorial surface
 
-**T-U10 — The permission matrix as a pure function** (`domain/access.ts`, P4, R-A6)
+**T-U10 — The grant table as a pure function** (`domain/access.ts`, P4, R-A6). Renamed from
+"permission matrix" when C9 removed the rendered matrix — this test was never about that surface,
+and A28's traceability row citing it was the reason a stale criterion looked covered.
 
 - **Every (subject scope × datapoint class) cell is asserted**: 6 scopes × 4 classes = 24 cells,
   as a table-driven test. This is why it is a unit test and not a click-through.
@@ -275,6 +284,12 @@ product's central interaction.
   over a range longer than two months is the named case.
 - **T-C6 — A page renders only its declared controls** (R-C1), and **no greyed control appears
   anywhere**. Table-driven over the six pages.
+- **T-C6.1 — Every declared control changes something** (R-C1, C14). For each page, each declared
+  control is toggled and the resulting ViewModel asserted to differ. This is the test that would
+  have caught per-capita being declared for `/demo/spend` and read by nothing — T-C6 passed
+  throughout, because the control *rendered*; it simply did nothing. The one exemption is written
+  as an expectation, not a skip: per-capita under a Member subject grouping divides by one and
+  returns identity, asserted as equality on purpose.
 - **T-C7 — An emptying filter renders "no data for this selection"** with shell, navigation and
   controls still present (R-V9, A26 adjacent).
 - **T-C8 — Team-grouped panels render the overlap statement** (A5, R-V3) with the count the domain
@@ -295,8 +310,16 @@ product's central interaction.
     carries `stackable: true`. Table-driven: WorkType, Model tier/family, execution mode and the
     three duration spans stack; **Team never does**, and a Team-grouped ViewModel asserting
     `stackable: true` is itself a failure. This is the test that keeps R-V1's narrowing honest —
-    a blanket `no stackId` assertion would have been easier and would have forbidden two legitimate
-    part-to-whole panels.
+    a blanket `no stackId` assertion would have been easier and would have forbidden a legitimate
+    part-to-whole panel.
+  - **The `/demo` WorkType tile is asserted `stackable: false`** (C11). WorkType partitions
+    *sessions*; this tile counts *Tasks*, whose sessions may span WorkTypes, so the grouping does
+    not partition this measure. The table is keyed on (grouping × measure), not on grouping alone —
+    keying it on grouping is what let a true-of-sessions justification carry a Task-grained tile.
+  - **The arithmetic is asserted, not just the flag**: the tile's slices are summed and asserted
+    **greater** than the Completed Tasks tile against the committed fixture (162 against 150 for the
+    open account in August 2026). A future change that made them equal would mean the measure had
+    silently been re-keyed, and that should fail here rather than pass quietly.
 
 ---
 
@@ -308,11 +331,14 @@ request per account per route, asserting rows rather than pixels."*
 - **T-E1 — Every route renders for both accounts.** 6 authenticated routes × 2 accounts = 12
   navigations, asserting a page landmark and no error boundary. Navigation is identical for both
   (A9, R-A8) — asserted as an equality of nav item sets, not eyeballed.
-- **T-E2 — The restricted account receives fewer rows, of a different kind** (A9, R-D18). On
-  `/demo/people` the open account renders 20 named Member rows; the restricted account renders its
-  **own named row plus its Team's aggregate row** — 2 against 20 — because it holds no scope that
-  resolves another Member by name. The earlier "strictly fewer rows" framing assumed a shortened
-  list of the same kind, which the access model does not produce. A row count, not a screenshot.
+- **T-E2 — The restricted account receives one row where the open account receives twenty**
+  (A9, R-D18, C10). On `/demo/people`, **1 against 20** — the restricted account resolves no other
+  Member by name, and C10 declined to restate its aggregated grant as a row in a table of named
+  rows. A row count, not a screenshot.
+- **T-E2.1 — The people page states the acting account's visibility in words** (A28, R-A10, C9).
+  Both accounts render the sentence; the two sentences **differ**, and the restricted one is
+  asserted to contain no digits — the point of C10 was to keep an aggregate off this page, and an
+  explanation that quotes a figure puts it back. This test replaces T-E8.
 - **T-E3 — Enforcement.** A token whose Organization does not match the path segment yields **404,
   not 403** (A11, R-A7). An unknown slug yields 404. No cookie on an `/[org]/**` path redirects to
   `/sign-in`.
@@ -323,21 +349,33 @@ request per account per route, asserting rows rather than pixels."*
   between the access model working and the access model being theatre.
 - **T-E5 — Control state does not survive navigation** (A20, R-C5). Set a period on `/demo/spend`,
   navigate to `/demo/work`, assert the default.
-- **T-E6 — The account switcher re-issues the token and stays on the current URL** (A5/R-A5). Same
-  path, fewer rows.
+- **T-E6 — The account switcher re-issues the token and stays on the current URL** (R-A5). Same
+  path, fewer rows. (Previously cited "A5/R-A5"; A5 is the Team-overlap criterion and has nothing to
+  do with the switcher. R-A5 was always the rule meant.)
 - **T-E7 — `/demo` renders four tiles and nothing else**, each linking to its evidence page (A1,
   A2). The one E2E test about layout, because "nothing else" is a structural claim about the page.
-- **T-E8 — The permission matrix renders for the open account and not for the restricted one**
-  (A28, R-A10).
+  **Three tiles carry a headline figure, not four** (R-N8, C11): the WorkType tile carries a title,
+  a breakdown and a link, and asserting a figure on it would re-admit the duplicate of tile 2 that
+  C11 removed.
+- ~~**T-E8 — The permission matrix renders for the open account and not for the restricted one.**~~
+  **Withdrawn 2026-09-09 by C9**, which removes the matrix from the product. It asserted a claim
+  (A28) that the spec contradicted in two other places, and it is replaced by T-E2.1. The ID is
+  retired rather than reused.
 - **T-E9 — The compute rate card appears on no surface** (A18, R-N11). Crawl all six routes for
-  its rate values. An absence across the whole product is an E2E claim.
+  the card — its heading, its "illustrative rates" marker and its per-unit labels. An absence across
+  the whole product is an E2E claim.
+
+  **Crawling for the bare rate *values* is unsatisfiable against this fixture** and was the earlier
+  wording: at 525 money literals in a narrow range, a rate value collides with legitimate figures on
+  pages that render no rate card at all. The card is identified by its structure, and its values stay
+  in T-E4's search set so that shipping it fails both tests at once.
 
 ---
 
 ## 6. Fixture invariant tests
 
 Over the committed JSON, no application code. These prove the data carries what the product's
-claims rest on — a fixture that quietly loses the 90+ day bucket makes T-U16 pass vacuously (P6).
+claims rest on — a fixture that quietly loses the 91+ day bucket makes T-U16 pass vacuously (P6).
 
 - **T-F1 — All 25 `(repository × work_type)` session files exist**; empty pairs hold `[]` (R-D19).
   A missing file is a fault, not a valid state.
@@ -413,12 +451,12 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A4 No hidden session anywhere | T-U5, T-F4 |
 | A5 Team totals exceed Org; overlap stated | T-U6, T-C8 |
 | A6 Per-capita excludes service accounts | T-U7 |
-| A7 23:30 Madrid buckets to the local day | T-U1, T-U8, T-F6 |
-| A8 Change suppressed iff prior period is zero | T-U3 |
+| A7 00:30 Madrid buckets to the local day | T-U1, T-U8, T-F6 |
+| A8 Change suppressed iff prior period is zero or incomplete | T-U3 |
 | A9 Restricted account: fewer rows, same nav | T-E1, T-E2 |
 | A10 No ungranted figure in the payload | T-E4, T-U10 |
 | A11 Org mismatch → 404 | T-E3 |
-| A12 No stacking, no pie | T-C11 |
+| A12 Stacking only where the grouping partitions the measure; no pie | T-C11 |
 | A13 Cap engages above five, not at five | T-U11 |
 | A14 Series identity stable across buckets and roll-up | T-U11, T-C3 |
 | A15 Mirror matches rendered series | T-C1 |
@@ -434,7 +472,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A25 Total spend unavailable below monthly | T-U12 |
 | A26 April and September flagged partial | T-U1, T-U12 |
 | A27 Spans are `interactive`-only and say so | T-U20, T-C1 |
-| A28 Matrix for the open account only | T-E8, T-U10 |
+| A28 No matrix anywhere; visibility stated in words | T-E2.1 |
 
 ---
 

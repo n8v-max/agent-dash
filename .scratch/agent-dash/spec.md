@@ -70,10 +70,10 @@ Both are Members of `demo` with real sessions in the fixture.
 
 **R-A3.1 — `self` is granted over every class, to every Role, always.** A Member can always see
 their own data and their own permissions; restriction bites on *other people*. This is an invariant
-of the model, not a property of a preset (`CONTEXT.md` § Access), and it is load-bearing twice:
-scopes are not a ladder, so a Role holding only `team` over `jobs` would resolve nobody by name and
-`/demo/people` would render with no people on it; and a Member whose view has just narrowed can
-always reach the matrix explaining why. See § 11 C6.
+of the model, not a property of a preset (`CONTEXT.md` § Access), and it is load-bearing: scopes
+are not a ladder, so a Role holding only `team` over `jobs` would resolve nobody by name and
+`/demo/people` would render with no people on it. It was load-bearing twice until C9 withdrew the
+permission matrix; the surviving reason carries it alone. See § 11 C6, C9.
 
 **R-A4 — `/sign-in` offers two "continue as" buttons**, each issuing that account's JWT and
 redirecting to `/demo`.
@@ -96,13 +96,18 @@ restricted account simply receives fewer rows.
 anyone in the Organization, visible to everyone on the same terms. No minimum-population floor at
 any scope or class. No administrative tier sees more than an ordinary Member. (ADR-0003.)
 
-**R-A10 — The read-only permission matrix renders collapsed at the foot of `/demo/people`**, for
-accounts holding `access`. Under R-A3.1 both accounts hold `self` over `access`, so **both see it**
-— the open account showing the full matrix, the restricted account showing its own grants.
+**R-A10 — No permission matrix ships. `/demo/people` states the acting account's visibility in
+one sentence**, e.g. *"You can see yourself by name; your Team's work reaches totals only."* It
+carries no figures, so it is not an aggregate row under another name.
 
-This is what ticket 07 was reaching for when it sited the matrix here: *"a viewer who switches and
-sees the tables shrink needs somewhere to learn why."* Under the literal reading of ticket 10's
-grants, that viewer was the one account that could not see it.
+Ticket 07 sited a read-only matrix here because *"a viewer who switches and sees the tables shrink
+needs somewhere to learn why."* The need is real; a permissions grid is not the MVP answer to it.
+The restricted account's page is a single row, and one row with no explanation reads as a fault
+rather than as a restriction — so the sentence is an empty-state affordance first and an access
+disclosure second. See § 11 C9.
+
+**The grant is withdrawn from the surface, not from the model.** `access` remains a class in R-A3
+and `self` over it remains universal (R-A3.1); nothing renders it.
 
 ---
 
@@ -153,14 +158,29 @@ yields exactly two buckets, **both partial**, so every quarter figure on the sur
 ten-second read would carry an incompleteness flag. See § 11 C7.
 
 **R-N7 — Each tile carries a period-over-period change figure**, subject to the change floor
-(R-M12).
+(R-M12) and to R-M13's partial-baseline rule.
 
-**R-N8 — The fourth tile is Completed Tasks by WorkType**, rendered as a small **stacked** area
-with no axis labels at tile size. WorkType is a true partition — every AgentSession references
-exactly one — so stacking is a legitimate encoding here under R-V1. **All five WorkTypes render;
-no "Other" bucket appears**, because the cap engages only above five series (R-V4). It is never empty, which Rework rate — the slot's original
-occupant — could not guarantee. Session counts were rejected as the measure: they are not
-velocity, because they *rise* when work goes badly.
+**The comparison reads outside the selected window.** The prior month is the month before the
+selection, whether or not the selection contains it — a comparison is not a filtered view. Without
+this, choosing any single month clips the range so no prior bucket exists and all four change
+figures suppress at once, which made the page's only control degrade the page. See § 11 C12.
+
+**R-N8 — The fourth tile is Completed Tasks by WorkType**, rendered **unstacked** as sorted
+horizontal bars over the reported month, longest first, with no axis labels at tile size. **All five
+WorkTypes render; no "Other" bucket appears**, because the cap engages only above five series
+(R-V4). It is never empty, which Rework rate — the slot's original occupant — could not guarantee.
+Session counts were rejected as the measure: they are not velocity, because they *rise* when work
+goes badly.
+
+**The tile carries no headline figure and no change figure.** Its subject is the mix; the count is
+the tile beside it. Building this tile from that one's reading printed the same number and the same
+delta twice on the page graded for the ten-second read.
+
+**It does not stack, because WorkType does not partition this measure.** The earlier justification —
+every AgentSession references exactly one WorkType — is true of sessions, not of Tasks, and a Task's
+sessions may span several. Measured against the committed fixture, August 2026: the slices sum to
+162 against the Completed Tasks tile's 150 (restricted account, 55 against 49). That is the false
+whole R-V1 exists to forbid. See § 11 C11.
 
 ### 3.2 `/demo/spend`
 
@@ -329,12 +349,16 @@ therefore a pure function of `(rows, timezone)`.
 **R-M11 — Day grain is available only over ranges of two months or less.** Over a longer range a
 daily bucket holds too few sessions to read.
 
-**R-M12 — The change floor is one.** A change figure is suppressed only when the prior period
-holds *nothing at all*. Above zero it is shown: two to three sessions week-over-week really is
-+50%, and on a narrow self-view that is the honest reading, not noise.
+**R-M12 — The change floor is one.** A change figure is suppressed when the prior period holds
+*nothing at all*, and when the prior period is *incomplete* (R-M13). Above zero and complete it is
+shown: two to three sessions week-over-week really is +50%, and on a narrow self-view that is the
+honest reading, not noise.
 
-**R-M13 — Comparison is unrestricted; incompleteness is flagged, not withheld.** Any period may be
-compared with any other. A period that has not finished is flagged as incomplete.
+**R-M13 — Comparison is unrestricted. An incomplete *current* period is flagged; an incomplete
+*prior* period is withheld.** Any period may be compared with any other. The asymmetry is the point:
+a part-month on screen is visible, flagged and chosen by the viewer, whereas a part-month used as a
+baseline is none of those things and inflates the comparison without bound. Withholding is not
+pro-rating — R-E2 forbids inventing the missing days, not declining to divide by them. See § 11 C13.
 
 **R-M14 — Per-capita divides by active *human* Members**, excluding service accounts, which hold
 no seat and would give the denominator the wrong size. Raw is the default; per-capita is offered
@@ -365,6 +389,14 @@ others. **No page shows a control its panels cannot use, and no page shows a gre
 | `/demo/people` | Period · Team · Member kind · sort |
 | `/demo/history` | Date range · Member · WorkType · Repository |
 | `/demo/projection` | — |
+
+**Per-capita applies to additive money panels only.** On `/demo/spend` it divides Total spend and
+the Team, Repository and WorkType breakdowns; it does not touch Cost per completed Task, which is
+already normalised, nor the comparator, where a median divided by a headcount means nothing. The
+denominator is the humans who contributed in that bucket and group, `service_account` Members
+excluded (R-M14). Under a Member subject grouping the denominator is one and the figure is
+unchanged — that is the control applying and returning identity, not a control the panel cannot use,
+so R-C1's ban on inert controls is not engaged. See § 11 C14.
 
 **R-C2 — `execution_mode` earns its place on `/demo/work` beyond the spans panel.** It is the one
 control that separates unattended runs from supervised ones across duration and acceptance, and the
@@ -476,9 +508,23 @@ in August; max 3 rising to 8. Low volume is deliberate — it is what makes seat
 against ~$4,500 of session spend, ~48% of Total spend) the sharpest finding in the product. A
 high-volume fixture would have buried it.
 
-**R-D5 — Timezone edge cases are seeded on purpose.** Some sessions fall between 22:00 and 24:00
-Europe/Madrid, so they land on the previous UTC day. Without them the declared-timezone decision
-is never exercised. No DST transition falls inside the window; that case is not covered.
+**R-D4 governs where it collides with a session-cost distribution.** Ticket 10 also specified a
+median session cost of ~$3.20 with p95 ~$35. Both cannot hold: the ramp fixes the session count, and
+those totals then fix the mean, leaving no distribution that reaches that median and that p95. The
+ramp wins, because the seat-cost finding above rests on it and the percentiles support no claim the
+product makes. Recorded 2026-09-09; the percentile figures are withdrawn, not deferred.
+
+**R-D5 — Timezone edge cases are seeded on purpose.** Sessions fall in the first two hours after
+local midnight — 00:00–02:00 Europe/Madrid — so they land on the *previous* UTC day. Without them
+the declared-timezone decision is never exercised. No DST transition falls inside the window; that
+case is not covered.
+
+**Corrected 2026-09-09.** This rule previously named 22:00–24:00 Madrid as the discriminating band.
+It is not: Madrid is UTC+2 over this window, so 23:30 local is 21:30 UTC on the *same* civil date
+and buckets identically under either timezone. The rows that discriminate are just after local
+midnight. Proved by mutation — switching `periods.ts` to UTC fails 14 tests and the test named for
+A7 was **not** among them, so A7's worked example could not fail. The fixture seeds both
+populations and T-U1 covers both; only the illustration was wrong. See § 11 C10.
 
 **R-D6 — Acceptance rate by WorkType**: `review` 0.86 · `bugfix` 0.79 · `implementation` 0.71 ·
 `refactor` 0.58 · `deploy` 0.34.
@@ -486,6 +532,17 @@ is never exercised. No DST transition falls inside the window; that case is not 
 **R-D7 — Acceptance rate by Repository**: `web-console` 0.78 · `mobile-app` 0.70 · `api-gateway`
 0.62 · `ml-scoring` 0.55 · `terraform-infra` 0.44. The Stanford complexity signal reaches the
 reader through the repository names, with no domain column — ADR-0004 working.
+
+**R-D6 and R-D7 are the two margins of one table.** They are the same sessions counted twice, so
+they can hold together only if both marginals reconcile to one Organization-wide acceptance rate —
+a constraint neither rule stated and the generator therefore had to satisfy implicitly. It is now
+stated: the fixture must produce a single grand total consistent with both lists, and T-F4 asserts
+it over raw JSON.
+
+**R-D7 is a cross-WorkType acceptance figure by construction**, which is the one figure R-M6 and
+A21 forbid the product to state. That is not a contradiction: it is a *fixture* property, verified
+over raw JSON and never computed through a metric or rendered on a surface. If it ever reaches a
+query it becomes an A21 failure.
 
 **R-D8 — Rework 18% of Tasks; Decomposition 12%.**
 
@@ -560,12 +617,12 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A4 | No hidden session appears in any metric, any table, or any chart mirror | R-M2, R-D12 |
 | A5 | Team-grouped totals exceed the Organization total, and the overlap statement is present | R-V3, R-D14 |
 | A6 | Per-capita denominators exclude `service_account` Members | R-M14, R-D3 |
-| A7 | A session at 23:30 Europe/Madrid buckets to that local day, not the previous UTC day | R-M10, R-D5 |
-| A8 | A change figure is suppressed when and only when the prior period holds zero | R-M12 |
+| A7 | A session at 00:30 Europe/Madrid buckets to that local day, not the previous UTC day it falls in | R-M10, R-D5 |
+| A8 | A change figure is suppressed when and only when the prior period holds zero or is incomplete | R-M12, R-M13 |
 | A9 | The restricted account receives strictly fewer rows on `/demo/people` and `/demo/spend`, with identical navigation | R-A3, R-A8, R-D18 |
 | A10 | A restricted-account payload contains no figure outside its grants | R-A6 |
 | A11 | A token whose Organization does not match the path segment yields 404 | R-A7 |
-| A12 | No chart stacks, and no pie chart exists | R-V1, R-V2 |
+| A12 | A chart stacks only where its grouping partitions its measure; no pie chart exists | R-V1, R-V2 |
 | A13 | A 20-series Member grouping renders 5 series (4 + "Other"); a 5-series Repository grouping renders 5 and no "Other" | R-V4 |
 | A14 | Series identity is stable across every bucket of one chart, and across a roll-up switch | R-V5 |
 | A15 | Every chart exposes a visually-hidden table mirror whose values equal the rendered series | R-X1 |
@@ -581,7 +638,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A25 | Total spend is unavailable below monthly grain on every surface | R-M1, R-M5 |
 | A26 | April and September render the partial-period flag | R-D2, R-E2 |
 | A27 | Human-presence spans render for `interactive` sessions only, and say so | R-N14 |
-| A28 | The permission matrix renders for the open account and not for the restricted one | R-A10 |
+| A28 | No permission matrix renders on any surface; `/demo/people` states the acting account's visibility in words | R-A10 |
 
 ---
 
@@ -589,6 +646,11 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 
 Two settled sources disagreed. Each resolution takes the later decision, and each is recorded
 because a future reader will otherwise think the spec drifted.
+
+C1–C8 were settled at the handoff. **C9–C14 were settled on 2026-09-09**, after the unattended build
+implemented the spec as written and reported where the spec contradicted itself or its own
+reasoning. Those six take the *better decision* rather than the later one, because in each case both
+sides were the same author.
 
 **C1 — Series cap: "fixed everywhere" vs "only above five series".** Ticket 07 § Controls states
 the top-4 + "Other" cap applies everywhere. Ticket 10 § Chart rules — resolved *after* 07 —
@@ -668,13 +730,110 @@ testable rule, and it keeps Team groupings unstacked for exactly the reason tick
 
 ---
 
+**C9 — The permission matrix does not ship.** Two settled sources disagreed about *who* sees the
+read-only permissions grid at the foot of `/demo/people`: A28 said the open account and not the
+restricted one, while R-A10 and C6 said both, each seeing its own grants. The build implemented
+R-A10 and left A28 the only acceptance criterion in the spec with no test behind it.
+
+**Resolved by removing the surface rather than choosing a side** (2026-09-09). A permissions grid
+is not MVP: it is a second information architecture, rendered to end users, explaining a mechanism
+the product already demonstrates by switching accounts. The disagreement was about the audience for
+a table that should not exist.
+
+What replaces it is smaller and does a job the matrix never did: one sentence on `/demo/people`
+naming what the acting account can see. Under C10 the restricted account's page is a single row,
+and a single row with no explanation reads as a fault. C6 is not reversed — `self` over `access`
+stays universal, because R-A3.1's other justification carries it alone.
+
+---
+
+**C10 — The restricted account's `/demo/people` is one row.** `testing-spec.md` T-E2 described the
+restricted account seeing its own named row *plus its Team's aggregate row* — 2 against 20 — the
+claim being that the difference is one of kind, not of length. The build shipped the named row plus
+an aggregate *sentence*.
+
+**Resolved in favour of one row and no aggregate** (2026-09-09), which is neither of the two things
+on the table. The aggregated grant is real and stays in the model — `team` over `jobs` and `tokens`
+still folds unnamed teammates into totals on `/demo/work` and `/demo/spend`, which is where the
+mechanism is legible. Restating it as a row on the people table put an aggregate beside a named row
+in one column set, inviting exactly the subtraction R-M17 exists to prevent. T-E2 becomes a plain
+count: 1 against 20, with C9's sentence carrying the explanation.
+
+---
+
+**C11 — The fourth `/demo` tile does not stack.** R-N8 stacked Completed Tasks by WorkType,
+justified by "every AgentSession references exactly one WorkType". True of sessions; the tile counts
+Tasks, and a Task's sessions may span several WorkTypes — 118 of the fixture's do. Measured through
+the real query, open account, August 2026: `58+35+25+32+12 = 162` against the Completed Tasks tile's
+**150**; restricted account, **55** against **49**. Two tiles on one screen disagreeing about the
+same quantity.
+
+**Resolved by unstacking, not by re-keying the measure** (2026-09-09). Keying each Task to its
+completing session's WorkType would have restored the partition, at the price of a definition
+nothing else in the product uses; switching the measure to sessions would have contradicted R-N4 and
+ticket 05's rejection of session counts as velocity. Sorted horizontal bars over one month make no
+part-to-whole claim, so the slices need not sum. C8 stands: the human-presence spans panel is still
+a legitimate stack, and R-V1 still permits stacking where the grouping genuinely partitions the
+measure. Only this ViewModel's claim to partition was false.
+
+The tile also loses its headline figure and change figure, which were built from tile 2's reading
+and printed the same number and delta twice.
+
+---
+
+**C12 — A change figure reads outside the selected window.** R-N7 gives every `/demo` tile a
+period-over-period change; the page's only control is a month picker, which clipped the range so no
+prior bucket existed and suppressed all four figures at once. The one control on the page made the
+page worse every time it was used.
+
+**Resolved by separating the comparison from the view** (2026-09-09). The prior month is the month
+before the selection, in the data, whether or not the selection contains it. A filtered view answers
+"what happened here"; a comparison answers "compared with what", and the second question does not
+inherit the first's bounds.
+
+---
+
+**C13 — Incompleteness is withheld on the baseline and flagged on the current period.** R-M13 said
+incompleteness is *flagged, never withheld*, which C12 turns into a defect: the fixture window opens
+and closes on partial months, so comparing against the month before the selection can silently take
+a part-month as its baseline and report a large fake rise.
+
+**Resolved asymmetrically, on purpose** (2026-09-09). A partial *current* month is on screen, is
+already flagged (R-E2, A26) and is what the viewer chose to look at, so it renders with its flag —
+*"September so far"*. A partial *prior* month is none of those things: it is read outside the
+window, invisible, and inflates the comparison without bound. It suppresses, with its reason given,
+alongside the existing zero floor.
+
+Rejected: comparing equal elapsed days of each month. It is honest and non-empty, but it invents a
+second comparison mode and sits against R-E2's *never pro-rated*. `change.ts` already computed an
+`incomplete` flag over either side and deliberately did not act on it; this is the rule that acts.
+
+---
+
+**C14 — Per-capita on `/demo/spend` is wired, not withdrawn.** R-C1 declared a per-capita control
+for `/demo/spend`, but no panel on that page read it, so the control changed nothing — against
+R-C1's own ban on controls a page's panels cannot use.
+
+**Resolved by implementing it** (2026-09-09) rather than deleting the declaration. Spend per person
+is the page's most defensible normalisation and the denominator already existed in the aggregation
+layer. It applies to additive money panels only; ratios and the comparator are left alone. Under a
+Member subject grouping the denominator is one, which is the control applying and returning
+identity — not an inert control, so no exception to R-C1 is needed.
+
+---
+
 ## 12. Open questions
 
-None. The two questions this spec opened at the handoff — the comparator's key and the restricted
-account's sight of the permission matrix — were settled on 2026-09-07 and are recorded as C4 and C6
-above. C4 keeps the comparator, re-keyed onto `Repository × WorkType`, on the grounds that a
-comparator is a **median beside your own value** and no filter produces one; the term is now defined
-in `CONTEXT.md` as **Comparison group**.
+None. Fourteen conflicts have been resolved, C9–C14 of them on 2026-09-09 after the unattended
+build surfaced them; each is recorded above with the reasoning that decided it, and each is
+reflected in `testing-spec.md`.
+
+The two questions this spec opened at the handoff — the comparator's key and the restricted
+account's sight of the permission matrix — were settled on 2026-09-07 as C4 and C6. C4 keeps the
+comparator, re-keyed onto `Repository × WorkType`, on the grounds that a comparator is a **median
+beside your own value** and no filter produces one; the term is now defined in `CONTEXT.md` as
+**Comparison group**. C6 was overtaken by C9, which removes the surface the question was about
+without reversing the grant it settled.
 
 ---
 
@@ -686,11 +845,20 @@ Carried forward from the map, not resolved here.
 2026-09-07 by R-N20.1** — the expandable `/demo/history` row ticket 07 declined is reinstated. It is
 the only surface either can legally occupy.
 
-**Landing copy is unwritten, and stays human-owned** (ticket 37). The hero currently reads "Ship
-faster. Know why." — written before the product had a point of view, and inconsistent with R-M1's
-refusal to make a productivity claim. **Direction settled 2026-09-07: lead with the ratio** — what
-agent work costs per thing actually delivered — with the waste mechanism as the supporting line.
-Nothing about speed or productivity gain. The line itself is not written here.
+~~**Landing copy is unwritten, and stays human-owned** (ticket 37).~~ **Closed 2026-09-09.** The
+hero read "Ship faster. Know why." — written before the product had a point of view, and
+inconsistent with R-M1's refusal to make a productivity claim. Direction was settled 2026-09-07:
+lead with the ratio, waste as the supporting mechanism, nothing about speed or productivity gain.
+
+**The line, written by the human who owns it:**
+
+> **Agent spend, measured per finished task. Not per token, not per seat.**
+
+*"Measured"*, not *"priced"* — a vendor's verb on a hero reads as how this product charges you.
+"Not per seat" is a claim about the **unit reported**, not about what the numerator holds: total
+spend does include seat cost (R-M5), and a reader who takes it the other way will find the
+contradiction one click in. Kept deliberately, the contrast being with per-seat and per-token
+*pricing models* rather than with this product's cost base.
 
 **Onboarding beyond the empty state, demo-mode role-switching UX beyond R-A5, responsive
 breakpoints and dark mode** are unspecified and deliberately so.

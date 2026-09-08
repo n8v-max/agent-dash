@@ -26,7 +26,8 @@ The efficacy page.
 
 **Small multiples are not negotiable (R-N13).** Acceptance rate is defined only *within* a WorkType,
 and the layout makes that visible with no caption. A single chart with a WorkType selector would
-hide five of six values and make a viewer click to discover that the comparison is not offered.
+hide four of five values and make a viewer click to discover that the comparison is not offered.
+*(Corrected 2026-09-09 from "five of six"; `research` was cut, so there are five WorkTypes.)*
 
 **Human-presence spans are `interactive`-only (R-N14).** A `headless` session is AFK for its entire
 lifetime by construction, so a view spanning both modes would merely rediscover which sessions were

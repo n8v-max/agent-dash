@@ -24,7 +24,8 @@ Task buckets.
 - **Rework and Decomposition are independent labels, not a partition.** A long Task can exhibit
   both, and the fixture contains such a Task.
 - **Incomplete Tasks**: Tasks with no accepted session, bucketed by **age since the last session** —
-  0–7 · 8–30 · 31–90 · 90+ days (R-M16). "Now" is injected (P5).
+  0–7 · 8–30 · 31–90 · 91+ days (R-M16). "Now" is injected (P5). *(Corrected 2026-09-09 from
+  `90+`, which double-covered day 90 — see the spec note below.)*
 
 ## Done when
 
