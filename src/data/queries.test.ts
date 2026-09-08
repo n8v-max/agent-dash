@@ -158,6 +158,8 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
     const page = OPEN_PAGES.spend;
     expect(Object.keys(page)).toEqual([
       "orgSlug",
+      // C14 — not a panel: which panels below are divided, and by how many.
+      "perCapita",
       "costPerCompletedTask",
       "totalSpend",
       "costPerSession",
@@ -577,3 +579,55 @@ describe("the degenerate arms — a range with nothing in it, and an id that nam
     expect(page.surface).toBe("withheld");
   });
 });
+
+describe("C14 — per-capita on `/demo/spend` divides the money panels, and only those", () => {
+  const raw = OPEN_PAGES.spend;
+  const divided = spendPage(OPEN, paramsFor("spend", { perCapita: true }));
+
+  it("was declared by R-C1 and read by nothing — the defect this replaced", () => {
+    // The guard, not the feature: T-C6 passed throughout, because the control *rendered*. What
+    // it never asserted is that anything downstream read it.
+    expect(divided.perCapita.on).toBe(true);
+    expect(raw.perCapita.on).toBe(false);
+    expect(divided).not.toEqual(raw);
+  });
+
+  it("divides Total spend by R-M14's denominator, and says so in the title", () => {
+    const denominator = divided.perCapita.denominator;
+
+    expect(denominator).toBeGreaterThan(1);
+    expect(divided.totalSpend.total).toBeCloseTo(raw.totalSpend.total / denominator, 8);
+    expect(divided.totalSpend.sessionCost).toBeCloseTo(raw.totalSpend.sessionCost / denominator, 8);
+    expect(divided.totalSpend.seatCost).toBeCloseTo(raw.totalSpend.seatCost / denominator, 8);
+    expect(divided.totalSpend.chart.title).toMatch(/per Member/);
+  });
+
+  it("keeps Total spend stackable, because the parts still sum to the whole", () => {
+    // The one place this differs from `/demo/work`'s velocity panel, which becomes a ratio under
+    // the same toggle. Session cost per Member and seat cost per Member add to total spend per
+    // Member exactly, so R-V1 has no reason to veto the geometry.
+    expect(divided.totalSpend.chart.stackable).toBe(true);
+    const [first] = divided.totalSpend.chart.mirror.rows;
+    const parts = (first ?? []).slice(1).filter((cell) => typeof cell === "number");
+    expect(parts).toHaveLength(2);
+  });
+
+  it("divides Cost by Repository and leaves the three ratios untouched", () => {
+    expect(divided.costByRepository.title).toMatch(/per Member/);
+    // Already normalised, so dividing by a headcount would state nothing. Asserted as identity
+    // rather than as an absent title, because a title is copy and this is arithmetic.
+    expect(divided.costPerCompletedTask).toEqual(raw.costPerCompletedTask);
+    expect(divided.costPerSession).toEqual(raw.costPerSession);
+    expect(divided.costPerCompletedTaskByWorkType).toEqual(raw.costPerCompletedTaskByWorkType);
+  });
+
+  it("uses the population's active humans, never the rows' authors (R-M14)", () => {
+    // 18 of the 20 committed Members hold a seat; the other two are service accounts. A
+    // denominator counted off the rows would drift with the filters and would delete R-D10's
+    // dormant seat-holder, which is the sharpest finding in the product.
+    const seatHolders = data.members.filter((member) => member.kind !== "service_account").length;
+    expect(divided.perCapita.denominator).toBe(seatHolders);
+    expect(divided.perCapita.denominator).toBeLessThan(data.members.length);
+  });
+});
+

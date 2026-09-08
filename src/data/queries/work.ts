@@ -11,7 +11,6 @@
 // (R-M14) and is a toggle, never the default.
 
 import type { Viewer } from "@/domain/access";
-import { rollUp } from "@/domain/aggregate";
 import {
   acceptanceRateWithin,
   decompositionRate,
@@ -24,7 +23,13 @@ import { WORK_TYPE_KEYS, type AgentSession, type WorkTypeKey } from "@/domain/ty
 import { chartViewModel, type ChartViewModel } from "@/domain/viewmodel";
 import type { ControlSet } from "../params";
 import { pageContext, type PageContext } from "./context";
-import { aggregationCells, bucketAxis, subjectGrouping } from "./panels";
+import {
+  aggregationCells,
+  bucketAxis,
+  perCapitaDivisor,
+  populationPerCapita,
+  subjectGrouping,
+} from "./panels";
 import {
   durationPanel,
   incompleteAgesPanel,
@@ -86,11 +91,8 @@ const velocityPanel = (context: PageContext): VelocityPanel => {
   const subject = subjectGrouping(context, view, () => 0);
   const perCapita = context.params.perCapita;
   // R-M14 — the denominator is the *population's* active human Members, never the rows' authors.
-  const population = rollUp(
-    { rows: [], measure: () => 0, members: context.population, teams: context.data.teams },
-    "organization",
-  ).perCapita;
-  const divisor = population.denominator === 0 ? 1 : population.denominator;
+  const population = populationPerCapita(context);
+  const divisor = perCapitaDivisor(population);
 
   return {
     chart: chartViewModel({

@@ -26,7 +26,37 @@ import { chartViewModel, type Cell, type ChartViewModel } from "@/domain/viewmod
 import type { ControlSet } from "../params";
 import { adoptionSection, type AdoptionSection } from "./adoption";
 import { pageContext, type PageContext } from "./context";
-import { aggregationCells, bucketAxis, subjectGrouping, sumOf } from "./panels";
+import {
+  aggregationCells,
+  bucketAxis,
+  perCapitaDivisor,
+  populationPerCapita,
+  subjectGrouping,
+  sumOf,
+} from "./panels";
+
+/**
+ * **C14 — per-capita, where the measure is money and adds up.**
+ *
+ * R-C1 declared a per-capita control for this page and no panel read it, so the control rendered
+ * and changed nothing. It is wired to the two *additive money* panels — Total spend and Cost by
+ * Repository — and deliberately not to the three ratios: Cost per completed Job, Cost per session
+ * and the by-template breakdown are already normalised, and dividing a rate by a headcount states
+ * nothing.
+ *
+ * **Total spend stays `additive` under the toggle**, unlike `work.ts`'s velocity panel which
+ * becomes a `ratio`. The two are not inconsistent: session cost per Member and seat cost per
+ * Member still sum exactly to total spend per Member, so the geometry's part-to-whole claim
+ * survives the division and R-V1 has no reason to veto it. Declaring it a ratio would be a false
+ * negative, and `stackable` is a domain fact rather than a preference either way.
+ */
+export type PerCapitaReading = {
+  readonly on: boolean;
+  /** R-M14 — active human Members. Service accounts hold no seat and are not in it. */
+  readonly denominator: number;
+  /** False where the population is one Member or none: there is nothing to divide out. */
+  readonly available: boolean;
+};
 
 /** R-N9 panel 2 — Total spend, split into session Cost and Seat cost. */
 export type TotalSpendPanel = {
@@ -53,6 +83,8 @@ export type CostPerSessionPanel = {
 
 export type SpendPageViewModel = {
   readonly orgSlug: string;
+  /** C14 — which panels below are divided, and by how many. Copy is the component's. */
+  readonly perCapita: PerCapitaReading;
   readonly costPerCompletedTask: ChartViewModel;
   readonly totalSpend: TotalSpendPanel;
   readonly costPerSession: CostPerSessionPanel;
@@ -115,26 +147,27 @@ const seatCells = (
     ];
   });
 
-const totalSpendPanel = (context: PageContext): TotalSpendPanel => {
+const totalSpendPanel = (context: PageContext, divisor: number): TotalSpendPanel => {
   const months = context.view("cost").months;
   const spend = spendOver(context, months) ?? NO_SPEND;
+  const per = (value: number): number => value / divisor;
 
   return {
     chart: chartViewModel({
-      title: "Total spend",
+      title: divisor === 1 ? "Total spend" : "Total spend, per Member",
       rollUpLevel: "Organization",
       // R-M1/R-M5 — session Cost and Seat cost sit outside each other and sum to Total spend
       // exactly, so this is a partition and the geometry may assert one (R-V1).
       grouping: "cost_component",
       measure: "additive",
       buckets: bucketAxis(context, months),
-      cells: seatCells(context, months),
+      cells: seatCells(context, months).map((cell) => ({ ...cell, value: per(cell.value) })),
       labelOf: (key) => (key === SEAT_GROUPS.seat ? "Seat cost" : "Session cost"),
       partition: true,
     }),
-    sessionCost: spend.sessionCost,
-    seatCost: spend.seatCost,
-    total: spend.total,
+    sessionCost: per(spend.sessionCost),
+    seatCost: per(spend.seatCost),
+    total: per(spend.total),
     seats: spend.seats,
     seatMonths: spend.seatMonths,
     seatShare: spend.seatShare,
@@ -193,9 +226,13 @@ const byWorkType = (context: PageContext, buckets: readonly PeriodBucket<AgentSe
     partition: true,
   });
 
-const byRepository = (context: PageContext, buckets: readonly PeriodBucket<AgentSession>[]) =>
+const byRepository = (
+  context: PageContext,
+  buckets: readonly PeriodBucket<AgentSession>[],
+  divisor: number,
+) =>
   chartViewModel({
-    title: "Cost by Repository",
+    title: divisor === 1 ? "Cost by Repository" : "Cost by Repository, per Member",
     rollUpLevel: "Repository",
     // R-V1 — a Task's sessions may span repositories, so Repository is not a partition.
     grouping: "repository",
@@ -204,7 +241,7 @@ const byRepository = (context: PageContext, buckets: readonly PeriodBucket<Agent
     cells: aggregationCells({
       buckets,
       keysOf: (row) => [row.repository_id],
-      valueOf: sumOf(costOf),
+      valueOf: (rows) => sumOf(costOf)(rows) / divisor,
     }),
     labelOf: (key) => context.label.repository(key),
     partition: false,
@@ -219,8 +256,15 @@ export function spendPage(viewer: Viewer, params: ControlSet): SpendPageViewMode
   const view = context.view("cost");
   const subject = subjectGrouping(context, view, costOf);
 
+  // C14 — the toggle divides only where a division states something. `available` is false over a
+  // population of one, so a single-Member view is offered nothing rather than offered identity.
+  const population = populationPerCapita(context);
+  const on = context.params.perCapita && population.available;
+  const divisor = on ? perCapitaDivisor(population) : 1;
+
   return {
     orgSlug: params.orgSlug,
+    perCapita: { on, denominator: population.denominator, available: population.available },
     costPerCompletedTask: chartViewModel({
       title: "Cost per completed Job",
       rollUpLevel: subject.rollUpLevel,
@@ -236,10 +280,10 @@ export function spendPage(viewer: Viewer, params: ControlSet): SpendPageViewMode
       partition: subject.partition,
       overlapNote: subject.overlapNote,
     }),
-    totalSpend: totalSpendPanel(context),
+    totalSpend: totalSpendPanel(context, divisor),
     costPerSession: costPerSessionPanel(context),
     costPerCompletedTaskByWorkType: byWorkType(context, view.buckets),
-    costByRepository: byRepository(context, view.buckets),
+    costByRepository: byRepository(context, view.buckets, divisor),
     adoption: adoptionSection(context),
   };
 }

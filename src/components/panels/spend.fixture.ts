@@ -137,6 +137,8 @@ export const spendPageFixture = (
   overrides: Partial<SpendPageViewModel> = {},
 ): SpendPageViewModel => ({
   orgSlug: "northwind",
+  // C14 — off by default, which is what a bare route renders (R-C4).
+  perCapita: { on: false, denominator: 18, available: true },
   costPerCompletedTask: chartFixture({
     title: "Cost per completed Job",
     rollUpLevel: "Organization",

@@ -11,7 +11,13 @@
 //   * **the aggregation result** — (bucket × group) → value, which is the table both the series
 //     and the mirror are built from (R-T7).
 
-import { rollUp, type MemberFacts, type Rollup, type RollupLevel } from "@/domain/aggregate";
+import {
+  rollUp,
+  type MemberFacts,
+  type PerCapita,
+  type Rollup,
+  type RollupLevel,
+} from "@/domain/aggregate";
 import { changeBetween, type Change, type PeriodFigure } from "@/domain/change";
 import type { PeriodBucket } from "@/domain/periods";
 import type { AgentSession, Member } from "@/domain/types";
@@ -192,6 +198,29 @@ export const monthsOf = (view: {
   const at = view.comparisonMonths.findIndex((bucket) => bucket.key === current.key);
   return { current, prior: at > 0 ? view.comparisonMonths[at - 1] : undefined };
 };
+
+/**
+ * **R-M14's denominator, computed once and read by every page that offers per-capita.**
+ *
+ * It is the *population's* active human Members — never the rows' authors, and never recomputed
+ * per bucket. `aggregate.ts` records the reasoning at length: a denominator that varied with the
+ * measure would make two metrics over one population disagree about its size, and it would delete
+ * exactly the Member R-D10 seeds, a seat held against near-zero usage, which is the sharpest
+ * finding in the product.
+ *
+ * Extracted here when C14 wired per-capita into `/demo/spend`: it was `work.ts`'s inline
+ * expression, and a second copy of it in `spend.ts` would have been a second answer to "how many
+ * people is this divided by" — the two would disagree the first time either was touched.
+ */
+export const populationPerCapita = (context: PageContext): PerCapita =>
+  rollUp(
+    { rows: [], measure: () => 0, members: context.population, teams: context.data.teams },
+    "organization",
+  ).perCapita;
+
+/** A divisor that cannot be zero. `available` is what says whether the figure means anything. */
+export const perCapitaDivisor = (population: PerCapita): number =>
+  population.denominator === 0 ? 1 : population.denominator;
 
 /** One tile's figure, the words for its absence, and its period-over-period change (R-N7). */
 export type Reading = {

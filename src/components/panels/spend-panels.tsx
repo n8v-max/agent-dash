@@ -71,9 +71,19 @@ export function CostPerCompletedTaskPanel(props: PanelChart) {
   );
 }
 
+/**
+ * C14's denominator, in words, where the toggle is on. Copy — the number is the ViewModel's, and
+ * `work-panels.tsx` says the same thing about the same denominator for the same reason.
+ */
+export const perCapitaNote = (perCapita: SpendPageViewModel["perCapita"]): string | null =>
+  perCapita.on
+    ? `Per Member: divided by ${count(perCapita.denominator)} active human Members. Service accounts hold no seat and are excluded from the denominator.`
+    : null;
+
 /** R-N9 panel 2 — Total spend, split into session Cost and Seat cost (R-M5, A25). */
 export function TotalSpendPanel(props: {
   readonly panel: TotalSpendViewModel;
+  readonly perCapitaNote?: string | null;
   readonly dimension?: PanelDimension;
 }) {
   const { panel } = props;
@@ -82,7 +92,7 @@ export function TotalSpendPanel(props: {
     <PanelCard
       title={panel.chart.title}
       question="What the period cost in total, and how much of it was seats rather than sessions. A seat is charged by whole months, so this panel reads months whatever grain the page is set to."
-      footnote={panel.note}
+      footnote={[props.perCapitaNote, panel.note].filter(Boolean).join(" ")}
       figures={
         <FigureList>
           <Figure
@@ -143,11 +153,12 @@ export function CostByWorkTypePanel(props: PanelChart) {
 }
 
 /** R-N9 panel 5 — Cost by Repository. Flat: no work-domain roll-up (ADR-0004, § 11 C2). */
-export function CostByRepositoryPanel(props: PanelChart) {
+export function CostByRepositoryPanel(props: PanelChart & { readonly footnote?: string | null }) {
   return (
     <PanelCard
       title={props.chart.title}
       question="Where the money went, by Repository. A Job's sessions may span repositories, so these totals sit beside each other rather than summing into one bar."
+      footnote={props.footnote ?? undefined}
     >
       {moneyChart(props.chart, "bar", props.dimension)}
     </PanelCard>
@@ -160,16 +171,19 @@ export function SpendPanels(props: {
   readonly dimension?: PanelDimension;
 }) {
   const { page, dimension } = props;
+  // C14 — the note goes on the two panels the toggle actually divides, and on no others. The
+  // three ratios below are already normalised, so per-capita neither changes them nor claims to.
+  const note = perCapitaNote(page.perCapita);
 
   return (
     <div className="space-y-6">
       <CostPerCompletedTaskPanel chart={page.costPerCompletedTask} dimension={dimension} />
-      <TotalSpendPanel panel={page.totalSpend} dimension={dimension} />
+      <TotalSpendPanel panel={page.totalSpend} perCapitaNote={note} dimension={dimension} />
       <div className="grid gap-6 xl:grid-cols-2">
         <CostPerSessionPanel panel={page.costPerSession} dimension={dimension} />
         <CostByWorkTypePanel chart={page.costPerCompletedTaskByWorkType} dimension={dimension} />
       </div>
-      <CostByRepositoryPanel chart={page.costByRepository} dimension={dimension} />
+      <CostByRepositoryPanel chart={page.costByRepository} footnote={note} dimension={dimension} />
     </div>
   );
 }

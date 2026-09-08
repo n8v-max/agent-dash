@@ -390,13 +390,18 @@ others. **No page shows a control its panels cannot use, and no page shows a gre
 | `/demo/history` | Date range · Member · WorkType · Repository |
 | `/demo/projection` | — |
 
-**Per-capita applies to additive money panels only.** On `/demo/spend` it divides Total spend and
-the Team, Repository and WorkType breakdowns; it does not touch Cost per completed Task, which is
-already normalised, nor the comparator, where a median divided by a headcount means nothing. The
-denominator is the humans who contributed in that bucket and group, `service_account` Members
-excluded (R-M14). Under a Member subject grouping the denominator is one and the figure is
-unchanged — that is the control applying and returning identity, not a control the panel cannot use,
-so R-C1's ban on inert controls is not engaged. See § 11 C14.
+**Per-capita applies to additive money panels only.** On `/demo/spend` it divides **Total spend**
+and **Cost by Repository**. It does not touch Cost per completed Task, Cost per session or the
+by-template breakdown: all three are ratios, already normalised, and a rate divided by a headcount
+states nothing. Neither of the two panels it does divide is under the subject control, so no
+grouping puts one Member in a denominator.
+
+**The denominator is R-M14's and no other**: the population's active human Members,
+`service_account` excluded — not the authors of the rows in view. `aggregate.ts` gives the reason
+and it is not a convenience: a denominator recomputed per bucket would vary with the measure, so
+two metrics over one population would disagree about how many people it holds, and it would delete
+exactly the Member R-D10 seeds — a seat held against near-zero usage, which is the sharpest finding
+in the product. See § 11 C14.
 
 **R-C2 — `execution_mode` earns its place on `/demo/work` beyond the spans panel.** It is the one
 control that separates unattended runs from supervised ones across duration and acceptance, and the
@@ -816,9 +821,19 @@ R-C1's own ban on controls a page's panels cannot use.
 
 **Resolved by implementing it** (2026-09-09) rather than deleting the declaration. Spend per person
 is the page's most defensible normalisation and the denominator already existed in the aggregation
-layer. It applies to additive money panels only; ratios and the comparator are left alone. Under a
-Member subject grouping the denominator is one, which is the control applying and returning
-identity — not an inert control, so no exception to R-C1 is needed.
+layer. It applies to Total spend and Cost by Repository — the page's two additive money panels —
+and to nothing else.
+
+**Total spend stays stackable under the toggle**, which is where this differs from `/demo/work`'s
+velocity panel: that one becomes a ratio when divided, and stops stacking. Session cost per Member
+and seat cost per Member still sum exactly to total spend per Member, so the part-to-whole claim
+survives the division and R-V1 has no reason to veto it. `stackable` is a domain fact either way,
+not a preference.
+
+**Corrected while implementing.** An earlier draft of this entry put the denominator at "the humans
+who contributed in that bucket and group", and worried about a Member subject grouping dividing by
+one. Both were wrong: R-M14 fixes the denominator to the population, for reasons `aggregate.ts`
+argues at length, and the subject control does not reach either of the two panels this touches.
 
 ---
 
