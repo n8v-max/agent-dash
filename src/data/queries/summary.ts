@@ -5,8 +5,13 @@
 // to avoid. The period control offers month and nothing else, so this query reads month buckets
 // and ignores the page grain entirely.
 //
-// **Every tile carries a change figure** (R-N7), subject to the change floor (R-M12) — which is
-// `change.ts`'s decision, carried here and never re-made.
+// **Every figure tile carries a change** (R-N7), subject to the change floor (R-M12) and C13's
+// partial baseline — both `change.ts`'s decisions, carried here and never re-made. The fourth
+// tile is not a figure tile and carries neither (C11).
+//
+// **The comparison reads outside the selection** (C12): `monthsOf` takes the prior month from
+// `comparisonMonths`, so choosing a single month no longer leaves the page with nothing to
+// compare against.
 
 import type { Change } from "@/domain/change";
 import {
@@ -23,7 +28,6 @@ import {
   type BucketViewModel,
   type ChartViewModel,
   type FigureUnit,
-  type TileViewModel,
 } from "@/domain/viewmodel";
 import type { Viewer } from "@/domain/access";
 import type { ControlSet } from "../params";
@@ -37,11 +41,32 @@ import {
 } from "./panels";
 
 /** R-N5 — a tile is itself the link to the page carrying its evidence, so it holds the href. */
-export type SummaryTile = TileViewModel & {
+type SummaryTileBase = {
+  readonly key: string;
+  readonly title: string;
   readonly href: string;
-  /** R-N8's small stacked area. `null` on the three figure tiles. */
-  readonly chart: ChartViewModel | null;
+  readonly period: BucketViewModel;
 };
+
+/**
+ * **Two kinds of tile, not one kind with optional halves** (C11).
+ *
+ * The fourth tile carries a breakdown and *no headline figure*: it was built from the Completed
+ * Tasks tile's own reading, so `/demo` printed the same number and the same delta twice on the
+ * page graded for the ten-second read. Modelled as a union rather than as a nullable `value`,
+ * because `null` already means *withheld or undefined* on `TileViewModel` (R-A6) — reusing it
+ * for "this tile has no figure by design" would make two different absences indistinguishable to
+ * the component rendering them.
+ */
+export type SummaryTile =
+  | (SummaryTileBase & { readonly kind: "breakdown"; readonly chart: ChartViewModel })
+  | (SummaryTileBase & {
+      readonly kind: "figure";
+      readonly value: number | null;
+      readonly unit: FigureUnit;
+      readonly caption: string | null;
+      readonly change: Change;
+    });
 
 export type SummaryPageViewModel = {
   readonly orgSlug: string;
@@ -76,10 +101,10 @@ type TileInput = {
   readonly caption?: string | null;
   readonly change: Change;
   readonly period: BucketViewModel;
-  readonly chart?: ChartViewModel | null;
 };
 
 const tile = (input: TileInput): SummaryTile => ({
+  kind: "figure",
   key: input.key,
   title: input.title,
   value: input.value,
@@ -88,27 +113,44 @@ const tile = (input: TileInput): SummaryTile => ({
   period: input.period,
   change: input.change,
   href: input.href,
-  chart: input.chart ?? null,
 });
 
-const workTypeMix = (context: PageContext): ChartViewModel =>
-  chartViewModel({
+/**
+ * **R-N8's breakdown, over the reported month alone, unstacked** (C11).
+ *
+ * Two things changed here, and they are the same decision seen twice.
+ *
+ * **It does not partition, so it does not stack.** The old justification — every AgentSession
+ * references exactly one WorkType — is true of *sessions*; this tile counts *Tasks*, and a Task's
+ * sessions may span several WorkTypes. Measured on the committed fixture, August 2026: the slices
+ * summed to 162 against the Completed Tasks tile's 150. Stacking asserted a whole the measure did
+ * not have, which is what R-V1 exists to forbid. `partition: false` is therefore a domain fact
+ * about (grouping × measure), not a styling retreat.
+ *
+ * **One bucket, so R-V5's ranking is the sort.** The series set is ranked by the measure across
+ * the whole range (R-V5); with the range narrowed to the reported month, that ranking *is*
+ * "longest first". No sort is written here, and none could disagree with the legend's order.
+ */
+const workTypeMix = (context: PageContext, month: PeriodBucket<AgentSession> | undefined) => {
+  const buckets = month ? [month] : [];
+  return chartViewModel({
     title: "Completed Jobs by template",
     rollUpLevel: "WorkType",
     grouping: "work_type",
-    // R-N8 — WorkType is a true partition of the sessions, so the geometry may assert one.
     measure: "additive",
-    buckets: bucketAxis(context, context.view("jobs").months),
+    buckets: bucketAxis(context, buckets),
     cells: aggregationCells({
-      buckets: context.view("jobs").months,
+      buckets,
       keysOf: (row) => [row.work_type],
       valueOf: (rows) => completedTasks(rows),
       // R-N8 — all five render; the cap engages only above five (R-V4), so no "Other" appears.
       groups: [...WORK_TYPE_KEYS],
     }),
     labelOf: (key) => context.label.workType(key),
-    partition: true,
+    // C11 — WorkType partitions sessions, not Tasks. This tile counts Tasks.
+    partition: false,
   });
+};
 
 /**
  * **`/demo`** — the summary. One call, four tiles, and the whole page's arithmetic done once.
@@ -118,8 +160,8 @@ const workTypeMix = (context: PageContext): ChartViewModel =>
  */
 export function summaryPage(viewer: Viewer, params: ControlSet): SummaryPageViewModel {
   const context = pageContext(viewer, params);
-  const cost = monthsOf(context.view("cost").months);
-  const jobs = monthsOf(context.view("jobs").months);
+  const cost = monthsOf(context.view("cost"));
+  const jobs = monthsOf(context.view("jobs"));
   const slug = params.orgSlug;
 
   const spend = readingOf(cost, (bucket) => ({ value: spendOver(bucket, context)?.total ?? null }));
@@ -157,15 +199,16 @@ export function summaryPage(viewer: Viewer, params: ControlSet): SummaryPageView
         period,
         ...ratio,
       }),
-      tile({
+      {
+        kind: "breakdown",
         key: "completed-tasks-by-work-type",
         title: "Completed Jobs by template",
-        unit: "count",
         href: `/${slug}/work`,
         period,
-        ...tasks,
-        chart: workTypeMix(context),
-      }),
+        // C11 — no `...tasks`. Spreading the Completed Tasks reading here is what printed the
+        // same figure and the same delta on two tiles side by side.
+        chart: workTypeMix(context, jobs.current),
+      },
     ],
   };
 }

@@ -26,9 +26,11 @@ import type { ModelLevel } from "@/domain/aggregate";
 import {
   bucketRows,
   planPeriods,
+  priorMonthStart,
   type PeriodBucket,
   type PeriodGrain,
   type PeriodPlan,
+  type PeriodRange,
 } from "@/domain/periods";
 import type { AgentSession, Member } from "@/domain/types";
 import type { BucketViewModel } from "@/domain/viewmodel";
@@ -62,6 +64,18 @@ export type ClassView = {
   readonly identified: ReadonlySet<string>;
   readonly buckets: readonly PeriodBucket<AgentSession>[];
   readonly months: readonly PeriodBucket<AgentSession>[];
+  /**
+   * The same months, over a range widened back by one month (C12) and clamped to the
+   * Organization's own window. `months` answers "what is in the selection"; this answers
+   * "compared with what", and the two are different questions.
+   *
+   * It is a second bucketing rather than a lookup on `months`, because the month before the
+   * selection is by definition not in `months` — that is the whole defect C12 fixes. The clamp
+   * is what keeps C13 honest: widening past `window_start` would make April, which the fixture
+   * only half covers, bucket as a *complete* month and become exactly the fake baseline C13
+   * suppresses.
+   */
+  readonly comparisonMonths: readonly PeriodBucket<AgentSession>[];
 };
 
 /** Display labels, resolved once. A panel asks; it never looks anything up itself. */
@@ -120,9 +134,25 @@ const bucketLabel = (key: string): string => {
   return key;
 };
 
-const planFor = (params: ControlSet, timezone: string, grain: PeriodGrain): PeriodPlan | null => {
-  const result = planPeriods({ timezone, grain, range: params.range, now: params.now });
+const planFor = (
+  params: ControlSet,
+  timezone: string,
+  grain: PeriodGrain,
+  range: PeriodRange = params.range,
+): PeriodPlan | null => {
+  const result = planPeriods({ timezone, grain, range, now: params.now });
   return result.ok ? result.plan : null;
+};
+
+/**
+ * C12 — the selected range, widened back to the start of the month before it, and no further
+ * back than the Organization's own window. ISO civil dates compare lexicographically, so `max`
+ * is a string comparison.
+ */
+const comparisonRangeOf = (range: PeriodRange, windowStart: string): PeriodRange => {
+  const widened = priorMonthStart(range.start);
+  if (widened === undefined) return range;
+  return { start: widened > windowStart ? widened : windowStart, end: range.end };
 };
 
 const bucketsFor = (
@@ -223,6 +253,12 @@ export function pageContext(viewer: Viewer, params: ControlSet): PageContext {
   const selected = selectorFor(params, membership, kindOf);
   const pagePlan = planFor(params, data.organization.timezone, params.grain);
   const monthPlan = planFor(params, data.organization.timezone, "month");
+  const comparisonPlan = planFor(
+    params,
+    data.organization.timezone,
+    "month",
+    comparisonRangeOf(params.range, data.organization.window_start),
+  );
 
   const request = (datapoint: DatapointClass): AccessRequest => ({ viewer, datapoint, membership });
   const viewFor = (datapoint: RowClass): ClassView => {
@@ -238,6 +274,7 @@ export function pageContext(viewer: Viewer, params: ControlSet): PageContext {
       identified: granted.identifiedSubjects,
       buckets,
       months: bucketsFor(monthPlan, selectedRows),
+      comparisonMonths: bucketsFor(comparisonPlan, selectedRows),
     };
   };
 

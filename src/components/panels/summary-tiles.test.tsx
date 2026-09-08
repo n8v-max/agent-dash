@@ -48,29 +48,35 @@ const noBasis: Change = {
   incomplete: true,
 };
 
-/** R-N8's tile chart: all five WorkTypes, no "Other", and a partition it may assert. */
+/**
+ * R-N8's tile chart after C11: all five WorkTypes, no "Other", **one bucket** — the reported
+ * month — and `stackable: false`, because WorkType partitions sessions and this tile counts
+ * Tasks. The series are in R-V5's ranked order, which at one bucket is "longest first".
+ */
 const WORK_TYPE_MIX: ChartViewModel = chartFixture({
   title: "Completed Jobs by template",
   rollUpLevel: "WorkType",
-  buckets: ["Aug 2026", "Sep 2026"],
+  buckets: ["Sep 2026"],
   series: [
-    { key: "implementation", label: "Implementation", values: [15, 6] },
-    { key: "bugfix", label: "Bug fix", values: [17, 6] },
-    { key: "refactor", label: "Refactor", values: [13, 2] },
-    { key: "review", label: "Review", values: [7, 1] },
-    { key: "deploy", label: "Deploy", values: [3, 0] },
+    { key: "bugfix", label: "Bug fix", values: [6] },
+    { key: "implementation", label: "Implementation", values: [6] },
+    { key: "refactor", label: "Refactor", values: [2] },
+    { key: "review", label: "Review", values: [1] },
+    { key: "deploy", label: "Deploy", values: [0] },
   ],
-  stackable: true,
+  stackable: false,
 });
 
-const tile = (over: Partial<SummaryTile> & Pick<SummaryTile, "key" | "title">): SummaryTile => ({
+type FigureTile = Extract<SummaryTile, { kind: "figure" }>;
+
+const tile = (over: Partial<FigureTile> & Pick<FigureTile, "key" | "title">): SummaryTile => ({
+  kind: "figure",
   value: 1,
   unit: "count",
   caption: null,
   period: SEPTEMBER,
   change: fell,
   href: "/demo/work",
-  chart: null,
   ...over,
 });
 
@@ -86,12 +92,14 @@ const TILES: readonly SummaryTile[] = [
     href: "/demo/spend",
     change: rose,
   }),
-  tile({
+  {
+    kind: "breakdown",
     key: "completed-tasks-by-work-type",
     title: "Completed Jobs by template",
-    value: 15,
+    href: "/demo/work",
+    period: SEPTEMBER,
     chart: WORK_TYPE_MIX,
-  }),
+  },
 ];
 
 const tiles = () => screen.getAllByRole("listitem");
@@ -185,9 +193,22 @@ describe("R-N8 — the fourth tile is the WorkType mix, and only the fourth", ()
     render(<SummaryTiles tiles={TILES} period={SEPTEMBER} />);
 
     expect(screen.getByRole("group", { name: /grouped by WorkType/ })).toBeInTheDocument();
+    // In R-V5's ranked order, which at one bucket (C11) is the sorted order of the bars.
     expect(
       within(screen.getByRole("table")).getAllByRole("columnheader").map((cell) => cell.textContent),
-    ).toEqual(["Period", "Implementation", "Bug fix", "Refactor", "Review", "Deploy"]);
+    ).toEqual(["Period", "Bug fix", "Implementation", "Refactor", "Review", "Deploy"]);
+  });
+
+  it("prints no figure and no change on the mix tile (C11)", () => {
+    render(<SummaryTiles tiles={TILES} period={SEPTEMBER} />);
+
+    // Tile 2 carries the count and its delta; tile 4 used to carry the same two, because the
+    // ViewModel built it from tile 2's reading. The union makes that unrepresentable now, and
+    // this asserts the rendered result: the mix tile prints neither.
+    expect(tiles()[1]).toHaveTextContent("15");
+    expect(tiles()[1]).toHaveTextContent("-69%");
+    expect(tiles()[3]).not.toHaveTextContent("15");
+    expect(tiles()[3]).not.toHaveTextContent("%");
   });
 });
 

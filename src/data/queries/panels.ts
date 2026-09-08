@@ -170,10 +170,28 @@ export type Months = {
   readonly prior: PeriodBucket<AgentSession> | undefined;
 };
 
-export const monthsOf = (buckets: readonly PeriodBucket<AgentSession>[]): Months => ({
-  current: buckets.at(-1),
-  prior: buckets.at(-2),
-});
+/**
+ * The reported month, and the month before it (C12).
+ *
+ * **The prior month is not `months.at(-2)`.** It is looked up in `comparisonMonths`, which is
+ * bucketed over a range widened back by one month, so the comparison survives a selection that
+ * contains only one month. Before C12 the page's month picker clipped the range to a single
+ * bucket and every change figure on it suppressed at once — the one control on `/demo` made the
+ * page worse each time it was used.
+ *
+ * The lookup is by *key*, not by index: the two bucketings have different lengths and different
+ * starts, and an index into the wrong one would silently compare the wrong pair of months.
+ */
+export const monthsOf = (view: {
+  readonly months: readonly PeriodBucket<AgentSession>[];
+  readonly comparisonMonths: readonly PeriodBucket<AgentSession>[];
+}): Months => {
+  const current = view.months.at(-1);
+  if (current === undefined) return { current: undefined, prior: undefined };
+
+  const at = view.comparisonMonths.findIndex((bucket) => bucket.key === current.key);
+  return { current, prior: at > 0 ? view.comparisonMonths[at - 1] : undefined };
+};
 
 /** One tile's figure, the words for its absence, and its period-over-period change (R-N7). */
 export type Reading = {

@@ -111,9 +111,47 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
       "cost-per-completed-task",
       "completed-tasks-by-work-type",
     ]);
-    // R-N7 — each tile carries a change figure, subject to R-M12's floor.
-    for (const held of OPEN_PAGES.summary.tiles) expect(held.change).toHaveProperty("shown");
-    expect(OPEN_PAGES.summary.tiles[3].chart?.series).toHaveLength(5);
+    // R-N7 — each *figure* tile carries a change, subject to R-M12's floor and C13's baseline.
+    // The fourth is a breakdown and carries neither figure nor change (C11).
+    const kinds = OPEN_PAGES.summary.tiles.map((held) => held.kind);
+    expect(kinds).toEqual(["figure", "figure", "figure", "breakdown"]);
+    const changes = OPEN_PAGES.summary.tiles.flatMap((held) =>
+      held.kind === "figure" ? [held.change] : [],
+    );
+    expect(changes).toHaveLength(3);
+    for (const change of changes) expect(change).toHaveProperty("shown");
+
+    const mix = OPEN_PAGES.summary.tiles[3];
+    if (mix.kind !== "breakdown") throw new Error("expected the breakdown tile");
+    expect(mix.chart.series).toHaveLength(5);
+    // C11 — one bucket, the reported month, so R-V5's whole-range ranking is the sort.
+    expect(mix.chart.buckets).toHaveLength(1);
+  });
+
+  it("prints no figure on the mix tile, because tile 2 already prints it (C11)", () => {
+    const [, tasks, , mix] = OPEN_PAGES.summary.tiles;
+    if (tasks.kind !== "figure" || mix.kind !== "breakdown") throw new Error("wrong tile kinds");
+
+    // The defect this replaced: the mix tile spread the Completed Tasks reading, so `/demo`
+    // printed one number and one delta twice, side by side, on the ten-second read.
+    expect(tasks.value).not.toBeNull();
+    expect(mix).not.toHaveProperty("value");
+    expect(mix).not.toHaveProperty("change");
+  });
+
+  it("the mix tile's slices exceed the Completed Jobs tile, which is why it cannot stack (C11)", () => {
+    const [, tasks, , mix] = OPEN_PAGES.summary.tiles;
+    if (tasks.kind !== "figure" || mix.kind !== "breakdown") throw new Error("wrong tile kinds");
+
+    // WorkType partitions sessions; this tile counts Tasks, whose sessions may span WorkTypes.
+    // Asserted as arithmetic rather than as a flag: were these ever to agree, the measure would
+    // have been silently re-keyed, and that should fail here rather than pass quietly.
+    const slices = mix.chart.series.reduce(
+      (running, series) => running + series.points.reduce((sum, point) => sum + point.value, 0),
+      0,
+    );
+    expect(slices).toBeGreaterThan(tasks.value ?? 0);
+    expect(mix.chart.stackable).toBe(false);
   });
 
   it("`/demo/spend` (R-N9) — seven panels in order, plus the rate card (R-N11)", () => {
@@ -174,7 +212,8 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
     expect(page.table.columns.filter((column) => column.numeric).every((column) => column.sortable))
       .toBe(true);
     expect(page.table.sort).toEqual({ column: "completedTasks", direction: "desc" });
-    expect(page.matrix.rows).toHaveLength(6);
+    // C9 — the visibility sentence, on every arm, in place of the withdrawn matrix.
+    expect(page.visibility).toMatch(/every other Member of this Organization by name/);
   });
 
   it("`/demo/people?member=` — the profile (R-N16) and the comparator (R-N17, R-N18)", () => {
@@ -349,8 +388,9 @@ describe("R-V1 — `stackable` follows the partition, not the panel", () => {
     }
   });
 
-  it("stacks the partitions R-V1 names: WorkType, Model, the spans, the cost split", () => {
-    expect(OPEN_PAGES.summary.tiles[3].chart?.stackable).toBe(true);
+  it("stacks the partitions R-V1 names: Model, the spans, the cost split", () => {
+    // The `/demo` WorkType tile is deliberately absent from this list — C11. `stackable` is keyed
+    // on (grouping × measure), and WorkType does not partition a Task-grained measure.
     expect(OPEN_PAGES.spend.totalSpend.chart.stackable).toBe(true);
     expect(OPEN_PAGES.spend.adoption.modelMix.chart.stackable).toBe(true);
     expect(OPEN_PAGES.work.presenceSpans.chart.stackable).toBe(true);
@@ -385,14 +425,16 @@ describe("R-T17 / R-A6 — the permission filter ran before aggregation", () => 
     expect(own).toBeLessThan(OPEN_PAGES.spend.adoption.volume.processed);
   });
 
-  it("resolves nobody but itself by name on `/demo/people`, and says how many it did not", () => {
+  it("resolves nobody but itself by name on `/demo/people` — one row, no aggregate (C10)", () => {
     const page = restricted.people;
     if (page.surface !== "table") throw new Error("expected the table surface");
 
     expect(page.table.rows.map((row) => row.key)).toEqual([RESTRICTED.memberId]);
-    expect(page.table.note).toMatch(/counted and not named/);
-    // R-A10 — and it still reaches the matrix, showing its own grants (R-A3.1).
-    expect(page.matrix.roleKey).toBe("restricted");
+    // C10 — the aggregate is real and lives on `/demo/work` and `/demo/spend`, not here.
+    expect(page.table.note).toBeNull();
+    // C9 — the sentence explains the one row, and carries no figure to be subtracted from.
+    expect(page.visibility).toMatch(/without being named/);
+    expect(page.visibility).not.toMatch(/\d/);
   });
 
   it("withholds another Member's profile rather than rendering one (R-A6)", () => {
@@ -479,8 +521,11 @@ describe("the degenerate arms — a range with nothing in it, and an id that nam
     const page = summaryPage(OPEN, emptyParams("summary"));
 
     expect(page.tiles).toHaveLength(4);
-    expect(page.tiles[1].value).toBe(0);
-    expect(page.tiles[3].chart?.empty).toBe(true);
+
+    const [, tasks, , mix] = page.tiles;
+    if (tasks.kind !== "figure" || mix.kind !== "breakdown") throw new Error("wrong tile kinds");
+    expect(tasks.value).toBe(0);
+    expect(mix.chart.empty).toBe(true);
   });
 
   it("returns every spend panel empty, and the rate card regardless (R-N11)", () => {
@@ -501,11 +546,11 @@ describe("the degenerate arms — a range with nothing in it, and an id that nam
     expect(page.presenceSpans.composition.sessions).toBe(0);
   });
 
-  it("returns an empty People table and an empty History table, with the matrix intact", () => {
+  it("returns an empty People table and an empty History table, with the sentence intact", () => {
     const people = peoplePage(OPEN, emptyParams("people"));
     if (people.surface !== "table") throw new Error("expected the table surface");
     expect(people.table.rows).toHaveLength(data.members.length);
-    expect(people.matrix.datapoints).toEqual(["jobs", "tokens", "cost", "access"]);
+    expect(people.visibility).not.toBe("");
 
     const history = historyPage(OPEN, emptyParams("history"));
     if (history.surface !== "table") throw new Error("expected the table surface");

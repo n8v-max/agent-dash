@@ -8,15 +8,13 @@
 //
 // **What the restricted account sees here is different in kind, not just shorter.** It holds no
 // scope resolving another Member by name, so its rows are not a filtered version of the open
-// account's twenty: it gets its own row, and a sentence saying how many Members reached the
-// totals through an aggregated grant without being named. That sentence is the mechanism
-// ADR-0003 kept, made visible, and it is why the account switch reads as a different page rather
-// than a shorter one.
+// account's twenty: it gets **its own row and nothing else** (C10). One row is the whole table.
 //
-// **The permission matrix renders at the foot for both accounts** (R-A10, `spec.md` § 11 C6),
-// collapsed and read-only, each showing its own grants — it is on every arm of the ViewModel, so
-// a viewer who has just been told a profile is withheld can open the reason underneath it. A28
-// and T-E8 read the other way; see `permission-matrix.tsx` and the ticket's Comments.
+// **The visibility line, not a permission matrix** (R-A10, `spec.md` § 11 C9). It renders above
+// the surface rather than at the foot, because a viewer who has just met a one-row table or a
+// withheld profile needs it before they scroll, not after. It is on every arm for the same
+// reason. C9 removed the matrix outright: it was a second information architecture explaining a
+// mechanism the account switcher already demonstrates.
 //
 // **R-M15 — no ordering is editorialised.** The default sort is Completed Jobs descending (A24),
 // the lede says so in words, and there is no percentile, no rank and no "top spender" anywhere on
@@ -27,7 +25,6 @@ import { pageRequest, type PageRequest } from "@/components/controls/request";
 import { controlHref } from "@/components/controls/schema";
 import { DataTable } from "@/components/panels/data-table";
 import { MemberProfile } from "@/components/panels/member-profile";
-import { PermissionMatrixPanel } from "@/components/panels/permission-matrix";
 import { PageFrame } from "@/components/shell/page-frame";
 import { peoplePage } from "@/data/queries";
 import type { TableColumn, TableRow } from "@/domain/viewmodel";
@@ -83,6 +80,13 @@ export default async function PeoplePage(props: PageProps<"/[org]/people">) {
 
   return (
     <PageFrame request={request} title="People" lede={LEDE}>
+      <p
+        data-testid="visibility-statement"
+        className="max-w-3xl text-sm leading-relaxed text-muted-foreground"
+      >
+        {view.visibility}
+      </p>
+
       {view.surface === "table" ? (
         <DataTable
           table={view.table}
@@ -110,8 +114,6 @@ export default async function PeoplePage(props: PageProps<"/[org]/people">) {
           </Link>
         </section>
       ) : null}
-
-      <PermissionMatrixPanel matrix={view.matrix} />
     </PageFrame>
   );
 }

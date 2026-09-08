@@ -120,14 +120,19 @@ describe("the floor is a count of one (R-M12, T-U3, A8)", () => {
     expect(change.shown ? "" : change.message).toContain("2026-04");
   });
 
-  it("admits exactly two reasons to suppress, both about the prior period's existence", () => {
+  it("admits exactly three reasons to suppress, every one about the prior period", () => {
     // The canary for the rule this ticket exists to keep out: a magnitude cut-off would have to
-    // name itself here, and naming it breaks this expectation before it reaches a chart.
-    expect(CHANGE_SUPPRESSIONS).toEqual(["no-prior-period", "prior-period-holds-nothing"]);
+    // name itself here, and naming it breaks this expectation before it reaches a chart. C13
+    // added the third — still a statement about the prior period, still not about size.
+    expect(CHANGE_SUPPRESSIONS).toEqual([
+      "no-prior-period",
+      "prior-period-holds-nothing",
+      "prior-period-incomplete",
+    ]);
   });
 });
 
-describe("comparison is unrestricted; incompleteness is flagged, not withheld (R-M13)", () => {
+describe("incompleteness: flagged on the current period, withheld on the prior (R-M13, C13)", () => {
   it("compares two periods that are not adjacent", () => {
     const change = shown(between(figure("2026-04", 200), figure("2026-09", 250)));
 
@@ -143,18 +148,34 @@ describe("comparison is unrestricted; incompleteness is flagged, not withheld (R
     expect(change.ratio).toBe(-0.75);
   });
 
-  it("shows the figure for a clipped prior period, and flags it", () => {
-    const change = shown(between(partialFigure("2026-04", 50), figure("2026-05", 75)));
+  it("suppresses against a clipped prior period, and says which month was unfinished", () => {
+    // C13's asymmetry, and the case that motivated it. April is clipped at the window's start,
+    // so the fixture only half covers it; comparing a whole May against it reports a rise that
+    // is an artefact of the window. The viewer never chose to look at April — under C12 it is
+    // read from outside the selected range — so there is nothing on screen to qualify.
+    const change = between(partialFigure("2026-04", 50), figure("2026-05", 75));
 
+    expect(change).toMatchObject({ shown: false, reason: "prior-period-incomplete" });
+    expect(change.shown ? "" : change.message).toContain("2026-04");
     expect(change.incomplete).toBe(true);
-    expect(change.ratio).toBe(0.5);
+  });
+
+  it("is not pro-rating: the unfinished month is declined as a baseline, not extrapolated", () => {
+    // R-E2 forbids inventing the missing days. C13 declines to divide by them, which is a
+    // different act — nothing here scales 50 up to a notional whole month.
+    const change = between(partialFigure("2026-04", 50), figure("2026-05", 75));
+
+    expect(change.shown).toBe(false);
+    expect(change.prior?.value).toBe(50);
   });
 
   it("leaves a comparison of two finished periods unflagged", () => {
     expect(shown(between(figure("2026-05", 4), figure("2026-06", 5))).incomplete).toBe(false);
   });
 
-  it("still suppresses a partial prior period that holds nothing — for the zero, not the flag", () => {
+  it("reports a prior period that is both empty and unfinished as empty", () => {
+    // Both rules fire; the order in `changeBetween` decides which is reported, and "holds
+    // nothing" is the more useful of the two things to tell someone.
     const change = between(partialFigure("2026-04", 0), figure("2026-05", 9));
 
     expect(change).toMatchObject({ shown: false, reason: "prior-period-holds-nothing" });
@@ -202,7 +223,8 @@ describe("figures are read off period buckets once (the bridge to periods.ts)", 
   it("suppresses the change out of an empty bucket and shows the change into one", () => {
     const [april, may, june] = periodFigures(buckets, cost);
 
-    expect(between(april, may).shown).toBe(true);
+    // April is clipped, so April → May is withheld under C13 rather than shown.
+    expect(between(april, may)).toMatchObject({ shown: false, reason: "prior-period-incomplete" });
     // May → June is a fall to nothing off a base of 20: shown, at −100%.
     expect(shown(between(may, june)).ratio).toBe(-1);
     // June → anything has no base at all: suppressed.

@@ -117,11 +117,13 @@ describe("R-N16 / R-A6 — what a cell links to, and what it withholds", () => {
     expect(within(withheld).queryByRole("link")).toBeNull();
   });
 
-  it("carries R-A9's sentence under the restricted account's table", () => {
+  it("renders the restricted account's table as one row and no note (C10)", () => {
     renderTable(RESTRICTED_TABLE);
 
     expect(bodyRows()).toHaveLength(1);
-    expect(screen.getByText(/counted and not named/)).toBeInTheDocument();
+    // C10 — an aggregate beside a named row in one column set is the subtraction R-M17 forbids.
+    // What explains the single row is the page's visibility sentence, not a note under the table.
+    expect(screen.queryByText(/counted and not named/)).toBeNull();
   });
 
   it("renders R-V9's fallback where the ViewModel says the selection is empty", () => {

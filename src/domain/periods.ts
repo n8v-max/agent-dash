@@ -277,6 +277,31 @@ export function civilDaysBetween(from: string, to: string): number | undefined {
   return start === undefined || end === undefined ? undefined : end - start;
 }
 
+/**
+ * **The first civil day of the month before `date`'s month** — `2026-05-20` → `2026-04-01`.
+ * `undefined` where `date` is not a `YYYY-MM-DD` civil date.
+ *
+ * C12's arithmetic, and it lives here because this module owns civil dates. A comparison is not
+ * a filtered view: `/demo`'s prior month is the month before the selection whether or not the
+ * selection contains it, and without a way to widen a range backwards, choosing any single month
+ * left the page with no prior bucket and suppressed all four change figures at once.
+ *
+ * It widens and never clamps — clamping to what the data actually covers is the caller's, because
+ * only the caller knows the Organization's window. A widened range that runs past the window
+ * would otherwise make a half-covered month read as a complete one, which is the fake baseline
+ * C13 exists to suppress.
+ */
+export function priorMonthStart(date: string): string | undefined {
+  const parts = /^(\d{4})-(\d{2})-\d{2}$/.exec(date);
+  if (!parts) return undefined;
+  const year = Number(parts[1]);
+  const month = Number(parts[2]);
+  if (month < 1 || month > 12) return undefined;
+  const priorYear = month === 1 ? year - 1 : year;
+  const priorMonth = month === 1 ? 12 : month - 1;
+  return `${String(priorYear).padStart(4, "0")}-${String(priorMonth).padStart(2, "0")}-01`;
+}
+
 /** Parses a grain out of a URL segment or query string. An unknown grain is not a grain. */
 export function parseGrain(text: string | undefined): PeriodGrain | undefined {
   return PERIOD_GRAINS.find((grain) => grain === text);

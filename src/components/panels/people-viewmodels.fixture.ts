@@ -7,89 +7,12 @@
 // the comparison group is the right population, and whether `self` is granted over every class
 // are claims about `src/domain` and `src/data`, asserted there (T-U10, `queries.test.ts`).
 //
-// The two matrices below are the two shipped presets of R-A3 as `grantMatrix` resolves them —
-// `self` granted over all four classes for both (R-A3.1), `org-member` over all four for the open
-// default, `team` over `jobs` and `tokens` for the restricted contractor, and nothing else.
+// The permission-matrix fixtures that once lived here went with the matrix itself (C9). The
+// restricted table below is now a single row with no note: C10 took the aggregate off this page.
 
-import type { MemberProfileViewModel, PermissionMatrixViewModel } from "@/data/queries";
-import type { DatapointClass, Permission, Resolution, SubjectScope } from "@/domain/access";
+import type { MemberProfileViewModel } from "@/data/queries";
 import type { TableRow, TableViewModelOf } from "@/domain/viewmodel";
 import { chartFixture } from "../charts/chart-viewmodels.fixture";
-
-// The two closed vocabularies of the access model, written out rather than imported: a component
-// (and its fixture) may reach `src/domain` for **types only** (R-T6/R-T33). The types above keep
-// these honest — a scope or a class added upstream is a type error here, not a silent omission.
-const SUBJECT_SCOPES: readonly SubjectScope[] = [
-  "self",
-  "peer",
-  "team",
-  "peer-team",
-  "org",
-  "org-member",
-];
-
-const DATAPOINT_CLASSES: readonly DatapointClass[] = ["jobs", "tokens", "cost", "access"];
-
-/** `CONTEXT.md` § Access — the second, independent dimension: who resolves to a name. */
-const SCOPE_RESOLUTION: Readonly<Record<SubjectScope, Resolution>> = {
-  self: "identified",
-  peer: "identified",
-  team: "aggregated",
-  "peer-team": "aggregated",
-  org: "aggregated",
-  "org-member": "identified",
-};
-
-export const MATRIX_NOTE =
-  "`self` is granted over every class, to every Role, always: a Member can always see their own " +
-  "data and their own permissions, and restriction bites on other people.";
-
-const cellsFor = (
-  granted: readonly Permission[],
-  scope: SubjectScope,
-): readonly { readonly datapoint: DatapointClass; readonly granted: boolean }[] =>
-  DATAPOINT_CLASSES.map((datapoint) => ({
-    datapoint,
-    granted:
-      scope === "self" ||
-      granted.some((cell) => cell.scope === scope && cell.datapoint === datapoint),
-  }));
-
-const matrixFixture = (input: {
-  readonly roleKey: string;
-  readonly roleName: string;
-  readonly granted: readonly Permission[];
-}): PermissionMatrixViewModel => ({
-  roleKey: input.roleKey,
-  roleName: input.roleName,
-  datapoints: DATAPOINT_CLASSES,
-  rows: SUBJECT_SCOPES.map((scope) => ({
-    scope,
-    resolution: SCOPE_RESOLUTION[scope],
-    cells: cellsFor(input.granted, scope),
-  })),
-  note: MATRIX_NOTE,
-});
-
-const crossProduct = (
-  scopes: readonly SubjectScope[],
-  datapoints: readonly DatapointClass[],
-): readonly Permission[] =>
-  scopes.flatMap((scope) => datapoints.map((datapoint) => ({ scope, datapoint })));
-
-/** R-A3's open default: `org-member` over all four classes, plus the universal `self` row. */
-export const OPEN_MATRIX = matrixFixture({
-  roleKey: "open-default",
-  roleName: "Open default",
-  granted: crossProduct(["org-member"], ["jobs", "tokens", "cost", "access"]),
-});
-
-/** R-A3's restricted contractor: `team` over `jobs` and `tokens`, plus the `self` row. */
-export const RESTRICTED_MATRIX = matrixFixture({
-  roleKey: "restricted",
-  roleName: "Restricted (contractor)",
-  granted: crossProduct(["team"], ["jobs", "tokens"]),
-});
 
 /** R-N15's seven columns, with the four numeric ones sortable. */
 export const PEOPLE_COLUMNS = [
@@ -119,15 +42,13 @@ export const PEOPLE_TABLE: TableViewModelOf<TableRow> = {
   note: null,
 };
 
-/** The restricted account's table: its own row, and the sentence R-A9 puts under it. */
+/** The restricted account's table (C10): its own row, and nothing else. */
 export const RESTRICTED_TABLE: TableViewModelOf<TableRow> = {
   columns: [...PEOPLE_COLUMNS],
   rows: [{ key: "mem_0009", cells: ["Hal Camps", "Platform", "human", 7, 15, 90_000, 41.2] }],
   sort: { column: "completedTasks", direction: "desc" },
   empty: false,
-  note:
-    "16 Members contribute to the totals on this page through an aggregated grant, so they are " +
-    "counted and not named. The permission matrix below says which grants resolve a name.",
+  note: null,
 };
 
 export const COMPARATOR_NOTE =

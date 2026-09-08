@@ -52,7 +52,7 @@ export type {
   IncompleteAgesPanel,
   PresenceSpansPanel,
 } from "./queries/work-panels";
-export type { PeoplePageViewModel, PermissionMatrixViewModel } from "./queries/people";
+export type { PeoplePageViewModel } from "./queries/people";
 export type {
   ComparatorBar,
   ComparatorViewModel,

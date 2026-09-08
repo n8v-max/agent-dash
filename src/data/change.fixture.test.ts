@@ -126,10 +126,11 @@ describe("T-U3 — the floor is a count of one, on committed rows (R-M12, A8)", 
     });
   });
 
-  it("shows every month-over-month figure in the roster when, and only when, the prior month holds something (A8)", () => {
+  it("shows every month-over-month figure in the roster when, and only when, the prior month is a baseline (A8, C13)", () => {
     // The sweep runs over all 20 committed Members × the five adjacent month pairs — 100 real
     // comparisons spanning ratios from −100% to +∞-adjacent. Every one of them is shown exactly
-    // when its base is non-zero, so a cut-off placed at any magnitude fails this test.
+    // when its base is non-zero **and finished**, so a cut-off placed at any magnitude fails this
+    // test, and so does a build that quietly reinstated a partial month as a baseline.
     const comparisons = members.flatMap((member) => {
       const figures = forMember(member.id);
       return figures.slice(1).map((current, index) => ({
@@ -139,23 +140,35 @@ describe("T-U3 — the floor is a count of one, on committed rows (R-M12, A8)", 
     });
 
     expect(comparisons).toHaveLength(members.length * 5);
-    expect(comparisons.every((held) => held.change.shown === (held.prior.value > 0))).toBe(true);
-    // …and the fixture really does exercise both sides of the iff.
+    expect(
+      comparisons.every(
+        (held) => held.change.shown === (held.prior.value > 0 && !held.prior.partial),
+      ),
+    ).toBe(true);
+    // …and the fixture really does exercise every side of that: empty bases, partial bases, and
+    // the large majority that are neither.
     expect(comparisons.filter((held) => !held.change.shown).length).toBeGreaterThan(0);
-    expect(comparisons.filter((held) => held.change.shown).length).toBeGreaterThan(80);
+    expect(
+      comparisons.filter((held) => !held.change.shown && held.prior.partial).length,
+    ).toBeGreaterThan(0);
+    expect(comparisons.filter((held) => held.change.shown).length).toBeGreaterThan(60);
   });
 
-  it("shows the org-wide month-over-month figure, which never wants the floor at all", () => {
+  it("shows the org-wide month-over-month figure wherever the prior month is whole", () => {
     const june = changeInto(ORG, "2026-06");
 
     expect(june).toMatchObject({ shown: true, absolute: 11, direction: "up" });
-    expect(ORG.slice(1).every((_figure, index) => changeInto(ORG, ORG[index + 1].key).shown)).toBe(
-      true,
-    );
+    // Every pair except the one whose baseline is April, which the window clips (C13).
+    const shownInto = ORG.slice(1).map((figure, index) => ({
+      key: figure.key,
+      shown: changeInto(ORG, figure.key).shown,
+      priorPartial: ORG[index].partial,
+    }));
+    expect(shownInto.every((held) => held.shown === !held.priorPartial)).toBe(true);
   });
 });
 
-describe("R-M13 — incompleteness is flagged on committed rows, never withheld", () => {
+describe("R-M13 / C13 — a partial current month is flagged; a partial baseline is withheld", () => {
   it("shows August → September and flags it, because September is clipped by the window", () => {
     const september = changeInto(ORG, "2026-09");
 
@@ -163,22 +176,33 @@ describe("R-M13 — incompleteness is flagged on committed rows, never withheld"
     expect(monthAt(ORG, "2026-09").partial).toBe(true);
   });
 
-  it("shows April → May and flags it, because April is clipped at the start of the window", () => {
-    expect(changeInto(ORG, "2026-05")).toMatchObject({ shown: true, incomplete: true });
+  it("withholds April → May, because April is clipped at the start of the window (C13)", () => {
+    // The case that decided C13's asymmetry on committed rows: April is half a month of data,
+    // and comparing a whole May against it reported a rise the fixture does not contain.
+    expect(changeInto(ORG, "2026-05")).toMatchObject({
+      shown: false,
+      reason: "prior-period-incomplete",
+      incomplete: true,
+    });
   });
 
   it("leaves a comparison of two whole months unflagged", () => {
     expect(changeInto(ORG, "2026-08")).toMatchObject({ shown: true, incomplete: false });
   });
 
-  it("suppresses on the floor alone: a partial month that holds nothing, and one that does not", () => {
-    // Gallego's April is partial and holds one session, so April → May is shown and flagged.
-    // Her May holds nothing, so May → June is suppressed. The flag decided neither.
+  it("distinguishes the two suppressions by reason, not merely by outcome", () => {
+    // Gallego's April is partial and holds one session, so April → May is withheld for the
+    // *flag*. Her May holds nothing, so May → June is withheld for the *zero*. Both are absent
+    // figures; they are different facts about the page and the copy says which.
     expect(changeInto(GALLEGO, "2026-05")).toMatchObject({
-      shown: true,
-      ratio: -1,
+      shown: false,
+      reason: "prior-period-incomplete",
       incomplete: true,
     });
-    expect(changeInto(GALLEGO, "2026-06")).toMatchObject({ shown: false, incomplete: false });
+    expect(changeInto(GALLEGO, "2026-06")).toMatchObject({
+      shown: false,
+      reason: "prior-period-holds-nothing",
+      incomplete: false,
+    });
   });
 });

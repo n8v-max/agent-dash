@@ -2,10 +2,15 @@
 //
 // The page is one argument read in ten seconds: *this is the total, this is what we got, this is
 // the rate, this is what kind of work it was.* Everything here serves that reading, and the
-// layout is what makes it: four cards of equal height on one row, four figures at the same size,
-// four changes in the same place. A tile that were louder than its neighbours would be a claim
-// about which figure matters, and the third — Cost per completed Job, the differentiator — earns
-// its place by being third in a sentence rather than by being bigger.
+// layout is what makes it: four cards of equal height on one row, **three** figures at the same
+// size, three changes in the same place. A tile that were louder than its neighbours would be a
+// claim about which figure matters, and the third — Cost per completed Job, the differentiator —
+// earns its place by being third in a sentence rather than by being bigger.
+//
+// **The fourth clause of that sentence is a shape, not a number** (C11). It carries no headline
+// figure, because it used to carry the Completed Jobs tile's — the same number and the same
+// delta, printed twice on the one page graded for a glance. `SummaryTile` is a union on `kind`,
+// so this module cannot render a figure on the breakdown tile even by accident.
 //
 // **Each tile is itself the link** (R-N5), and the link is the tile's *title*, stretched over the
 // whole card by `after:absolute after:inset-0`. That is not a styling flourish; it is what keeps
@@ -74,16 +79,17 @@ function ChangeFigure(props: { readonly change: Change }) {
 }
 
 /**
- * The small stacked area of R-N8, at tile size.
+ * R-N8's breakdown, at tile size: sorted horizontal bars over the reported month (C11).
  *
  * **No axis labels**: the ticks are hidden, and so is the grid they would have indexed — at this
- * size the shape and the legend are the reading, and the exact figures are one click away on
+ * size the bars and the legend are the reading, and the exact figures are one click away on
  * `/demo/work` and already in the R-X1 mirror `ChartFrame` renders. The height is pinned rather
  * than left to `aspect-video`, so the tile stays a tile at any column width.
  *
- * The stack itself is not a choice made here: `chart-shapes.tsx` stacks if and only if the
- * ViewModel carries `stackable: true` (R-V1, T-C11), and this panel names a shape and nothing
- * more.
+ * **Neither the sort nor the absence of a stack is decided here.** The order is R-V5's
+ * whole-range ranking over a single-bucket chart, which is the same thing as "longest first";
+ * `chart-shapes.tsx` stacks if and only if the ViewModel carries `stackable: true` (R-V1,
+ * T-C11), and C11 made this ViewModel say `false`. This panel names a shape and nothing more.
  */
 const MIX_CHART = cn(
   "[&_[data-slot=chart]]:aspect-auto [&_[data-slot=chart]]:h-32",
@@ -105,40 +111,31 @@ const CARD = cn(
 function Tile(props: { readonly tile: SummaryTile }) {
   const { tile } = props;
 
-  const figure = (
-    <div className="flex flex-col gap-2 xl:w-40 xl:shrink-0">
-      <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground sm:text-4xl">
-        {figureText(tile.value, tile.unit)}
-      </p>
-      {tile.caption ? (
-        <p className="text-xs leading-snug text-muted-foreground">{tile.caption}</p>
-      ) : null}
-      <ChangeFigure change={tile.change} />
-    </div>
-  );
-
   return (
-    <li className={cn(CARD, tile.chart && "xl:col-span-2")}>
+    <li className={cn(CARD, tile.kind === "breakdown" && "xl:col-span-2")}>
       <h2 className="text-sm font-medium text-muted-foreground transition-colors group-hover:text-foreground">
         <Link href={tile.href} className="rounded-sm after:absolute after:inset-0">
           {tile.title}
         </Link>
       </h2>
-      {tile.chart ? (
-        // The mix tile is two columns wide and reads across rather than down: the figure keeps
-        // its place in the row of four, and the composition sits beside it instead of under it.
-        // Stacked vertically it would have made this card twice the height of its neighbours
-        // and left three of them mostly empty.
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-          {figure}
-          <ChartFrame
-            chart={tile.chart}
-            shape="area"
-            className={cn("min-w-0 xl:flex-1", MIX_CHART)}
-          />
-        </div>
+      {tile.kind === "breakdown" ? (
+        // Two columns wide, and the bars have the whole of it. Before C11 this card was a figure
+        // beside a chart; the figure was the neighbouring tile's, so what is left is the width.
+        <ChartFrame
+          chart={tile.chart}
+          shape="horizontal-bar"
+          className={cn("min-w-0", MIX_CHART)}
+        />
       ) : (
-        figure
+        <div className="flex flex-col gap-2">
+          <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground sm:text-4xl">
+            {figureText(tile.value, tile.unit)}
+          </p>
+          {tile.caption ? (
+            <p className="text-xs leading-snug text-muted-foreground">{tile.caption}</p>
+          ) : null}
+          <ChangeFigure change={tile.change} />
+        </div>
       )}
       {/*
         The affordance, and the reason the tiles need no link row under them (R-N5): the whole

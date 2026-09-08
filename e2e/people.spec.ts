@@ -1,35 +1,18 @@
-// `/demo/people`, end to end — **T-E2**, **A24**, R-N16/R-N17, and the part of **T-E8** that can
-// honestly be written today.
+// `/demo/people`, end to end — **T-E2**, **T-E2.1**, **A24** and R-N16/R-N17.
 //
-// ---------------------------------------------------------------------------------------------
-// **T-E8 is deliberately incomplete, and this is the record of why.**
+// **T-E8 is gone, and this is the record of why.** It asserted that the permission matrix renders
+// for the open account and not the restricted one (A28), which R-A10 and `spec.md` § 11 C6
+// contradicted in terms. The earlier version of this file wrote out the disagreement at length and
+// left the deciding assertion unwritten, because a spec contradicting itself is a human decision.
 //
-// T-E8 (`testing-spec.md` § 5) and A28 (`spec.md` § 10) both read: *"the permission matrix
-// renders for the open account and **not** for the restricted one."* **R-A10 says the opposite,
-// in terms**: *"under R-A3.1 both accounts hold `self` over `access`, so both see it — the open
-// account showing the full matrix, the restricted account showing its own grants"*, and
-// `spec.md` § 11 **C6** is the later resolution that made it so, arguing that the literal reading
-// produces "a matrix nobody can see".
+// It was decided on 2026-09-09 as **C9**: the matrix does not ship at all. The disagreement was
+// about the audience for a table that should not exist — a second information architecture,
+// rendered to end users, explaining a mechanism the account switcher already demonstrates.
 //
-// Ticket 21's domain layer is built on R-A10: `self` over every class is an invariant enforced
-// ahead of the grant list, so **both Roles hold `self × access`** and `grantMatrix` returns a
-// *different* matrix for each. "The restricted account holds no `access`" is not expressible
-// there at all.
-//
-// So the assertion T-E8 names — *whether the matrix renders for the restricted account* — is
-// **left unwritten**. A test written to either reading pins the losing behaviour, and this is a
-// spec disagreeing with itself, which is a human decision rather than an implementer's (AFK
-// handover § 8). It is **not** `.skip`ped: a skipped test is a green build with a hole in it.
-// What is written below is every T-E8-adjacent fact that holds under *both* readings:
-//
-//   * the matrix renders for the open account, collapsed and read-only (both readings agree);
-//   * **whatever matrix an account renders states that account's own grants** — written as a
-//     filter over the cells actually found, so it is a real check where a matrix renders and
-//     vacuously true where one does not, and therefore takes no side.
-//
-// A28's traceability row cites **T-U10** as evidence. T-U10 asserts the R-A3.1 invariant, which
-// is what *supports* R-A10 — it is not evidence for A28's prose.
-// ---------------------------------------------------------------------------------------------
+// **T-E2.1 replaces it** below, and it is a sharper test than either reading of T-E8: both
+// accounts render a visibility sentence, the two sentences *differ*, and the restricted one
+// carries no digits. That last assertion is C10's, not C9's — C10 took the aggregate off this
+// page, and an explanation that quotes a count would put one back under another name.
 
 import { expect, test, type Page } from "@playwright/test";
 import { OPEN_ACCOUNT, RESTRICTED_ACCOUNT, ungrantedNames, useSession } from "./support/session";
@@ -56,31 +39,7 @@ const peopleRows = (page: Page) => peopleTable(page).locator("tbody tr");
  * `e2e/support/costs.ts` states for the cost search set. These four cells are `spec.md` § 2's
  * table, plus R-A3.1's universal `self` row, transcribed.
  */
-const GRANTED_CELLS: Readonly<Record<string, readonly string[]>> = {
-  [OPEN_ACCOUNT.memberId]: [
-    "org-member:jobs",
-    "org-member:tokens",
-    "org-member:cost",
-    "org-member:access",
-  ],
-  [RESTRICTED_ACCOUNT.memberId]: ["team:jobs", "team:tokens"],
-};
-
-const shouldBeGranted = (memberId: string, cell: string): boolean =>
-  cell.startsWith("self:") || (GRANTED_CELLS[memberId] ?? []).includes(cell);
-
-/** Every permission cell on the page, as `scope:class` → what the page says about it. */
-const matrixCells = async (page: Page): Promise<readonly { cell: string; granted: boolean }[]> => {
-  const cells = await page.locator("td[data-scope]").all();
-  return Promise.all(
-    cells.map(async (cell) => ({
-      cell: `${await cell.getAttribute("data-scope")}:${await cell.getAttribute("data-datapoint")}`,
-      granted: (await cell.getAttribute("data-granted")) === "true",
-    })),
-  );
-};
-
-test.describe("T-E2 — the restricted account's rows are of a different kind (A9, R-D18)", () => {
+test.describe("T-E2 — one row against twenty (A9, R-D18, C10)", () => {
   test("the open account is given all 20 Members, every one of them named", async ({
     page,
     context,
@@ -94,12 +53,12 @@ test.describe("T-E2 — the restricted account's rows are of a different kind (A
     // (R-N16), which only an identifying grant can produce. Scoped to the body, because the
     // sortable headings are links too (R-N15).
     await expect(peopleRows(page).getByRole("link")).toHaveCount(20);
-    // And the open account has no aggregate statement to make — nobody reached its totals
-    // without being named.
+    // C10 — no note under the table, for either account. Nobody reached the open account's
+    // totals without being named, and the restricted account's aggregate is not restated here.
     await expect(page.getByText(/counted and not named/)).toHaveCount(0);
   });
 
-  test("the restricted account names itself and nobody else, and says so in words", async ({
+  test("the restricted account names itself and nobody else", async ({
     page,
     context,
     baseURL,
@@ -116,34 +75,17 @@ test.describe("T-E2 — the restricted account's rows are of a different kind (A
       [],
     );
 
-    // The other half: the restricted surface carries a statement the open one does not — how
-    // many Members reached these totals through an aggregated grant without being named. A
-    // *shortened list of the same kind* would carry no such sentence.
-    await expect(page.getByText(/counted and not named/)).toBeVisible();
   });
 
-  test("it receives a handful of rows against twenty, not a shortened list of the same kind", async ({
-    page,
-    context,
-    baseURL,
-  }) => {
+  test("it receives exactly one row against twenty (C10)", async ({ page, context, baseURL }) => {
     await useSession(context, RESTRICTED_CLAIMS, baseURL ?? BASE);
     await page.goto(PEOPLE);
 
-    const rows = await peopleRows(page).count();
-
-    // ┌─ **A known shortfall, recorded rather than papered over.** T-E2 asks for **2** rows here
-    // │  — the viewer's own named row *plus its Team's aggregate row*. `peoplePage`
-    // │  (`src/data/queries/people.ts`, built by ticket 28/31) produces the own row and an
-    // │  aggregate **statement** instead of an aggregate **row**, so today the count is 1 — and
-    // │  `src/data/queries.test.ts` asserts exactly that, by Member id. Emitting the Team row
-    // │  means changing `src/data/**`, which this ticket may not touch and which other agents
-    // │  are working in. So the count is asserted as the *range* both designs satisfy: this test
-    // │  is honest today and still passes the moment the Team aggregate row lands.
-    // └─ The claim that does *not* soften is above: exactly one Member is named, and it is the
-    //    viewer. That is what makes the difference one of kind rather than of length.
-    expect(rows).toBeGreaterThanOrEqual(1);
-    expect(rows).toBeLessThanOrEqual(2);
+    // An exact count, where the earlier version of this test asserted a range of 1–2 because the
+    // spec asked for a Team aggregate row the build had not produced. C10 decided against that
+    // row: the grant is real and stays legible on `/demo/work` and `/demo/spend`, but an
+    // aggregate beside a named row in one column set invites the subtraction R-M17 forbids.
+    await expect(peopleRows(page)).toHaveCount(1);
   });
 });
 
@@ -255,54 +197,64 @@ test.describe("R-N16 / R-N17 — `?member=` is a surface, and the comparator is 
   });
 });
 
-test.describe("R-A10 — the read-only permission matrix at the foot of the page", () => {
-  test("renders for the open account, collapsed and carrying no control", async ({
+test.describe("T-E2.1 — the page says what this account can see (A28, R-A10, C9)", () => {
+  test("each account is told what it can see, and the two are told different things", async ({
     page,
     context,
     baseURL,
   }) => {
     await useSession(context, OPEN_CLAIMS, baseURL ?? BASE);
     await page.goto(PEOPLE);
-    const matrix = page.getByTestId("permission-matrix");
+    // Asserted as two specific sentences rather than as "they differ": presence alone would pass
+    // against a line hard-coded into the page, and inequality alone would pass against two
+    // hard-coded lines. What C9 claims is that the sentence is *read off the grants*, and the
+    // evidence for that is each account being told the thing its own grants imply.
+    await expect(page.getByTestId("visibility-statement")).toHaveText(
+      /yourself by name, and every other Member of this Organization by name/,
+    );
 
-    await expect(matrix).toBeAttached();
-    // Collapsed: `<details>` with no `open` attribute (R-A10).
-    await expect(matrix).not.toHaveAttribute("open", /.*/);
-    await expect(matrix.locator("input, select, textarea, button")).toHaveCount(0);
-    // All 24 cells of (subject scope × datapoint class).
-    await expect(matrix.locator("td[data-scope]")).toHaveCount(24);
+    await useSession(context, RESTRICTED_CLAIMS, baseURL ?? BASE);
+    await page.goto(PEOPLE);
+    await expect(page.getByTestId("visibility-statement")).toHaveText(
+      /yourself by name\. Other Members' work reaches the totals on this page without being named/,
+    );
   });
 
-  test("opens to show the grants, and the `self` row is granted over every class (R-A3.1)", async ({
+  test("the restricted sentence explains the one row and quotes no figure (C10)", async ({
     page,
     context,
     baseURL,
   }) => {
-    await useSession(context, OPEN_CLAIMS, baseURL ?? BASE);
+    await useSession(context, RESTRICTED_CLAIMS, baseURL ?? BASE);
     await page.goto(PEOPLE);
-    await page.getByTestId("permission-matrix").locator("summary").click();
+    const sentence = page.getByTestId("visibility-statement");
 
-    await expect(page.getByTestId("permission-matrix")).toHaveAttribute("open", /.*/);
-    await expect(page.locator("td[data-scope='self'][data-granted='false']")).toHaveCount(0);
+    await expect(sentence).toBeVisible();
+    await expect(sentence).toHaveText(/without being named/);
+    // C10 took an aggregate off this page; an explanation carrying a count puts one back.
+    await expect(sentence).not.toHaveText(/\d/);
   });
 
-  // The T-E8-adjacent claim that takes no side: *whatever* matrix an account renders is that
-  // account's own. Vacuously true for an account rendering none — which is the point, because
-  // whether the restricted account renders one is the question the specs disagree on.
+  /**
+   * An absence, asserted on the two things the matrix carried that nothing else does — its test
+   * id, and the `data-scope` cells that were the whole point of it. Both accounts, and both the
+   * table and profile arms, because the matrix used to render on every arm.
+   */
   for (const account of [OPEN_ACCOUNT, RESTRICTED_ACCOUNT]) {
-    test(`every permission cell the ${account.roleName} account renders is its own grant`, async ({
+    test(`no permission matrix renders for the ${account.roleName} account (C9)`, async ({
       page,
       context,
       baseURL,
     }) => {
       await useSession(context, { member_id: account.memberId, org_slug: SLUG }, baseURL ?? BASE);
+
       await page.goto(PEOPLE);
+      await expect(page.getByTestId("permission-matrix")).toHaveCount(0);
+      await expect(page.locator("td[data-scope]")).toHaveCount(0);
 
-      const contradictions = (await matrixCells(page)).filter(
-        (found) => found.granted !== shouldBeGranted(account.memberId, found.cell),
-      );
-
-      expect(contradictions, `${account.roleName} was shown a grant it does not hold`).toEqual([]);
+      await page.goto(`${PEOPLE}?member=${account.memberId}`);
+      await expect(page.getByTestId("permission-matrix")).toHaveCount(0);
+      await expect(page.locator("td[data-scope]")).toHaveCount(0);
     });
   }
 });
