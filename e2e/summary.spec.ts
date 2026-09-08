@@ -88,7 +88,7 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     await expect(main(page).getByRole("link")).toHaveCount(4);
   });
 
-  test("the fourth tile is the WorkType mix, stacked and unlabelled at tile size (R-N8)", async ({
+  test("the fourth tile is the WorkType mix, unstacked and unlabelled at tile size (R-N8, C11)", async ({
     page,
   }) => {
     await page.goto(`/${SLUG}`);
@@ -100,6 +100,10 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     const columns = mix.locator("table thead th");
     await expect(columns).toHaveCount(6);
     await expect(columns.filter({ hasText: "Other" })).toHaveCount(0);
+
+    // C11 — one bucket, the reported month. The tile was a time series over every month in the
+    // range; narrowing it to one bucket is what makes R-V5's ranking the bars' sorted order.
+    await expect(mix.locator("table tbody tr")).toHaveCount(1);
 
     // R-N8 — no axis labels at tile size. Recharts 3 puts every tick label in its own layer,
     // one per axis, and the assertion is over those layers' computed `display`: neither
@@ -113,6 +117,28 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
 
     expect(axisLabels.length).toBeGreaterThan(0);
     expect(axisLabels.filter((display) => display !== "none")).toEqual([]);
+  });
+
+  test("the mix tile carries no figure of its own, and does not stack (C11)", async ({ page }) => {
+    await page.goto(`/${SLUG}`);
+
+    const tiles = main(page).getByRole("listitem");
+    const mixTile = tiles.filter({ hasText: "Completed Jobs by template" });
+
+    // Three change figures, not four. The mix tile was built from the Completed Jobs tile's own
+    // reading, so `/demo` printed one number and one delta twice, side by side.
+    await expect(tiles.filter({ hasText: /%/ })).toHaveCount(3);
+    await expect(mixTile).not.toHaveText(/%/);
+
+    // Unstacked, asserted as geometry rather than as a class name: in a horizontal bar chart
+    // every unstacked bar starts at the axis, so they share one `x`. Stacked, each would begin
+    // where the last ended, and there would be five different values here.
+    const barStarts = await mixTile
+      .locator(".recharts-bar-rectangle path")
+      .evaluateAll((held) => held.map((bar) => Math.round(bar.getBoundingClientRect().left)));
+
+    expect(barStarts).toHaveLength(5);
+    expect(new Set(barStarts).size).toBe(1);
   });
 
   test("offers month and nothing else; no quarter is reachable (A2)", async ({ page }) => {
@@ -134,6 +160,37 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
   // R-N6 read from the page rather than from the control: the surface reports one month, and
   // R-E2 flags it rather than withholding or pro-rating it. The clock is clamped to the window's
   // last day, so the reported month is September for as long as the fixture is the fixture.
+  /**
+   * C12 — the defect that made the page's only control degrade it.
+   *
+   * Selecting a month clipped the range to a single bucket, leaving no prior month inside it, so
+   * all four change figures suppressed at once. The comparison now reads outside the selected
+   * window: August is compared with July whether or not July is in view.
+   */
+  test("keeps its change figures when a single month is selected (C12)", async ({ page }) => {
+    await page.goto(`/${SLUG}?period=2026-08`);
+
+    const tiles = main(page).getByRole("listitem");
+
+    await expect(page.getByTestId("summary-period")).toHaveText(/^Aug 2026/);
+    await expect(tiles.filter({ hasText: /%/ })).toHaveCount(3);
+    // The words the suppression would have printed, on none of them.
+    await expect(main(page)).not.toHaveText(/no prior period to compare against/);
+  });
+
+  /**
+   * C13 — and the limit of C12. May's baseline is April, which the fixture's window clips, so a
+   * whole May against half an April would report a rise the data does not contain. It suppresses,
+   * and says which month was unfinished rather than saying nothing.
+   */
+  test("withholds the change where the baseline month is unfinished (C13)", async ({ page }) => {
+    await page.goto(`/${SLUG}?period=2026-05`);
+
+    await expect(page.getByTestId("summary-period")).toHaveText(/^May 2026/);
+    await expect(main(page)).toHaveText(/2026-04 is unfinished/);
+    await expect(main(page).getByRole("listitem").filter({ hasText: /%/ })).toHaveCount(0);
+  });
+
   test("reports a single month, flagged as unfinished (R-N6, R-E2)", async ({ page }) => {
     await page.goto(`/${SLUG}`);
 

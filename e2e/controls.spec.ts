@@ -72,6 +72,27 @@ test.describe("T-E5 — control state does not survive navigation (A20, R-C5)", 
     for (const href of hrefs) expect(href).not.toContain("?");
   });
 
+  /**
+   * C14 — R-C1 says no page shows a control its panels cannot use. Per-capita was declared for
+   * `/demo/spend` and read by nothing there, so it rendered and changed the page not at all.
+   * T-C6 passed throughout, because the control *rendered*; what it never asserted is that
+   * anything downstream read it.
+   */
+  test("per-capita changes /spend, where it used to change nothing (C14)", async ({ page }) => {
+    // Asserted as two specific readings rather than as "they differ", so the test says what the
+    // control does rather than only that it does something.
+    await page.goto(`/${SLUG}/spend`);
+    await expect(page.getByRole("main")).toHaveText(/Total spend/);
+    await expect(page.getByRole("main")).not.toHaveText(/per Member/);
+
+    await page.goto(`/${SLUG}/spend?per_capita=1`);
+    await expect(page.getByRole("main")).toHaveText(/Total spend, per Member/);
+    await expect(page.getByRole("main")).toHaveText(/Cost by Repository, per Member/);
+    await expect(page.getByRole("main")).toHaveText(/active human Members/);
+    // The three ratios are left alone: dividing a rate by a headcount states nothing.
+    await expect(page.getByRole("main")).not.toHaveText(/Cost per session, per Member/);
+  });
+
   test("a filter set on /work is gone on /people", async ({ page }) => {
     await page.goto(`/${SLUG}/work?execution_mode=headless&per_capita=1`);
     await expect(page.getByTestId("page-toolbar")).toContainText("Headless");
