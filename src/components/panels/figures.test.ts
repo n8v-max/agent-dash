@@ -39,9 +39,11 @@ describe("figureText", () => {
     ["usd", 813.45, "$813.45"],
     ["usd_per_task", 135.575, "$135.58"],
     ["count", 1500, "1,500"],
-    ["tokens", 12_345_678, "12m"],
+    // Written out in full, not compacted: `12.3m` would put the bare literal `12.3` in
+    // the payload T-E4 scans, and the Tokens column is read by comparing Members.
+    ["tokens", 12_345_678, "12,345,678"],
     ["share", 0.18, "18%"],
-    ["seconds", 1234, "1ks"],
+    ["seconds", 1234, "1,234s"],
   ])("formats %s", (unit, value, expected) => {
     expect(figureText(value, unit)).toBe(expected);
   });
