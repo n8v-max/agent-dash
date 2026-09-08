@@ -8,7 +8,7 @@
 // not-found *body* while answering 200 if the check lands after streaming begins, and a soft
 // 404 is not what R-A7 asks for.
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { OPEN_ACCOUNT, RESTRICTED_ACCOUNT, useSession } from "./support/session";
 
 const BASE = "http://localhost:3000";
@@ -104,35 +104,9 @@ test.describe("R-A4 / R-T13 — issuing a session", () => {
   });
 });
 
-// R-A8 — navigation is identical for both accounts. Asserted as an equality of the nav's
-// link set, not eyeballed: nothing hidden, nothing disabled, the restricted account simply
-// receives fewer rows. The full T-E1 sweep belongs to ticket 30, which owns the real shell.
-test.describe("R-A8 — the two accounts see the same doors", () => {
-  const navOf = async (page: Page): Promise<string[]> =>
-    page.getByRole("navigation").getByRole("link").allTextContents();
-
-  test("the nav is the same set of items for the open and the restricted account", async ({
-    page,
-    context,
-    baseURL,
-  }) => {
-    await useSession(
-      context,
-      { member_id: OPEN_ACCOUNT.memberId, org_slug: OPEN_ACCOUNT.orgSlug },
-      baseURL ?? BASE,
-    );
-    await page.goto(`/${OPEN_ACCOUNT.orgSlug}`);
-    const open = await navOf(page);
-
-    await useSession(
-      context,
-      { member_id: RESTRICTED_ACCOUNT.memberId, org_slug: RESTRICTED_ACCOUNT.orgSlug },
-      baseURL ?? BASE,
-    );
-    await page.goto(`/${RESTRICTED_ACCOUNT.orgSlug}`);
-    const restricted = await navOf(page);
-
-    expect(open.length).toBeGreaterThan(0);
-    expect(restricted).toEqual(open);
-  });
-});
+// R-A8 — navigation is identical for both accounts — **moved to `routes.spec.ts`**.
+//
+// A single-route version of that equality stood here while the shell was being built and T-E1's
+// sweep did not exist. T-E1 owns it now, across all six routes and comparing `href` and
+// `aria-current` as well as the label; keeping a `/demo`-only copy beside it would be one test
+// paying for the same claim twice.

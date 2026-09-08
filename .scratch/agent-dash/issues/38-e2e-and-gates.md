@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 32, 33, 34, 35, 36
-Label: ready-for-agent
+Label: resolved
 
 # E2E suite, coverage gates, and CI
 
@@ -113,3 +113,35 @@ contain the viewer's *own* name, so the negatives cannot pass vacuously) and the
 guards** on the search sets. And re-run ticket 29's falsification probe afterwards — render a
 name and a cost in a `hidden` section and confirm T-E4 still fails — because an exclusion list is
 exactly the kind of change that can quietly make an assertion unable to fire.
+
+### 2026-09-08 — implemented (ticket 38)
+
+**Done-when met, with one criterion blocked.** Every criterion in `spec.md` § 10 has a passing
+owning test per `testing-spec.md` § 9 except **A28**, which is left blocked on the human decision
+recorded in the comment above. It is not written to either side.
+
+**Added:**
+
+- **T-E1** — `e2e/routes.spec.ts`. 6 routes × 2 accounts = 12 navigations, each asserting a 200, the
+  `<main>` landmark carrying *that route's* `<h1>`, the header, no Next error surface in the
+  rendered text, and no `pageerror`. Plus the A9/R-A8 nav-set equality, now over all six routes and
+  comparing `href` and `aria-current` as well as the label.
+- The single-route version of that nav equality was **moved out of `enforcement.spec.ts`** rather
+  than duplicated. It was placed there as a stand-in while the shell was being built.
+- **T-E4's permanent positive control** — `e2e/payload.spec.ts` now asserts that the *open*
+  account's `/demo/people` payload carries the nineteen names the restricted account must not
+  receive. This is the wave-9 item the file's `TODO` named; the `TODO` is gone and the
+  `sonarjs/todo-tag` warning with it. The second item that `TODO` carried — the restricted
+  payload's row count — is the recorded T-E2 shortfall and lives in `e2e/people.spec.ts`, where
+  the rows are.
+- **T-Q3** — `docs/coverage-gaps.md`. A ranked list of eleven unasserted behaviours in
+  `src/domain/**`, the § 7 decisions that are deliberately not on it, and why the percentage is not
+  the deliverable. The list is produced, not closed: none of its items is an acceptance criterion.
+
+**Gates verified, not changed.** `.github/workflows/ci.yml` already runs `pnpm lint` (the ESLint
+domain-boundary rule), the T-F9 / R-T35 fixture-seed regenerate-and-diff, and `pnpm test:coverage`.
+T-Q2's per-file domain thresholds were falsified rather than assumed: raising `DOMAIN_THRESHOLDS`
+to 99% branches makes `pnpm test:coverage` exit 1 naming `src/domain/viewmodel.ts` by file, which
+is the per-file behaviour the generated threshold keys exist for. Reverted.
+
+**T-E4 was not weakened and `e2e/support/costs.ts` and `e2e/support/fixture.ts` were not touched.**

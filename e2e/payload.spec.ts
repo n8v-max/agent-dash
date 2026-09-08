@@ -21,21 +21,37 @@
 // page that carries no money at all. `./support/costs` computes both from the raw committed
 // fixture, never from `src/data/queries.ts`, and its header says why.
 //
-// **What this file cannot yet assert, and does not pretend to.** The panels that carry Member
-// rows and cost figures do not exist — wave 9 supplies them. Until they do, the negative
-// assertions below run against routes that render a shell. The positive control exists so that
-// this is not a vacuous pass: it proves the search finds a Member name in the payload when one
-// is genuinely there, so a failure to find the other nineteen is a fact about the payload and
-// not about the search. The two set-shape tests below do the same job for the cost half.
+// **Two positive controls, because a negative assertion is only worth what its search is worth.**
 //
-// TODO(wave 9): once `/[org]/people` and `/[org]/spend` render rows, add the assertions that
-// cannot be made today — that the restricted payload carries exactly two rows (own + Team
-// aggregate, T-E2) and that the open account's payload carries the other Members' names, which
-// is the permanent positive control for the negative assertions on the restricted one.
+//   1. *The viewer's own name is in its own payload.* Without it every assertion below could pass
+//      because the payload was empty, the encoding defeated the search, or the request never
+//      reached the app.
+//   2. *The other Members' names are in the **open** account's payload.* This is the permanent
+//      one, and it is the stronger of the two: it proves the nineteen names the restricted
+//      account must not receive are names this product genuinely serialises when a grant allows
+//      it — so their absence from the restricted payload is a fact about the access model rather
+//      than a fact about the fixture, the route or the regex. It could not be written until
+//      `/[org]/people` rendered rows, and it now can.
+//
+// The two set-shape tests do the same job for the cost half.
+//
+// **The one T-E2-shaped assertion this file still does not make** is the restricted payload's
+// *row count*. `testing-spec.md` § 5 asks for two rows — the viewer's own plus its Team's
+// aggregate — and `src/data/queries/people.ts` renders the own row plus an aggregate *sentence*,
+// so the count is one. That is a recorded shortfall and a product decision, not a test defect;
+// it is asserted where the rows are, in `e2e/people.spec.ts`, as the range both designs satisfy
+// with the difference-in-kind claim asserted sharply beside it. It is not restated here.
 
 import { expect, test } from "@playwright/test";
 import { decimalsIn, ungrantedCostLiterals } from "./support/costs";
-import { RESTRICTED_ACCOUNT, orgRoutes, payloadFor, ungrantedNames, useSession } from "./support/session";
+import {
+  OPEN_ACCOUNT,
+  RESTRICTED_ACCOUNT,
+  orgRoutes,
+  payloadFor,
+  ungrantedNames,
+  useSession,
+} from "./support/session";
 
 const BASE = "http://localhost:3000";
 
@@ -165,4 +181,31 @@ test.describe("T-E4 — the restricted account's payload", () => {
       expect(leaked, `${route} serialised costs outside the contractor's grants`).toEqual([]);
     });
   }
+});
+
+// The permanent positive control for the name half. It runs as the *open* account, which is the
+// only reason it belongs in a second describe: the same nineteen names, the same route, the same
+// search, and a grant that allows them — so a green negative above cannot be the search failing.
+test.describe("T-E4 — the same names, for an account that holds the grant", () => {
+  test("the open account's /demo/people payload carries every name the contractor may not see", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await useSession(
+      context,
+      { member_id: OPEN_ACCOUNT.memberId, org_slug: OPEN_ACCOUNT.orgSlug },
+      baseURL ?? BASE,
+    );
+
+    const payload = await payloadFor(page, `/${OPEN_ACCOUNT.orgSlug}/people`);
+
+    const absent = UNGRANTED_NAMES.filter((name) => !payload.includes(name));
+
+    expect(
+      absent,
+      "the search found none of these in a payload that is supposed to carry them, so the " +
+        "negative assertions above prove nothing about the access model",
+    ).toEqual([]);
+  });
 });
