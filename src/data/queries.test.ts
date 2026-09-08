@@ -290,6 +290,47 @@ describe("R-T7 — the mirror states what the chart claims, on every panel of ev
   });
 });
 
+describe("R-T30 — a series key survives being turned into a CSS custom property", () => {
+  const pages = Object.entries(OPEN_PAGES);
+
+  // shadcn's `ChartStyle` mints `--color-${key}` from the series key, so a key carrying a space
+  // produces `--color-Claude Sonnet`: not a valid property name, so the browser drops the whole
+  // declaration and `fill="var(--color-Claude Sonnet)"` resolves to nothing. The mark renders
+  // unpainted while the legend swatch — which reads `--chart-N` directly — stays coloured, so it
+  // is the silent wrong-colour failure R-T30 and T-C3 exist to close, not a visible error.
+  //
+  // Model `family` was authored for a reader ("Claude Sonnet") and was being used as the key.
+  // Every other grouping is already keyed on an identifier. This asserts the property for all of
+  // them at once, so the next grouping keyed on a label fails here rather than in a browser.
+  const CSS_IDENT = /^[\w-]+$/;
+
+  it.each(pages)("%s: every series key is a valid custom-property ident", (_name, page) => {
+    for (const chart of chartsIn(page)) {
+      for (const series of chart.series) {
+        expect(series.key, `series key ${JSON.stringify(series.key)}`).toMatch(CSS_IDENT);
+      }
+    }
+  });
+
+  it.each(["exact", "family", "tier"] as const)(
+    "holds at Model roll-up level %s, which is where it failed",
+    (level) => {
+      const page = spendPage(OPEN, paramsFor("spend", { modelLevel: level }));
+      const keys = page.adoption.modelMix.chart.series.map((series) => series.key);
+      expect(keys.length).toBeGreaterThan(0);
+      for (const key of keys) expect(key, `${level}: ${key}`).toMatch(CSS_IDENT);
+    },
+  );
+
+  it("keeps the authored label at `family`, where the key had to change", () => {
+    const page = spendPage(OPEN, paramsFor("spend", { modelLevel: "family" }));
+    const series = page.adoption.modelMix.chart.series;
+    // The key is now an identifier; the reader's text is untouched.
+    expect(series.map((entry) => entry.label)).toContain("Claude Sonnet");
+    expect(series.map((entry) => entry.key)).toContain("Claude-Sonnet");
+  });
+});
+
 describe("R-V1 — `stackable` follows the partition, not the panel", () => {
   it("never stacks a Team-grouped panel, on any page", () => {
     for (const page of [

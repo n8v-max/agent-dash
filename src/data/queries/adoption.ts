@@ -96,6 +96,22 @@ const distributionOf = (distribution: Distribution): DistributionViewModel => ({
  * Tokens by Model label, per bucket. Entries naming a Model outside the roster are counted
  * nowhere — the same rule `modelMix` applies, restated here because this pass is per bucket.
  */
+/**
+ * The series key for a Model grouping — an identifier, never a display label.
+ *
+ * `family` is the one Model level whose value is authored for a reader ("Claude Sonnet"), and a
+ * series key travels further than the other keys do: R-T30 turns it into a CSS custom property,
+ * and `--color-Claude Sonnet` is not a valid property name, so the declaration is dropped and the
+ * mark renders unpainted. The legend swatch reads `--chart-N` directly and stays coloured, which
+ * makes it the silent wrong-colour class R-T30 and T-C3 exist to close rather than a visible
+ * error. Every other grouping in the product is already keyed on an id (`team_platform`,
+ * `api-gateway`, `balanced`), so this is the only level that needed one.
+ *
+ * The label is carried separately, by `labelOf` on the chart input.
+ */
+const modelGroupKey = (context: PageContext, id: string, level: ModelLevel): string =>
+  context.label.model(id, level).replace(/[^\w-]+/g, "-");
+
 const modelCells = (
   context: PageContext,
   level: ModelLevel,
@@ -107,7 +123,7 @@ const modelCells = (
     for (const row of bucket.rows) {
       for (const entry of row.token_usage) {
         if (!roster.has(entry.model_id)) continue;
-        const group = context.label.model(entry.model_id, level);
+        const group = modelGroupKey(context, entry.model_id, level);
         totals.set(group, (totals.get(group) ?? 0) + tokensProcessed(entry));
       }
     }
@@ -122,6 +138,12 @@ const modelMixPanel = (context: PageContext): ModelMixPanel => {
     entries: view.rows.flatMap((row) => row.token_usage),
     models: context.data.models,
   });
+  const modelLabels = new Map(
+    context.data.models.map((model) => [
+      modelGroupKey(context, model.id, level),
+      context.label.model(model.id, level),
+    ]),
+  );
 
   return {
     level,
@@ -133,6 +155,7 @@ const modelMixPanel = (context: PageContext): ModelMixPanel => {
       measure: "additive",
       buckets: bucketAxis(context, view.buckets),
       cells: modelCells(context, level, view.buckets),
+      labelOf: (key) => modelLabels.get(key) ?? key,
       partition: true,
     }),
     levels: {

@@ -77,6 +77,12 @@ export type ChartFrameProps = {
   readonly dimension?: Dimension;
   /** How a measure-axis tick reads. Decimal-free by default — see `chart-shapes.tsx`. */
   readonly tickFormat?: (value: number) => string;
+  /**
+   * Pin the measure axis to a fixed extent, for panels read against a scale they do not own.
+   * R-N13's acceptance small multiples are the case; the value comes from the ViewModel
+   * (`acceptanceAxis`), so the scale stays a domain fact rather than a panel's choice.
+   */
+  readonly measureDomain?: readonly [number, number];
   readonly className?: string;
 };
 
@@ -108,6 +114,7 @@ export function ChartFrame(props: ChartFrameProps) {
             chart,
             shape: props.shape,
             tickFormat: props.tickFormat ?? defaultTickFormat,
+            measureDomain: props.measureDomain,
           })}
         </ChartContainer>
       </ChartBox>

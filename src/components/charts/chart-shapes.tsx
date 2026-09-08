@@ -105,22 +105,37 @@ type ShapeInput = {
   readonly chart: ChartViewModel;
   readonly shape: ChartShape;
   readonly tickFormat: (value: number) => string;
+  /**
+   * The measure axis's fixed extent, when the panel is read against a scale it does not own.
+   *
+   * R-N13's small multiples are the case: acceptance rate is comparable only *within* a WorkType,
+   * so the five charts exist to be read side by side, and side-by-side reading is only honest if
+   * they share a scale. Left to itself Recharts scales each chart to its own maximum — at month
+   * grain `deploy` at 33% drew exactly as tall as `implementation` at 67%, which is the chart
+   * asserting a falsehood the caption cannot undo.
+   *
+   * It arrives from the domain layer (`acceptanceAxis` on the ViewModel), like `stackable` — a
+   * component supplies no default and decides nothing.
+   */
+  readonly measureDomain?: readonly [number, number];
 };
 
 /**
  * The bucket axis is categorical and the measure axis is numeric; `horizontal-bar` swaps which
  * is which, and nothing else about the chart changes.
  */
-const axesFor = (input: ShapeInput): readonly ReactElement[] =>
-  input.shape === "horizontal-bar"
+const axesFor = (input: ShapeInput): readonly ReactElement[] => {
+  const domain = input.measureDomain ? { domain: input.measureDomain } : {};
+  return input.shape === "horizontal-bar"
     ? [
-        <XAxis key="measure" type="number" tickFormatter={input.tickFormat} {...AXIS} />,
+        <XAxis key="measure" type="number" tickFormatter={input.tickFormat} {...domain} {...AXIS} />,
         <YAxis key="bucket" type="category" dataKey={BUCKET_KEY} width={120} {...AXIS} />,
       ]
     : [
         <XAxis key="bucket" dataKey={BUCKET_KEY} {...AXIS} />,
-        <YAxis key="measure" tickFormatter={input.tickFormat} width={56} {...AXIS} />,
+        <YAxis key="measure" tickFormatter={input.tickFormat} width={56} {...domain} {...AXIS} />,
       ];
+};
 
 /** Grid, axes, tooltip and legend — identical for every shape, so no panel can vary them. */
 const furnitureFor = (input: ShapeInput): readonly ReactElement[] => [
