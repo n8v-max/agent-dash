@@ -1,14 +1,13 @@
 // T-E4's cost search set — the literals a leak would be made of, and nothing else.
 //
-// **The defect this module exists to fix: value identity is not fact identity.** The earlier
+// **The defect this module exists to fix: value identity is not fact identity.** The original
 // construction was "every other Member's session `cost`, minus the viewer's own session costs".
 // But the restricted account holds `self` over `cost` (R-A3.1), so it legitimately renders
-// *aggregates* of its own rows — weekly totals, per-Repository totals, tile figures — and a
-// legitimate own-aggregate can equal some other Member's individual session cost by arithmetic
-// coincidence. Ticket 31 measured exactly that: 15 values flagged on `/demo/spend` were all
-// mirror `<td>` cells holding the viewer's own weekly cost, colliding by value with rows the
-// viewer holds no grant over. There are 439 distinct two-decimal literals in a narrow money
-// range, so almost any legitimate money figure has a real chance of tripping the assertion.
+// *readings* of its own rows — weekly totals, per-Repository totals, tile figures, and the
+// ratios those same rows divide out to — and a legitimate own reading can equal some other
+// Member's individual session cost by arithmetic coincidence. There are ~525 distinct
+// two-decimal literals in a narrow money range, so almost any legitimate figure has a real
+// chance of tripping the assertion.
 //
 // The fix is to make the search set **discriminate**, not to relax the claim: subtract every
 // value the viewer's *own granted rows* can legitimately produce. What stays in the set is
@@ -16,107 +15,54 @@
 // weakening, because the RSC flight payload carries raw props and a leaked `24.39` would never
 // match a currency pattern.
 //
-// **This reads the committed fixture JSON directly and never calls `src/data/queries.ts`.**
-// Deciding what the test permits by running the code under test is circular: a filter that
-// wrongly emitted another Member's rows would emit the same values into the allow-list, and the
-// leak would become invisible. The only thing borrowed from the application is R-M2 — hidden
-// rows are dropped, exactly as `src/data/load.ts` drops them at parse — because a row nothing
-// can render is not a row anything can leak.
-
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
-
-/**
- * The fields of a raw fixture session row this module reads. Deliberately the JSON shape and
- * not `AgentSession`: importing the domain type is harmless, but stating the shape here is what
- * makes the "no application code decides what the test allows" property visible at a glance.
- */
-type SessionRow = {
-  readonly member_id: string;
-  readonly cost: number;
-  readonly hidden: boolean;
-  readonly started_at: string;
-  readonly repository_id: string;
-  readonly work_type: string;
-  readonly execution_mode: string;
-  readonly accepted: boolean;
-};
-
-const FIXTURE_DIRECTORY = join(process.cwd(), "src", "fixtures", "data");
-
-const readFixture = <Shape>(...path: readonly string[]): Shape =>
-  JSON.parse(readFileSync(join(FIXTURE_DIRECTORY, ...path), "utf8")) as Shape;
-
-/** R-M10 — boundaries fall in the Organization's declared timezone, never UTC. */
-const orgTimezone = (): string =>
-  readFixture<{ readonly timezone: string }>("organization.json").timezone;
-
-/**
- * Every session the product can render, hidden rows already gone (R-M2). Read straight off
- * disk: `load.ts` is the application's door to the fixture, and this is not the application.
- */
-const visibleSessions = (): readonly SessionRow[] =>
-  readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
-    .filter((name) => name.endsWith(".json"))
-    .flatMap((name) => readFixture<readonly SessionRow[]>("sessions", name))
-    .filter((row) => !row.hidden);
-
-// --- Period bucketing, reimplemented rather than imported ------------------------------------
+// **Three classes are subtracted, and each was measured against a real failure.**
 //
-// `src/domain/periods.ts` is the product's own answer to "which week is this row in", and the
-// test asking it would again be the code under test deciding what the test allows. It is thirty
-// lines of civil-date arithmetic; the convention it follows — ISO weeks, Monday start, buckets
-// in the Organization's timezone — is what is being matched, not the implementation.
+//   1. **Sums** (ticket 31). 15 values flagged on `/demo/spend` were mirror `<td>` cells holding
+//      the viewer's own weekly cost.
+//   2. **Quotients** (this ticket). A sum is not the only reading a granted row has. Every ratio
+//      the product renders is `numerator-over-K ÷ denominator-over-K` for one (period × grouping)
+//      key K, and those land in the same narrow range: 16 literals on `/demo/spend` were the
+//      R-X1 mirrors of Cost per completed Job, Cost per session and cost per completed Job by
+//      template, and three on `/demo/work` — `0.7`, `0.6`, `0.86` — were **acceptance rates**.
+//      `/demo/work` renders no money figure at all: `WorkPageViewModel` carries counts, rates,
+//      ages and seconds and has no cost field, so a money assertion failing there was proof the
+//      search was unsound rather than a finding.
+//   3. **The published token rate card** (R-N11), in `./fixture`, which is not a Member datapoint
+//      at all. Its cache-write multiplier `1.25` and one model's output rate `1.5` were the last
+//      two `/demo/spend` literals, and neither is anybody's cost.
+//
+// **The quotients are taken over matching keys only.** A cross product of every sum against
+// every count would blanket the value space and gut the search set; the product never renders
+// one bucket's cost over another bucket's session count, so neither does this.
+//
+// **The subtraction is built from the viewer's own rows and nothing else** — never the Team's,
+// even though `team` over `jobs` (R-A3) means the rates on `/demo/work` are genuinely computed
+// over the Team's sessions. A teammate's *cost* is ungranted (the `cost` view is `self`-only),
+// so building the allow-list out of teammates' rows would let an ungranted cost mask itself.
+// Own rows are the conservative source: every literal removed is one the viewer holds `self`
+// over, at a (period × grouping) key the product actually reports.
+//
+// **This reads the committed fixture JSON directly and never calls `src/data/queries.ts`** — see
+// `./fixture`, which holds the reading and the period arithmetic.
 
-const MS_PER_DAY = 86_400_000;
+import {
+  civilDayIn,
+  orgTimezone,
+  periodKeysOf,
+  tokenRateCardFigures,
+  visibleSessions,
+  type SessionRow,
+} from "./fixture";
 
-/** `YYYY-MM-DD` → whole days since 1970-01-01. `Date.UTC` is arithmetic, not a clock read. */
-const dayNumberOf = (civil: string): number =>
-  Date.UTC(Number(civil.slice(0, 4)), Number(civil.slice(5, 7)) - 1, Number(civil.slice(8, 10))) /
-  MS_PER_DAY;
-
-/** Day 0 (1970-01-01) was a Thursday, so `day + 3` is days since the preceding Monday. */
-const startOfWeek = (day: number): number => day - ((((day + 3) % 7) + 7) % 7);
-
-/** `2026-W15` — the ISO week-numbering key, fixed by the week's Thursday. */
-const isoWeekKey = (day: number): string => {
-  const monday = startOfWeek(day);
-  const year = new Date((monday + 3) * MS_PER_DAY).getUTCFullYear();
-  const firstMonday = startOfWeek(dayNumberOf(`${year}-01-04`));
-  return `${year}-W${String((monday - firstMonday) / 7 + 1).padStart(2, "0")}`;
-};
-
-/** An instant → the civil day it fell on in one fixed timezone. Built once per call site. */
-const civilDayIn = (timezone: string): ((instant: string) => string) => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  return (instant) => {
-    const parts = Object.fromEntries(
-      formatter.formatToParts(new Date(instant)).map((part) => [part.type, part.value]),
-    );
-    return `${parts.year}-${parts.month}-${parts.day}`;
-  };
-};
-
-/** The three grains a row lands in: `2026-08-03`, `2026-W32`, `2026-08`. */
-const periodKeysOf = (civil: string): readonly string[] => [
-  civil,
-  isoWeekKey(dayNumberOf(civil)),
-  civil.slice(0, 7),
-];
-
-// --- What the viewer's own rows can legitimately add up to -------------------------------------
+// --- What the viewer's own rows can legitimately be read as ------------------------------------
 
 /** The whole-window "bucket": the ungrouped totals a tile carries (R-N8). */
 const WHOLE_WINDOW = "*";
 
 /**
- * The groupings a cost panel splits by. `all` is the bucket's own total — the row total of a
- * mirror table, and the value of a single-series chart point.
+ * The groupings a panel splits by. `all` is the bucket's own reading — the row total of a
+ * mirror table, the value of a single-series chart point, and what every panel falls back to
+ * when the page's own filters have narrowed the population instead.
  */
 const groupKeysOf = (row: SessionRow): readonly string[] => [
   "all",
@@ -127,22 +73,99 @@ const groupKeysOf = (row: SessionRow): readonly string[] => [
 ];
 
 /**
- * Every total the viewer's own rows can produce: the grand total, each period bucket at each
- * grain, each grouping, and the **cross product** of the two — which is precisely what one cell
- * of an R-X1 chart mirror holds.
+ * One (period × grouping) key's rows, reduced to the four quantities every reading in this
+ * product divides or sums: money, sessions, accepted sessions, and the Tasks behind them.
+ *
+ * The Tasks are kept as their sessions rather than as counts because the Task-grain labels are
+ * order-sensitive — Rework is "a non-accepted session **followed by** another".
  */
-const grantedTotals = (rows: readonly SessionRow[], timezone: string): readonly number[] => {
+type Bucket = {
+  cost: number;
+  sessions: number;
+  accepted: number;
+  readonly tasks: Map<string, SessionRow[]>;
+};
+
+const emptyBucket = (): Bucket => ({ cost: 0, sessions: 0, accepted: 0, tasks: new Map() });
+
+const absorb = (bucket: Bucket, row: SessionRow): void => {
+  bucket.cost += row.cost;
+  bucket.sessions += 1;
+  if (row.accepted) bucket.accepted += 1;
+  const held = bucket.tasks.get(row.task_key);
+  if (held) held.push(row);
+  else bucket.tasks.set(row.task_key, [row]);
+};
+
+/**
+ * The viewer's own rows, bucketed the way every panel buckets them: the grand total, each
+ * period bucket at each grain, each grouping, and the **cross product** of the two — which is
+ * precisely what one cell of an R-X1 chart mirror holds.
+ */
+const grantedBuckets = (rows: readonly SessionRow[], timezone: string): readonly Bucket[] => {
   const civilDayOf = civilDayIn(timezone);
-  const totals = new Map<string, number>();
+  const buckets = new Map<string, Bucket>();
   for (const row of rows) {
     for (const period of [WHOLE_WINDOW, ...periodKeysOf(civilDayOf(row.started_at))]) {
       for (const group of groupKeysOf(row)) {
         const key = `${period}|${group}`;
-        totals.set(key, (totals.get(key) ?? 0) + row.cost);
+        const bucket = buckets.get(key) ?? emptyBucket();
+        absorb(bucket, row);
+        buckets.set(key, bucket);
       }
     }
   }
-  return [...totals.values()];
+  return [...buckets.values()];
+};
+
+// --- The Task-grain labels, restated rather than imported --------------------------------------
+//
+// `src/domain/metrics/efficacy.ts` owns these for the product; restating them keeps the rule
+// this file exists for. They are three one-line predicates and the definitions are R-M1's.
+
+/** Start, then end — the order `efficacy.ts` reads "followed by" off. */
+const inSessionOrder = (left: SessionRow, right: SessionRow): number =>
+  Date.parse(left.started_at) - Date.parse(right.started_at) ||
+  Date.parse(left.ended_at) - Date.parse(right.ended_at);
+
+/** A Completed Task is a Task with at least one accepted session. */
+const isCompleted = (sessions: readonly SessionRow[]): boolean =>
+  sessions.some((session) => session.accepted);
+
+/** Rework — a non-accepted session with another session after it, of any WorkType. */
+const isRework = (sessions: readonly SessionRow[]): boolean =>
+  [...sessions]
+    .sort(inSessionOrder)
+    .slice(0, -1)
+    .some((session) => !session.accepted);
+
+/** Decomposition — a second *accepted* session: work deliberately split, not work repeated. */
+const isDecomposition = (sessions: readonly SessionRow[]): boolean =>
+  sessions.filter((session) => session.accepted).length > 1;
+
+const countOf = (
+  tasks: ReadonlyMap<string, SessionRow[]>,
+  holds: (sessions: readonly SessionRow[]) => boolean,
+): number => [...tasks.values()].filter((sessions) => holds(sessions)).length;
+
+/** A quotient, or nothing at all. Every denominator in this module goes through it. */
+const over = (numerator: number, denominator: number): readonly number[] =>
+  denominator === 0 ? [] : [numerator / denominator];
+
+/**
+ * Every ratio one (period × grouping) key legitimately reads out to, numerator and denominator
+ * taken over **the same** key: Cost per session and Cost per completed Job (`/demo/spend`), the
+ * acceptance rate (`/demo/work`, R-M6), and the two Task-grain rates beside it.
+ */
+const grantedQuotients = (bucket: Bucket): readonly number[] => {
+  const tasks = bucket.tasks.size;
+  return [
+    ...over(bucket.cost, bucket.sessions),
+    ...over(bucket.cost, countOf(bucket.tasks, isCompleted)),
+    ...over(bucket.accepted, bucket.sessions),
+    ...over(countOf(bucket.tasks, isRework), tasks),
+    ...over(countOf(bucket.tasks, isDecomposition), tasks),
+  ];
 };
 
 // --- Literals ----------------------------------------------------------------------------------
@@ -177,7 +200,8 @@ export const decimalsIn = (payload: string): ReadonlySet<string> =>
  * Three renderings, because the figure reaches the browser in three shapes: the raw prop in the
  * RSC flight payload (`String`), a two-decimal money figure, and the grouped `en-GB` form —
  * whose thousands separator means `1,234.56` contributes the literal `234.56`, which is the kind
- * of collision that is impossible to reason about and trivial to measure.
+ * of collision that is impossible to reason about and trivial to measure. A quotient goes through
+ * the **same** path as a sum, so `0.7`, `0.70` and `0.666…` are all covered identically.
  */
 const literalsOf = (value: number): readonly string[] =>
   [String(value), value.toFixed(2), MONEY.format(value)].flatMap(
@@ -193,20 +217,28 @@ const literalsFor = (figures: readonly number[]): Set<string> => {
 };
 
 /**
- * Cost literals the viewer holds no grant over, and which its own granted rows cannot produce.
+ * Cost literals the viewer holds no grant over, and which nothing on the page can legitimately
+ * produce.
  *
  * Both sides go through the same three renderings, which is what keeps the two comparable: an
  * ungranted cost of `2` is searched for as `2.00` because that is the only shape of it a
  * decimal search can find, and the viewer's own cost of `2` is subtracted in the same shape.
- * Subtracted, in order: the viewer's own individual session costs, and every total those rows
- * can legitimately be aggregated into. What remains is a value that can only have come from a
- * row the viewer holds no scope over — which is the claim T-E4 makes.
+ * Subtracted, in order: the viewer's own individual session costs, every total those rows
+ * aggregate to, every ratio those same rows divide out to at the same key, and the published
+ * token rate card. What remains is a value that can only have come from a row the viewer holds
+ * no scope over — which is the claim T-E4 makes.
  */
 export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<string> => {
   const rows = visibleSessions();
   const own = rows.filter((row) => row.member_id === viewerMemberId);
+  const buckets = grantedBuckets(own, orgTimezone());
 
-  const granted = literalsFor([...own.map((row) => row.cost), ...grantedTotals(own, orgTimezone())]);
+  const granted = literalsFor([
+    ...own.map((row) => row.cost),
+    ...buckets.map((bucket) => bucket.cost),
+    ...buckets.flatMap(grantedQuotients),
+    ...tokenRateCardFigures(),
+  ]);
   const ungranted = literalsFor(
     rows.filter((row) => row.member_id !== viewerMemberId).map((row) => row.cost),
   );

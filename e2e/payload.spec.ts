@@ -16,8 +16,10 @@
 // A cost is a *number*, and `self` over `cost` grants the viewer every aggregate of its own
 // rows — so a legitimate own-aggregate can equal some other Member's session cost by arithmetic
 // coincidence. The name half is untouched and sharp. The cost half now subtracts what the
-// viewer's own granted rows can legitimately add up to; `./support/costs` computes that from the
-// raw committed fixture, never from `src/data/queries.ts`, and its header says why.
+// viewer's own granted rows can legitimately **add up to and divide out to** — a ratio is a
+// reading of granted rows exactly as a total is, and `/demo/work` renders acceptance rates on a
+// page that carries no money at all. `./support/costs` computes both from the raw committed
+// fixture, never from `src/data/queries.ts`, and its header says why.
 //
 // **What this file cannot yet assert, and does not pretend to.** The panels that carry Member
 // rows and cost figures do not exist — wave 9 supplies them. Until they do, the negative
@@ -42,18 +44,31 @@ const UNGRANTED_NAMES = ungrantedNames(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 
 /**
- * The floor the residual cost set must clear. Measured on the committed fixture: **484**
- * candidate ungranted literals, **459** after subtracting every figure the viewer's own granted
- * rows can produce — 25 removed, each one a value those rows genuinely aggregate to. (The set
- * the earlier construction searched held 439; subtracting aggregates alone takes it to 417, and
- * it is larger here only because an ungranted cost is now also searched for in the two-decimal
- * shape a money formatter would print it in.)
+ * The floor the residual cost set must clear. Measured on the committed fixture: **525**
+ * candidate ungranted literals, **348** after subtracting every figure the viewer's own granted
+ * rows can produce. Where the 177 go:
  *
- * **400 is the line below which this stops being a search of the money range.** If a fixture or
+ *   * **66** are the viewer's own session costs and the totals its rows aggregate to (sums).
+ *   * **95** are money quotients — Cost per session and Cost per completed Job, at the same
+ *     (period × grouping) key the numerator and the denominator were both summed over. This is
+ *     the class that made `/demo/spend` fail on 16 R-X1 mirror cells.
+ *   * **13** are the session- and Task-grain rates: acceptance rate, Rework rate, Decomposition
+ *     rate. This is the class that made `/demo/work` — a page carrying no money figure at all —
+ *     fail on `0.7`, `0.6` and `0.86`.
+ *   * **3** are the published token rate card (R-N11), which is nobody's datapoint.
+ *
+ * **The floor was 400 against a set of 459 and is now 300 against a set of 348.** That is a
+ * deliberate, measured change and not a concession: the 111 literals the quotient and rate-card
+ * subtractions removed are each a value the viewer's own `self`-granted rows genuinely read out
+ * to, so keeping them would keep testing arithmetic coincidence rather than disclosure. 300
+ * holds the same ~14% headroom over the measured set that 400 held over 459, and 348 of 525 is
+ * still two thirds of the ungranted money range.
+ *
+ * **300 is the line below which this stops being a search of the money range.** If a fixture or
  * a subtraction change ever drops the set under it, the cost assertion has become theatre and
  * the answer is to investigate, not to lower the number.
  */
-const UNGRANTED_COST_FLOOR = 400;
+const UNGRANTED_COST_FLOOR = 300;
 
 /**
  * `24.39` is `ses_0032`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
@@ -68,6 +83,15 @@ const KNOWN_UNGRANTED_LITERAL = "24.39";
  * defect this file exists to fix: value identity is not fact identity.
  */
 const OWN_AGGREGATE_COLLISION = "13.04";
+
+/**
+ * `0.7` is the viewer's own acceptance rate for `implementation` work in August 2026 — 7 of its
+ * own 10 sessions — and it is also some other Member's session cost. It is one of the three
+ * literals `/demo/work` failed on, on a page whose ViewModel carries **no cost field at all**.
+ * A *sum* subtraction cannot see it; only the quotient subtraction can. It is named here so
+ * that a future change reverting the quotient half fails on a value, not just on a set size.
+ */
+const OWN_QUOTIENT_COLLISION = "0.7";
 
 test.describe("T-E4 — the restricted account's payload", () => {
   test.beforeEach(async ({ context, baseURL }) => {
@@ -107,6 +131,21 @@ test.describe("T-E4 — the restricted account's payload", () => {
       UNGRANTED_COSTS.has(OWN_AGGREGATE_COLLISION),
       `${OWN_AGGREGATE_COLLISION} is a total of the viewer's own sessions; self scope grants it`,
     ).toBe(false);
+  });
+
+  test("the search set excludes a ratio the viewer's own rows divide out to", () => {
+    expect(
+      UNGRANTED_COSTS.has(OWN_QUOTIENT_COLLISION),
+      `${OWN_QUOTIENT_COLLISION} is the viewer's own acceptance rate for one WorkType in one ` +
+        "month — a quotient of its own granted rows, not a cost it holds no scope over",
+    ).toBe(false);
+
+    // Named beside it, because the pair is the point: subtracting quotients must not have
+    // reached the costs a leak would actually be made of.
+    expect(
+      UNGRANTED_COSTS.has(KNOWN_UNGRANTED_LITERAL),
+      `${KNOWN_UNGRANTED_LITERAL} must survive the quotient subtraction as well as the sum one`,
+    ).toBe(true);
   });
 
   for (const route of ROUTES) {
