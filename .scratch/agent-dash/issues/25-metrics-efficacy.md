@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 23
-Label: ready-for-agent
+Label: resolved
 
 # Efficacy metrics
 

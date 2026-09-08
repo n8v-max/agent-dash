@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 30
-Label: ready-for-agent
+Label: resolved
 
 # ChartFrame: the table mirror, accessibility, and series identity
 
@@ -187,3 +187,43 @@ categorically distinguishable, which is the one job a series palette has. R-V7 c
 permitted and would not extend anything. Not done here: the charts are not on a page yet, no
 component hard-codes a colour (every mark reads `var(--color-<key>)` off the `ChartConfig`), so
 this stays a one-file change for whoever owns the panels' visual pass. Recorded, not re-decided.
+
+### 2026-09-08 — implemented (AFK build, wave 8)
+
+All six gates green. `ChartFrame` carries R-T28's four responsibilities and nothing else; the five
+shapes are built from the ViewModel.
+
+**T-C3 was written first and failed against the pristine vendored component**, exactly as ticket
+18's spike predicted:
+
+```
+AssertionError: expected [ <div …(1)>…(1)</div>, …(3) ] to deeply equal []
++ [ "Platform", "Data", "Mobile", "Infrastructure" ]
+```
+
+All four surviving legend entries were **the same DOM node objects** that had been Member names —
+React reconciled Members into Teams in place. Patch 3 then applied at both sites. Ticket 18's
+recorded tooltip diff needed one change to typecheck: Recharts 3 types `dataKey` as possibly a
+function, which is not a `React.Key`, so it is `String()`-wrapped. The legend site is exactly as
+recorded.
+
+**T-C11** is table-driven over all eleven groupings and typed as a total `Record<Grouping, boolean>`,
+so a new domain grouping fails to compile until someone decides its geometry. Two static assertions
+back it: **no `Pie` in any module including the vendored `chart.tsx`**, and **every `stackId` in the
+chart modules is the one `stackIdOf` produces** — so a panel cannot reach around the rule.
+
+**Fixed dimensions without a `ResizeObserver` polyfill**: given two fixed numbers Recharts skips its
+size detector entirely, and `ChartContainer`'s inner `ResponsiveContainer` sees a positive context
+and passes children through, so `initialDimension` is never consulted. The absence of the polyfill
+is asserted, since T-C0 makes it the alarm.
+
+**The predicted T-E4 chart-decimal hazard does not exist on this stack, and that was measured
+rather than assumed.** Recharts 3 sizes from an effect, so no SVG reaches the response payload at
+all — ten `ChartFrame`s mounted on two routes in a production build produced `hasSvg: false`. The
+exclusion the ticket proposed would have removed nothing and only narrowed the assertion, so it was
+not made. The falsification probe was re-run with the charts mounted and T-E4 still fires.
+
+Two follow-ups landed on `main` afterwards, both found by wave 9: `measureDomain` on `ChartFrame`
+(R-N13's shared axis was not actually honoured), and the Model-mix series key fix. One gap
+recorded and not closed: `ChartFrame` has no way to express "no axis labels at tile size" (R-N8),
+which ticket 32 worked around with arbitrary variants from its own panel.
