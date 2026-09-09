@@ -314,6 +314,10 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    // Stryker's sandbox is a copy of src/ with `@ts-nocheck` prepended and mutants spliced in;
+    // it is deleted after a run, but a cancelled run leaves it behind and it must never be linted.
+    ".stryker-tmp/**",
+    "reports/**",
     // shadcn primitives are vendored, not authored here.
     "src/components/ui/**",
   ]),
