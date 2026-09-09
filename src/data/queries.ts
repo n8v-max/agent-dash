@@ -31,6 +31,7 @@ export { controlOptions, PEOPLE_SORT_COLUMNS } from "./queries/controls";
 
 export type { SummaryPageViewModel, SummaryTile } from "./queries/summary";
 export type {
+  CostByRepositoryPanel,
   CostPerSessionPanel,
   SpendPageViewModel,
   TotalSpendPanel,

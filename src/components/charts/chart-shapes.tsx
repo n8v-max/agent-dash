@@ -71,6 +71,22 @@ export const STACK_ID = "series";
 const BUCKET_KEY = "bucket";
 
 /**
+ * **R-V12, in one expression** (T-C18). The only place a panel's named shape is overruled.
+ *
+ * A **ranked** ViewModel has no time axis: it holds one bucket covering the whole selected
+ * period and its groups are the bars, in R-V5's whole-range order. That is a horizontal bar
+ * chart whatever the panel asked for — Cost per completed Job names `line`, and at
+ * `subject=member` a line has nothing to run along.
+ *
+ * It is here rather than in the panels for the reason `stackIdOf` is: the *form* is a domain
+ * fact the query decided (`viewmodel.ts`'s `ChartForm`), and a panel that could choose its own
+ * shape from it could choose a different one on the page beside it. A panel still names the
+ * shape its **series** form takes; it never names the ranked one.
+ */
+export const shapeFor = (chart: ChartViewModel, shape: ChartShape): ChartShape =>
+  chart.form === "ranked" ? "horizontal-bar" : shape;
+
+/**
  * **R-V1, in one expression** (T-C11). The only producer of a `stackId` in the product.
  */
 export function stackIdOf(input: {
@@ -185,6 +201,15 @@ type ShapeInput = {
 const axesFor = (input: ShapeInput): readonly ReactElement[] => {
   const domain = input.measureDomain ? { domain: input.measureDomain } : {};
   const hide = input.axes === false;
+  // **R-V12 — a ranked chart's category axis holds one tick and says nothing.** Its single
+  // bucket is the whole selected period, which the mirror's column header already names and the
+  // page's own filter sentence already states, so drawing it would spend the 120px category
+  // gutter restating one of them. The *measure* axis stays: unlike R-N8's tile this is a
+  // full-width panel, and five bars of money want a scale to be read against.
+  //
+  // It is applied on the horizontal-bar arm alone because that is the only arm a ranked chart
+  // reaches — `shapeFor` has already overruled every other shape by the time this runs.
+  const bucketHidden = hide || input.chart.form === "ranked";
   return input.shape === "horizontal-bar"
     ? [
         <XAxis
@@ -195,7 +220,14 @@ const axesFor = (input: ShapeInput): readonly ReactElement[] => {
           {...domain}
           {...AXIS}
         />,
-        <YAxis key="bucket" type="category" dataKey={BUCKET_KEY} width={120} hide={hide} {...AXIS} />,
+        <YAxis
+          key="bucket"
+          type="category"
+          dataKey={BUCKET_KEY}
+          width={120}
+          hide={bucketHidden}
+          {...AXIS}
+        />,
       ]
     : [
         <XAxis key="bucket" dataKey={BUCKET_KEY} hide={hide} {...AXIS} />,
@@ -229,18 +261,22 @@ export const furnitureFor = (input: ShapeInput): readonly ReactElement[] => {
   const tooltip = <ChartTooltip key="tooltip" content={<ChartTooltipContent />} />;
   if (input.bare) return [tooltip];
 
+  // R-V12 — resolved here as well as in `chartElementFor`, so that whichever entry point a test
+  // or a panel reaches, the furniture and the marks agree about which shape is being drawn.
+  const resolved = { ...input, shape: shapeFor(input.chart, input.shape) };
+
   return [
     ...(input.axes === false
       ? []
       : [
           <CartesianGrid
             key="grid"
-            horizontal={input.shape !== "horizontal-bar"}
-            vertical={input.shape === "horizontal-bar"}
+            horizontal={resolved.shape !== "horizontal-bar"}
+            vertical={resolved.shape === "horizontal-bar"}
             strokeDasharray="3 3"
           />,
         ]),
-    ...axesFor(input),
+    ...axesFor(resolved),
     tooltip,
     <ChartLegend key="legend" content={<SeriesLegend />} />,
   ];
@@ -328,24 +364,28 @@ const MARGIN_WITH_LABELS = { top: 12, right: 40, bottom: 4, left: 4 } as const;
  * (R-V1) are decided once, above the switch.
  */
 export function chartElementFor(input: ShapeInput): ReactElement {
-  const data = chartRows(input.chart);
-  const stackId = stackIdOf({ shape: input.shape, stackable: input.chart.stackable });
-  const furniture = furnitureFor(input);
+  // R-V12 — the form is resolved **once**, above the switch, exactly as the stack decision is.
+  // Everything below reads `resolved.shape`, so a ranked ViewModel cannot reach a line mark by
+  // one path while its furniture is laid out for bars by another.
+  const resolved: ShapeInput = { ...input, shape: shapeFor(input.chart, input.shape) };
+  const data = chartRows(resolved.chart);
+  const stackId = stackIdOf({ shape: resolved.shape, stackable: resolved.chart.stackable });
+  const furniture = furnitureFor(resolved);
 
-  if (input.shape === "line") {
+  if (resolved.shape === "line") {
     return (
       <LineChart accessibilityLayer data={data}>
         {furniture}
-        {linesFor(input.chart)}
+        {linesFor(resolved.chart)}
       </LineChart>
     );
   }
 
-  if (input.shape === "area") {
+  if (resolved.shape === "area") {
     return (
       <AreaChart accessibilityLayer data={data}>
         {furniture}
-        {areasFor(input.chart, stackId)}
+        {areasFor(resolved.chart, stackId)}
       </AreaChart>
     );
   }
@@ -354,11 +394,11 @@ export function chartElementFor(input: ShapeInput): ReactElement {
     <BarChart
       accessibilityLayer
       data={data}
-      layout={input.shape === "horizontal-bar" ? "vertical" : "horizontal"}
-      margin={input.valueLabels ? MARGIN_WITH_LABELS : undefined}
+      layout={resolved.shape === "horizontal-bar" ? "vertical" : "horizontal"}
+      margin={resolved.valueLabels ? MARGIN_WITH_LABELS : undefined}
     >
       {furniture}
-      {barsFor(input, stackId)}
+      {barsFor(resolved, stackId)}
     </BarChart>
   );
 }

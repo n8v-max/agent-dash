@@ -60,11 +60,29 @@ export type MirrorViewModel = {
 /** A series as a chart renders it — `series.ts`'s shape, unchanged, so nothing re-spells it. */
 export type SeriesViewModel = Series;
 
+/**
+ * **R-V12 — what a chart's bucket axis is, decided by the query.**
+ *
+ * `series` is the ordinary chart: the buckets are periods and it is read left to right over
+ * time. `ranked` has **no time axis at all** — one bucket covering the whole selected period,
+ * the groups as the bars, in R-V5's whole-range order, longest first.
+ *
+ * It is a domain fact on the ViewModel for the same reason `stackable` is: whether a grouping
+ * can be read over time is a property of the grouping and the range, not a shape a panel picks.
+ * Twenty Members drawn as twenty overlapping lines is the failure that made this a field —
+ * capped to four plus "Other" it is five lines that cross each other, and the reader learns
+ * nothing about any of them.
+ */
+export const CHART_FORMS = ["series", "ranked"] as const;
+export type ChartForm = (typeof CHART_FORMS)[number];
+
 /** Everything a chart panel needs, and nothing else (R-T6). */
 export type ChartViewModel = {
   readonly title: string;
   /** Drives the `aria-label` (R-X2). Words, because a screen reader reads it out. */
   readonly rollUpLevel: string;
+  /** R-V12 — domain-supplied, like `stackable`. A panel names a shape; it never names a form. */
+  readonly form: ChartForm;
   readonly buckets: readonly BucketViewModel[];
   readonly series: readonly SeriesViewModel[];
   /** R-V4 — populated only where the cap engaged; R-V6's tooltip lists what it holds. */
@@ -175,6 +193,8 @@ export type ChartInput = {
   readonly rollUpLevel: string;
   readonly grouping: Grouping;
   readonly measure: MeasureKind;
+  /** R-V12. Omitted is `series` — a chart is read over time unless the query says otherwise. */
+  readonly form?: ChartForm;
   readonly buckets: readonly BucketViewModel[];
   readonly cells: readonly Cell[];
   /** Group key → display label. Ties in R-V5's ranking break on it, so it is load-bearing. */
@@ -259,6 +279,21 @@ const mirrorFrom = (input: ChartInput, set: SeriesSet, grid: Grid): MirrorViewMo
   const cellFor = (series: Series, bucket: string): number | null =>
     series.inert ? sweptFor(bucket) : valueAt(grid, series.key, bucket) ?? absent;
 
+  // **R-V12 — a ranked chart's table is transposed, one row per group.** The chart has no time
+  // axis, so the reading a viewer takes off it is "who, and how much", and a table of one row
+  // and twenty columns states that no better than the twenty-line chart this form replaced.
+  // The grouping heads the first column and every bucket the chart holds is a column after it,
+  // which for the one bucket a ranked chart carries is the period it was read over.
+  if (input.form === "ranked") {
+    return {
+      columns: [input.rollUpLevel, ...input.buckets.map((bucket) => bucket.label)],
+      rows: set.series.map((series) => [
+        series.label,
+        ...input.buckets.map((bucket) => cellFor(series, bucket.key)),
+      ]),
+    };
+  }
+
   return {
     columns: [input.bucketColumn ?? "Period", ...set.series.map((series) => series.label)],
     rows: input.buckets.map((bucket) => [
@@ -281,6 +316,7 @@ export function chartViewModel(input: ChartInput): ChartViewModel {
   return {
     title: input.title,
     rollUpLevel: input.rollUpLevel,
+    form: input.form ?? "series",
     buckets: input.buckets,
     series: set.series,
     other: set.other,

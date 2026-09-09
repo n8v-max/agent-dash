@@ -9,7 +9,10 @@
 //     that computed the totals, and no panel can reach a different conclusion about who is on
 //     a Team;
 //   * **the aggregation result** — (bucket × group) → value, which is the table both the series
-//     and the mirror are built from (R-T7).
+//     and the mirror are built from (R-T7);
+//   * **the chart's form** (R-V12) — whether a subject level is read over time or as ranked bars
+//     over the whole period. It sits beside the grouping it is a fact about, so the three panels
+//     the subject control reaches cannot draw one Member two different ways on two pages.
 
 import {
   rollUp,
@@ -21,7 +24,7 @@ import {
 import { changeBetween, type Change, type PeriodReading } from "@/domain/change";
 import type { PeriodBucket } from "@/domain/periods";
 import type { AgentSession, Member } from "@/domain/types";
-import type { BucketViewModel, Cell, Grouping } from "@/domain/viewmodel";
+import type { BucketViewModel, ChartForm, Cell, Grouping } from "@/domain/viewmodel";
 import type { ClassView, PageContext } from "./context";
 
 /**
@@ -48,10 +51,30 @@ const GROUPING_OF: Readonly<Record<RollupLevel, Grouping>> = {
   organization: "organization",
 };
 
+/**
+ * **R-V12 — the form each subject level is read in.**
+ *
+ * Team and Organization are a handful of series over the page's buckets and read as a trend.
+ * **Member is not**: twenty of them capped to four plus "Other" (R-V4) is five lines crossing
+ * each other over twenty-two weeks, and a reader takes nothing off any of the five. So a Member
+ * subject drops the time axis and becomes one bar per person over the whole selected period, in
+ * R-V5's whole-range order — which is the ordering the cap already computed.
+ *
+ * It lives here, beside the placement and the overlap note, so that the three panels the subject
+ * control reaches cannot disagree about which form the level is read in.
+ */
+const FORM_OF: Readonly<Record<RollupLevel, ChartForm>> = {
+  member: "ranked",
+  team: "series",
+  organization: "series",
+};
+
 /** The subject grouping, resolved: how rows are keyed, labelled, and whether they partition. */
 export type Subject = {
   readonly grouping: Grouping;
   readonly rollUpLevel: string;
+  /** R-V12 — domain-supplied, and the same answer for every panel on the page. */
+  readonly form: ChartForm;
   readonly keysOf: (row: AgentSession) => readonly string[];
   readonly labelOf: (key: string) => string;
   /** `Rollup.partition` — false for Team, and the third conjunct of `stackable` (R-V1). */
@@ -85,6 +108,7 @@ export function subjectGrouping(
   return {
     grouping: GROUPING_OF[level],
     rollUpLevel: ROLLUP_WORDS[level],
+    form: FORM_OF[level],
     keysOf: (row) =>
       (rollup.placement.get(row.member_id) ?? []).map((key) => (named(key) ? key : UNNAMED_GROUP_KEY)),
     labelOf: (key) => {
@@ -104,6 +128,70 @@ export const bucketAxis = (
   buckets: readonly PeriodBucket<AgentSession>[],
 ): readonly BucketViewModel[] => buckets.map((bucket) => context.label.bucket(bucket));
 
+/**
+ * The whole of what the aggregation reads off a bucket: its identity, and its rows.
+ *
+ * Stated structurally rather than as `PeriodBucket<AgentSession>` so that R-V12's whole-range
+ * bucket can be one without fabricating a grain, a first day and a last day it does not have.
+ * A `PeriodBucket` satisfies it, so every existing caller is unchanged.
+ */
+export type CellBucket = {
+  readonly key: string;
+  readonly rows: readonly AgentSession[];
+};
+
+/**
+ * The identity of the one bucket a ranked chart holds. It is not a period key: no grain
+ * produces it, so it cannot collide with one, and `bucketLabel` never sees it — the label is
+ * composed below from the period labels it spans.
+ */
+const WHOLE_RANGE_KEY = "range";
+
+/**
+ * **What a subject-grouped panel aggregates over, and what it draws** (R-V12).
+ *
+ * A `series` panel is the page's own buckets, unchanged. A `ranked` one collapses them into a
+ * single bucket covering the whole selected period, so the cap's whole-range ranking (R-V5) is
+ * the order of the bars and there is no time axis left to read.
+ */
+export type SubjectAxis = {
+  /** What the cells are grouped over — the page's buckets, or the one that spans them. */
+  readonly buckets: readonly CellBucket[];
+  /** What the chart draws as its columns, labelled and carrying R-E2's flag. */
+  readonly axis: readonly BucketViewModel[];
+};
+
+export const subjectAxis = (
+  context: PageContext,
+  view: ClassView,
+  subject: Subject,
+): SubjectAxis => {
+  if (subject.form === "series") {
+    return { buckets: view.buckets, axis: bucketAxis(context, view.buckets) };
+  }
+
+  const labelled = bucketAxis(context, view.buckets);
+  const first = labelled.at(0);
+  const last = labelled.at(-1);
+  // A range holding no bucket has no period to name, and one bar under a blank label would be a
+  // reading. `chartViewModel` reads no bucket and no cell as R-V9's empty panel instead.
+  if (!first || !last) return { buckets: [], axis: [] };
+
+  return {
+    // `view.rows` is the buckets' own rows flattened (`context.ts`), never a second filter over
+    // the dataset — so the ranked panel and the series panel beside it read one population.
+    buckets: [{ key: WHOLE_RANGE_KEY, rows: view.rows }],
+    axis: [
+      {
+        key: WHOLE_RANGE_KEY,
+        label: first.key === last.key ? first.label : `${first.label} – ${last.label}`,
+        // R-E2 — a period assembled out of a clipped or unfinished bucket is itself partial.
+        partial: labelled.some((bucket) => bucket.partial),
+      },
+    ],
+  };
+};
+
 /** Sum of a measure over rows — the additive reading, and the commonest `valueOf`. */
 export const sumOf =
   (measure: (row: AgentSession) => number) =>
@@ -111,7 +199,7 @@ export const sumOf =
     rows.reduce((running, row) => running + measure(row), 0);
 
 export type CellInput = {
-  readonly buckets: readonly PeriodBucket<AgentSession>[];
+  readonly buckets: readonly CellBucket[];
   /** A row's group keys — several on a Team grouping, where the full figure lands in each (R-V3). */
   readonly keysOf: (row: AgentSession) => readonly string[];
   /**

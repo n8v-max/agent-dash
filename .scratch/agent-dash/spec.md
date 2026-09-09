@@ -232,6 +232,16 @@ measure use and not money:
 read on the summary; repeating it in the first position spends the fold twice. The ratio is the
 differentiator; the total is the number every competitor already ships.
 
+**R-N9.1 — Cost by Repository reads months, whatever the page grain is** (added 2026-09-09,
+ticket 44). Five repositories across the page's twenty-two weeks is a hundred and ten bars, which
+is a texture rather than a comparison. The grain is fixed in the query, not in the panel, and the
+panel carries **the same one-line note Total spend carries** — one sentence, on both, because it
+is one claim about the same buckets. Each panel's own reason stays in its own copy: Total spend
+cannot exist below a month at all (R-M5, A25), while this panel could and would be unreadable.
+
+Per-capita still divides it (R-C1), and it is still flat — no work-domain roll-up (ADR-0004,
+§ 11 C2).
+
 **R-N11 — The illustrative token rate card renders as a collapsed table at the foot.** It is the
 evidence for every money figure in the product and costs one collapsed table. **The compute rate
 card is never displayed anywhere** — rates vary by machine specification and the breakdown is not
@@ -565,11 +575,19 @@ the toolbar.
 grouping genuinely partitions the measure, and forbidden where it does not. No caption can undo a
 false claim made by the geometry — but the claim is only false where the grouping is non-additive.
 
-| Grouping | Partition? | Stacking |
-|---|---|---|
-| WorkType, Model tier/family, execution mode, machine spec, duration spans | Yes | Permitted |
-| **Team** | **No** — Members are many-to-many with Teams | **Forbidden** |
-| **Repository** | **No** for Task-grain measures — a Task's sessions may span repositories | **Forbidden** |
+| Grouping | Partition? | Stacking | Form (R-V12) |
+|---|---|---|---|
+| WorkType, Model tier/family, execution mode, machine spec, duration spans | Yes | Permitted | series |
+| **Team** | **No** — Members are many-to-many with Teams | **Forbidden** | series |
+| **Repository** | **No** for Task-grain measures — a Task's sessions may span repositories | **Forbidden** | series |
+| **Member** | Yes — a session has one Member | **Forbidden**: R-V1 permits, it does not require | **ranked** |
+
+**The table gained a form column on 2026-09-09** (ticket 44). Stacking was never the only thing a
+grouping decides about the geometry it may be drawn in: **Member decides the shape of the chart
+itself**, because twenty of them capped to four plus "Other" (R-V4) is five lines crossing each
+other and a reader takes nothing off any of the five. Both columns are domain facts on the
+ViewModel, and neither is a panel's to choose. Member is a true partition and still never stacks,
+which is what the "permits, does not require" reading of this table has always meant.
 
 Ticket 10 stated this as "no stacking, anywhere", reasoning that *"stacking encodes a partition;
 Team is not one."* That reasoning is correct and does not reach WorkType or the duration spans,
@@ -637,6 +655,34 @@ its direction, beside the number it is the shape of. The **tooltip, `accessibili
 the R-X1 mirror are unaffected**: the chrome goes, the values do not. R-N8 already stated this for
 the summary tile's bars ("no axis labels at tile size"); R-V10 is the same rule, named once, for
 every tile in the product. Added 2026-09-09.
+
+**R-V12 — A chart's *form* is a domain fact, and `subject=member` is `ranked`.** Every chart
+carries one of two forms, decided by the query that built it and never by the panel that renders
+it:
+
+| Form | Bucket axis | Reads as |
+|---|---|---|
+| `series` | the page's periods | a trend, left to right |
+| `ranked` | **none** — one bucket spanning the selected period | one bar per group, longest first |
+
+**At `subject=member`, every panel the subject control reaches is `ranked`.** That is
+`/demo/spend`'s Cost per completed Job and Cost per session, and `/demo/work`'s Completed Jobs per
+period. There is no time axis: one horizontal bar per Member over the selected period, ordered by
+R-V5's whole-range ranking of the panel's own measure, capped at top 4 + "Other" exactly as any
+other grouping is (R-V4). **The R-X1 mirror is transposed with it** — one row per Member, headed
+by the grouping — because a table of one row and twenty columns is the accessible statement of a
+chart nobody can read either.
+
+Team and Organization stay `series`: four Teams over twenty-two weeks is a trend, and twenty
+Members over twenty-two weeks is not. The rule is keyed on the *grouping*, not on the series
+count, so it cannot flip mid-range as a filter narrows the population.
+
+**It is a fact on the ViewModel for the same reason `stackable` is** (R-V1): a panel that could
+choose its own form could choose a different one from the panel beside it, and the two would then
+be read as though they answered the same question in the same way. A panel still names the shape
+its `series` form takes; it never names the ranked one.
+
+Decided by the human, 2026-09-09, rounds 2 and 3. Added by ticket 44.
 
 ---
 
@@ -815,6 +861,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A33 | All six routes are links in the header nav; no overflow control exists on any surface | R-N2 |
 | A34 | `/demo/history` applies its date range on change, with no Apply control, and an out-of-window or incomplete edit does not navigate | R-N20 |
 | A35 | Every controlled page states its active filters in one line under the heading, naming the off state of each filter it does not narrow | R-C7 |
+| A36 | At `subject=member` every subject-grouped panel renders ranked bars and no line series, with one mirror row per Member; Cost by Repository renders months at every page grain, under the same note Total spend carries | R-V12, R-N9.1 |
 
 ---
 

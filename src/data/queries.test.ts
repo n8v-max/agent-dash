@@ -72,14 +72,30 @@ const chartsIn = (value: unknown, found: ChartViewModel[] = []): readonly ChartV
   return found;
 };
 
-/** The chart's claim, read off the mirror: bucket label → column label → value. */
-const fromMirror = (chart: ChartViewModel): Record<string, Record<string, unknown>> =>
-  Object.fromEntries(
-    chart.mirror.rows.map((row) => [
+/**
+ * The chart's claim, read off the mirror: bucket label → column label → value.
+ *
+ * **A ranked chart's mirror is transposed** (R-V12) — one row per group, one column per bucket —
+ * so it is read back the other way round before the comparison. What is under test is that the
+ * two derivation paths agree about the *figures*, not that they print them in one orientation.
+ */
+const fromMirror = (chart: ChartViewModel): Record<string, Record<string, unknown>> => {
+  const { columns, rows } = chart.mirror;
+  if (chart.form === "ranked") {
+    return Object.fromEntries(
+      columns.slice(1).map((bucket, at) => [
+        bucket,
+        Object.fromEntries(rows.map((row) => [String(row[0]), row[at + 1]])),
+      ]),
+    );
+  }
+  return Object.fromEntries(
+    rows.map((row) => [
       row[0],
-      Object.fromEntries(chart.mirror.columns.slice(1).map((column, at) => [column, row[at + 1]])),
+      Object.fromEntries(columns.slice(1).map((column, at) => [column, row[at + 1]])),
     ]),
   );
+};
 
 /** The same claim, read off the rendered series. Two paths, one aggregation table (R-T7). */
 const fromSeries = (chart: ChartViewModel): Record<string, Record<string, unknown>> =>
@@ -367,16 +383,30 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
 });
 
 describe("R-T7 — the mirror states what the chart claims, on every panel of every page", () => {
-  const pages = Object.entries(OPEN_PAGES);
+  // The ranked pages are swept beside the series ones (R-V12): the mirror is transposed there,
+  // and a transposed table is exactly where the two derivation paths could quietly disagree.
+  const pages = Object.entries({
+    ...OPEN_PAGES,
+    "spend, by Member": spendPage(OPEN, paramsFor("spend", { subject: "member" })),
+    "work, by Member": workPage(OPEN, paramsFor("work", { subject: "member" })),
+  });
 
   it.each(pages)("%s: every chart's mirror equals its rendered series (T-C1)", (_name, page) => {
     const charts = chartsIn(page);
     // `/demo/people` and `/demo/history` open on a table, so a page may legitimately carry none.
     for (const chart of charts) {
       expect(fromMirror(chart)).toEqual(fromSeries(chart));
-      // The header row names the buckets' column and then every series, in ranked order.
-      expect(chart.mirror.columns.slice(1)).toEqual(chart.series.map((series) => series.label));
-      expect(chart.mirror.rows).toHaveLength(chart.buckets.length);
+      const ranked = chart.form === "ranked";
+      // A series chart heads its columns with the buckets' column and then every series; a
+      // ranked one heads them with the grouping and then every bucket, one row per series.
+      expect(chart.mirror.columns.slice(1)).toEqual(
+        ranked
+          ? chart.buckets.map((bucket) => bucket.label)
+          : chart.series.map((series) => series.label),
+      );
+      expect(chart.mirror.rows).toHaveLength(
+        ranked ? chart.series.length : chart.buckets.length,
+      );
     }
   });
 
@@ -384,7 +414,7 @@ describe("R-T7 — the mirror states what the chart claims, on every panel of ev
     // 20 Members, so the cap engages: four named plus "Other", whose column the mirror sums out
     // of the aggregation table over exactly the groups the cap did not name.
     const page = spendPage(OPEN, paramsFor("spend", { subject: "member" }));
-    const chart = page.costByRepository;
+    const chart = page.costByRepository.chart;
     const members = page.adoption.tokensOverTime;
 
     expect(members.series).toHaveLength(5);
@@ -479,7 +509,7 @@ describe("R-V1 — `stackable` follows the partition, not the panel", () => {
   });
 
   it("never stacks Repository (R-V1), nor a Member or Organization grouping", () => {
-    expect(OPEN_PAGES.spend.costByRepository.stackable).toBe(false);
+    expect(OPEN_PAGES.spend.costByRepository.chart.stackable).toBe(false);
     expect(spendPage(OPEN, paramsFor("spend", { subject: "member" })).adoption.tokensOverTime.stackable)
       .toBe(false);
   });
@@ -538,7 +568,9 @@ describe("the controls the pages declare (R-C1) reach the queries", () => {
     const [repository] = data.repositories;
     const page = spendPage(OPEN, paramsFor("spend", { repository: repository.id }));
 
-    expect(page.costByRepository.series.map((series) => series.label)).toEqual([repository.name]);
+    expect(page.costByRepository.chart.series.map((series) => series.label)).toEqual([
+      repository.name,
+    ]);
     expect(page.totalSpend.sessionCost).toBeLessThan(OPEN_PAGES.spend.totalSpend.sessionCost);
   });
 
@@ -575,8 +607,8 @@ describe("the controls the pages declare (R-C1) reach the queries", () => {
       paramsFor("spend", { repository: "repo_that_does_not_exist" }),
     );
 
-    expect(page.costByRepository.empty).toBe(true);
-    expect(page.costByRepository.series).toEqual([]);
+    expect(page.costByRepository.chart.empty).toBe(true);
+    expect(page.costByRepository.chart.series).toEqual([]);
     expect(page.costPerCompletedTask.empty).toBe(true);
   });
 
@@ -688,7 +720,7 @@ describe("C14 — per-capita on `/demo/spend` divides the money panels, and only
   });
 
   it("divides Cost by Repository and leaves the three ratios untouched", () => {
-    expect(divided.costByRepository.title).toMatch(/per Member/);
+    expect(divided.costByRepository.chart.title).toMatch(/per Member/);
     // Already normalised, so dividing by a headcount would state nothing. Asserted as identity
     // rather than as an absent title, because a title is copy and this is arithmetic.
     expect(divided.costPerCompletedTask).toEqual(raw.costPerCompletedTask);
@@ -752,5 +784,140 @@ describe("R-M18 — a week with no Completed Job draws nothing, not zero", () =>
     // A Completed Job cannot cost nothing: every session on it carries an attributed cost. So a
     // zero here would be the coercion this rule removed rather than a reading.
     expect([...readings.values()]).not.toContain(0);
+  });
+});
+
+// --- R-V12 / R-N9.1 — Member is ranked, and Cost by Repository reads months (ticket 44) ------
+//
+// **Twenty overlapping lines is not a chart.** Capped to four plus "Other" (R-V4) a Member
+// subject still drew five lines crossing each other over twenty-two weeks, and a reader learned
+// nothing about any of the five. At `subject=member` the panel loses its time axis instead: one
+// bar per Member over the whole selected period, in R-V5's whole-range order.
+//
+// **The form is the query's decision** (R-V12), and it is asserted here rather than in the panel
+// for the same reason `stackable` is: a component that could choose it could choose differently
+// on the page beside it.
+
+describe("R-V12 — a Member subject is ranked bars, and every other subject is a series", () => {
+  const rankedSpend = spendPage(OPEN, paramsFor("spend", { subject: "member", grain: "week" }));
+  const rankedWork = workPage(OPEN, paramsFor("work", { subject: "member", grain: "week" }));
+
+  /** The three panels the subject control reaches, on the two pages that declare it (R-C1). */
+  const subjectCharts = [
+    rankedSpend.costPerCompletedTask,
+    rankedSpend.costPerSession.chart,
+    rankedWork.velocity.chart,
+  ];
+
+  it("carries `form: ranked` on every subject-grouped panel, and one bucket, not the weeks", () => {
+    for (const chart of subjectCharts) {
+      expect(chart.form).toBe("ranked");
+      expect(chart.rollUpLevel).toBe("Member");
+      // No time axis: one bucket, naming the period the bars were read over.
+      expect(chart.buckets).toHaveLength(1);
+      expect(chart.buckets[0]?.label).toMatch(/^Week \d+, 2026 – Week \d+, 2026$/);
+    }
+  });
+
+  it("orders the bars by the panel's own measure, longest first (R-V5)", () => {
+    // The named four. "Other" always takes the fifth slot whatever it sums to (R-V4, R-V6), so
+    // it is not part of the ordering claim — it is the tail, not the fifth-largest reading.
+    const values = rankedSpend.costPerSession.chart.series
+      .filter((series) => !series.inert)
+      .map((series) => series.points[0]?.value ?? 0);
+
+    expect(values.length).toBeGreaterThan(1);
+    expect([...values].sort((left, right) => right - left)).toEqual(values);
+  });
+
+  it("mirrors one row per Member, headed by the grouping (R-X1)", () => {
+    const chart = rankedSpend.costPerCompletedTask;
+
+    expect(chart.mirror.columns[0]).toBe("Member");
+    expect(chart.mirror.rows).toHaveLength(chart.series.length);
+    expect(chart.mirror.rows.map((row) => row[0])).toEqual(
+      chart.series.map((series) => series.label),
+    );
+  });
+
+  it("caps twenty Members to four plus 'Other', as a series chart would (R-V4)", () => {
+    const chart = rankedSpend.costPerCompletedTask;
+
+    expect(chart.series).toHaveLength(5);
+    expect(chart.other?.holds.length).toBeGreaterThan(0);
+  });
+
+  it("leaves Team and Organization as series over the page's own buckets", () => {
+    for (const level of ["team", "organization"] as const) {
+      const page = spendPage(OPEN, paramsFor("spend", { subject: level, grain: "week" }));
+
+      expect(page.costPerCompletedTask.form).toBe("series");
+      expect(page.costPerCompletedTask.buckets.length).toBeGreaterThan(1);
+      expect(page.costPerCompletedTask.mirror.columns[0]).toBe("Period");
+    }
+  });
+
+  it("leaves the panels the subject control does not reach as series", () => {
+    expect(rankedSpend.totalSpend.chart.form).toBe("series");
+    expect(rankedSpend.costByRepository.chart.form).toBe("series");
+    expect(rankedSpend.costPerCompletedTaskByWorkType.form).toBe("series");
+  });
+
+  it("draws R-V9's empty panel over a range the account worked none of", () => {
+    const page = spendPage(
+      OPEN,
+      paramsFor("spend", {
+        subject: "member",
+        range: { start: "2027-01-01", end: "2027-01-31" },
+      }),
+    );
+
+    // The period is nameable, so the bucket exists and the panel says "no data for this
+    // selection" (R-V9) rather than drawing one bar of nothing.
+    expect(page.costPerCompletedTask.buckets).toHaveLength(1);
+    expect(page.costPerCompletedTask.empty).toBe(true);
+    expect(page.costPerCompletedTask.series).toEqual([]);
+  });
+
+  it("names no period at all where the range does not bucket, rather than a blank one", () => {
+    // A range the period planner rejects buckets nothing (`periods.ts`), so there is no first
+    // and no last label to compose a period out of. One bar under an empty axis label would be
+    // a reading; no axis and no cell is R-V9's empty panel.
+    const page = spendPage(
+      OPEN,
+      paramsFor("spend", { subject: "member", range: { start: "nope", end: "nope" } }),
+    );
+
+    expect(page.costPerCompletedTask.buckets).toEqual([]);
+    expect(page.costPerCompletedTask.empty).toBe(true);
+  });
+});
+
+describe("R-N9.1 — Cost by Repository reads months whatever the page grain is", () => {
+  it("holds month buckets while the panels beside it hold the page's weeks", () => {
+    const page = spendPage(OPEN, paramsFor("spend", { grain: "week" }));
+    const labels = (chart: ChartViewModel) => chart.buckets.map((bucket) => bucket.label);
+
+    expect(labels(page.costByRepository.chart).every((label) => /^\w{3} 2026$/.test(label))).toBe(
+      true,
+    );
+    expect(labels(page.costPerSession.chart)[0]).toMatch(/^Week /);
+  });
+
+  it("states why in the same words Total spend uses, rather than in a second sentence", () => {
+    const page = spendPage(OPEN, paramsFor("spend"));
+
+    expect(page.costByRepository.note).toBe(page.totalSpend.note);
+    expect(page.costByRepository.note).toMatch(/monthly grain and coarser only/);
+  });
+
+  it("still divides by the per-capita denominator it was already divided by (C14)", () => {
+    const raw = spendPage(OPEN, paramsFor("spend"));
+    const per = spendPage(OPEN, paramsFor("spend", { perCapita: true }));
+
+    expect(per.costByRepository.chart.title).toBe("Cost by Repository, per Member");
+    expect(per.costByRepository.chart.series[0]?.points[0]?.value).toBeLessThan(
+      raw.costByRepository.chart.series[0]?.points[0]?.value ?? 0,
+    );
   });
 });

@@ -303,6 +303,14 @@ polyfill lands in the setup file, and then fails **confusingly rather than loudl
 series (A15). Because the mirror is built in the domain layer independently of the series (R-T7),
 this is a real cross-check rather than the same array printed twice.
 
+**A `ranked` chart's mirror is transposed** (R-V12, ticket 44) — one row per group, headed by the
+grouping, one column per bucket — so the cross-check reads it back the other way round before
+comparing. The claim is that the two derivation paths agree about the *figures*; the orientation
+is the chart's own, and is itself asserted, because a transposed table is exactly where the two
+paths could quietly stop describing the same chart. The ranked pages are swept beside the series
+ones in `src/data/queries.test.ts`, over the committed fixture, so the case is covered by real
+data and not only by a hand-written ViewModel.
+
 **T-C1.1 — A bucket with no reading renders as an absence, in both places** (A29, R-M18, R-V10).
 The mirror cell is an **em dash** and the `line` and `area` marks carry **`connectNulls={false}`**,
 so the table and the chart make one claim. Both are asserted, and so is the contrast: a bucket
@@ -424,6 +432,23 @@ product's central interaction.
   numbers. R-N24's "one figure, no bound" claim is restated rather than dropped: the projected
   tile's money figures are exactly the headline and its two named components, so a fourth number
   fails the test. The seat charge is asserted **beside** the chart, never as a series in it.
+- **T-C18 — A ranked ViewModel draws horizontal bars, whatever shape the panel named** (A36,
+  R-V12, ticket 44). Asserted over `shapeFor`, the one expression that resolves a form into a
+  shape — the same shape of claim T-C11 makes over `stackIdOf` and T-C12 over `furnitureFor`, and
+  for the same reason: an SVG query would additionally depend on jsdom, on a fixed dimension and
+  on Recharts' class names. Table-driven over all five shapes in both directions: a ranked chart
+  overrides every one of them, and a series chart leaves every one of them alone — the second
+  half is the control, without which the test would pass against a product that had forgotten
+  `line` existed. Two further claims sit with it: a ranked chart's marks are `Bar` and not `Line`
+  under a `layout="vertical"` chart, and its one-tick **category axis is hidden while the measure
+  axis stays**, because one category carries no reading and the 120px gutter it reserves is what
+  makes the bars short.
+  - **The domain half is `src/domain/viewmodel.test.ts`'s**, over the real function: `form`
+    defaults to `series`, a ranked chart transposes its mirror into one row per group in R-V5's
+    order, the capped tail gets its own row summed out of the grid, and R-M18's absence survives
+    the transpose. It has to be there — a component test may not import `src/domain` at runtime
+    (R-T6) — and `src/data/queries.test.ts` closes the loop by asserting which *subject level*
+    the query gives which form.
 
 ---
 
@@ -512,6 +537,19 @@ request per account per route, asserting rows rather than pixels."*
   session cost and the projected total, with the two totals equal to their components to within
   the cent the strings are rounded to. The exact identity is T-U21.1's; what this test adds is
   that the figures a reader can *see* are the ones it holds between.
+- **T-E14 — Ranked bars and monthly repositories survive the whole stack** (A36, R-V12, R-N9.1,
+  ticket 44). Every layer below proves a piece — the domain layer decides what a ranked table is,
+  the query decides which subject level is ranked, `shapeFor` decides what that draws — and none
+  of them proves the decision reaches a running page through the RSC boundary and past the shape
+  the panel itself named. So: `/demo/spend?subject=member` renders **no line series at all** on
+  Cost per completed Job and one bar per Member, its mirror has one row per Member headed by
+  "Member" with "Other" last, and `/demo/spend?grain=week` puts month keys in Cost by
+  Repository's mirror while the panel beside it still carries the page's weeks.
+
+  **Both halves carry their control**, because each claim is an absence: `?subject=team` is
+  asserted to still draw a line and still head its mirror "Period", and Cost per session is
+  asserted to still be on weeks. Without them a page that had simply lost its charts, or one that
+  had stopped honouring its grain control at all, would pass the file.
 
 ---
 
@@ -623,6 +661,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A33 Six nav links, no overflow | T-C16, T-E12 |
 | A34 The history date range applies on change | T-E13 |
 | A35 Every controlled page states its active filters | T-C15, T-E12 |
+| A36 `subject=member` is ranked bars with a transposed mirror; Cost by Repository reads months | T-C18, T-C1, T-E14 |
 
 ---
 

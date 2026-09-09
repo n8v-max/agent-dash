@@ -24,6 +24,7 @@
 
 import type { ReactElement, ReactNode } from "react";
 import type {
+  CostByRepositoryPanel as CostByRepositoryViewModel,
   CostPerSessionPanel as CostPerSessionViewModel,
   SpendPageViewModel,
   TotalSpendPanel as TotalSpendViewModel,
@@ -184,18 +185,30 @@ export function CostByWorkTypePanel(props: PanelChart) {
   );
 }
 
-/** R-N9 panel 5 — Cost by Repository. Flat: no work-domain roll-up (ADR-0004, § 11 C2). */
-export function CostByRepositoryPanel(
-  props: PanelChart & { readonly footnote?: string | null; readonly controls?: ReactNode },
-) {
+/**
+ * R-N9 panel 5 — Cost by Repository. Flat: no work-domain roll-up (ADR-0004, § 11 C2).
+ *
+ * **It reads months whatever the page grain is** (R-N9.1), and says so in the ViewModel's own
+ * words — the same sentence Total spend carries above, because it is the same claim about the
+ * same buckets. The grain is the query's decision; this component renders the note it was given.
+ */
+export function CostByRepositoryPanel(props: {
+  readonly panel: CostByRepositoryViewModel;
+  readonly perCapitaNote?: string | null;
+  /** R-C6 — the per-capita toggle, in this panel's header because this panel is one it divides. */
+  readonly controls?: ReactNode;
+  readonly dimension?: PanelDimension;
+}) {
+  const { panel } = props;
+
   return (
     <PanelCard
       controls={props.controls}
-      title={props.chart.title}
-      question="Where the money went, by Repository. A Job's sessions may span repositories, so these totals sit beside each other rather than summing into one bar."
-      footnote={props.footnote ?? undefined}
+      title={panel.chart.title}
+      question="Where the money went, by Repository. A Job's sessions may span repositories, so these totals sit beside each other rather than summing into one bar. Five repositories across a page of weeks is more bars than a comparison can carry, so this panel reads months."
+      footnote={[props.perCapitaNote, panel.note].filter(Boolean).join(" ")}
     >
-      {moneyChart(props.chart, "bar", props.dimension)}
+      {moneyChart(panel.chart, "bar", props.dimension)}
     </PanelCard>
   );
 }
@@ -242,8 +255,8 @@ export function SpendPanels(props: {
         <CostByWorkTypePanel chart={page.costPerCompletedTaskByWorkType} dimension={dimension} />
       </div>
       <CostByRepositoryPanel
-        chart={page.costByRepository}
-        footnote={note}
+        panel={page.costByRepository}
+        perCapitaNote={note}
         controls={controls.perCapita}
         dimension={dimension}
       />

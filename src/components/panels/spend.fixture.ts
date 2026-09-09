@@ -8,9 +8,10 @@
 // that the mirror was summed independently of the series (R-T7) — is asserted in
 // `src/domain/**` and `src/data/**`, over the real functions and the committed fixture.
 //
-// **The grains here are deliberately mixed.** Every panel but Total spend carries the page's
-// weekly buckets; Total spend carries months, because that is the shape A25 forces on it. A
-// panel that quietly re-bucketed would show up as months where weeks were handed over.
+// **The grains here are deliberately mixed.** The three ratio panels carry the page's weekly
+// buckets; Total spend and Cost by Repository carry months, because that is the shape A25 and
+// R-N9.1 force on them. A panel that quietly re-bucketed would show up as months where weeks
+// were handed over.
 
 import { chartFixture } from "@/components/charts/chart-viewmodels.fixture";
 import type {
@@ -23,13 +24,18 @@ import type {
 /** The page grain in these fixtures: `/demo/spend` opens at week (R-C4, `params.ts`). */
 export const WEEK_BUCKETS = ["Week 18, 2026", "Week 19, 2026", "Week 20, 2026"];
 
-/** What Total spend carries instead, whatever the page grain is (R-M5, A25). */
+/** What Total spend and Cost by Repository carry instead, at any page grain (R-M5, R-N9.1). */
 export const MONTH_BUCKETS = ["Apr 2026", "May 2026", "Jun 2026"];
 
-/** The note the ViewModel carries on the Total spend panel — R-M5's reason, in its words. */
+/**
+ * The note the ViewModel carries on **both** monthly panels — Total spend (R-M5) and Cost by
+ * Repository (R-N9.1). One sentence, because it is one claim about the same buckets: `spend.ts`
+ * exports one constant and hands it to both, and this fixture holds one copy for the same reason.
+ */
 export const MONTHLY_NOTE =
-  "Total spend is reported monthly whatever the page grain is: a seat fee apportioned across " +
-  "days is invented precision, so the figure exists at monthly grain and coarser only.";
+  "This panel reads months whatever the page grain is: a finer bucket would be either invented " +
+  "precision or more bars than can be read, so the figure is reported at monthly grain and " +
+  "coarser only.";
 
 /** R-N9's one line for the Adoption section. */
 export const ADOPTION_STATEMENT =
@@ -195,15 +201,20 @@ export const spendPageFixture = (
       { key: "review", label: "Review", values: [12.1, 13.4, 11.8] },
     ],
   }),
-  costByRepository: chartFixture({
-    title: "Cost by Repository",
-    rollUpLevel: "Repository",
-    buckets: WEEK_BUCKETS,
-    series: [
-      { key: "repo_api", label: "api-gateway", values: [1900, 2100, 1800] },
-      { key: "repo_web", label: "web-client", values: [1400, 1500, 1300] },
-    ],
-  }),
+  costByRepository: {
+    // R-N9.1 — months, like Total spend, while every other panel on this page carries the
+    // page's weeks. A panel that quietly re-bucketed would show up here as weeks.
+    chart: chartFixture({
+      title: "Cost by Repository",
+      rollUpLevel: "Repository",
+      buckets: MONTH_BUCKETS,
+      series: [
+        { key: "repo_api", label: "api-gateway", values: [1900, 2100, 1800] },
+        { key: "repo_web", label: "web-client", values: [1400, 1500, 1300] },
+      ],
+    }),
+    note: MONTHLY_NOTE,
+  },
   adoption: adoptionFixture(),
   ...overrides,
 });

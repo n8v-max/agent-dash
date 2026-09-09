@@ -47,6 +47,8 @@ export type ChartSpec = {
   /** R-V4 — what the "Other" bucket holds. Present only where the cap engaged. */
   readonly holds?: readonly string[];
   readonly stackable?: boolean;
+  /** R-V12 — the domain fact a ranked chart carries. `series` unless a spec says otherwise. */
+  readonly form?: ChartViewModel["form"];
   readonly overlapNote?: string | null;
   readonly bucketColumn?: string;
 };
@@ -80,6 +82,66 @@ export const TEAM_SERIES: readonly SeriesSpec[] = [
   seriesSpec("team_infra", "Infrastructure", 10),
 ];
 
+/** A spec's value in one bucket. An unwritten value is a zero; a written `null` is a gap. */
+const valueAt = (held: SeriesSpec, index: number): number | null =>
+  // `=== undefined`, never `??`: a spec shorter than the bucket list is an *unwritten* value and
+  // reads as zero, where an absent reading is written `null` and survives. `held.values[index] ??
+  // 0` would collapse the two and delete every gap a test writes.
+  held.values[index] === undefined ? 0 : held.values[index];
+
+type Bucket = ChartViewModel["buckets"][number];
+
+/** R-V12 — the series mirror: one row per bucket, one column per series. */
+const seriesMirror = (
+  spec: ChartSpec,
+  specs: readonly SeriesSpec[],
+  buckets: readonly Bucket[],
+): ChartViewModel["mirror"] => ({
+  columns: [spec.bucketColumn ?? "Period", ...specs.map((held) => held.label)],
+  rows: buckets.map((bucket, index) => [
+    bucket.label,
+    ...specs.map((held) => valueAt(held, index)),
+  ]),
+});
+
+/** R-V12 — the ranked mirror: transposed, one row per group, headed by the grouping. */
+const rankedMirror = (
+  spec: ChartSpec,
+  specs: readonly SeriesSpec[],
+  buckets: readonly Bucket[],
+): ChartViewModel["mirror"] => ({
+  columns: [spec.rollUpLevel ?? "Member", ...buckets.map((bucket) => bucket.label)],
+  rows: specs.map((held) => [
+    held.label,
+    ...buckets.map((_bucket, index) => valueAt(held, index)),
+  ]),
+});
+
+/**
+ * **R-V12 — which way round the table goes**, mirroring what `viewmodel.ts` does with the same
+ * fact: a series chart tabulates buckets down and series across, a ranked one the other way.
+ */
+const mirrorFor = (
+  spec: ChartSpec,
+  specs: readonly SeriesSpec[],
+  buckets: readonly Bucket[],
+  form: ChartViewModel["form"],
+): ChartViewModel["mirror"] =>
+  form === "ranked" ? rankedMirror(spec, specs, buckets) : seriesMirror(spec, specs, buckets);
+
+/** The series a spec paints, in palette order (R-V7). "Other" is the one inert key (R-V6). */
+const paintedSeries = (
+  specs: readonly SeriesSpec[],
+  buckets: readonly Bucket[],
+): readonly SeriesViewModel[] =>
+  specs.map((held, at) => ({
+    key: held.key,
+    label: held.label,
+    colorVar: PALETTE[at] ?? "--chart-5",
+    inert: held.key === OTHER_KEY,
+    points: buckets.map((bucket, index) => ({ bucket: bucket.key, value: valueAt(held, index) })),
+  }));
+
 /** A ChartViewModel exactly as `src/domain/viewmodel.ts` would have assembled one. */
 export function chartFixture(spec: ChartSpec = {}): ChartViewModel {
   const bucketLabels = spec.buckets ?? DEFAULT_BUCKETS;
@@ -89,35 +151,20 @@ export function chartFixture(spec: ChartSpec = {}): ChartViewModel {
     label,
     partial: false,
   }));
-  const series: readonly SeriesViewModel[] = specs.map((held, at) => ({
-    key: held.key,
-    label: held.label,
-    colorVar: PALETTE[at] ?? "--chart-5",
-    inert: held.key === OTHER_KEY,
-    points: buckets.map((bucket, index) => ({
-      bucket: bucket.key,
-      // `=== undefined`, never `??`: a spec shorter than the bucket list is an *unwritten*
-      // value and reads as zero, where an absent reading is written `null` and survives.
-      // `held.values[index] ?? 0` would collapse the two and delete every gap a test writes.
-      value: held.values[index] === undefined ? 0 : held.values[index],
-    })),
-  }));
+  const series = paintedSeries(specs, buckets);
+  const form = spec.form ?? "series";
 
   return {
     title: spec.title ?? "Cost per session",
     rollUpLevel: spec.rollUpLevel ?? "Member",
+    form,
     buckets,
     series,
     other: spec.holds ? { holds: spec.holds } : null,
     overlapNote: spec.overlapNote ?? null,
     stackable: spec.stackable ?? false,
     empty: specs.length === 0,
-    mirror: {
-      columns: [spec.bucketColumn ?? "Period", ...specs.map((held) => held.label)],
-      rows: buckets.map((bucket, index) => [
-        bucket.label,
-        ...specs.map((held) => (held.values[index] === undefined ? 0 : held.values[index])),
-      ]),
-    },
+    // R-V12 — the domain layer transposes a ranked chart's table, so a fixture of one must too.
+    mirror: mirrorFor(spec, specs, buckets, form),
   };
 }

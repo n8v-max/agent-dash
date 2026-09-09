@@ -29,6 +29,7 @@ import {
   bucketAxis,
   perCapitaDivisor,
   populationPerCapita,
+  subjectAxis,
   subjectGrouping,
 } from "./panels";
 import {
@@ -90,6 +91,10 @@ const completedTasks = (rows: readonly AgentSession[]): number => completedTaskK
 const velocityPanel = (context: PageContext): VelocityPanel => {
   const view = context.view("jobs");
   const subject = subjectGrouping(context, view, () => 0);
+  // R-V12 — at `subject=member` there is no time axis: one bar per Member over the whole
+  // selected period, ranked by this panel's own measure. Decided in `panels.ts`, so this panel
+  // and the two on `/demo/spend` cannot draw the same subject two different ways.
+  const axis = subjectAxis(context, view, subject);
   // R-M14 — the denominator is the *population's* active human Members, never the rows' authors.
   const population = populationPerCapita(context);
   // The gate `spend.ts` applies, applied here too: per-capita is *offered* only where more than
@@ -106,9 +111,10 @@ const velocityPanel = (context: PageContext): VelocityPanel => {
       grouping: subject.grouping,
       // A per-capita figure is a ratio; the raw count is a sum of the population's Tasks.
       measure: perCapita ? "ratio" : "additive",
-      buckets: bucketAxis(context, view.buckets),
+      form: subject.form,
+      buckets: axis.axis,
       cells: aggregationCells({
-        buckets: view.buckets,
+        buckets: axis.buckets,
         keysOf: subject.keysOf,
         valueOf: (rows) =>
           divisor === null ? completedTasks(rows) : ratio(completedTasks(rows), divisor),

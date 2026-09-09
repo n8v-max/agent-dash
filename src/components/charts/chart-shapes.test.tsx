@@ -34,6 +34,7 @@ import {
   chartElementFor,
   chartRows,
   furnitureFor,
+  shapeFor,
   stackIdOf,
   type ChartShape,
 } from "./chart-shapes";
@@ -287,5 +288,59 @@ describe("R-M18 — a null reading breaks the line rather than being drawn", () 
 
     expect(uses.length).toBeGreaterThan(0);
     for (const use of uses) expect(use).toBe("connectNulls={false}");
+  });
+});
+
+/**
+ * **T-C18 — the chart's *form* decides its shape, and the query decides the form** (R-V12, A36).
+ *
+ * Asserted over `shapeFor`, the one expression that resolves it, for the same reason T-C11
+ * asserts `stackIdOf` and T-C12 asserts `furnitureFor`: what R-V12 governs is which element the
+ * shape factory emits, and an SVG query would additionally depend on jsdom, on a dimension and
+ * on Recharts' class names. The `series` arm is the control — every shape a panel names survives
+ * unchanged, so this is a rule about ranked charts and not a rule the product acquired by
+ * accident.
+ */
+describe("T-C18 — a ranked ViewModel draws horizontal bars, whatever shape the panel named", () => {
+  const RANKED = chartFixture({ form: "ranked", buckets: ["Apr 2026 – Sep 2026"] });
+  const SERIES = chartFixture();
+
+  it.each(CHART_SHAPES)("overrides `%s` on a ranked chart", (shape) => {
+    expect(shapeFor(RANKED, shape)).toBe("horizontal-bar");
+  });
+
+  it.each(CHART_SHAPES)("leaves `%s` alone on a series chart", (shape) => {
+    expect(shapeFor(SERIES, shape)).toBe(shape);
+  });
+
+  it("draws bars and no line where the panel asked for a line", () => {
+    const element = chartElementFor({ chart: RANKED, shape: "line", tickFormat: String });
+    const props = element.props as { readonly layout?: string; readonly children?: ReactNode };
+    // Recharts' chart containers carry no `displayName`; their marks do, so the marks are the
+    // handle. A `Bar` under a `layout="vertical"` chart is a horizontal bar and nothing else.
+    const marks = Children.toArray(props.children).flatMap((child) =>
+      isValidElement(child) ? [nameOf(child)] : [],
+    );
+
+    expect(props.layout).toBe("vertical");
+    expect(marks).toContain("Bar");
+    expect(marks).not.toContain("Line");
+  });
+
+  /**
+   * A ranked chart holds exactly one bucket — the whole selected period — so its category axis
+   * has one tick and carries no reading. It is hidden rather than drawn, which is what gives the
+   * bars the width the 120px category gutter would otherwise reserve. The measure axis stays:
+   * unlike R-N8's tile, a full-width panel is big enough to be read against a scale.
+   */
+  it("hides the one-tick category axis and keeps the measure axis", () => {
+    const drawn = furnitureFor({ chart: RANKED, shape: "line", tickFormat: String });
+    const axes = drawn.filter((mark) => nameOf(mark).endsWith("Axis"));
+
+    expect(axes.map((axis) => (axis.props as { readonly hide?: boolean }).hide)).toEqual([
+      false,
+      true,
+    ]);
+    expect(drawn.map(nameOf)).toContain("Legend");
   });
 });

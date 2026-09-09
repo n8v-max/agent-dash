@@ -350,3 +350,77 @@ describe("R-M18 — a zero denominator reaches the chart as a gap, not as a zero
     expect(mirrorOther).toEqual([30, 5, null]);
   });
 });
+
+// --- R-V12 — the chart's form, and what it does to the table (ticket 44) ---------------------
+//
+// A ranked chart has **no time axis**: its groups are the bars, ordered by R-V5's whole-range
+// ranking, over one bucket covering the selected period. The mirror is therefore transposed —
+// one row per group, headed by the grouping — because a table of one row and twenty columns is
+// the accessible statement of a chart nobody can read either.
+
+describe("R-V12 — `form` is a domain fact, and a ranked chart's table is one row per group", () => {
+  const ranked = (input: Partial<ChartInput> = {}) =>
+    chart({
+      form: "ranked",
+      rollUpLevel: "Member",
+      grouping: "member",
+      buckets: buckets("range"),
+      cells: [
+        cell("range", "ada", 10),
+        cell("range", "grace", 30),
+        cell("range", "alan", 20),
+      ],
+      ...input,
+    });
+
+  it("defaults to a series chart, read over its own period buckets", () => {
+    const view = chart({ cells: [cell("2026-04", "bugfix", 10)] });
+
+    expect(view.form).toBe("series");
+    expect(view.mirror.columns[0]).toBe("Period");
+  });
+
+  it("heads the first column with the grouping and gives each group its own row", () => {
+    const view = ranked();
+
+    expect(view.form).toBe("ranked");
+    expect(view.mirror.columns).toEqual(["Member", "range"]);
+    // R-V5's whole-range ranking, descending — which on one bucket is the order of the bars.
+    expect(view.mirror.rows).toEqual([
+      ["grace", 30],
+      ["alan", 20],
+      ["ada", 10],
+    ]);
+  });
+
+  it("states the same figures the series do, on the transposed path too (R-T7)", () => {
+    const view = ranked();
+    const fromSeries = view.series.map((series) => [
+      series.label,
+      series.points.find((point) => point.bucket === "range")?.value ?? null,
+    ]);
+
+    expect(view.mirror.rows).toEqual(fromSeries);
+  });
+
+  it("gives the capped tail its own row, summed out of the grid and not off a point (R-V4)", () => {
+    const view = ranked({
+      cells: ["a", "b", "c", "d", "e", "f"].map((group, at) =>
+        cell("range", group, 60 - at * 10),
+      ),
+    });
+
+    expect(view.other).toEqual({ holds: ["e", "f"] });
+    expect(view.mirror.rows.at(-1)).toEqual(["Other", 30]);
+  });
+
+  it("carries an absent reading into the transposed table as `null` (R-M18)", () => {
+    const view = ranked({
+      measure: "ratio",
+      buckets: buckets("range", "later"),
+      cells: [cell("range", "ada", 10)],
+    });
+
+    expect(view.mirror.rows).toEqual([["ada", 10, null]]);
+  });
+});

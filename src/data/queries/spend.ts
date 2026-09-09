@@ -4,10 +4,17 @@
 // read on the summary, and the ratio is the differentiator. The panel order below is R-N9's,
 // and it is the order the ViewModel declares its fields in.
 //
-// **Total spend reads month buckets whatever the page grain is** (R-M5, A25). A seat fee
-// apportioned across days is invented precision, so `seatBearingPeriod` refuses anything finer
-// than a month — which means the honest panel is one that shows months, not one that shows a
-// rejection where a chart should be. The page grain still drives every other panel.
+// **Two panels read month buckets whatever the page grain is** (R-M5, A25, R-N9.1). For Total
+// spend a seat fee apportioned across days is invented precision, so `seatBearingPeriod` refuses
+// anything finer than a month — the honest panel is one that shows months, not one that shows a
+// rejection where a chart should be. For Cost by Repository it is legibility: five repositories
+// over twenty-two weeks is a hundred and ten bars. Both carry the same one-line note.
+//
+// **At `subject=member` the panels the subject control reaches lose their time axis** (R-V12).
+// Twenty Members capped to four plus "Other" is five lines crossing each other; ranked bars over
+// the whole selected period is the same data as a reading. The *query* decides that — `form` is
+// a domain fact on the ViewModel, like `stackable` — and `panels.ts` decides it once for the
+// three panels, so no two of them can disagree.
 
 import type { Viewer } from "@/domain/access";
 import {
@@ -31,6 +38,7 @@ import {
   bucketAxis,
   perCapitaDivisor,
   populationPerCapita,
+  subjectAxis,
   subjectGrouping,
   sumOf,
 } from "./panels";
@@ -84,6 +92,19 @@ export type CostPerSessionPanel = {
   readonly range: CostPerSession;
 };
 
+/**
+ * R-N9 panel 5 — Cost by Repository, at month grain whatever the page grain is (R-N9.1).
+ *
+ * It is a panel rather than a bare chart because it now carries the same qualification Total
+ * spend does, and the note has to travel on the ViewModel: a panel that spelled it itself would
+ * be a second answer to why the buckets on it are not the page's.
+ */
+export type CostByRepositoryPanel = {
+  readonly chart: ChartViewModel;
+  /** Why this panel is monthly whatever the page grain is. The same line Total spend carries. */
+  readonly note: string;
+};
+
 export type SpendPageViewModel = {
   readonly orgSlug: string;
   /** C14 — which panels below are divided, and by how many. Copy is the component's. */
@@ -92,7 +113,7 @@ export type SpendPageViewModel = {
   readonly totalSpend: TotalSpendPanel;
   readonly costPerSession: CostPerSessionPanel;
   readonly costPerCompletedTaskByWorkType: ChartViewModel;
-  readonly costByRepository: ChartViewModel;
+  readonly costByRepository: CostByRepositoryPanel;
   readonly adoption: AdoptionSection;
 };
 
@@ -100,9 +121,20 @@ const costOf = (row: AgentSession): number => row.cost;
 
 const SEAT_GROUPS = { session: "session", seat: "seat" } as const;
 
+/**
+ * **Why two of this page's panels read months whatever the page grain is** (R-M5, R-N9.1, A25).
+ *
+ * One sentence, carried by both, because it is one consequence: below a month neither figure is
+ * honest. Total spend cannot exist there at all — a seat fee apportioned across days is invented
+ * precision (R-M5) — and Cost by Repository can, but as twenty-two weeks of five bars, which is
+ * a chart nobody reads. Each panel's own reason stays in its own copy; what is shared is the
+ * grain, and it is written once so the two panels cannot drift into two different claims about
+ * the same buckets.
+ */
 const MONTHLY_NOTE =
-  "Total spend is reported monthly whatever the page grain is: a seat fee apportioned across " +
-  "days is invented precision, so the figure exists at monthly grain and coarser only.";
+  "This panel reads months whatever the page grain is: a finer bucket would be either invented " +
+  "precision or more bars than can be read, so the figure is reported at monthly grain and " +
+  "coarser only.";
 
 /**
  * **Cost per completed Task, per bucket.** The join, one bucket at a time: every session's cost
@@ -185,6 +217,7 @@ const costPerSessionPanel = (context: PageContext): CostPerSessionPanel => {
   const view = context.view("cost");
   const outcome = context.params.accepted;
   const subject = subjectGrouping(context, view, costOf);
+  const axis = subjectAxis(context, view, subject);
   const reading = (rows: readonly AgentSession[]): CostPerSession =>
     costPerSession({ key: "range", partial: false, rows }, outcome);
 
@@ -195,9 +228,11 @@ const costPerSessionPanel = (context: PageContext): CostPerSessionPanel => {
       grouping: subject.grouping,
       // An average is not a part of a whole, whatever it is grouped by (R-V1).
       measure: "ratio",
-      buckets: bucketAxis(context, view.buckets),
+      // R-V12 — one bar per Member over the period; a series over the page's buckets otherwise.
+      form: subject.form,
+      buckets: axis.axis,
       cells: aggregationCells({
-        buckets: view.buckets,
+        buckets: axis.buckets,
         keysOf: subject.keysOf,
         valueOf: (rows) => reading(rows).value,
       }),
@@ -231,26 +266,37 @@ const byWorkType = (context: PageContext, buckets: readonly PeriodBucket<AgentSe
     partition: true,
   });
 
+/**
+ * **R-N9 panel 5 — Cost by Repository, over months** (R-N9.1).
+ *
+ * It reads `view.months` rather than the page's own buckets, for the reason `MONTHLY_NOTE`
+ * gives: at week grain over the committed window this panel drew twenty-two groups of five
+ * bars, and five repositories × twenty-two weeks is a texture rather than a comparison. The
+ * grain is fixed in the query, not in the panel — the same discipline Total spend already
+ * follows (R-M5, A25), and the same sentence says so on both.
+ */
 const byRepository = (
   context: PageContext,
-  buckets: readonly PeriodBucket<AgentSession>[],
+  months: readonly PeriodBucket<AgentSession>[],
   divisor: number,
-) =>
-  chartViewModel({
+): CostByRepositoryPanel => ({
+  chart: chartViewModel({
     title: divisor === 1 ? "Cost by Repository" : "Cost by Repository, per Member",
     rollUpLevel: "Repository",
     // R-V1 — a Task's sessions may span repositories, so Repository is not a partition.
     grouping: "repository",
     measure: "additive",
-    buckets: bucketAxis(context, buckets),
+    buckets: bucketAxis(context, months),
     cells: aggregationCells({
-      buckets,
+      buckets: months,
       keysOf: (row) => [row.repository_id],
       valueOf: (rows) => sumOf(costOf)(rows) / divisor,
     }),
     labelOf: (key) => context.label.repository(key),
     partition: false,
-  });
+  }),
+  note: MONTHLY_NOTE,
+});
 
 /**
  * **`/demo/spend`.** One call, seven panels and the rate card, over one load, one permission
@@ -260,6 +306,7 @@ export function spendPage(viewer: Viewer, params: ControlSet): SpendPageViewMode
   const context = pageContext(viewer, params);
   const view = context.view("cost");
   const subject = subjectGrouping(context, view, costOf);
+  const axis = subjectAxis(context, view, subject);
 
   // C14 — the toggle divides only where a division states something. `available` is false over a
   // population of one, so a single-Member view is offered nothing rather than offered identity.
@@ -278,9 +325,12 @@ export function spendPage(viewer: Viewer, params: ControlSet): SpendPageViewMode
       rollUpLevel: subject.rollUpLevel,
       grouping: subject.grouping,
       measure: "ratio",
-      buckets: bucketAxis(context, view.buckets),
+      // R-V12 — the query chooses the form, and every panel under the subject control gets the
+      // same one, so the page cannot draw a Member as bars here and as a line beside it.
+      form: subject.form,
+      buckets: axis.axis,
       cells: aggregationCells({
-        buckets: view.buckets,
+        buckets: axis.buckets,
         keysOf: subject.keysOf,
         valueOf: ratioOf,
       }),
@@ -291,7 +341,8 @@ export function spendPage(viewer: Viewer, params: ControlSet): SpendPageViewMode
     totalSpend: totalSpendPanel(context, divisor),
     costPerSession: costPerSessionPanel(context),
     costPerCompletedTaskByWorkType: byWorkType(context, view.buckets),
-    costByRepository: byRepository(context, view.buckets, divisor),
+    // R-N9.1 — months, whatever the page grain is, exactly as Total spend above.
+    costByRepository: byRepository(context, view.months, divisor),
     adoption: adoptionSection(context),
   };
 }

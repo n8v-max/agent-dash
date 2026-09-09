@@ -10,7 +10,13 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { chartFixture } from "@/components/charts/chart-viewmodels.fixture";
 import { SpendPanels } from "./spend-panels";
-import { MONTH_BUCKETS, OVERLAP_NOTE, WEEK_BUCKETS, spendPageFixture } from "./spend.fixture";
+import {
+  MONTHLY_NOTE,
+  MONTH_BUCKETS,
+  OVERLAP_NOTE,
+  WEEK_BUCKETS,
+  spendPageFixture,
+} from "./spend.fixture";
 
 /** T-C0 / R-T29 — fixed numbers, never `initialDimension`. */
 const SIZE = { width: 640, height: 320 };
@@ -56,18 +62,28 @@ describe("R-N9 — the panels render in the order the spec declares", () => {
   });
 });
 
-describe("A25 — Total spend is unavailable below monthly grain on this page (R-M5)", () => {
-  it("reads months while every other panel on the page reads the page's weeks", () => {
+describe("A25 / A36 — the two monthly panels, and the three that read the page's grain", () => {
+  it("reads months on Total spend and Cost by Repository, weeks on the ratios (R-M5, R-N9.1)", () => {
     render(<SpendPanels page={spendPageFixture()} dimension={SIZE} />);
 
     expect(bucketsOf("Total spend, grouped by Organization")).toEqual(MONTH_BUCKETS);
+    expect(bucketsOf("Cost by Repository, grouped by Repository")).toEqual(MONTH_BUCKETS);
     expect(bucketsOf("Cost per session, grouped by Organization")).toEqual(WEEK_BUCKETS);
+    expect(bucketsOf("Cost per completed Job, grouped by Organization")).toEqual(WEEK_BUCKETS);
   });
 
-  it("states why, in the ViewModel's own words, rather than showing a rejection", () => {
-    render(<SpendPanels page={spendPageFixture()} dimension={SIZE} />);
+  /**
+   * **One sentence, on both panels** (ticket 44). It is one claim about the same buckets, so the
+   * ViewModel carries one constant and hands it to both — a second sentence here would be two
+   * answers to why these two panels are not on the page's grain. Asserted as *two* rendered
+   * copies of the *same* string, because that is the difference between reuse and duplication.
+   */
+  it("states why, in the ViewModel's own words, on both panels and in the same words", () => {
+    const page = spendPageFixture();
+    render(<SpendPanels page={page} dimension={SIZE} />);
 
-    expect(screen.getByText(/monthly grain and coarser only/i)).toBeVisible();
+    expect(page.costByRepository.note).toBe(page.totalSpend.note);
+    expect(screen.getAllByText(new RegExp(MONTHLY_NOTE, "i"))).toHaveLength(2);
   });
 
   it("renders the seat split the monthly figure is made of", () => {
@@ -118,12 +134,15 @@ describe("the panels hand the ViewModel over unchanged (R-T6)", () => {
 describe("T-C7 — a filter that empties a panel renders 'no data for this selection' (R-V9)", () => {
   it("keeps the panel, its heading and the other panels, and says it once", () => {
     const page = spendPageFixture({
-      costByRepository: chartFixture({
-        title: "Cost by Repository",
-        rollUpLevel: "Repository",
-        buckets: WEEK_BUCKETS,
-        series: [],
-      }),
+      costByRepository: {
+        chart: chartFixture({
+          title: "Cost by Repository",
+          rollUpLevel: "Repository",
+          buckets: MONTH_BUCKETS,
+          series: [],
+        }),
+        note: MONTHLY_NOTE,
+      },
     });
 
     render(<SpendPanels page={page} dimension={SIZE} />);
