@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0023",
+    "parent_session_id": null,
     "started_at": "2026-04-24T04:53:35+02:00",
     "ended_at": "2026-04-24T07:23:57+02:00",
     "member_id": "mem_nightlybot",
@@ -34,7 +35,38 @@
     ]
   },
   {
+    "id": "ses_0764",
+    "parent_session_id": "ses_0023",
+    "started_at": "2026-04-24T05:12:22+02:00",
+    "ended_at": "2026-04-24T05:49:22+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "refactor",
+    "task_key": "equilibrio/terraform-infra#247",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.45,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 2220,
+    "machine_allocation_duration_s": 2220,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 10361,
+        "cache_read": 379677,
+        "cache_write": 28009,
+        "output": 8551
+      }
+    ]
+  },
+  {
     "id": "ses_0028",
+    "parent_session_id": null,
     "started_at": "2026-04-28T03:01:55+02:00",
     "ended_at": "2026-04-28T04:36:12+02:00",
     "member_id": "mem_nightlybot",
@@ -76,6 +108,7 @@
   },
   {
     "id": "ses_0175",
+    "parent_session_id": null,
     "started_at": "2026-06-12T04:49:14+02:00",
     "ended_at": "2026-06-12T15:13:24+02:00",
     "member_id": "mem_nightlybot",
@@ -117,6 +150,7 @@
   },
   {
     "id": "ses_0211",
+    "parent_session_id": null,
     "started_at": "2026-06-19T23:57:48+02:00",
     "ended_at": "2026-06-20T02:54:00+02:00",
     "member_id": "mem_nightlybot",
@@ -151,6 +185,7 @@
   },
   {
     "id": "ses_0242",
+    "parent_session_id": null,
     "started_at": "2026-06-30T00:01:24+02:00",
     "ended_at": "2026-06-30T02:59:21+02:00",
     "member_id": "mem_nightlybot",
@@ -192,6 +227,7 @@
   },
   {
     "id": "ses_0339",
+    "parent_session_id": null,
     "started_at": "2026-07-14T22:28:20+02:00",
     "ended_at": "2026-07-15T04:29:57+02:00",
     "member_id": "mem_nightlybot",
@@ -226,6 +262,7 @@
   },
   {
     "id": "ses_0347",
+    "parent_session_id": null,
     "started_at": "2026-07-15T22:56:21+02:00",
     "ended_at": "2026-07-16T03:31:13+02:00",
     "member_id": "mem_hcamps",
@@ -260,6 +297,7 @@
   },
   {
     "id": "ses_0410",
+    "parent_session_id": null,
     "started_at": "2026-07-28T15:37:05+02:00",
     "ended_at": "2026-07-28T16:57:17+02:00",
     "member_id": "mem_sroldan",
@@ -301,6 +339,7 @@
   },
   {
     "id": "ses_0430",
+    "parent_session_id": null,
     "started_at": "2026-07-30T03:40:41+02:00",
     "ended_at": "2026-07-30T04:23:15+02:00",
     "member_id": "mem_nightlybot",
@@ -334,7 +373,68 @@
     ]
   },
   {
+    "id": "ses_0942",
+    "parent_session_id": "ses_0430",
+    "started_at": "2026-07-30T04:01:04+02:00",
+    "ended_at": "2026-07-30T04:07:10+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "refactor",
+    "task_key": "equilibrio/terraform-infra#317",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.38,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 366,
+    "machine_allocation_duration_s": 366,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 24582,
+        "cache_read": 293455,
+        "cache_write": 25667,
+        "output": 8896
+      }
+    ]
+  },
+  {
+    "id": "ses_0943",
+    "parent_session_id": "ses_0430",
+    "started_at": "2026-07-30T04:08:58+02:00",
+    "ended_at": "2026-07-30T04:16:44+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "refactor",
+    "task_key": "equilibrio/terraform-infra#317",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.49,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 466,
+    "machine_allocation_duration_s": 466,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 31298,
+        "cache_read": 373634,
+        "cache_write": 32680,
+        "output": 11327
+      }
+    ]
+  },
+  {
     "id": "ses_0530",
+    "parent_session_id": null,
     "started_at": "2026-08-11T19:05:07+02:00",
     "ended_at": "2026-08-12T03:45:37+02:00",
     "member_id": "mem_sroldan",
@@ -369,6 +469,7 @@
   },
   {
     "id": "ses_0563",
+    "parent_session_id": null,
     "started_at": "2026-08-16T01:49:59+02:00",
     "ended_at": "2026-08-16T03:40:21+02:00",
     "member_id": "mem_nightlybot",
@@ -410,6 +511,7 @@
   },
   {
     "id": "ses_0681",
+    "parent_session_id": null,
     "started_at": "2026-08-30T18:45:00+02:00",
     "ended_at": "2026-08-30T19:56:01+02:00",
     "member_id": "mem_sroldan",
@@ -444,6 +546,7 @@
   },
   {
     "id": "ses_0699",
+    "parent_session_id": null,
     "started_at": "2026-09-01T12:15:28+02:00",
     "ended_at": "2026-09-01T13:30:07+02:00",
     "member_id": "mem_hcamps",

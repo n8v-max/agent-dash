@@ -261,11 +261,16 @@ const seriesFrom = (input: ChartInput): SeriesSet => {
  * No `SeriesPoint` is read here: a named column is that group's own cell, and the "Other"
  * column is an independent sum over exactly the groups the cap did not name. T-C1 then
  * compares two traversals of one table rather than one array printed twice.
+ *
+ * **The sweep order comes from the cap too, and that is not decoration.** Floating-point addition
+ * is not associative: `(a + b) + c` and `(a + c) + b` differ in the last place, so two paths
+ * adding one tail of sixteen ratios in two different orders produce two figures that are equal to
+ * fifteen decimals and unequal to `toEqual`. R-T7 asserts the two paths agree, so the one order
+ * the domain has already fixed — R-V5's whole-range ranking — is the order both of them add in.
  */
 const mirrorFrom = (input: ChartInput, set: SeriesSet, grid: Grid): MirrorViewModel => {
   const absent = absentOf(input.measure);
-  const named = new Set(set.series.filter((series) => !series.inert).map((series) => series.key));
-  const swept = [...grid.keys()].filter((key) => !named.has(key));
+  const swept = set.other?.keys ?? [];
   // R-M18 — "Other" holds the sum of the readings that *exist* in the bucket, and holds nothing
   // where none of the groups it swept has one. Sixteen Members with no Cost per completed Job in
   // a week do not add up to zero.
@@ -319,7 +324,8 @@ export function chartViewModel(input: ChartInput): ChartViewModel {
     form: input.form ?? "series",
     buckets: input.buckets,
     series: set.series,
-    other: set.other,
+    // The mirror's business, not a panel's: R-V6 lists what "Other" holds and nothing more.
+    other: set.other === null ? null : { holds: set.other.holds },
     overlapNote: input.overlapNote ?? null,
     stackable: stackable(input),
     empty: input.cells.length === 0,

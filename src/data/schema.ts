@@ -157,6 +157,10 @@ export const tokenUsageSchema: Validator<TokenUsage> = object({
 
 export const sessionSchema: Validator<AgentSession> = object({
   id: string,
+  // The tree link. `null` is a root; a string names one. Whether that string names a row that
+  // *exists*, is itself a root, and agrees with this row's five inherited labels is a claim
+  // about the whole file set and is checked in `load.ts`, where every row is in scope.
+  parent_session_id: nullableString,
   started_at: string,
   ended_at: string,
   member_id: string,

@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0077",
+    "parent_session_id": null,
     "started_at": "2026-05-18T16:48:08+02:00",
     "ended_at": "2026-05-18T18:26:42+02:00",
     "member_id": "mem_ncastells",
@@ -39,6 +40,7 @@
   },
   {
     "id": "ses_0079",
+    "parent_session_id": null,
     "started_at": "2026-05-19T00:52:14+02:00",
     "ended_at": "2026-05-19T02:42:34+02:00",
     "member_id": "mem_nightlybot",
@@ -76,7 +78,156 @@
     ]
   },
   {
+    "id": "ses_0789",
+    "parent_session_id": "ses_0079",
+    "started_at": "2026-05-19T01:03:42+02:00",
+    "ended_at": "2026-05-19T01:19:16+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#493",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.55,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 934,
+    "machine_allocation_duration_s": 934,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 7334,
+        "cache_read": 146334,
+        "cache_write": 10597,
+        "output": 8460
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 3949,
+        "cache_read": 78795,
+        "cache_write": 5706,
+        "output": 4555
+      }
+    ]
+  },
+  {
+    "id": "ses_0790",
+    "parent_session_id": "ses_0079",
+    "started_at": "2026-05-19T01:39:41+02:00",
+    "ended_at": "2026-05-19T02:11:05+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#493",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.11,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1884,
+    "machine_allocation_duration_s": 1884,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 14794,
+        "cache_read": 295175,
+        "cache_write": 21375,
+        "output": 17064
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 7966,
+        "cache_read": 158940,
+        "cache_write": 11509,
+        "output": 9188
+      }
+    ]
+  },
+  {
+    "id": "ses_0787",
+    "parent_session_id": "ses_0079",
+    "started_at": "2026-05-19T01:52:03+02:00",
+    "ended_at": "2026-05-19T02:19:39+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#493",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.97,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1656,
+    "machine_allocation_duration_s": 1656,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 13004,
+        "cache_read": 259453,
+        "cache_write": 18788,
+        "output": 14999
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 7002,
+        "cache_read": 139705,
+        "cache_write": 10117,
+        "output": 8076
+      }
+    ]
+  },
+  {
+    "id": "ses_0788",
+    "parent_session_id": "ses_0079",
+    "started_at": "2026-05-19T02:02:25+02:00",
+    "ended_at": "2026-05-19T02:24:33+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#493",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.78,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1328,
+    "machine_allocation_duration_s": 1328,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 10428,
+        "cache_read": 208064,
+        "cache_write": 15067,
+        "output": 12028
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 5615,
+        "cache_read": 112034,
+        "cache_write": 8113,
+        "output": 6477
+      }
+    ]
+  },
+  {
     "id": "ses_0083",
+    "parent_session_id": null,
     "started_at": "2026-05-19T23:10:18+02:00",
     "ended_at": "2026-05-20T00:48:59+02:00",
     "member_id": "mem_nightlybot",
@@ -114,7 +265,45 @@
     ]
   },
   {
+    "id": "ses_0791",
+    "parent_session_id": "ses_0083",
+    "started_at": "2026-05-19T23:34:17+02:00",
+    "ended_at": "2026-05-19T23:46:25+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#497",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.92,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 728,
+    "machine_allocation_duration_s": 728,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 32349,
+        "cache_read": 291334,
+        "cache_write": 55128,
+        "output": 18172
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 17418,
+        "cache_read": 156872,
+        "cache_write": 29684,
+        "output": 9785
+      }
+    ]
+  },
+  {
     "id": "ses_0102",
+    "parent_session_id": null,
     "started_at": "2026-05-22T17:44:28+02:00",
     "ended_at": "2026-05-22T20:56:54+02:00",
     "member_id": "mem_blorenzo",
@@ -146,6 +335,7 @@
   },
   {
     "id": "ses_0138",
+    "parent_session_id": null,
     "started_at": "2026-06-01T23:57:24+02:00",
     "ended_at": "2026-06-02T04:43:21+02:00",
     "member_id": "mem_nightlybot",
@@ -177,6 +367,7 @@
   },
   {
     "id": "ses_0278",
+    "parent_session_id": null,
     "started_at": "2026-07-06T11:42:09+02:00",
     "ended_at": "2026-07-06T16:35:11+02:00",
     "member_id": "mem_ncastells",
@@ -208,6 +399,7 @@
   },
   {
     "id": "ses_0297",
+    "parent_session_id": null,
     "started_at": "2026-07-07T21:33:23+02:00",
     "ended_at": "2026-07-07T23:33:58+02:00",
     "member_id": "mem_hcamps",
@@ -239,6 +431,7 @@
   },
   {
     "id": "ses_0333",
+    "parent_session_id": null,
     "started_at": "2026-07-14T08:56:20+02:00",
     "ended_at": "2026-07-14T11:34:26+02:00",
     "member_id": "mem_sibanez",
@@ -269,7 +462,68 @@
     ]
   },
   {
+    "id": "ses_0908",
+    "parent_session_id": "ses_0333",
+    "started_at": "2026-07-14T09:02:45+02:00",
+    "ended_at": "2026-07-14T09:27:35+02:00",
+    "member_id": "mem_sibanez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#576",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.81,
+    "interactive_duration_s": 646,
+    "idle_duration_s": 328,
+    "afk_duration_s": 516,
+    "machine_allocation_duration_s": 1490,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 73325,
+        "cache_read": 2007642,
+        "cache_write": 157317,
+        "output": 36840
+      }
+    ]
+  },
+  {
+    "id": "ses_0907",
+    "parent_session_id": "ses_0333",
+    "started_at": "2026-07-14T09:39:57+02:00",
+    "ended_at": "2026-07-14T10:05:42+02:00",
+    "member_id": "mem_sibanez",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#576",
+    "execution_mode": "interactive",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.87,
+    "interactive_duration_s": 670,
+    "idle_duration_s": 341,
+    "afk_duration_s": 534,
+    "machine_allocation_duration_s": 1545,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 76031,
+        "cache_read": 2081750,
+        "cache_write": 163124,
+        "output": 38200
+      }
+    ]
+  },
+  {
     "id": "ses_0381",
+    "parent_session_id": null,
     "started_at": "2026-07-22T15:32:51+02:00",
     "ended_at": "2026-07-22T19:40:22+02:00",
     "member_id": "mem_jdominguez",
@@ -301,6 +555,7 @@
   },
   {
     "id": "ses_0384",
+    "parent_session_id": null,
     "started_at": "2026-07-23T04:10:04+02:00",
     "ended_at": "2026-07-23T05:06:36+02:00",
     "member_id": "mem_nightlybot",
@@ -332,6 +587,7 @@
   },
   {
     "id": "ses_0388",
+    "parent_session_id": null,
     "started_at": "2026-07-23T21:13:16+02:00",
     "ended_at": "2026-07-24T00:44:27+02:00",
     "member_id": "mem_hcamps",
@@ -370,6 +626,7 @@
   },
   {
     "id": "ses_0428",
+    "parent_session_id": null,
     "started_at": "2026-07-29T20:55:57+02:00",
     "ended_at": "2026-07-29T22:18:31+02:00",
     "member_id": "mem_aruiz",
@@ -401,6 +658,7 @@
   },
   {
     "id": "ses_0436",
+    "parent_session_id": null,
     "started_at": "2026-07-31T10:04:57+02:00",
     "ended_at": "2026-07-31T12:34:17+02:00",
     "member_id": "mem_hcamps",
@@ -431,7 +689,68 @@
     ]
   },
   {
+    "id": "ses_0944",
+    "parent_session_id": "ses_0436",
+    "started_at": "2026-07-31T11:13:15+02:00",
+    "ended_at": "2026-07-31T11:41:22+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#609",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.65,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1687,
+    "machine_allocation_duration_s": 1687,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 33294,
+        "cache_read": 1000141,
+        "cache_write": 63281,
+        "output": 18639
+      }
+    ]
+  },
+  {
+    "id": "ses_0945",
+    "parent_session_id": "ses_0436",
+    "started_at": "2026-07-31T11:27:24+02:00",
+    "ended_at": "2026-07-31T11:57:03+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_api_gateway",
+    "work_type": "review",
+    "task_key": "equilibrio/api-gateway#609",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.69,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1779,
+    "machine_allocation_duration_s": 1779,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 35110,
+        "cache_read": 1054683,
+        "cache_write": 66732,
+        "output": 19655
+      }
+    ]
+  },
+  {
     "id": "ses_0467",
+    "parent_session_id": null,
     "started_at": "2026-08-05T10:39:16+02:00",
     "ended_at": "2026-08-05T16:43:00+02:00",
     "member_id": "mem_rmarin",
@@ -463,6 +782,7 @@
   },
   {
     "id": "ses_0500",
+    "parent_session_id": null,
     "started_at": "2026-08-07T18:46:08+02:00",
     "ended_at": "2026-08-07T20:46:52+02:00",
     "member_id": "mem_jdominguez",
@@ -494,6 +814,7 @@
   },
   {
     "id": "ses_0558",
+    "parent_session_id": null,
     "started_at": "2026-08-14T13:54:47+02:00",
     "ended_at": "2026-08-14T15:07:03+02:00",
     "member_id": "mem_mpena",
@@ -525,6 +846,7 @@
   },
   {
     "id": "ses_0594",
+    "parent_session_id": null,
     "started_at": "2026-08-19T14:04:26+02:00",
     "ended_at": "2026-08-19T16:12:06+02:00",
     "member_id": "mem_mpena",
@@ -556,6 +878,7 @@
   },
   {
     "id": "ses_0645",
+    "parent_session_id": null,
     "started_at": "2026-08-25T21:16:52+02:00",
     "ended_at": "2026-08-25T23:11:38+02:00",
     "member_id": "mem_aruiz",
@@ -587,6 +910,7 @@
   },
   {
     "id": "ses_0742",
+    "parent_session_id": null,
     "started_at": "2026-09-07T15:49:22+02:00",
     "ended_at": "2026-09-07T20:11:12+02:00",
     "member_id": "mem_sroldan",

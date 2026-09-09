@@ -71,6 +71,12 @@ const sessionsByPair = new Map(
 
 const allSessions = [...sessionsByPair.values()].flat();
 const visible = allSessions.filter((row) => !row.hidden);
+// R-M19 — **session count means root count.** Every distribution stated in sessions is asserted
+// over roots: a child carries no outcome, so counting one in an acceptance denominator would
+// divide by rows that could never be accepted. Token-grain claims still read every row, because a
+// child's tokens are real and reach the product through its root.
+const roots = visible.filter((row) => row.parent_session_id === null);
+const children = allSessions.filter((row) => row.parent_session_id !== null);
 const tasks = read<Task[]>("tasks.json");
 const repositories = read<Repository[]>("repositories.json");
 const directory = read<{ github_users: GithubUser[]; members: Member[] }>("members.json");
@@ -195,7 +201,7 @@ describe("T-F3 — token classes", () => {
 describe("T-F4 — the required distributions", () => {
   it("carries R-D6 acceptance by WorkType", () => {
     for (const workType of WORK_TYPES) {
-      const rows = visible.filter((row) => row.work_type === workType);
+      const rows = roots.filter((row) => row.work_type === workType);
       expect(rows.length).toBeGreaterThan(0);
       expect(
         Math.abs(acceptanceOf(rows) - ACCEPTANCE_BY_WORK_TYPE[workType]),
@@ -205,7 +211,7 @@ describe("T-F4 — the required distributions", () => {
 
   it("carries R-D7 acceptance by Repository", () => {
     for (const repository of REPOSITORIES) {
-      const rows = visible.filter(
+      const rows = roots.filter(
         (row) => repositoryNameById.get(row.repository_id) === repository,
       );
       expect(
@@ -215,7 +221,7 @@ describe("T-F4 — the required distributions", () => {
   });
 
   it("carries R-D8 rework at 18% and decomposition at 12% of Tasks", () => {
-    const grouped = groupByTask(visible);
+    const grouped = groupByTask(roots);
     const rework = grouped.filter((rows) => rows.slice(0, -1).some((row) => !row.accepted));
     const decomposition = grouped.filter(
       (rows) => rows.filter((row) => row.accepted).length > 1,
@@ -226,7 +232,7 @@ describe("T-F4 — the required distributions", () => {
 
   it("fills all four R-D9 incomplete-Task age buckets, including 91+", () => {
     const endMs = Date.parse(`${WINDOW_END}T23:59:59+02:00`);
-    const ages = groupByTask(visible)
+    const ages = groupByTask(roots)
       .filter((rows) => rows.every((row) => !row.accepted))
       .map((rows) => Math.floor((endMs - Date.parse(rows[rows.length - 1].started_at)) / DAY_MS));
     const buckets = [
@@ -242,13 +248,13 @@ describe("T-F4 — the required distributions", () => {
   it("holds R-D10's seat with fewer than five sessions", () => {
     const humans = directory.members.filter((member) => member.kind === "human");
     const counts = humans.map(
-      (member) => visible.filter((row) => row.member_id === member.id).length,
+      (member) => roots.filter((row) => row.member_id === member.id).length,
     );
     expect(counts.filter((count) => count > 0 && count < 5).length).toBeGreaterThanOrEqual(1);
   });
 
   it("holds R-D11's ~20 CPU-heavy, token-light sessions", () => {
-    const cpuHeavy = visible.filter(
+    const cpuHeavy = roots.filter(
       (row) =>
         row.machine_spec === "compute" &&
         row.machine_allocation_duration_s >= 4 * 3600 &&
@@ -264,21 +270,24 @@ describe("T-F4 — the required distributions", () => {
   });
 
   it("holds R-D12's ~2% hidden sessions in the committed data", () => {
-    const hidden = allSessions.filter((row) => row.hidden);
+    const storedRoots = allSessions.filter((row) => row.parent_session_id === null);
+    const hidden = storedRoots.filter((row) => row.hidden);
     expect(hidden.length).toBeGreaterThan(0);
-    expect(hidden.length / allSessions.length).toBeCloseTo(0.02, 2);
-    expect(visible.length).toBeLessThan(allSessions.length);
+    // The share is of roots, on R-M19's rule: a hidden root takes its children with it, so a
+    // denominator counting children would report a hidden share the fan-out had diluted.
+    expect(hidden.length / storedRoots.length).toBeCloseTo(0.02, 2);
+    expect(roots.length).toBeLessThan(storedRoots.length);
   });
 
   it("holds R-D13's interactive service account and headless humans", () => {
     const kindOf = (row: AgentSession) => memberById.get(row.member_id)?.kind;
     expect(
-      visible.filter(
+      roots.filter(
         (row) => kindOf(row) === "service_account" && row.execution_mode === "interactive",
       ).length,
     ).toBeGreaterThan(0);
     expect(
-      visible.filter((row) => kindOf(row) === "human" && row.execution_mode === "headless").length,
+      roots.filter((row) => kindOf(row) === "human" && row.execution_mode === "headless").length,
     ).toBeGreaterThan(0);
   });
 
@@ -287,7 +296,7 @@ describe("T-F4 — the required distributions", () => {
     expect(multiTeam.length).toBeGreaterThanOrEqual(3);
     const crossTeam = REPOSITORIES.filter((repository) => {
       const workers = new Set(
-        visible
+        roots
           .filter((row) => repositoryNameById.get(row.repository_id) === repository)
           .map((row) => row.member_id),
       );
@@ -300,8 +309,8 @@ describe("T-F4 — the required distributions", () => {
   });
 
   it("holds R-D15's 40% multi-Model sessions", () => {
-    const multi = visible.filter((row) => row.token_usage.length > 1);
-    expect(multi.length / visible.length).toBeCloseTo(0.4, 1);
+    const multi = roots.filter((row) => row.token_usage.length > 1);
+    expect(multi.length / roots.length).toBeCloseTo(0.4, 1);
   });
 
   it("holds R-D17's falling frontier share", () => {
@@ -327,6 +336,66 @@ describe("T-F4 — the required distributions", () => {
     expect(shareIn("2026-04")).toBeCloseTo(0.25, 1);
     expect(shareIn("2026-08")).toBeCloseTo(0.1, 1);
     expect(shareIn("2026-04")).toBeGreaterThan(shareIn("2026-08") + 0.1);
+  });
+});
+
+describe("T-F10 — the session tree (R-M19, R-D21)", () => {
+  const byId = new Map(allSessions.map((row) => [row.id, row]));
+  const inherited = [
+    "member_id",
+    "repository_id",
+    "work_type",
+    "task_key",
+    "execution_mode",
+  ] as const;
+
+  it("spawns children from ~20% of visible roots, one to four at a time", () => {
+    const parents = new Set(children.map((child) => child.parent_session_id));
+    expect(children.length).toBeGreaterThan(0);
+    expect(parents.size / roots.length).toBeCloseTo(0.2, 2);
+    for (const parent of parents) {
+      const count = children.filter((child) => child.parent_session_id === parent).length;
+      expect(count).toBeGreaterThanOrEqual(1);
+      expect(count).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it("gives every child a parent that exists, is a root, and shares the five labels", () => {
+    for (const child of children) {
+      const parent = byId.get(child.parent_session_id ?? "");
+      expect(parent).toBeDefined();
+      expect(parent?.parent_session_id).toBeNull();
+      for (const label of inherited) expect(child[label]).toBe(parent?.[label]);
+    }
+  });
+
+  it("never lets a child carry the outcome, and never hides one under a visible root", () => {
+    for (const child of children) {
+      expect(child.accepted).toBe(false);
+      expect(child.hidden).toBe(byId.get(child.parent_session_id ?? "")?.hidden);
+    }
+  });
+
+  it("nests every child inside its root's window, so the root's wall clock spans the attempt", () => {
+    for (const child of children) {
+      const parent = byId.get(child.parent_session_id ?? "");
+      expect(Date.parse(child.started_at)).toBeGreaterThan(Date.parse(parent?.started_at ?? ""));
+      expect(Date.parse(child.ended_at)).toBeLessThan(Date.parse(parent?.ended_at ?? ""));
+    }
+  });
+
+  it("leans the fan-out toward implementation and headless work", () => {
+    const shareOf = (rows: readonly AgentSession[], holds: (row: AgentSession) => boolean) =>
+      rows.filter(holds).length / rows.length;
+    const fannedOut = roots.filter((root) =>
+      children.some((child) => child.parent_session_id === root.id),
+    );
+    for (const holds of [
+      (row: AgentSession) => row.work_type === "implementation",
+      (row: AgentSession) => row.execution_mode === "headless",
+    ]) {
+      expect(shareOf(fannedOut, holds)).toBeGreaterThan(shareOf(roots, holds));
+    }
   });
 });
 

@@ -115,6 +115,51 @@ const ratesPresentIn = (payload: string): readonly string[] => {
     .map((rate) => rate.machine_spec);
 };
 
+/** Where a given rate's literals stand in the payload, as standalone decimals. */
+const positionsOf = (payload: string, rate: number): readonly number[] => {
+  const alternation = [...new Set(literalsOf(rate))]
+    .map((literal) => literal.replaceAll(".", "\\."))
+    .join("|");
+  const pattern = new RegExp(`(?<![\\d.])(?:${alternation})(?![\\d.])`, "g");
+  return [...payload.matchAll(pattern)].map((match) => match.index);
+};
+
+/**
+ * Assertion 3 — **the tightest stretch of payload holding a literal of every one of the four
+ * rates**, or `null` where it holds fewer than four.
+ *
+ * The measurement it replaces was "no payload carries all four at all", and this file's own
+ * header predicted its end: *"a compute rate and a price paid are both money in the same narrow
+ * range"*. On ticket 48's fixture that prediction came true — 1,034 session rows put all four
+ * of `0.3`, `0.45`, `0.9` and `1.2` on `/demo/history` as costs, and the old form failed on a
+ * page holding money. **The claim is unchanged and the search is sharpened**, exactly as the
+ * header says it must be: a rendered card puts its four rates within one table of each other,
+ * and scattered session costs do not. The threshold is the leaked card's own length rather than
+ * a chosen number, so it cannot drift from what it is meant to describe.
+ */
+const rateSpanIn = (payload: string): number | null => {
+  const found = COMPUTE.rates
+    .flatMap((rate, index) => positionsOf(payload, rate.usd_per_hour).map((at) => ({ at, index })))
+    .sort((left, right) => left.at - right.at);
+  const held = new Map<number, number>();
+  let narrowest: number | null = null;
+  let from = 0;
+  for (const [to, entry] of found.entries()) {
+    held.set(entry.index, (held.get(entry.index) ?? 0) + 1);
+    while (held.size === COMPUTE.rates.length) {
+      const width = entry.at - found[from].at;
+      narrowest = narrowest === null || width < narrowest ? width : narrowest;
+      const leaving = found[from].index;
+      const count = held.get(leaving) ?? 0;
+      if (count <= 1) held.delete(leaving);
+      else held.set(leaving, count - 1);
+      from += 1;
+      if (from > to) break;
+    }
+  }
+  return narrowest;
+};
+
 /**
  * Assertion 1 — names the card cannot appear without. Deliberately not `per hour` or a bare
  * `compute`: those are ordinary words a legitimate panel may one day use, and a marker that can
@@ -172,6 +217,12 @@ test.describe("T-E9 — the compute rate card appears on no surface (A18, R-N11)
     expect(markersIn(costs)).toEqual([]);
     expect(pairingsIn(costs)).toEqual([]);
     expect(ratesPresentIn(costs).length).toBeLessThan(4);
+    expect(rateSpanIn(costs)).toBeNull();
+  });
+
+  test("the card's four rates stand within its own length of each other", () => {
+    // The threshold the crawl below uses, measured on the leak rather than chosen.
+    expect(rateSpanIn(LEAKED_CARD)).toBeLessThanOrEqual(LEAKED_CARD.length);
   });
 
   for (const route of ROUTES) {
@@ -190,17 +241,18 @@ test.describe("T-E9 — the compute rate card appears on no surface (A18, R-N11)
       ).toEqual([]);
     });
 
-    test(`carries no more of the card's rates than money alone explains on ${route}`, async ({
-      page,
-    }) => {
+    test(`never gathers the card's four rates into one place on ${route}`, async ({ page }) => {
       const payload = await payloadFor(page, route);
+      const span = rateSpanIn(payload);
 
-      // Four rows print four rates. Fewer than four means the payload holds money figures that
-      // happen to equal rates — which the two assertions above have already shown they are.
+      // A rendered card is four rows in a row. `/demo/history` carries all four rate *values* as
+      // session costs, scattered across a fifty-row table — which is money, not a card, and the
+      // distance between them is what says so.
       expect(
-        ratesPresentIn(payload).length,
-        `${route} carries a literal of every rate on the compute card`,
-      ).toBeLessThan(4);
+        span === null || span > LEAKED_CARD.length,
+        `${route} gathered every compute rate into ${String(span)} characters, ` +
+          `where the card itself spans ${LEAKED_CARD.length}`,
+      ).toBe(true);
     });
   }
 });
@@ -227,6 +279,21 @@ test.describe("/demo/history — the raw rows under every aggregate", () => {
     await expect(detail).toBeVisible();
     await expect(detail.getByText("Cache write")).toBeVisible();
     await expect(detail.getByRole("heading", { name: "Model mix" })).toBeVisible();
+  });
+
+  // T-E18 — the one surface where the multi-agent fan-out is visible as rows. Everywhere else it
+  // is folded into the root's figures (R-M19), which is why this is the page that has to show it.
+  test("T-E18 — expands a root to the agents that worked it (R-N20.2)", async ({ page }) => {
+    await page.goto(`/${OPEN_ACCOUNT.orgSlug}/history`);
+
+    // The expander names its own fan-out, so the row is addressable without knowing an id.
+    await page.getByRole("button", { name: /sub-agent sessions for session/ }).first().click();
+
+    const children = page.getByTestId("session-children");
+    await expect(children).toBeVisible();
+    await expect(children.getByRole("heading", { name: "Sub-agent sessions" })).toBeVisible();
+    await expect(children.getByText(/already in the row above/)).toBeVisible();
+    await expect(page.locator("[data-child]").first()).toBeVisible();
   });
 
   test("builds no link from the Task key — the tracker is imaginary (R-N21)", async ({ page }) => {

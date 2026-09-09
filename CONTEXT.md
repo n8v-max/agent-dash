@@ -60,10 +60,38 @@ makes multi-session analysis trustworthy.
 resolved may depend on non-engineering work the platform never sees, so Task resolution is out
 of scope. What the platform observes is the sessions it ran against the Task.
 
-**AgentSession** — A single *attempt* at a Task, and the atomic unit of platform activity: the
-grain at which cost is incurred and the grain everything is stored at. It is launched under a
-fixed set of labels — Member, Repository, WorkType, Task, `execution_mode` and `machine_spec` —
-and accumulates measures as it runs.
+**AgentSession** — A single *attempt* at a Task by a single agent, and the atomic unit of platform
+activity: the grain at which cost is incurred and the grain everything is stored at. It is
+launched under a fixed set of labels — Member, Repository, WorkType, Task, `execution_mode` and
+`machine_spec` — and accumulates measures as it runs.
+
+**An attempt may be worked by more than one agent.** A session fans out to sub-agents, each of
+which is a session of its own, so *attempt* and *session* stopped being the same thing. The two
+terms below are what tell them apart, and every metric defined at "session" grain is defined over
+the first of them. See `docs/adr/0008-a-child-session-rolls-up-into-its-root.md`.
+
+**Root session** — An AgentSession launched by a Member: the attempt itself. It carries no parent.
+**A root is what "a session" means in every metric**, and the population every session-grain figure
+is counted over.
+
+**Child session** — An AgentSession spawned by a root as part of the same attempt — a sub-agent
+fan-out, not a retry. It **inherits** its root's Task, Member, Repository, WorkType and
+`execution_mode`, and it runs *inside* its root's window: it starts after the root starts and ends
+before the root ends.
+
+A child **never carries `accepted`**. Acceptance is a property of the attempt — the WorkType's
+criterion is met once, by the work as a whole — so the outcome sits on the root and the child has
+none to disagree with.
+
+A child's **Cost, TokenUsage and duration spans roll up into its root** for every aggregate, and it
+appears as a row of its own nowhere except the raw session history. Its wall clock does not roll
+up: the root's start and end already span the whole attempt, which is why a session's *machine
+allocation* may exceed its *duration* — two agents holding two machines for an hour is two machine
+hours inside one hour of work.
+
+**The tree is one level deep.** A child's parent is always a root; a child spawns nothing. That is
+a modelling choice, not an observation about agents, and it is what keeps the roll-up a single
+addition rather than a traversal.
 
 **Machine spec** — The class of machine allocated to a session: `general`, `compute`, `memory` or
 `storage`. It is fixed at launch and it is the key of the compute rate card. It is **not an
@@ -127,6 +155,10 @@ The platform absorbs its cost; it is not billed to the Organization, and it appe
 and no view. Excluding these is what keeps Acceptance rate a clean measure of *agent* efficacy
 with no platform noise in it, and it is why the session model needs no terminal-status field.
 
+The rule reaches Child sessions as it reaches roots — a hidden child is absorbed too. **A hidden
+root takes its children with it**, because a child whose root is not in the data has nothing to
+roll up into; there is no such thing as a visible child of a hidden root.
+
 **Output comparability** — Output artefact counts are comparable only across WorkTypes that
 share an artefact kind. `refactor` and `implementation` both produce changed lines; `review` and
 `refactor` share nothing, so no chart may put them on one axis. The three code WorkTypes —
@@ -137,21 +169,29 @@ enforced by convention inside a chart component. In the UI the dependency runs t
 round: **choosing a datapoint conditions which WorkTypes are offered**, so an incomparable
 selection cannot be expressed in the first place.
 
-**Rework** — A Task on which a **non-accepted** session was followed by **another session** —
-of any WorkType. The follow-up need not attempt the same class of work: a failed `review`
-session followed by an `implementation` session is still a second attempt at the same Task.
-The distinction between Task and AgentSession exists so that Rework is *measurable* at all —
+**Rework** — A Task on which a **non-accepted root session** was followed by **another root
+session** — of any WorkType. The follow-up need not attempt the same class of work: a failed
+`review` session followed by an `implementation` session is still a second attempt at the same
+Task. The distinction between Task and AgentSession exists so that Rework is *measurable* at all —
 three retries of one Task and three first-time-successful Tasks are otherwise indistinguishable.
 
-**Completed Task** — A Task with **at least one accepted session**. The unit of delivered work.
+**It counts attempts, so it counts roots.** A Child session is one agent working *the same*
+attempt and carries no acceptance of its own; counting it would read every sub-agent fan-out as a
+failed session followed by another, and the metric would rise with how much a team parallelised
+rather than with how much it repeated itself. On the committed fixture the difference between the
+two readings is 18% and 31%.
+
+**Completed Task** — A Task with **at least one accepted root session**. The unit of delivered
+work. Only a root can be accepted, so the qualifier renames nothing it did not already mean.
 
 **Incomplete Task** — A Task with **no** accepted session. Deliberately an umbrella: it covers
 both work still in flight and work someone gave up on, and the platform cannot tell them apart,
 because it does not own the external Task's lifecycle. Age since the last session is reported
 instead, and the reader draws their own conclusion.
 
-**Decomposition** — A Task with more than one **accepted** session: work deliberately split, not
-work repeated. Rework and Decomposition are independent labels on a Task rather than a
+**Decomposition** — A Task with more than one **accepted root session**: work deliberately split,
+not work repeated. A fan-out inside one attempt is not a split — nobody decided to divide the Task
+when an agent spawned a helper — which is the same reason Rework counts roots. Rework and Decomposition are independent labels on a Task rather than a
 partition; a long Task can exhibit both. Separating them is what makes multi-session Tasks
 interpretable — the raw count alone cannot tell a retry from a split.
 
@@ -394,10 +434,12 @@ group survived ADR-0004's cut of `Cohort` rather than being subsumed by the filt
 
 ## Metric Concepts
 
-**Acceptance rate** — Share of AgentSessions that met their WorkType's acceptance criterion.
+**Acceptance rate** — Share of **root sessions** that met their WorkType's acceptance criterion.
 This is the efficacy metric. Reported **within** a WorkType, since the criterion differs by type,
 which is why there is no Organization-level acceptance rate: averaging across criteria that
-measure different things produces a number that means nothing.
+measure different things produces a number that means nothing. Child sessions are not in the
+denominator: they carry no outcome, so counting them would divide by attempts that could never
+have been accepted.
 
 **Rework rate** — Share of Tasks exhibiting Rework.
 
@@ -410,7 +452,9 @@ whether a Task is in flight or abandoned.
 **Completed Tasks per period** — The velocity measure, and the only one. Session counts are not
 velocity: they *rise* when work goes badly.
 
-**Cost per session** — Session Cost, aggregated over a period.
+**Cost per session** — Session Cost, aggregated over a period, per **root session**. The
+numerator holds every agent's cost and the denominator counts attempts, so a Task worked by four
+agents reads as one expensive session rather than four cheap ones.
 
 **Cost per completed Task** — Total Cost over a period divided by Completed Tasks in it. This is
 where cost meets efficacy, and it is the product's central claim: attempts that produced nothing
@@ -419,8 +463,14 @@ sit in the numerator and not in the denominator, so waste raises the figure.
 **Tokens processed** — The four disjoint token classes summed. An **adoption** measure, not a
 cost proxy, and never presented beside a spend figure in a way that invites the inference.
 
-**Session duration** — Wall-clock time from AgentSession start to end. Median and p95 are the
-meaningful aggregations; the distribution is right-skewed, so the mean is not.
+**Session duration** — Wall-clock time from root session start to end, which spans the whole
+attempt because a Child session runs inside its root's window. Median and p95 are the meaningful
+aggregations; the distribution is right-skewed, so the mean is not.
+
+**Agents per session** — How many agents worked one attempt: the root, plus everything it spawned.
+Reported as median and p95, beside Session duration, because on a multi-agent platform how long a
+session ran and how many agents ran it are one reading in two halves. A session that fanned out to
+nothing is one agent, never none.
 
 **Projected cost** — Total spend extrapolated to the end of the current period, in proportion to
 the period elapsed. A forecast, not a measurement.

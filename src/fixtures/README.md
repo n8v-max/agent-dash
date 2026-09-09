@@ -17,13 +17,38 @@ modules therefore carry the `.mts` extension.
 
 | File | Imitates | Notes |
 |---|---|---|
-| `data/sessions/<repo>__<work_type>.json` × 25 | Platform events | Timestamp-ordered. All 25 exist; `mobile-app__deploy.json` holds `[]` (R-D19) |
+| `data/sessions/<repo>__<work_type>.json` × 25 | Platform events | Timestamp-ordered. All 25 exist; `mobile-app__deploy.json` holds `[]` (R-D19). Roots and their children sit in the same file — a child inherits both labels |
 | `data/members.json` | Mocked GitHub API | `{ github_users, members }` — the two sides of the join, and the join already applied |
 | `data/teams.json`, `data/repositories.json`, `data/tasks.json` | Mocked GitHub API | GitHub field names, simplified envelope: no pagination, no `_links`, no unread fields |
 | `data/work_types.json`, `data/models.json`, `data/rate_cards.json`, `data/organization.json` | Mocked internal API | Serialised as-is |
 
 `Task` carries no `state`: the platform does not own the external issue's lifecycle
 (`CONTEXT.md` § Work), so a resolved flag would be a claim the fixture is not entitled to make.
+
+## The fan-out (R-D21, ADR-0008)
+
+The platform is multi-agent, so ~20% of visible roots spawn one to four **child sessions**,
+weighted toward `implementation` and `headless`. A child inherits its root's Task, Member,
+Repository, WorkType and `execution_mode`, carries no `accepted`, and runs inside its root's
+window. The application folds a child's cost, tokens and duration into its root at parse (R-M19),
+so **session count means root count**: 742 attempts, 292 children, 1,049 rows on disk.
+
+**`children.mts` runs last, and changes no root.** Everything upstream of it — the schedule, the
+Task shapes, the cell assignment, the model draw, the hidden rows — runs exactly as it did before
+children existed, so the roots are byte-identical apart from `parent_session_id`, and child ids
+continue the sequence from the last root rather than renumbering it. R-D8's Rework and
+Decomposition rates are *arrangements of roots* (`tasks.mts`), so they were hit without a single
+target being retuned.
+
+**A child is small in both dimensions at once.** Its machine allocation is 12–30% of its root's,
+and its tokens are that same fraction of its root's own draw, taken per Model — scaling the
+parcels rather than re-drawing them is what keeps R-D16's tier shares and R-D17's monthly trend
+where `tokens.mts` put them, because a fan-out uses the models its root was already using. The
+size is also what protects R-D4: session spend rose 8.4% and the seat share moved from 48.2% to
+46.2%, still inside its authored band.
+
+Every distribution in `distributions.mts` and every money figure in `spend.mts` is asserted over
+**roots carrying their children** (`tree.mts`), because that is the population the product reads.
 
 ## The GitHub → Member join (R-D20)
 
@@ -97,4 +122,6 @@ Both are reported rather than resolved, and no spec was edited.
   implies a mean near $9 and a window total near $6,900, which contradicts R-D4's ~$4,500 of
   session spend and its ~48% seat share. R-D4 is in the spec and wins: the committed data carries
   a median of $3.44 and a p95 of $18.42, with $4,523.63 of session spend against $4,212.00 of seat
-  cost — **48.2% of Total spend**.
+  cost — **48.2% of Total spend**. Ticket 48's fan-out then added 8.4% of session spend on top: the
+  committed data now carries a median of $3.64 and a p95 of $20.32, with $4,905.39 of session
+  spend against the same $4,212.00 of seat cost — **46.2% of Total spend**.

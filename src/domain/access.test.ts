@@ -61,6 +61,7 @@ const requestFor = (viewer: Viewer, datapoint: DatapointClass): AccessRequest =>
 /** A real `AgentSession`, so the filter is proved against the shape it actually receives. */
 const session = (id: string, memberId: string, cost: number): AgentSession => ({
   id,
+  parent_session_id: null,
   started_at: "2026-04-01T09:00:00+02:00",
   ended_at: "2026-04-01T09:30:00+02:00",
   member_id: memberId,

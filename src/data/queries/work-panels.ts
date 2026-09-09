@@ -2,7 +2,9 @@
 //
 //   4. Incomplete Tasks by age bucket (R-M16) — the one chart whose columns are ages, not periods.
 //   5. Session duration, median and p95 (R-M1) — two readings, **one chart each**, and no mean
-//      (T-U19). See `DurationPanel` for why they no longer share an axis.
+//      (T-U19). See `DurationPanel` for why they no longer share an axis. It carries the Agents
+//      per session reading too (R-M19): on a multi-agent platform a session's machine time is
+//      its tree's, so how long it ran and how many agents ran it are one reading in two halves.
 //   6. Human-presence spans, `interactive` sessions only (R-N14, A27) — the composition R-V1
 //      stacks, because the three spans sum to `machine_allocation_duration_s` exactly (R-T12).
 
@@ -11,6 +13,7 @@ import {
   taskFacts,
   type IncompleteTaskAges,
 } from "@/domain/metrics/efficacy";
+import { agentsPerSession, type AgentsPerSession } from "@/domain/sessions";
 import {
   PRESENCE_SPANS,
   sessionDurationSummary,
@@ -50,6 +53,15 @@ export type DurationPanel = {
   readonly p95: ChartViewModel;
   /** Median and p95 over the whole range. **There is no mean** (T-U19). */
   readonly summary: DurationSummary;
+  /**
+   * **Agents per session** — the fan-out, at the same two order statistics (R-M19, ADR-0008).
+   *
+   * It sits on the duration panel because it is what makes the duration legible on a
+   * multi-agent platform: a session's machine allocation is now the tree's, so "how long" and
+   * "how many agents" are two halves of one reading. It is a *figure*, not a third chart —
+   * R-N12's fifth item is two small multiples and stays two.
+   */
+  readonly agents: AgentsPerSession;
 };
 
 export type PresenceSpansPanel = {
@@ -149,6 +161,9 @@ export function durationPanel(context: PageContext): DurationPanel {
     median: durationChart(context, view, "median"),
     p95: durationChart(context, view, "p95"),
     summary: sessionDurationSummary(view.rows),
+    // The rows are roots (R-M19); the children are looked up by root id, so a root outside the
+    // period contributes neither itself nor its fan-out.
+    agents: agentsPerSession(view.rows, context.data.childSessions),
   };
 }
 

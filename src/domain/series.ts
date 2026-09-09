@@ -113,7 +113,13 @@ export type Series = {
  */
 export type SeriesSet = {
   readonly series: readonly Series[];
-  readonly other: { readonly holds: readonly string[] } | null;
+  /**
+   * `holds` is what R-V6's tooltip lists; `keys` is the same tail in the same ranked order,
+   * carried so that the mirror can sum it in the order the chart summed it. Floating-point
+   * addition is not associative, so two paths adding one tail in two orders agree about the
+   * figure to fifteen places and not to sixteen — and R-T7 asserts they agree, full stop.
+   */
+  readonly other: { readonly holds: readonly string[]; readonly keys: readonly string[] } | null;
 };
 
 /** The minimum a series needs from a bucket. `PeriodBucket<Row>` satisfies it structurally. */
@@ -282,7 +288,8 @@ export function capSeries<Row>(input: SeriesInput<Row>): SeriesSet {
   const swept = ranked.slice(NAMED_SERIES_CAP);
   return {
     series: paint([...kept, otherTally(swept, input.buckets.length, absent)], input.buckets),
-    // R-V6 — what the tooltip lists, in the same ranked order the chart itself is in.
-    other: { holds: swept.map((held) => held.label) },
+    // R-V6 — what the tooltip lists, in the same ranked order the chart itself is in. The keys
+    // ride along in that order because the mirror re-adds the same tail out of the grid (R-T7).
+    other: { holds: swept.map((held) => held.label), keys: swept.map((held) => held.key) },
   };
 }

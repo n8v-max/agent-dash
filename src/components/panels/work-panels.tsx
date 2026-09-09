@@ -33,7 +33,14 @@ import type {
   TaskRatesPanel,
   VelocityPanel,
 } from "@/data/queries";
-import { countText, durationText, hoursTick, percentText, percentTick } from "./work-format";
+import {
+  countOrAbsence,
+  countText,
+  durationText,
+  hoursTick,
+  percentText,
+  percentTick,
+} from "./work-format";
 import { HALF_CHART, PANEL_CHART, WorkPanel, type PanelFigure } from "./work-section";
 
 /** R-M14's denominator, said in words where the toggle is on. Copy — the number is the ViewModel's. */
@@ -124,7 +131,7 @@ export function IncompleteAgesChart(props: { readonly panel: IncompleteAgesPanel
 }
 
 const DURATION_NOTE =
-  "Wall clock, start to end. Median and p95 are nearest-rank order statistics, so each is a duration some session actually had. The distribution is right-skewed, so there is no mean.";
+  "Wall clock, start to end. Median and p95 are nearest-rank order statistics, so each is a duration some session actually had. The distribution is right-skewed, so there is no mean. A session is one attempt however many agents worked it: a sub-agent runs inside its root's window, so the wall clock is the root's, and its machine time is the whole tree's.";
 
 const durationFigures = (panel: DurationPanel): readonly PanelFigure[] => [
   {
@@ -134,6 +141,15 @@ const durationFigures = (panel: DurationPanel): readonly PanelFigure[] => [
     detail: `${countText(panel.summary.count)} sessions`,
   },
   { key: "p95", label: "p95", value: durationText(panel.summary.p95) },
+  // R-M19 — the fan-out, at the same two order statistics. A session that spawned nothing
+  // counts one agent, so the median is 1 wherever most attempts are worked by one agent.
+  {
+    key: "agents-median",
+    label: "Agents per session",
+    value: countOrAbsence(panel.agents.median),
+    detail: `${countText(panel.agents.agents)} agents across ${countText(panel.agents.sessions)} sessions`,
+  },
+  { key: "agents-p95", label: "Agents p95", value: countOrAbsence(panel.agents.p95) },
 ];
 
 /**

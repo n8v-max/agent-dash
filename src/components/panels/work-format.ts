@@ -32,6 +32,10 @@ export const percentText = (share: number | null): string =>
 
 export const countText = (value: number): string => COUNT.format(value);
 
+/** A count the domain layer may have had no population for. `null` is an absence (R-M18). */
+export const countOrAbsence = (value: number | null): string =>
+  value === null ? NO_FIGURE : countText(value);
+
 /** Seconds, in the units a reader reads a session in. `null` where there was no population. */
 export function durationText(seconds: number | null): string {
   if (seconds === null) return NO_FIGURE;

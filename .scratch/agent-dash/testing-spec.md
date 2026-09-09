@@ -294,6 +294,29 @@ against.
     formatter in the Organization's timezone, lands **inside `window_end`** — which is the reason
     it prints the start rather than the end — and is the same string when the wall clock is moved
     five years forward.
+- **T-U24 — the session tree** (`domain/sessions.ts`, R-M19, R-D21, A41, ADR-0008). Two failures,
+  and the module is arranged so each is unavailable rather than discouraged.
+  - **A child is never a row.** `rollUpSessions` returns roots carrying their children's cost,
+    tokens and the four duration fields; the wall clock stays the root's, so the folded row's
+    machine allocation legitimately exceeds its duration by *exactly* the children's machine time.
+    A child whose root is absent is counted nowhere, on `aggregate.ts`'s own rule for an
+    unattributable row.
+  - **A child is never an attempt.** `taskFacts` drops children in the grouping pass, so a Task
+    with one accepted root and three children is neither Rework nor Decomposition — and the type
+    it takes carries `parent_session_id`, so the guard cannot be removed without changing every
+    caller. **Over the committed fixture** (P6, `src/data/sessions.fixture.test.ts`): `taskFacts`
+    over roots and over every visible row produce *identical* output, and relabelling the children
+    as roots moves the Rework rate from 18% to 31% — the error the ticket exists to remove,
+    computed rather than argued.
+  - **What makes a child well-formed is one expression** (`childFaults`), and each of its five
+    faults gets a case: a missing root, a grandchild, each of the five inherited labels
+    disagreeing, a child carrying `accepted`, and a visible child under a hidden root. The same
+    expression is what `load.ts` throws on (R-T37), asserted there against a doctored fixture.
+- **T-U25 — Agents per session** (R-M19, R-N12 item 5). Median and p95 through `duration.ts`'s
+  nearest rank — the same order statistic, not a second implementation (A37) — with a root that
+  spawned nothing counting **one** agent and an empty population reading `null`, never `0`
+  (R-M18). Over the committed fixture: median 1, p95 4, and the agent total equal to the number of
+  visible rows on disk.
 
 ---
 
@@ -508,6 +531,14 @@ product's central interaction.
   both of these fit inside a chart that was already clipping them: Recharts' own
   `overflow: hidden` meant a legend running off both edges of the card cost nothing in scroll
   width and silently deleted two of five series names.
+- **T-C23 — a root expands to the agents that worked it** (A41, R-N20.2, ticket 48). Three claims,
+  and the third is the one that keeps the page honest. A row that fanned out to nothing renders the
+  detail panel and **no** child list. A row that fanned out renders one list item per child, each
+  with its own tokens, cost and Model mix — asserted on a *different* model from its root's,
+  because a sub-agent that reached for a cheaper model is the reading this list exists for. And the
+  list says the figures above already hold them, so nothing on the page invites a reader to add a
+  child's cost to its root's. The fan-out is also named in the expander's accessible label, which
+  is what lets T-E18 find such a row without knowing a session id.
 
 ---
 
@@ -657,6 +688,11 @@ inside the desktop project, which keeps each width beside the requirement it bel
   restricted account is swept over `/demo/people`, whose visibility sentence and one-row table are
   markup the open account never renders.
 
+- **T-E18 — `/demo/history` expands a root to the agents that worked it** (A41, R-N20.2, ticket
+  48). The one surface where the session tree is visible as rows; everywhere else the fan-out is
+  already inside the figures (R-M19). The row is reached through the expander's own label — which
+  names its fan-out — rather than through a session id, so the test survives a regenerated fixture.
+
 ---
 
 ## 6. Fixture invariant tests
@@ -686,6 +722,12 @@ claims rest on — a fixture that quietly loses the 91+ day bucket makes T-U16 p
   an unreachable state and must not appear.
 - **T-F9 — The committed output matches the seed** (R-T21). CI regenerates into a temp directory
   and diffs. The only place the generator runs in CI.
+- **T-F10 — The session tree** (R-M19, R-D21, ticket 48). Over the raw JSON: ~20% of visible roots
+  carry one to four children; every child's parent **exists, is a root, and shares the five
+  inherited labels**; no child carries `accepted`; a child is hidden exactly when its root is; and
+  every child is nested inside its root's window — started after it, ended before it. The fan-out
+  leans toward `implementation` and `headless`, asserted as a share against the root population
+  rather than as a count, so the lean is a property of the draw and not of the fixture's size.
 
 ---
 
@@ -772,7 +814,8 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A37 One interpolation, named in one place and overridden nowhere | T-C19 |
 | A38 One visible sentence per panel; the rest folded, verbatim | T-C20, T-E16 |
 | A39 The as-of stamp on every surface, matching the History top row | T-U23, T-C21, T-E15 |
-| A40 Every route fits a 390px phone; nothing is hidden to make it fit | T-E17, T-C22 |
+| A40 | Every route fits a 390px phone; nothing is hidden to make it fit | T-E17, T-C22 |
+| A41 | A child session rolls up into its root, is no attempt of its own, and is a row on `/demo/history` alone | T-U24, T-U25, T-C23, T-E18, T-F10 |
 
 ---
 

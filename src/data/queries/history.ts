@@ -15,6 +15,14 @@
 //
 // **R-N21 — the Task key is plain text**, `owner/repo#number`. The external tracker is
 // imaginary, and a dead link is worse than none, so no href is built.
+//
+// **R-N20.2 — a root row expands to its children.** Every other surface in the product reads a
+// figure that already has the fan-out folded into it (R-M19); this is the only place the rows
+// underneath are visible, which is exactly what `/demo/history` is for. A root's own cells carry
+// the *tree's* cost, tokens and duration, so the child rows under it are a breakdown of the row
+// above them rather than extra rows a reader has to add up. The Hidden rule reaches them as it
+// reaches a root: `load.ts` stripped hidden rows once, and a hidden root took its children with
+// it (R-M2, R-N22).
 
 import { resolvesName, type Viewer } from "@/domain/access";
 import { tokenVolume, tokensProcessed } from "@/domain/metrics/adoption";
@@ -42,10 +50,27 @@ export type SessionDetail = {
     | null;
 };
 
+/**
+ * One child session under a root (R-N20.2). It carries its own tokens and Model mix — the two
+ * figures R-N20.1 makes legal here and nowhere else — plus enough of its row to place it: when it
+ * ran, for how long, and what it cost. `accepted` is absent because a child never carries one.
+ */
+export type HistoryChildRow = {
+  readonly key: string;
+  /** The instant, in the Organization's timezone (R-M10). */
+  readonly startedAt: string;
+  readonly durationSeconds: number;
+  /** `null` where the viewer's grants reach this session's Member in aggregate only (R-A6). */
+  readonly cost: number | null;
+  readonly detail: SessionDetail;
+};
+
 export type HistoryRow = {
   readonly key: string;
   readonly cells: readonly TableCell[];
   readonly detail: SessionDetail;
+  /** R-N20.2 — the agents this attempt fanned out to, in start order. Usually empty. */
+  readonly children: readonly HistoryChildRow[];
 };
 
 export type HistoryPageViewModel = {
@@ -106,6 +131,14 @@ const detailOf = (context: PageContext, row: AgentSession): SessionDetail => {
   };
 };
 
+const childRowFor = (context: PageContext, row: AgentSession): HistoryChildRow => ({
+  key: row.id,
+  startedAt: context.label.instant(row.started_at),
+  durationSeconds: sessionDurationSeconds(row),
+  cost: grantedOver(context, "cost", row) ? row.cost : null,
+  detail: detailOf(context, row),
+});
+
 const rowFor = (context: PageContext, row: AgentSession): HistoryRow => {
   const detail = detailOf(context, row);
   const cells: readonly TableCell[] = [
@@ -121,7 +154,15 @@ const rowFor = (context: PageContext, row: AgentSession): HistoryRow => {
     detail.tokensProcessed,
     grantedOver(context, "cost", row) ? row.cost : null,
   ];
-  return { key: row.id, cells, detail };
+  return {
+    key: row.id,
+    cells,
+    detail,
+    // The child rows are the same Member's, so the grant that reached the root reaches them.
+    children: (context.data.childSessions.get(row.id) ?? []).map((child) =>
+      childRowFor(context, child),
+    ),
+  };
 };
 
 /**

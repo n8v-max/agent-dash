@@ -28,7 +28,7 @@ import {
 } from "@/domain/metrics/duration";
 import { loadDataset } from "./load";
 
-const { members, sessions } = loadDataset();
+const { members, sessions, childSessions } = loadDataset();
 
 const kindOf = new Map(members.map((member) => [member.id, member.kind]));
 const interactive = sessions.filter((session) => session.execution_mode === "interactive");
@@ -61,14 +61,21 @@ describe("T-U19 — median and p95 on the committed, right-skewed distribution (
     expect(durations).toContain(summary.p95);
   });
 
-  it("reads the same figure off the stored spans as off the two stored instants", () => {
-    // Wall clock and machine allocation are different claims that happen to agree on every
-    // committed row. Asserting it here is what lets `duration.ts` prefer the instants.
+  it("reads the wall clock off the two instants, and machine allocation off the tree (R-M19)", () => {
+    // Wall clock and machine allocation were two claims that agreed on every committed row
+    // until sessions could fan out. They no longer do, and the difference is *exactly* the
+    // children's machine time: two agents holding two machines held two machines, and they held
+    // them inside the root's window. This is why `duration.ts` reads the instants.
     for (const session of sessions) {
-      expect(sessionDurationSeconds(session)).toBe(session.machine_allocation_duration_s);
+      const children = childSessions.get(session.id) ?? [];
+      expect(session.machine_allocation_duration_s - sessionDurationSeconds(session)).toBe(
+        totalOf(children),
+      );
     }
-    expect(durationSummary(sessions.map((session) => session.machine_allocation_duration_s))).toEqual(
-      sessionDurationSummary(sessions),
+    const alone = sessions.filter((session) => !childSessions.has(session.id));
+    expect(alone.length).toBeGreaterThan(0);
+    expect(durationSummary(alone.map((session) => session.machine_allocation_duration_s))).toEqual(
+      sessionDurationSummary(alone),
     );
   });
 });
@@ -109,21 +116,23 @@ describe("T-U20 — the composition is interactive sessions only (R-N14, A27)", 
     expect(composition.excluded).toBe(263);
     expect(composition.sessions + composition.excluded).toBe(sessions.length);
     expect(composition.total).toBe(totalOf(interactive));
+    // The totals carry the fan-out: a root's machine time is its own plus its children's
+    // (R-M19), so these are 4,743,050 seconds of machine allocation across 479 attempts.
     expect(composition.slices).toEqual([
-      { key: "interactive", total: 1_645_977, share: 1_645_977 / 4_398_464 },
-      { key: "idle", total: 1_230_125, share: 1_230_125 / 4_398_464 },
-      { key: "afk", total: 1_522_362, share: 1_522_362 / 4_398_464 },
+      { key: "interactive", total: 1_782_366, share: 1_782_366 / 4_743_050 },
+      { key: "idle", total: 1_323_413, share: 1_323_413 / 4_743_050 },
+      { key: "afk", total: 1_637_271, share: 1_637_271 / 4_743_050 },
     ]);
   });
 
-  it("reports an AFK share of 35%, where both modes together would report 61%", () => {
+  it("reports an AFK share of 35%, where both modes together would report 62%", () => {
     // The reading R-N14 forbids, computed here so the difference is a number rather than an
     // argument: including the headless population nearly doubles the AFK share, and the
     // composition stops being about human presence at all.
     const afkAcrossBothModes =
       sessions.reduce((running, session) => running + session.afk_duration_s, 0) / totalOf(sessions);
-    expect(afkAcrossBothModes).toBeCloseTo(0.613, 3);
-    expect(composition.slices[2]?.share).toBeCloseTo(0.346, 3);
+    expect(afkAcrossBothModes).toBeCloseTo(0.618, 3);
+    expect(composition.slices[2]?.share).toBeCloseTo(0.345, 3);
   });
 
   it("stacks legitimately: the slices sum to the population's machine allocation (R-V1)", () => {

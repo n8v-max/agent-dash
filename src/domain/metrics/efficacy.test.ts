@@ -64,6 +64,7 @@ const session = (
   startedDaysAgo: number,
 ): Row => ({
   task_key: taskKey,
+  parent_session_id: null,
   work_type: workType,
   accepted,
   started_at: daysBefore(startedDaysAgo),
@@ -85,6 +86,7 @@ const bucketOf = (report: IncompleteTaskAges, key: IncompleteAgeBucketKey): numb
 /** A Task with one unaccepted session that ended `days` ago — the only shape the buckets read. */
 const incompleteAged = (taskKey: string, days: number, hours = 0): Row => ({
   task_key: taskKey,
+  parent_session_id: null,
   work_type: "implementation",
   accepted: false,
   started_at: daysBefore(days + 1, hours),
@@ -289,6 +291,62 @@ describe("T-U15 — Decomposition is more than one *accepted* session", () => {
       accepted: 1,
       decomposition: false,
     });
+  });
+});
+
+describe("T-U24 — a sub-agent fan-out is one attempt, not several (R-M19, ADR-0008)", () => {
+  /** A child on the same Task: it inherits everything and carries no outcome of its own. */
+  const child = (taskKey: string, parent: string, startedDaysAgo: number): Row => ({
+    ...session(taskKey, "implementation", false, startedDaysAgo),
+    parent_session_id: parent,
+  });
+
+  it("is neither Rework nor Decomposition: one root, accepted, and three children", () => {
+    // The case the ticket was raised for. Before the parent link, these four rows read as a
+    // failed session followed by another — the Rework rate rose with the size of the fan-out.
+    const facts = factsFor([
+      session("acme/api#40", "implementation", true, 30),
+      child("acme/api#40", "ses_root", 29),
+      child("acme/api#40", "ses_root", 28),
+      child("acme/api#40", "ses_root", 27),
+    ]);
+
+    expect(facts).toMatchObject({
+      task_key: "acme/api#40",
+      // Session count means **root** count: one attempt was made at this Task.
+      sessions: 1,
+      accepted: 1,
+      rework: false,
+      decomposition: false,
+      completed: true,
+    });
+  });
+
+  it("still sees a real retry underneath a fan-out", () => {
+    const facts = factsFor([
+      session("acme/api#41", "implementation", false, 30),
+      child("acme/api#41", "ses_root", 29),
+      session("acme/api#41", "bugfix", true, 20),
+    ]);
+
+    expect(facts).toMatchObject({ sessions: 2, accepted: 1, rework: true, decomposition: false });
+  });
+
+  it("does not age a Task from a child's end", () => {
+    // A child ends before its root by construction, so this is a guard rather than a case the
+    // fixture holds: the age is the root's, because the child is not a session on the Task.
+    const facts = factsFor([
+      incompleteAged("acme/api#42", 45),
+      { ...incompleteAged("acme/api#42", 2), parent_session_id: "ses_root" },
+    ]);
+
+    expect(facts).toMatchObject({ sessions: 1, lastSessionEndedAt: daysBefore(45) });
+  });
+
+  it("counts a Task made only of children as no Task at all", () => {
+    // There is no root to attribute them to, so they are counted nowhere — the same rule
+    // `rollUpSessions` applies to an orphan (T-U24).
+    expect(taskFacts([child("acme/api#43", "ses_root", 5)])).toEqual([]);
   });
 });
 
@@ -553,6 +611,7 @@ describe("T-U16 — `now` is injected (P5)", () => {
   it("ages nothing for a Task whose last session carries no readable instant", () => {
     const unreadable: Row = {
       task_key: "acme/api#27",
+      parent_session_id: null,
       work_type: "deploy",
       accepted: false,
       started_at: "whenever",
@@ -576,6 +635,7 @@ describe("session order is read off the sessions, whatever shape they arrive in"
     readonly endedDaysAgo: number;
   }): Row => ({
     task_key: spec.task,
+    parent_session_id: null,
     work_type: "implementation",
     accepted: spec.accepted,
     started_at: daysBefore(spec.startedDaysAgo),
@@ -611,6 +671,7 @@ describe("session order is read off the sessions, whatever shape they arrive in"
   it("still groups a session carrying no readable instant, and ages the Task from a readable one", () => {
     const unreadable: Row = {
       task_key: "acme/api#32",
+      parent_session_id: null,
       work_type: "review",
       accepted: false,
       started_at: "whenever",

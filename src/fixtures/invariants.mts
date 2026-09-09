@@ -5,7 +5,7 @@
 
 import { REPO_NAMES, WORK_TYPE_KEYS } from "./allocation.mts";
 import { models, organization, repositories, workTypes } from "./catalog.mts";
-import { check } from "./check.mts";
+import { check, near } from "./check.mts";
 import {
   acceptanceLines,
   edgeCaseLines,
@@ -18,7 +18,15 @@ import { githubUsers, members } from "./people.mts";
 import { crossesUtcDay, startsLateEvening } from "./predicates.mts";
 import { madridOffsetMinutes } from "./schedule.mts";
 import { modelMixLines, totalSpendLines, trendLines } from "./spend.mts";
-import { EMPTY_PAIRS, MADRID_OFFSET_MINUTES, WINDOW_END_DAY, WINDOW_START_DAY } from "./targets.mts";
+import {
+  CHILD_EDGE_SECONDS,
+  CHILD_ROOT_SHARE,
+  EMPTY_PAIRS,
+  MADRID_OFFSET_MINUTES,
+  WINDOW_END_DAY,
+  WINDOW_START_DAY,
+} from "./targets.mts";
+import { agentCounts, INHERITED_LABELS, isRoot, rootsOf } from "./tree.mts";
 import type { AgentSession, Task } from "./types.mts";
 
 const TASK_KEY = /^[a-z0-9-]+\/[a-z0-9-]+#\d+$/u;
@@ -44,6 +52,39 @@ const assertRow = (row: AgentSession, taskOf: ReadonlyMap<string, Task>): void =
   check(TASK_KEY.test(row.task_key), `T-F7: ${row.task_key} is not owner/repo#number`);
   check(task?.repository_id === row.repository_id, `T-F7: ${row.task_key} is in another repo`);
   check(row.cost > 0, `attributed cost is not positive on ${row.id}`);
+};
+
+// R-D21 / R-M19 — the tree, checked as the loader checks it (`src/domain/sessions.ts`), plus the
+// nesting the loader cannot see: a child starts after its root and ends before it, which is what
+// lets the root's wall clock stand for the whole attempt.
+const assertTree = (rows: readonly AgentSession[]): string[] => {
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  const children = rows.filter((row) => !isRoot(row));
+  for (const child of children) {
+    const parent = byId.get(child.parent_session_id as string);
+    check(parent !== undefined, `R-M19: child ${child.id} names a root that does not exist`);
+    if (parent === undefined) continue;
+    check(isRoot(parent), `R-M19: ${child.id} hangs off ${parent.id}, which is itself a child`);
+    check(!child.accepted, `R-M19: child ${child.id} carries an outcome; acceptance is the root's`);
+    check(parent.hidden === child.hidden, `R-M19: ${child.id} and its root disagree about hidden`);
+    for (const label of INHERITED_LABELS) {
+      check(child[label] === parent[label], `R-M19: ${child.id} does not inherit ${label}`);
+    }
+    const started = Date.parse(child.started_at) - Date.parse(parent.started_at);
+    const ended = Date.parse(parent.ended_at) - Date.parse(child.ended_at);
+    check(
+      started >= CHILD_EDGE_SECONDS * 1000 && ended >= CHILD_EDGE_SECONDS * 1000,
+      `R-D21: ${child.id} is not nested inside its root's window`,
+    );
+  }
+  // The share is of *visible* roots, which is the population `children.mts` draws from: a hidden
+  // root takes its children with it, so it was never a candidate to fan out.
+  const roots = rows.filter((row) => isRoot(row) && !row.hidden);
+  const fannedOut = new Set(children.map((child) => child.parent_session_id));
+  return [
+    near("R-D21 roots that fan out", fannedOut.size / roots.length, CHILD_ROOT_SHARE, 0.005),
+    `R-D21 ${children.length} child sessions under ${fannedOut.size} roots · agents per session max ${Math.max(...agentCounts(rows))}`,
+  ];
 };
 
 const assertClock = (rows: readonly AgentSession[]): string[] => {
@@ -125,19 +166,26 @@ export const assertFixture = (fixture: {
   const taskOf = new Map(fixture.tasks.map((task) => [task.key, task]));
   for (const row of fixture.sessions) assertRow(row, taskOf);
   const visible = fixture.sessions.filter((row) => !row.hidden);
+  // **Every distribution below is asserted over ROOTS, carrying their children** (R-M19): that is
+  // the population the product reads, so it is the population the fixture has to be shaped in.
+  // Asserting over stored rows would measure acceptance against sessions that carry no outcome.
+  const roots = rootsOf(visible);
   return [
     ...assertScale(),
-    `R-D3 ${fixture.sessions.length} AgentSessions (${visible.length} visible)`,
+    `R-D3 ${fixture.sessions.length} AgentSession rows · ${roots.length} visible roots · ${
+      visible.length - roots.length
+    } visible children`,
+    ...assertTree(fixture.sessions),
     ...assertClock(fixture.sessions),
     ...assertMatrix(fixture.sessions),
     ...assertJoin(),
-    ...rampLines(visible),
-    ...acceptanceLines(visible),
-    ...taskLines(visible),
-    ...edgeCaseLines(fixture.sessions, visible),
-    ...populationLines(visible),
-    ...modelMixLines(visible),
-    ...trendLines(visible),
-    ...totalSpendLines(visible),
+    ...rampLines(roots),
+    ...acceptanceLines(roots),
+    ...taskLines(roots),
+    ...edgeCaseLines(fixture.sessions.filter(isRoot), roots),
+    ...populationLines(roots),
+    ...modelMixLines(roots),
+    ...trendLines(roots),
+    ...totalSpendLines(roots),
   ].join("\n");
 };

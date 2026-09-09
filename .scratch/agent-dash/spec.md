@@ -287,7 +287,8 @@ something a viewer should reason about.
 3. Rework rate and Decomposition rate as two lines on one chart (both Task-grain rates)
 4. Incomplete Tasks as a horizontal bar by age bucket
 5. Session duration — median and p95, as **two small multiples, one per statistic, each on its
-   own axis**
+   own axis** — carrying the **Agents per session** reading, median and p95, in the same figure
+   strip (R-M19)
 6. Human-presence spans and machine time as one **stacked** composition, **restricted to
    `interactive` sessions and labelled so**. The three spans are disjoint and sum exactly to
    `machine_allocation_duration_s`, so they are a true partition and stack legitimately (R-V1)
@@ -299,6 +300,12 @@ to the p95 and the median draws as a flat rule along the floor of the panel, whi
 a trend line exists to show being unreadable. The two are compared by *magnitude* in the figure
 strip above the charts, which is where a comparison of two unlike readings belongs; each chart is
 read for its own shape. A log axis was the alternative and was rejected — see ticket 41.
+
+**Agents per session joins that strip and adds no third chart** (added 2026-09-09, ticket 48). On a
+multi-agent platform a session's machine time is its whole tree's, so how long an attempt ran and
+how many agents ran it are one reading in two halves; a fan-out is what explains a duration that
+holds more machine time than wall clock. It is a figure and not a chart because R-N12's fifth item
+is two small multiples and stays two.
 
 **R-N13 — Acceptance rate uses small multiples, never a single chart with a WorkType selector.**
 Acceptance rate is defined only *within* a WorkType, and the layout makes that visible with no
@@ -369,6 +376,16 @@ Ticket 07 declined this row in favour of extra selectors on a flat table; the tw
 alternatives, and without it the most carefully modelled part of `CONTEXT.md` § Models & Money is
 provable in tests and prose but never on screen.
 
+**R-N20.2 — A root row expands to the child sessions under it**, indented, each carrying its own
+tokens, cost and Model mix (added 2026-09-09, ticket 48). This is the **only** view of the session
+tree in the product: every other surface reads a figure that already has the fan-out folded into it
+(R-M19), which is exactly why the page showing raw rows has to show it. The root's own cells carry
+the *tree's* cost, tokens and duration, so the children read as a breakdown of the row above them
+and never as rows to add to it — and the expansion says so in words. The fan-out is named in the
+expander's accessible label, so a reader who cannot see the indent learns of it without opening
+the row. The Hidden rule reaches a child as it reaches a root (R-N22): a hidden root takes its
+children with it.
+
 **R-N21 — The Task key renders as plain text**, in `owner/repo#number` form. The external tracker
 is imaginary; a dead link is worse than none.
 
@@ -414,6 +431,7 @@ statement available here — a projection at 10% elapsed and one at 90% are diff
 | Tokens processed | `tokens` | Sortable column and time series. Adoption, not cost |
 | Model mix | `tokens` | Distribution at exact / family / tier |
 | Session duration | `jobs` | Median and p95 |
+| Agents per session | `jobs` | Median and p95, beside Session duration |
 | Human-presence spans | `jobs` | Composition, `interactive` sessions only |
 | Projected cost | `cost` | `/demo/projection` only |
 
@@ -515,6 +533,27 @@ future suite can bind to — *the reading is `null` if and only if the denominat
 **A measured zero is not an absence.** An acceptance rate of 0 over five sessions is a
 measurement and renders as `0%`; over no sessions there is nothing to render. Nothing in this rule
 rounds, clamps or hides a real zero.
+
+**R-M19 — A session means a *root* session, and a child rolls up into it.** The platform is
+multi-agent: an AgentSession fans out to sub-agents, each of which is a session of its own. A
+child inherits its root's Task, Member, Repository, WorkType and `execution_mode`, never carries
+`accepted`, and runs inside its root's window. Added 2026-09-09 (ticket 48, ADR-0008).
+
+- **Every session-grain figure counts roots**: session counts, Acceptance rate, Cost per session,
+  and the Task-grain labels Rework and Decomposition. A fan-out is one attempt worked by several
+  agents, not several attempts, and counting it as several is what made Rework rise with how much
+  a team parallelised — 18% of Tasks against 31% on the committed fixture.
+- **Cost, TokenUsage and duration spans roll up into the root** for every aggregate, so no figure
+  loses a child's spend and none counts it twice. The **wall clock does not**: the root's start and
+  end already span the attempt, which is why a session's machine allocation may now exceed its
+  duration.
+- **The fold happens once, in the data layer, at parse** — beside R-M2's hidden-session strip and
+  for the same reason. Nothing above it is offered a population that still holds children.
+- **The tree is one level deep.** A child's parent is always a root; a grandchild is a fixture
+  fault, not a shape to interpret.
+
+**Agents per session** — how many agents worked one attempt — is reported as median and p95 beside
+Session duration (R-N12 item 5). A root that spawned nothing is one agent, never none.
 
 ---
 
@@ -807,7 +846,9 @@ month against 19 days of sessions, so its Cost per completed Task is inflated by
 the flag is what stops that being read as a finding.
 
 **R-D3 — Scale.** 4 Teams · 20 Members (18 `human`, 2 `service_account`) · 5 Repositories · 5
-WorkTypes · 7 Models across 3 vendors · ~600 Tasks · ~750 AgentSessions.
+WorkTypes · 7 Models across 3 vendors · ~600 Tasks · ~750 **root** AgentSessions, plus the child
+sessions R-D21 fans out from them (~1,050 rows on disk in all). The session count the product
+reports is the root count (R-M19).
 
 **R-D4 — Volume is an adoption ramp**: median 0 sessions per Member per week in April rising to 2
 in August; max 3 rising to 8. Low volume is deliberate — it is what makes seat cost (~$4,212
@@ -894,6 +935,18 @@ the reinstated restricted preset is untestable.
 file set declares the full matrix and a missing file is unambiguously a fault rather than a valid
 state.
 
+**R-D21 — ~20% of visible roots fan out to one to four child sessions**, weighted toward
+`implementation` and `headless` work (added 2026-09-09, ticket 48). Without them R-M19's roll-up
+has nothing to act on and ADR-0008's whole argument is untestable.
+
+A child is **small in both dimensions at once**: it holds a fraction of its root's machine
+allocation and draws the same fraction of its root's tokens, per Model. Two constraints fix that
+sizing and both are asserted by the generator. R-D6's and R-D8's rates are unchanged and must
+still hit — they do, exactly, because the fan-out is drawn from finished rows and moves no root.
+And R-D4's seat share is a ratio with session spend in its denominator, so a fan-out that cost
+what a root costs would dilute the sharpest finding in the product out of its band; the committed
+figure is **46.2%**, down from 48.2% before the children existed.
+
 **R-D20 — The GitHub → Member join is authored, not modelled.** The match rule is documented in
 the fixture README so a reader can see the join, but **no GitHub user fails to match**. An
 unmatched user is a real product problem that none of the six surfaces would show.
@@ -957,6 +1010,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A38 | Each panel shows one visible paragraph of prose, and the rest of it is reachable, verbatim, behind that panel's "Why this number" disclosure | R-V14 |
 | A39 | Every `/[org]` surface carries the as-of stamp in its toolbar, naming the same instant, and that instant is the top row of `/demo/history` | R-N3, R-N3.1 |
 | A40 | At 390×844, `document.documentElement.scrollWidth <= 390` on all six authenticated routes, with six nav links still visible, the account switcher reduced to its avatar, and every wide table scrolling inside its own card | R-V15 |
+| A41 | A Task worked by one root and its children is neither Rework nor Decomposition, the root's cost is its own plus its children's, and a child session is a row on `/demo/history` and on no other surface | R-M19, R-N20.2, R-D21 |
 
 ---
 

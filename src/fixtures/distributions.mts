@@ -1,6 +1,11 @@
 // The distributions R-D4 … R-D18 require, checked over the rows the product can actually
 // see. Hidden sessions are excluded here for the same reason the data layer excludes them
 // (R-M2): a metric that counted them would not be measuring agent efficacy.
+//
+// **`roots` throughout means visible root sessions, each already carrying its children's cost,
+// tokens and duration** (R-M19, `tree.mts`). Session count means root count, so every rate below
+// has a denominator of attempts rather than of agents — an acceptance rate over stored rows would
+// divide by sessions that carry no outcome and could never be accepted.
 
 import { REPO_NAMES, WORK_TYPE_KEYS } from "./allocation.mts";
 import { atLeast, check, near } from "./check.mts";
@@ -30,11 +35,11 @@ const repositoryName = new Map(repositories.map((repository) => [repository.id, 
 const rateOf = (rows: readonly AgentSession[]): number =>
   rows.filter((row) => row.accepted).length / rows.length;
 
-export const acceptanceLines = (visible: readonly AgentSession[]): string[] => [
+export const acceptanceLines = (roots: readonly AgentSession[]): string[] => [
   ...WORK_TYPE_KEYS.map((key) =>
     near(
       `R-D6 acceptance ${key}`,
-      rateOf(visible.filter((row) => row.work_type === key)),
+      rateOf(roots.filter((row) => row.work_type === key)),
       ACCEPTANCE_BY_WORK_TYPE[key],
       0.01,
     ),
@@ -42,16 +47,16 @@ export const acceptanceLines = (visible: readonly AgentSession[]): string[] => [
   ...REPO_NAMES.map((name) =>
     near(
       `R-D7 acceptance ${name}`,
-      rateOf(visible.filter((row) => repositoryName.get(row.repository_id) === name)),
+      rateOf(roots.filter((row) => repositoryName.get(row.repository_id) === name)),
       ACCEPTANCE_BY_REPOSITORY[name],
       0.01,
     ),
   ),
 ];
 
-const byTask = (visible: readonly AgentSession[]): Map<string, AgentSession[]> => {
+const byTask = (rows: readonly AgentSession[]): Map<string, AgentSession[]> => {
   const grouped = new Map<string, AgentSession[]>();
-  for (const row of visible) {
+  for (const row of rows) {
     grouped.set(row.task_key, [...(grouped.get(row.task_key) ?? []), row]);
   }
   for (const rows of grouped.values()) rows.sort((a, b) => Date.parse(a.started_at) - Date.parse(b.started_at));
@@ -60,8 +65,8 @@ const byTask = (visible: readonly AgentSession[]): Map<string, AgentSession[]> =
 
 // Rework — a non-accepted session followed by another session, of any WorkType.
 // Decomposition — more than one accepted session. Independent labels, not a partition.
-export const taskLines = (visible: readonly AgentSession[]): string[] => {
-  const tasks = [...byTask(visible).values()];
+export const taskLines = (roots: readonly AgentSession[]): string[] => {
+  const tasks = [...byTask(roots).values()];
   const rework = tasks.filter((rows) => rows.slice(0, -1).some((row) => !row.accepted));
   const decomposition = tasks.filter((rows) => rows.filter((row) => row.accepted).length > 1);
   const incomplete = tasks.filter((rows) => rows.every((row) => !row.accepted));
@@ -83,19 +88,22 @@ export const taskLines = (visible: readonly AgentSession[]): string[] => {
   ];
 };
 
-export const edgeCaseLines = (sessions: readonly AgentSession[], visible: readonly AgentSession[]): string[] => {
-  const cpuHeavy = visible.filter(isCpuHeavy);
-  const lowUsage = visible.filter((row) => row.member_id === LOW_USAGE_MEMBER_ID);
+export const edgeCaseLines = (
+  allRoots: readonly AgentSession[],
+  roots: readonly AgentSession[],
+): string[] => {
+  const cpuHeavy = roots.filter(isCpuHeavy);
+  const lowUsage = roots.filter((row) => row.member_id === LOW_USAGE_MEMBER_ID);
   const humans = new Set(members.filter((m) => m.kind === "human").map((m) => m.id));
-  const serviceInteractive = visible.filter(
+  const serviceInteractive = roots.filter(
     (row) => !humans.has(row.member_id) && row.execution_mode === "interactive",
   );
-  const humanHeadless = visible.filter(
+  const humanHeadless = roots.filter(
     (row) => humans.has(row.member_id) && row.execution_mode === "headless",
   );
   return [
     near("R-D11 CPU-heavy sessions", cpuHeavy.length, CPU_HEAVY_COUNT, 2),
-    near("R-D12 hidden share", 1 - visible.length / sessions.length, HIDDEN_SHARE, 0.005),
+    near("R-D12 hidden share", 1 - roots.length / allRoots.length, HIDDEN_SHARE, 0.005),
     `R-D10 low-usage seat holder ${lowUsage.length} sessions${
       lowUsage.length < LOW_USAGE_SESSIONS + 2 ? "" : " (too many)"
     }`,
@@ -103,18 +111,18 @@ export const edgeCaseLines = (sessions: readonly AgentSession[], visible: readon
     atLeast("R-D13 headless human sessions", humanHeadless.length, 20),
     near(
       "R-D15 multi-Model sessions",
-      visible.filter((row) => row.token_usage.length > 1).length / visible.length,
+      roots.filter((row) => row.token_usage.length > 1).length / roots.length,
       MULTI_MODEL_SHARE,
       0.04,
     ),
   ];
 };
 
-export const populationLines = (visible: readonly AgentSession[]): string[] => {
+export const populationLines = (roots: readonly AgentSession[]): string[] => {
   const multiTeam = members.filter((member) => member.team_ids.length > 1);
   const teamsPerRepository = REPO_NAMES.map((name) => {
     const workers = new Set(
-      visible
+      roots
         .filter((row) => repositoryName.get(row.repository_id) === name)
         .map((row) => row.member_id),
     );
@@ -124,8 +132,8 @@ export const populationLines = (visible: readonly AgentSession[]): string[] => {
   });
   // R-D18 — both accounts need real sessions, and the restricted one must not double as the
   // low-usage seat holder, or the two findings would sit on the same person.
-  const openRows = visible.filter((row) => row.member_id === OPEN_ACCOUNT_MEMBER_ID);
-  const restrictedRows = visible.filter((row) => row.member_id === RESTRICTED_ACCOUNT_MEMBER_ID);
+  const openRows = roots.filter((row) => row.member_id === OPEN_ACCOUNT_MEMBER_ID);
+  const restrictedRows = roots.filter((row) => row.member_id === RESTRICTED_ACCOUNT_MEMBER_ID);
   return [
     atLeast("R-D14 Members on more than one Team", multiTeam.length, 3),
     atLeast("R-D14 Teams working the busiest Repository", Math.max(...teamsPerRepository), 2),
@@ -135,9 +143,9 @@ export const populationLines = (visible: readonly AgentSession[]): string[] => {
 };
 
 // R-D4 — the adoption ramp, measured the way the requirement states it: per Member, per week.
-export const rampLines = (visible: readonly AgentSession[]): string[] => {
+export const rampLines = (roots: readonly AgentSession[]): string[] => {
   const counts = new Map<string, number>();
-  for (const row of visible) {
+  for (const row of roots) {
     const key = `${row.member_id}|${weekOfRow(row)}`;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }

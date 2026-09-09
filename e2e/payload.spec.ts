@@ -60,25 +60,26 @@ const UNGRANTED_NAMES = ungrantedNames(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 
 /**
- * The floor the residual cost set must clear. Measured on the committed fixture: **525**
- * candidate ungranted literals, **348** after subtracting every figure the viewer's own granted
- * rows can produce. Where the 177 go:
+ * The floor the residual cost set must clear. Measured on the committed fixture: **612**
+ * candidate ungranted literals, **384** after subtracting every figure the viewer's granted rows
+ * can produce. The classes subtracted, each measured against a real failure:
  *
- *   * **66** are the viewer's own session costs and the totals its rows aggregate to (sums).
- *   * **95** are money quotients — Cost per session and Cost per completed Job, at the same
+ *   * the viewer's own session costs and the totals its rows aggregate to (sums);
+ *   * money quotients — Cost per session and Cost per completed Job, at the same
  *     (period × grouping) key the numerator and the denominator were both summed over. This is
- *     the class that made `/demo/spend` fail on 16 R-X1 mirror cells.
- *   * **13** are the session- and Task-grain rates: acceptance rate, Rework rate, Decomposition
- *     rate. This is the class that made `/demo/work` — a page carrying no money figure at all —
- *     fail on `0.7`, `0.6` and `0.86`.
- *   * **3** are the published token rate card (R-N11), which is nobody's datapoint.
+ *     the class that made `/demo/spend` fail on 16 R-X1 mirror cells;
+ *   * the session- and Task-grain **rates**: acceptance rate, Rework rate, Decomposition rate.
+ *     This is the class that made `/demo/work` — a page carrying no money figure at all — fail
+ *     on `0.7`, `0.6` and `0.86`, and again on `0.43` and `0.07` after ticket 48 regenerated the
+ *     fixture. Counts over counts, so they are subtracted over the **Team** as well as over the
+ *     viewer's own rows: R-A3 grants `team` over `jobs`, so that is the population `/demo/work`
+ *     genuinely computes them across, and a count can never be a cost;
+ *   * the published token rate card (R-N11), which is nobody's datapoint.
  *
- * **The floor was 400 against a set of 459 and is now 300 against a set of 348.** That is a
- * deliberate, measured change and not a concession: the 111 literals the quotient and rate-card
- * subtractions removed are each a value the viewer's own `self`-granted rows genuinely read out
- * to, so keeping them would keep testing arithmetic coincidence rather than disclosure. 300
- * holds the same ~14% headroom over the measured set that 400 held over 459, and 348 of 525 is
- * still two thirds of the ungranted money range.
+ * **Both sides grew with ticket 48's multi-agent fixture**, and grew together: a root's cost is
+ * now its whole tree's (R-M19) and `/demo/history` additionally prints each child's own cost, so
+ * there are more candidate literals *and* more legitimate ones. 384 of 612 is still nearly two
+ * thirds of the ungranted money range.
  *
  * **300 is the line below which this stops being a search of the money range.** If a fixture or
  * a subtraction change ever drops the set under it, the cost assertion has become theatre and
@@ -94,11 +95,13 @@ const UNGRANTED_COST_FLOOR = 300;
 const KNOWN_UNGRANTED_LITERAL = "24.39";
 
 /**
- * `13.04` is another Member's session cost **and** the viewer's own 2026-08-03 implementation
- * total. It is one of the 15 false positives ticket 31 measured on `/demo/spend`, and it is the
- * defect this file exists to fix: value identity is not fact identity.
+ * `7.31` is another Member's session cost — `ses_0079`'s, once its two sub-agents roll into it
+ * (R-M19) — **and** the viewer's own 2026-07-20 total. It is the same kind of false positive
+ * ticket 31 measured on `/demo/spend`, and it is the defect this file exists to fix: value
+ * identity is not fact identity. (It reads `7.31` rather than ticket 31's `13.04` because
+ * ticket 48 regenerated the fixture; the property it is named for is the same one.)
  */
-const OWN_AGGREGATE_COLLISION = "13.04";
+const OWN_AGGREGATE_COLLISION = "7.31";
 
 /**
  * `0.7` is the viewer's own acceptance rate for `implementation` work in August 2026 — 7 of its

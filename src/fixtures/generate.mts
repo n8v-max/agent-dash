@@ -8,6 +8,7 @@
 
 import { fileURLToPath } from "node:url";
 import { planCells } from "./allocation.mts";
+import { spawnChildren } from "./children.mts";
 import { assignCells } from "./assign.mts";
 import { assertFixture } from "./invariants.mts";
 import { mintTasks } from "./issues.mts";
@@ -32,7 +33,12 @@ const main = (): void => {
   const plan = planCells(slots.length);
   const assigned = assignCells(rng, members, plannedTasks, plan);
   const tasks = mintTasks(rng, assigned);
-  const sessions = buildSessions(rng, members, assigned, tasks);
+  const roots = buildSessions(rng, members, assigned, tasks);
+  // R-D21 — the fan-out is drawn last, from finished rows, so every root keeps the id, the
+  // timestamps and the figures it had before children existed (ADR-0008).
+  const sessions = [...roots, ...spawnChildren(rng, roots)].sort(
+    (a, b) => Date.parse(a.started_at) - Date.parse(b.started_at) || a.id.localeCompare(b.id),
+  );
   const report = assertFixture({ sessions, tasks });
   const directory = outputDirectory(process.argv.slice(2));
   const files = writeFixture(directory, { sessions, tasks });

@@ -112,6 +112,9 @@ const rowFrom = (rng: Rng, draft: Draft, usages: TokenUsage[]): Omit<AgentSessio
     throw new Error("R-T12: duration spans do not sum to the machine allocation");
   }
   return {
+    // A root. `children.mts` is the only thing that writes a parent, and it writes one only
+    // onto rows it has just spawned from a root in this list (R-D21, ADR-0008).
+    parent_session_id: null,
     started_at: isoInMadrid(draft.started_at_ms),
     ended_at: isoInMadrid(draft.started_at_ms + allocation * 1000),
     member_id: draft.member.id,

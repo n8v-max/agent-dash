@@ -128,6 +128,8 @@ export const DURATION: DurationPanel = {
     series: [{ key: "p95", label: "p95", values: [11400, 12000, 11700] }],
   }),
   summary: { count: 486, median: 2640, p95: 11700 },
+  // R-M19 — the fan-out reading. Most attempts are one agent; the tail is four or five.
+  agents: { sessions: 486, agents: 671, median: 1, p95: 4 },
 };
 
 /** The three spans, per bucket. Disjoint, and a partition of machine allocation (R-T12). */

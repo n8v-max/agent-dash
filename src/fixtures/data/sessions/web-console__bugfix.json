@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0040",
+    "parent_session_id": null,
     "started_at": "2026-05-05T21:54:49+02:00",
     "ended_at": "2026-05-05T23:27:55+02:00",
     "member_id": "mem_tferran",
@@ -41,7 +42,45 @@
     ]
   },
   {
+    "id": "ses_0772",
+    "parent_session_id": "ses_0040",
+    "started_at": "2026-05-05T22:40:13+02:00",
+    "ended_at": "2026-05-05T22:55:39+02:00",
+    "member_id": "mem_tferran",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#315",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.79,
+    "interactive_duration_s": 232,
+    "idle_duration_s": 520,
+    "afk_duration_s": 174,
+    "machine_allocation_duration_s": 926,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 84963,
+        "cache_read": 2854383,
+        "cache_write": 166448,
+        "output": 42575
+      },
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 45749,
+        "cache_read": 1536975,
+        "cache_write": 89626,
+        "output": 22925
+      }
+    ]
+  },
+  {
     "id": "ses_0043",
+    "parent_session_id": null,
     "started_at": "2026-05-06T14:58:41+02:00",
     "ended_at": "2026-05-06T18:51:09+02:00",
     "member_id": "mem_aruiz",
@@ -83,6 +122,7 @@
   },
   {
     "id": "ses_0051",
+    "parent_session_id": null,
     "started_at": "2026-05-07T18:07:25+02:00",
     "ended_at": "2026-05-07T20:01:43+02:00",
     "member_id": "mem_rmarin",
@@ -117,6 +157,7 @@
   },
   {
     "id": "ses_0053",
+    "parent_session_id": null,
     "started_at": "2026-05-08T09:11:44+02:00",
     "ended_at": "2026-05-08T10:20:30+02:00",
     "member_id": "mem_dnavarro",
@@ -151,6 +192,7 @@
   },
   {
     "id": "ses_0074",
+    "parent_session_id": null,
     "started_at": "2026-05-18T08:47:19+02:00",
     "ended_at": "2026-05-18T11:03:08+02:00",
     "member_id": "mem_dnavarro",
@@ -185,6 +227,7 @@
   },
   {
     "id": "ses_0082",
+    "parent_session_id": null,
     "started_at": "2026-05-19T19:50:14+02:00",
     "ended_at": "2026-05-19T22:17:20+02:00",
     "member_id": "mem_pherrera",
@@ -233,6 +276,7 @@
   },
   {
     "id": "ses_0097",
+    "parent_session_id": null,
     "started_at": "2026-05-22T10:22:39+02:00",
     "ended_at": "2026-05-22T11:34:21+02:00",
     "member_id": "mem_lbermejo",
@@ -267,6 +311,7 @@
   },
   {
     "id": "ses_0113",
+    "parent_session_id": null,
     "started_at": "2026-05-26T16:31:52+02:00",
     "ended_at": "2026-05-26T18:34:03+02:00",
     "member_id": "mem_dnavarro",
@@ -308,6 +353,7 @@
   },
   {
     "id": "ses_0116",
+    "parent_session_id": null,
     "started_at": "2026-05-27T11:55:14+02:00",
     "ended_at": "2026-05-27T12:26:49+02:00",
     "member_id": "mem_blorenzo",
@@ -349,6 +395,7 @@
   },
   {
     "id": "ses_0123",
+    "parent_session_id": null,
     "started_at": "2026-05-28T13:39:52+02:00",
     "ended_at": "2026-05-28T15:11:22+02:00",
     "member_id": "mem_pherrera",
@@ -382,7 +429,98 @@
     ]
   },
   {
+    "id": "ses_0807",
+    "parent_session_id": "ses_0123",
+    "started_at": "2026-05-28T13:44:22+02:00",
+    "ended_at": "2026-05-28T14:00:22+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#387",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.52,
+    "interactive_duration_s": 286,
+    "idle_duration_s": 97,
+    "afk_duration_s": 577,
+    "machine_allocation_duration_s": 960,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 27016,
+        "cache_read": 500971,
+        "cache_write": 46363,
+        "output": 16581
+      }
+    ]
+  },
+  {
+    "id": "ses_0809",
+    "parent_session_id": "ses_0123",
+    "started_at": "2026-05-28T14:04:37+02:00",
+    "ended_at": "2026-05-28T14:17:04+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#387",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.4,
+    "interactive_duration_s": 222,
+    "idle_duration_s": 76,
+    "afk_duration_s": 449,
+    "machine_allocation_duration_s": 747,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 21021,
+        "cache_read": 389818,
+        "cache_write": 36076,
+        "output": 12902
+      }
+    ]
+  },
+  {
+    "id": "ses_0808",
+    "parent_session_id": "ses_0123",
+    "started_at": "2026-05-28T14:50:52+02:00",
+    "ended_at": "2026-05-28T15:04:20+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#387",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.43,
+    "interactive_duration_s": 241,
+    "idle_duration_s": 82,
+    "afk_duration_s": 485,
+    "machine_allocation_duration_s": 808,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 22738,
+        "cache_read": 421650,
+        "cache_write": 39022,
+        "output": 13956
+      }
+    ]
+  },
+  {
     "id": "ses_0169",
+    "parent_session_id": null,
     "started_at": "2026-06-10T19:11:15+02:00",
     "ended_at": "2026-06-10T21:57:46+02:00",
     "member_id": "mem_lbermejo",
@@ -416,7 +554,68 @@
     ]
   },
   {
+    "id": "ses_0836",
+    "parent_session_id": "ses_0169",
+    "started_at": "2026-06-10T20:17:48+02:00",
+    "ended_at": "2026-06-10T20:39:36+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#420",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.44,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1308,
+    "machine_allocation_duration_s": 1308,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 7191,
+        "cache_read": 253365,
+        "cache_write": 14290,
+        "output": 3260
+      }
+    ]
+  },
+  {
+    "id": "ses_0835",
+    "parent_session_id": "ses_0169",
+    "started_at": "2026-06-10T20:48:07+02:00",
+    "ended_at": "2026-06-10T21:29:35+02:00",
+    "member_id": "mem_lbermejo",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#420",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.84,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 2488,
+    "machine_allocation_duration_s": 2488,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 13679,
+        "cache_read": 481936,
+        "cache_write": 27181,
+        "output": 6202
+      }
+    ]
+  },
+  {
     "id": "ses_0170",
+    "parent_session_id": null,
     "started_at": "2026-06-10T21:08:15+02:00",
     "ended_at": "2026-06-10T22:42:34+02:00",
     "member_id": "mem_lbermejo",
@@ -451,6 +650,7 @@
   },
   {
     "id": "ses_0173",
+    "parent_session_id": null,
     "started_at": "2026-06-11T20:49:23+02:00",
     "ended_at": "2026-06-11T21:57:05+02:00",
     "member_id": "mem_aruiz",
@@ -499,6 +699,7 @@
   },
   {
     "id": "ses_0191",
+    "parent_session_id": null,
     "started_at": "2026-06-16T09:16:00+02:00",
     "ended_at": "2026-06-16T10:37:40+02:00",
     "member_id": "mem_dnavarro",
@@ -533,6 +734,7 @@
   },
   {
     "id": "ses_0234",
+    "parent_session_id": null,
     "started_at": "2026-06-25T18:16:42+02:00",
     "ended_at": "2026-06-25T19:41:53+02:00",
     "member_id": "mem_aruiz",
@@ -574,6 +776,7 @@
   },
   {
     "id": "ses_0239",
+    "parent_session_id": null,
     "started_at": "2026-06-29T12:12:53+02:00",
     "ended_at": "2026-06-29T13:57:01+02:00",
     "member_id": "mem_lbermejo",
@@ -608,6 +811,7 @@
   },
   {
     "id": "ses_0295",
+    "parent_session_id": null,
     "started_at": "2026-07-07T17:55:01+02:00",
     "ended_at": "2026-07-07T19:58:52+02:00",
     "member_id": "mem_blorenzo",
@@ -649,6 +853,7 @@
   },
   {
     "id": "ses_0296",
+    "parent_session_id": null,
     "started_at": "2026-07-07T18:03:15+02:00",
     "ended_at": "2026-07-07T22:15:21+02:00",
     "member_id": "mem_pherrera",
@@ -683,6 +888,7 @@
   },
   {
     "id": "ses_0298",
+    "parent_session_id": null,
     "started_at": "2026-07-07T21:37:12+02:00",
     "ended_at": "2026-07-07T22:47:23+02:00",
     "member_id": "mem_ivazquez",
@@ -717,6 +923,7 @@
   },
   {
     "id": "ses_0322",
+    "parent_session_id": null,
     "started_at": "2026-07-10T23:32:44+02:00",
     "ended_at": "2026-07-11T01:12:32+02:00",
     "member_id": "mem_pherrera",
@@ -757,7 +964,82 @@
     ]
   },
   {
+    "id": "ses_0903",
+    "parent_session_id": "ses_0322",
+    "started_at": "2026-07-11T00:32:42+02:00",
+    "ended_at": "2026-07-11T01:00:09+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#500",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.53,
+    "interactive_duration_s": 670,
+    "idle_duration_s": 741,
+    "afk_duration_s": 236,
+    "machine_allocation_duration_s": 1647,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 18263,
+        "cache_read": 280877,
+        "cache_write": 14070,
+        "output": 8120
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 9834,
+        "cache_read": 151242,
+        "cache_write": 7576,
+        "output": 4372
+      }
+    ]
+  },
+  {
+    "id": "ses_0904",
+    "parent_session_id": "ses_0322",
+    "started_at": "2026-07-11T00:38:36+02:00",
+    "ended_at": "2026-07-11T01:04:22+02:00",
+    "member_id": "mem_pherrera",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#500",
+    "execution_mode": "interactive",
+    "machine_spec": "storage",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.5,
+    "interactive_duration_s": 629,
+    "idle_duration_s": 695,
+    "afk_duration_s": 222,
+    "machine_allocation_duration_s": 1546,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 17143,
+        "cache_read": 263653,
+        "cache_write": 13207,
+        "output": 7622
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 9231,
+        "cache_read": 141967,
+        "cache_write": 7111,
+        "output": 4104
+      }
+    ]
+  },
+  {
     "id": "ses_0327",
+    "parent_session_id": null,
     "started_at": "2026-07-13T08:11:11+02:00",
     "ended_at": "2026-07-13T10:16:42+02:00",
     "member_id": "mem_lbermejo",
@@ -792,6 +1074,7 @@
   },
   {
     "id": "ses_0328",
+    "parent_session_id": null,
     "started_at": "2026-07-13T09:25:19+02:00",
     "ended_at": "2026-07-13T11:12:54+02:00",
     "member_id": "mem_pherrera",
@@ -833,6 +1116,7 @@
   },
   {
     "id": "ses_0334",
+    "parent_session_id": null,
     "started_at": "2026-07-14T12:28:16+02:00",
     "ended_at": "2026-07-14T14:04:44+02:00",
     "member_id": "mem_pherrera",
@@ -867,6 +1151,7 @@
   },
   {
     "id": "ses_0343",
+    "parent_session_id": null,
     "started_at": "2026-07-15T13:00:57+02:00",
     "ended_at": "2026-07-15T16:43:25+02:00",
     "member_id": "mem_hcamps",
@@ -900,7 +1185,38 @@
     ]
   },
   {
+    "id": "ses_0909",
+    "parent_session_id": "ses_0343",
+    "started_at": "2026-07-15T13:23:03+02:00",
+    "ended_at": "2026-07-15T14:24:26+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#521",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.6,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 3683,
+    "machine_allocation_duration_s": 3683,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 45410,
+        "cache_read": 1739028,
+        "cache_write": 100661,
+        "output": 60301
+      }
+    ]
+  },
+  {
     "id": "ses_0344",
+    "parent_session_id": null,
     "started_at": "2026-07-15T14:51:00+02:00",
     "ended_at": "2026-07-15T18:13:26+02:00",
     "member_id": "mem_sibanez",
@@ -942,6 +1258,7 @@
   },
   {
     "id": "ses_0345",
+    "parent_session_id": null,
     "started_at": "2026-07-15T21:22:04+02:00",
     "ended_at": "2026-07-15T22:48:01+02:00",
     "member_id": "mem_lbermejo",
@@ -983,6 +1300,7 @@
   },
   {
     "id": "ses_0357",
+    "parent_session_id": null,
     "started_at": "2026-07-17T12:33:43+02:00",
     "ended_at": "2026-07-17T14:48:31+02:00",
     "member_id": "mem_aquintana",
@@ -1024,6 +1342,7 @@
   },
   {
     "id": "ses_0374",
+    "parent_session_id": null,
     "started_at": "2026-07-21T20:00:15+02:00",
     "ended_at": "2026-07-21T23:44:15+02:00",
     "member_id": "mem_ncastells",
@@ -1065,6 +1384,7 @@
   },
   {
     "id": "ses_0375",
+    "parent_session_id": null,
     "started_at": "2026-07-21T20:18:01+02:00",
     "ended_at": "2026-07-21T21:15:00+02:00",
     "member_id": "mem_lbermejo",
@@ -1099,6 +1419,7 @@
   },
   {
     "id": "ses_0393",
+    "parent_session_id": null,
     "started_at": "2026-07-26T17:31:54+02:00",
     "ended_at": "2026-07-26T19:25:24+02:00",
     "member_id": "mem_hcamps",
@@ -1140,6 +1461,7 @@
   },
   {
     "id": "ses_0402",
+    "parent_session_id": null,
     "started_at": "2026-07-28T09:10:47+02:00",
     "ended_at": "2026-07-28T10:18:05+02:00",
     "member_id": "mem_ccruz",
@@ -1173,7 +1495,38 @@
     ]
   },
   {
+    "id": "ses_0925",
+    "parent_session_id": "ses_0402",
+    "started_at": "2026-07-28T09:27:15+02:00",
+    "ended_at": "2026-07-28T09:45:32+02:00",
+    "member_id": "mem_ccruz",
+    "repository_id": "repo_web_console",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/web-console#566",
+    "execution_mode": "headless",
+    "machine_spec": "compute",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.5,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1097,
+    "machine_allocation_duration_s": 1097,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.5-flash-lite",
+        "uncached_input": 47298,
+        "cache_read": 1545290,
+        "cache_write": 96808,
+        "output": 23964
+      }
+    ]
+  },
+  {
     "id": "ses_0439",
+    "parent_session_id": null,
     "started_at": "2026-07-31T15:25:46+02:00",
     "ended_at": "2026-07-31T17:08:28+02:00",
     "member_id": "mem_blorenzo",
@@ -1208,6 +1561,7 @@
   },
   {
     "id": "ses_0441",
+    "parent_session_id": null,
     "started_at": "2026-07-31T18:54:17+02:00",
     "ended_at": "2026-07-31T21:25:26+02:00",
     "member_id": "mem_hcamps",
@@ -1242,6 +1596,7 @@
   },
   {
     "id": "ses_0470",
+    "parent_session_id": null,
     "started_at": "2026-08-05T16:14:48+02:00",
     "ended_at": "2026-08-05T17:41:36+02:00",
     "member_id": "mem_dnavarro",
@@ -1276,6 +1631,7 @@
   },
   {
     "id": "ses_0472",
+    "parent_session_id": null,
     "started_at": "2026-08-05T17:36:22+02:00",
     "ended_at": "2026-08-05T19:34:53+02:00",
     "member_id": "mem_hcamps",
@@ -1310,6 +1666,7 @@
   },
   {
     "id": "ses_0481",
+    "parent_session_id": null,
     "started_at": "2026-08-06T11:47:55+02:00",
     "ended_at": "2026-08-06T14:20:38+02:00",
     "member_id": "mem_jdominguez",
@@ -1344,6 +1701,7 @@
   },
   {
     "id": "ses_0529",
+    "parent_session_id": null,
     "started_at": "2026-08-11T17:45:33+02:00",
     "ended_at": "2026-08-11T19:04:14+02:00",
     "member_id": "mem_esaez",
@@ -1378,6 +1736,7 @@
   },
   {
     "id": "ses_0553",
+    "parent_session_id": null,
     "started_at": "2026-08-14T10:39:25+02:00",
     "ended_at": "2026-08-14T12:12:49+02:00",
     "member_id": "mem_blorenzo",
@@ -1412,6 +1771,7 @@
   },
   {
     "id": "ses_0566",
+    "parent_session_id": null,
     "started_at": "2026-08-17T10:24:54+02:00",
     "ended_at": "2026-08-17T12:13:01+02:00",
     "member_id": "mem_lbermejo",
@@ -1453,6 +1813,7 @@
   },
   {
     "id": "ses_0577",
+    "parent_session_id": null,
     "started_at": "2026-08-18T10:25:32+02:00",
     "ended_at": "2026-08-18T11:57:04+02:00",
     "member_id": "mem_mpena",
@@ -1487,6 +1848,7 @@
   },
   {
     "id": "ses_0631",
+    "parent_session_id": null,
     "started_at": "2026-08-24T20:07:29+02:00",
     "ended_at": "2026-08-24T23:01:05+02:00",
     "member_id": "mem_hcamps",
@@ -1528,6 +1890,7 @@
   },
   {
     "id": "ses_0635",
+    "parent_session_id": null,
     "started_at": "2026-08-25T09:05:12+02:00",
     "ended_at": "2026-08-25T10:50:05+02:00",
     "member_id": "mem_sroldan",
@@ -1562,6 +1925,7 @@
   },
   {
     "id": "ses_0651",
+    "parent_session_id": null,
     "started_at": "2026-08-26T10:08:46+02:00",
     "ended_at": "2026-08-26T11:36:12+02:00",
     "member_id": "mem_jdominguez",
@@ -1596,6 +1960,7 @@
   },
   {
     "id": "ses_0652",
+    "parent_session_id": null,
     "started_at": "2026-08-26T12:26:49+02:00",
     "ended_at": "2026-08-26T18:51:34+02:00",
     "member_id": "mem_pherrera",
@@ -1630,6 +1995,7 @@
   },
   {
     "id": "ses_0672",
+    "parent_session_id": null,
     "started_at": "2026-08-28T15:26:42+02:00",
     "ended_at": "2026-08-28T17:04:02+02:00",
     "member_id": "mem_tferran",
@@ -1664,6 +2030,7 @@
   },
   {
     "id": "ses_0679",
+    "parent_session_id": null,
     "started_at": "2026-08-29T21:32:43+02:00",
     "ended_at": "2026-08-29T22:41:42+02:00",
     "member_id": "mem_lbermejo",
@@ -1698,6 +2065,7 @@
   },
   {
     "id": "ses_0714",
+    "parent_session_id": null,
     "started_at": "2026-09-02T16:09:00+02:00",
     "ended_at": "2026-09-02T17:35:57+02:00",
     "member_id": "mem_sibanez",

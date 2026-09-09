@@ -317,7 +317,9 @@ describe('"Other" is inert and lists what it holds (R-V6)', () => {
   });
 
   it("lists what it holds, by label, in the same ranked order the chart is in", () => {
-    expect(set.other).toEqual({ holds: ["Eze", "Fern"] });
+    // The keys ride along in that same order: the mirror re-adds this tail out of its own grid
+    // (R-T7), and two orders over one tail of floats disagree in the last place.
+    expect(set.other).toEqual({ holds: ["Eze", "Fern"], keys: ["e", "f"] });
   });
 
   it("populates the holds list only when the cap engaged", () => {

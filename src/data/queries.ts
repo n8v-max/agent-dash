@@ -60,6 +60,11 @@ export type {
   ComparisonGroup,
   MemberProfileViewModel,
 } from "./queries/profile";
-export type { HistoryPageViewModel, HistoryRow, SessionDetail } from "./queries/history";
+export type {
+  HistoryChildRow,
+  HistoryPageViewModel,
+  HistoryRow,
+  SessionDetail,
+} from "./queries/history";
 export type { ProjectionComponents, ProjectionPageViewModel } from "./queries/projection";
 export type { ControlOption, ControlOptions } from "./queries/controls";

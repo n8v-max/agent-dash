@@ -1,5 +1,9 @@
 // Money and Model mix. R-D16's headline is *derived here from ADR-0007's card and the tokens
-// the generator actually emitted* — never hardcoded. Ticket 16's "~56% of token spend" was
+// the generator actually emitted* — never hardcoded.
+//
+// **`roots` means visible root sessions carrying their children's cost and tokens** (R-M19): the
+// tier shares are token-grain and a child's tokens are its root's to answer for, and the median
+// session cost is the median of an *attempt*, not of an agent. Ticket 16's "~56% of token spend" was
 // computed against a card ADR-0007 replaced, which is exactly the failure mode this avoids.
 
 import { SEAT_FEE_MONTHLY_USD } from "./catalog.mts";
@@ -28,8 +32,8 @@ const shareOf = (totals: Record<ModelTier, { tokens: number; spend: number }>, f
   >;
 };
 
-export const modelMixLines = (visible: readonly AgentSession[]): string[] => {
-  const totals = tierTotals(usagesOf(visible));
+export const modelMixLines = (roots: readonly AgentSession[]): string[] => {
+  const totals = tierTotals(usagesOf(roots));
   const tokens = shareOf(totals, "tokens");
   const spend = shareOf(totals, "spend");
   // The invariant, stated as ADR-0007 states it: the frontier tier carries more token spend
@@ -54,9 +58,9 @@ export const modelMixLines = (visible: readonly AgentSession[]): string[] => {
 
 // R-D17 — the frontier share falls from 25% in April to 10% in August. Spend per session
 // drops while session count rises: the one thing on the dashboard a reader can act on.
-export const trendLines = (visible: readonly AgentSession[]): string[] => {
+export const trendLines = (roots: readonly AgentSession[]): string[] => {
   const monthly = WINDOW_MONTHS.map((month) => {
-    const rows = visible.filter((row) => row.started_at.startsWith(month));
+    const rows = roots.filter((row) => row.started_at.startsWith(month));
     const totals = tierTotals(usagesOf(rows));
     const tokens = TIERS.reduce((acc, tier) => acc + totals[tier].tokens, 0);
     return { month, rows: rows.length, share: totals.frontier.tokens / tokens };
@@ -71,18 +75,19 @@ export const trendLines = (visible: readonly AgentSession[]): string[] => {
   return lines;
 };
 
-// R-D4 — seat cost is ~48% of Total spend, which is the sharpest finding in the product and
-// the reason the fixture is deliberately low-volume. R-M5: seats attach to `human` Members
+// R-D4 — seat cost is ~46% of Total spend (it was 48.2% before ticket 48's fan-out added real
+// session spend), which is the sharpest finding in the product and the reason the fixture is
+// deliberately low-volume. R-M5: seats attach to `human` Members
 // only, at monthly grain and coarser.
-export const totalSpendLines = (visible: readonly AgentSession[]): string[] => {
-  const sessionCost = sum(visible.map((row) => row.cost));
+export const totalSpendLines = (roots: readonly AgentSession[]): string[] => {
+  const sessionCost = sum(roots.map((row) => row.cost));
   const seatCost = humanMembers.length * SEAT_FEE_MONTHLY_USD * WINDOW_MONTHS.length;
   const share = seatCost / (seatCost + sessionCost);
   check(
     share >= SEAT_SHARE_RANGE.min && share <= SEAT_SHARE_RANGE.max,
     `R-D4: seat cost is ${percent(share)} of Total spend, outside the authored band`,
   );
-  const costs = visible.map((row) => row.cost);
+  const costs = roots.map((row) => row.cost);
   const middle = median(costs);
   check(
     middle >= MEDIAN_SESSION_COST_RANGE.min && middle <= MEDIAN_SESSION_COST_RANGE.max,

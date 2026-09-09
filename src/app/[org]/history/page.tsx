@@ -9,10 +9,14 @@
 //
 // **R-N22 — hidden sessions appear here as nowhere else: not at all.** They were stripped at
 // parse, and nothing on this route can ask for them back.
+//
+// **R-N20.2 — and the child sessions appear here as nowhere else either.** Every other surface
+// reads a figure with the fan-out already folded into it (R-M19); this is the page that shows the
+// rows underneath, so it is the page that shows the tree.
 
 import Link from "next/link";
 import { pageRequest } from "@/components/controls/request";
-import { SessionDetailPanel } from "@/components/panels/session-detail";
+import { SessionChildren, SessionDetailPanel } from "@/components/panels/session-detail";
 import { SessionTable } from "@/components/panels/session-table";
 import { PageFrame } from "@/components/shell/page-frame";
 import { historyPage, type HistoryPageViewModel } from "@/data/queries";
@@ -32,8 +36,10 @@ function OneSession(props: {
         </p>
         {/* R-N21 — plain text, `owner/repo#number`. The tracker is imaginary; no link is built. */}
         <p className="mt-1 font-mono text-lg text-foreground">{row.detail.taskKey}</p>
-        <div className="mt-6">
+        <div className="mt-6 space-y-6">
           <SessionDetailPanel detail={row.detail} />
+          {/* R-N20.2 — the agents that worked this attempt, already inside its figures. */}
+          <SessionChildren rows={row.children} />
         </div>
       </div>
       <Link href={`/${props.view.orgSlug}/history`} className={BACK}>
@@ -52,7 +58,7 @@ export default async function HistoryPage(props: PageProps<"/[org]/history">) {
     <PageFrame
       request={request}
       title="History"
-      lede="One row per session. Expand a row for its four token classes and its Model mix — the only place either appears. Hidden sessions appear here as nowhere else: not at all."
+      lede="One row per session — one attempt, whatever it cost and however many agents worked it. Expand a row for its four token classes, its Model mix and the sub-agents it fanned out to, all three of which appear here and nowhere else. Hidden sessions appear here as nowhere else: not at all."
     >
       {view.surface === "table" ? (
         <SessionTable

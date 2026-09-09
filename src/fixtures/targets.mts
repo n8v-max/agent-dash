@@ -81,6 +81,30 @@ export const RAMP = {
 export const REWORK_RATE = 0.18;
 export const DECOMPOSITION_RATE = 0.12;
 
+// R-D21 — the multi-agent fan-out (ADR-0008). A share of *visible roots* spawn one to four
+// children, weighted toward `implementation` and `headless`. The share is a share and not a
+// probability, so `children.mts` samples without replacement and hits it exactly.
+//
+// **These numbers are the ones the seat-cost finding survives.** A child's cost is real session
+// spend, and R-D4 puts seat cost at ~48% of Total spend — so the fan-out is sized to add a small
+// single-digit percentage to session spend rather than whatever a plausible-looking sub-agent
+// would cost. The scale band does both jobs at once: it is the fraction of its root's machine
+// allocation a child holds *and* the fraction of its root's tokens it draws.
+export const CHILD_ROOT_SHARE = 0.2;
+export const CHILD_COUNT_WEIGHTS = [
+  [1, 0.45],
+  [2, 0.3],
+  [3, 0.15],
+  [4, 0.1],
+] as const;
+export const CHILD_WEIGHT_IMPLEMENTATION = 2.5;
+export const CHILD_WEIGHT_HEADLESS = 2;
+export const CHILD_SCALE = { min: 0.12, max: 0.3 };
+// A child is at least two minutes long and leaves a minute clear at each end of its root, so
+// "starts after the root and ends before it" is structural rather than sampled and retried.
+export const CHILD_MINIMUM_SECONDS = 120;
+export const CHILD_EDGE_SECONDS = 60;
+
 // R-D12 — ~2% hidden sessions. Generated here, excluded in the data layer.
 export const HIDDEN_SHARE = 0.02;
 
@@ -165,7 +189,9 @@ export const MACHINE_SPEC_BIAS: Record<string, Partial<Record<MachineSpec, numbe
   "mobile-app": { storage: 1.6 },
 };
 
-// R-D4 — seat cost is ~48% of Total spend. That is the sharpest finding in the product, so
-// the generator asserts the realised share rather than hoping for it.
+// R-D4 — seat cost is roughly half of Total spend: 48.2% before ticket 48's fan-out and 46.2%
+// with it, because a child session's cost is real session spend. That is the sharpest finding in
+// the product, so the generator asserts the realised share rather than hoping for it — and the
+// band is what sizes CHILD_SCALE above.
 export const SEAT_SHARE_RANGE = { min: 0.44, max: 0.52 };
 export const MEDIAN_SESSION_COST_RANGE = { min: 2.4, max: 4.2 };

@@ -222,7 +222,10 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
       "Héctor Camps Vidal",
       "Pablo Herrera Gil",
       "Equilibrio Nightly Runner",
-      "Diego Navarro Prieto",
+      // Fourth by cost and nowhere near the top four by session count — she leads April on
+      // volume and is inside "Other" on the count chart above. The two orders disagree, which
+      // is the whole claim (R-V5).
+      "Irene Vázquez Soto",
       "Other",
     ]);
     expect(byCost.series.map((series) => series.label)).not.toEqual(

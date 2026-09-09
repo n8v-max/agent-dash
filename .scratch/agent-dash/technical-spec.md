@@ -248,6 +248,7 @@ Shape, abbreviated to the load-bearing fields:
 ```ts
 type AgentSession = {
   id: string
+  parent_session_id: string | null   // the root this was spawned by; null on a root (R-M19)
   started_at: string          // ISO 8601 with offset
   ended_at: string
   member_id: string
@@ -274,7 +275,26 @@ type AgentSession = {
 rate cards are generator inputs (§ 6) and, for the token card only, display data. ADR-0005.
 
 **R-T12 — The three duration spans sum exactly to `machine_allocation_duration_s`**, asserted by
-the generator on every row and re-asserted as a fixture invariant test.
+the generator on every row and re-asserted as a fixture invariant test. It survives the R-T37
+roll-up because all four fields are summed together, not three of them.
+
+**R-T37 — The session tree is validated and folded once, at parse** (R-M19, ADR-0008). Added
+2026-09-09 (ticket 48).
+
+*Validated*: a child that names a root which does not exist, is not itself a root, disagrees with
+any of the five labels it inherits, carries `accepted`, or is visible under a hidden root is a
+**FixtureFault** — the same fault model as every other shape violation. The rules live in
+`src/domain/sessions.ts` as one expression (`childFaults`), so the loader and the fixture invariant
+test cannot come to different conclusions about what a valid child is.
+
+*Folded*: `load.ts` returns **roots**, each carrying its children's cost, tokens and duration spans,
+plus a separate `childSessions` map keyed by root id. Both happen on the same line as R-M2's hidden
+strip: a per-query fold is a fold somebody eventually forgets, and the one query that wants the raw
+children — `/demo/history` — asks for the map by name.
+
+The folded `cost` is rounded to whole cents. That is not the application pricing anything (R-M4):
+`4.23 + 0.09` is `4.32` in the unit money is denominated in and `4.319999999999999` in binary, and
+the row this produces stands in for a stored row on every surface that reads one.
 
 ---
 
@@ -344,6 +364,13 @@ directory and diff. This is the only place the generator runs in CI.
 **R-T22 — The generator holds both rate cards and prices every session**, writing a `cost` field
 (ADR-0005). The token card is additionally serialised for display; the compute card is serialised
 for the generator's own use and rendered nowhere (R-N11).
+
+**R-T22.1 — The fan-out is generated last, from finished rows** (R-D21). Every stage upstream of
+it — the schedule, the Task shapes, the cell assignment, the model draw, the hidden rows — runs as
+it did before children existed, so the roots it produces are byte-identical apart from the schema's
+new field, and child ids continue the sequence rather than renumbering it. That is what makes
+ADR-0008's own claim checkable: the headline figures move by the roll-up because the roots did not
+move at all.
 
 **R-T23 — The generator asserts its own invariants as it writes** — span sums (R-T12), the
 required distributions (R-D6 through R-D17), the presence of every required edge case. A generator

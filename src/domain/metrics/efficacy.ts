@@ -27,6 +27,13 @@
 //          org-level figure could be filed under — and this module exports nothing that
 //          combines, sums or averages two `AcceptanceRate`s. T-U14 asserts that absence.
 //
+//   * **Rework and Decomposition are defined over ROOT sessions** (R-M19, ADR-0008). A child
+//     session is a sub-agent on the same attempt, not a second attempt: it inherits its root's
+//     Task and never carries `accepted`, so counting one would read every fan-out as a failed
+//     session followed by another. `taskFacts` drops children in the grouping pass, and
+//     `TaskSession` carries `parent_session_id` so that it can — the alternative, trusting the
+//     caller to have folded them, is a rule enforced nowhere.
+//
 //   * **Rework is WorkType-blind, because its input carries no WorkType at all.** R-M1 and
 //     `CONTEXT.md` define it as a **non-accepted session followed by another session on the same
 //     Task, of any WorkType**; the same-WorkType clause was dropped by ticket 05, since a failed
@@ -72,6 +79,7 @@
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
 import { ratio, type Ratio } from "../ratio";
+import { isRootSession } from "../sessions";
 import type { WorkTypeKey } from "../types";
 
 // --- Acceptance rate: within a WorkType, always (R-M6, A21) --------------------------------
@@ -155,6 +163,12 @@ export function acceptanceRateByWorkType(
 export type TaskSession = {
   /** `owner/repo#number` — externally keyed, never absent and never synthetic. */
   readonly task_key: string;
+  /**
+   * The root this session was spawned by, or `null` where it is a root (ADR-0008). **Present so
+   * that a child cannot be read as an attempt**: a sub-agent fan-out is one attempt worked by
+   * several agents, and counting its children would make every fan-out look like Rework.
+   */
+  readonly parent_session_id: string | null;
   readonly accepted: boolean;
   readonly started_at: string;
   readonly ended_at: string;
@@ -239,10 +253,17 @@ const factsFor = (taskKey: string, sessions: readonly TaskSession[]): TaskFacts 
  *
  * The **Tasks are the rows' own** — the population is whatever sessions were handed in, already
  * filtered by period, permission and hidden-session removal upstream (R-M2, R-T17).
+ *
+ * **Children are grouped into their root before anything is decided** (R-M19, ADR-0008): a child
+ * is dropped here, and its figures reached this Task through its root's row rather than as a row
+ * of its own. `load.ts` has already folded them, so on the committed data this pass sees no child
+ * at all — the guard is here because Rework is defined over *root* sessions, and a definition that
+ * only holds because of what an upstream caller did is a definition waiting to be broken.
  */
 export function taskFacts(sessions: readonly TaskSession[]): readonly TaskFacts[] {
   const held = new Map<string, TaskSession[]>();
   for (const session of sessions) {
+    if (!isRootSession(session)) continue;
     const existing = held.get(session.task_key);
     if (existing) existing.push(session);
     else held.set(session.task_key, [session]);

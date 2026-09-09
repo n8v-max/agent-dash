@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0017",
+    "parent_session_id": null,
     "started_at": "2026-04-22T08:31:06+02:00",
     "ended_at": "2026-04-22T11:45:16+02:00",
     "member_id": "mem_dnavarro",
@@ -42,6 +43,7 @@
   },
   {
     "id": "ses_0056",
+    "parent_session_id": null,
     "started_at": "2026-05-08T23:20:43+02:00",
     "ended_at": "2026-05-09T00:30:46+02:00",
     "member_id": "mem_nightlybot",
@@ -76,6 +78,7 @@
   },
   {
     "id": "ses_0130",
+    "parent_session_id": null,
     "started_at": "2026-05-29T17:13:56+02:00",
     "ended_at": "2026-05-29T19:05:55+02:00",
     "member_id": "mem_jdominguez",
@@ -117,6 +120,7 @@
   },
   {
     "id": "ses_0139",
+    "parent_session_id": null,
     "started_at": "2026-06-02T10:04:57+02:00",
     "ended_at": "2026-06-02T12:51:33+02:00",
     "member_id": "mem_jdominguez",
@@ -151,6 +155,7 @@
   },
   {
     "id": "ses_0237",
+    "parent_session_id": null,
     "started_at": "2026-06-26T19:58:33+02:00",
     "ended_at": "2026-06-26T21:01:25+02:00",
     "member_id": "mem_hcamps",
@@ -191,7 +196,119 @@
     ]
   },
   {
+    "id": "ses_0871",
+    "parent_session_id": "ses_0237",
+    "started_at": "2026-06-26T20:07:13+02:00",
+    "ended_at": "2026-06-26T20:16:10+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#187",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.56,
+    "interactive_duration_s": 218,
+    "idle_duration_s": 53,
+    "afk_duration_s": 266,
+    "machine_allocation_duration_s": 537,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 21006,
+        "cache_read": 444573,
+        "cache_write": 28791,
+        "output": 7069
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 11311,
+        "cache_read": 239386,
+        "cache_write": 15503,
+        "output": 3807
+      }
+    ]
+  },
+  {
+    "id": "ses_0870",
+    "parent_session_id": "ses_0237",
+    "started_at": "2026-06-26T20:12:31+02:00",
+    "ended_at": "2026-06-26T20:29:27+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#187",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 2.95,
+    "interactive_duration_s": 412,
+    "idle_duration_s": 100,
+    "afk_duration_s": 504,
+    "machine_allocation_duration_s": 1016,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 39743,
+        "cache_read": 841129,
+        "cache_write": 54472,
+        "output": 13375
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 21400,
+        "cache_read": 452916,
+        "cache_write": 29331,
+        "output": 7202
+      }
+    ]
+  },
+  {
+    "id": "ses_0872",
+    "parent_session_id": "ses_0237",
+    "started_at": "2026-06-26T20:47:59+02:00",
+    "ended_at": "2026-06-26T20:56:11+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#187",
+    "execution_mode": "interactive",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.43,
+    "interactive_duration_s": 199,
+    "idle_duration_s": 48,
+    "afk_duration_s": 245,
+    "machine_allocation_duration_s": 492,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 19246,
+        "cache_read": 407319,
+        "cache_write": 26378,
+        "output": 6477
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 10363,
+        "cache_read": 219325,
+        "cache_write": 14204,
+        "output": 3488
+      }
+    ]
+  },
+  {
     "id": "ses_0246",
+    "parent_session_id": null,
     "started_at": "2026-06-30T17:14:05+02:00",
     "ended_at": "2026-06-30T18:36:36+02:00",
     "member_id": "mem_hcamps",
@@ -226,6 +343,7 @@
   },
   {
     "id": "ses_0249",
+    "parent_session_id": null,
     "started_at": "2026-06-30T20:54:36+02:00",
     "ended_at": "2026-06-30T23:14:08+02:00",
     "member_id": "mem_hcamps",
@@ -260,6 +378,7 @@
   },
   {
     "id": "ses_0254",
+    "parent_session_id": null,
     "started_at": "2026-07-01T21:21:11+02:00",
     "ended_at": "2026-07-01T23:15:16+02:00",
     "member_id": "mem_hcamps",
@@ -294,6 +413,7 @@
   },
   {
     "id": "ses_0257",
+    "parent_session_id": null,
     "started_at": "2026-07-02T15:20:18+02:00",
     "ended_at": "2026-07-02T18:56:53+02:00",
     "member_id": "mem_ivazquez",
@@ -328,6 +448,7 @@
   },
   {
     "id": "ses_0263",
+    "parent_session_id": null,
     "started_at": "2026-07-03T08:20:18+02:00",
     "ended_at": "2026-07-03T10:06:03+02:00",
     "member_id": "mem_ivazquez",
@@ -369,6 +490,7 @@
   },
   {
     "id": "ses_0283",
+    "parent_session_id": null,
     "started_at": "2026-07-06T16:07:38+02:00",
     "ended_at": "2026-07-06T18:28:04+02:00",
     "member_id": "mem_ivazquez",
@@ -403,6 +525,7 @@
   },
   {
     "id": "ses_0289",
+    "parent_session_id": null,
     "started_at": "2026-07-07T09:53:38+02:00",
     "ended_at": "2026-07-07T11:05:57+02:00",
     "member_id": "mem_ivazquez",
@@ -437,6 +560,7 @@
   },
   {
     "id": "ses_0301",
+    "parent_session_id": null,
     "started_at": "2026-07-08T12:18:44+02:00",
     "ended_at": "2026-07-08T15:40:56+02:00",
     "member_id": "mem_hcamps",
@@ -471,6 +595,7 @@
   },
   {
     "id": "ses_0325",
+    "parent_session_id": null,
     "started_at": "2026-07-13T00:20:15+02:00",
     "ended_at": "2026-07-13T07:04:34+02:00",
     "member_id": "mem_nightlybot",
@@ -505,6 +630,7 @@
   },
   {
     "id": "ses_0353",
+    "parent_session_id": null,
     "started_at": "2026-07-16T23:52:06+02:00",
     "ended_at": "2026-07-17T01:42:55+02:00",
     "member_id": "mem_aruiz",
@@ -539,6 +665,7 @@
   },
   {
     "id": "ses_0396",
+    "parent_session_id": null,
     "started_at": "2026-07-27T13:42:56+02:00",
     "ended_at": "2026-07-27T16:30:31+02:00",
     "member_id": "mem_aruiz",
@@ -573,6 +700,7 @@
   },
   {
     "id": "ses_0432",
+    "parent_session_id": null,
     "started_at": "2026-07-30T19:27:56+02:00",
     "ended_at": "2026-07-30T21:12:37+02:00",
     "member_id": "mem_ivazquez",
@@ -614,6 +742,7 @@
   },
   {
     "id": "ses_0549",
+    "parent_session_id": null,
     "started_at": "2026-08-13T19:08:15+02:00",
     "ended_at": "2026-08-13T21:08:59+02:00",
     "member_id": "mem_ivazquez",
@@ -647,7 +776,68 @@
     ]
   },
   {
+    "id": "ses_1002",
+    "parent_session_id": "ses_0549",
+    "started_at": "2026-08-13T19:50:28+02:00",
+    "ended_at": "2026-08-13T20:14:54+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#255",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 4.71,
+    "interactive_duration_s": 716,
+    "idle_duration_s": 332,
+    "afk_duration_s": 418,
+    "machine_allocation_duration_s": 1466,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 171663,
+        "cache_read": 5056790,
+        "cache_write": 475907,
+        "output": 180373
+      }
+    ]
+  },
+  {
+    "id": "ses_1001",
+    "parent_session_id": "ses_0549",
+    "started_at": "2026-08-13T19:55:22+02:00",
+    "ended_at": "2026-08-13T20:27:40+02:00",
+    "member_id": "mem_ivazquez",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "bugfix",
+    "task_key": "equilibrio/ml-scoring#255",
+    "execution_mode": "interactive",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 6.23,
+    "interactive_duration_s": 947,
+    "idle_duration_s": 439,
+    "afk_duration_s": 552,
+    "machine_allocation_duration_s": 1938,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 226933,
+        "cache_read": 6684897,
+        "cache_write": 629132,
+        "output": 238447
+      }
+    ]
+  },
+  {
     "id": "ses_0568",
+    "parent_session_id": null,
     "started_at": "2026-08-17T12:48:19+02:00",
     "ended_at": "2026-08-17T14:13:44+02:00",
     "member_id": "mem_sibanez",
@@ -682,6 +872,7 @@
   },
   {
     "id": "ses_0633",
+    "parent_session_id": null,
     "started_at": "2026-08-25T01:26:20+02:00",
     "ended_at": "2026-08-25T03:02:08+02:00",
     "member_id": "mem_hcamps",

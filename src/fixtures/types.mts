@@ -30,6 +30,8 @@ export type TokenUsage = {
 
 export type AgentSession = {
   id: string;
+  /** The root session this one was spawned by; `null` on a root. One level only (ADR-0008). */
+  parent_session_id: string | null;
   started_at: string;
   ended_at: string;
   member_id: string;

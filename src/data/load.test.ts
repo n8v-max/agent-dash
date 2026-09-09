@@ -26,6 +26,9 @@ const sessionFiles = rawRepositories.flatMap((repository) =>
 /** Every session row on disk, hidden ones included. This is the "without the filter" side. */
 const rawSessions = sessionFiles.flatMap((file) => readRaw<AgentSession[]>(file));
 const hiddenRows = rawSessions.filter((row) => row.hidden);
+/** What the loader returns one of: a visible **root** (R-M19). Children fold into these. */
+const visibleRoots = rawSessions.filter((row) => !row.hidden && row.parent_session_id === null);
+const rawChildren = rawSessions.filter((row) => row.parent_session_id !== null);
 
 /** Mirrors the production reader, so an override test differs from production in one file only. */
 const fixtureReader: FixtureReader = (path) => readFileSync(join(DATA_DIRECTORY, path), "utf8");
@@ -86,7 +89,11 @@ describe("readDataset", () => {
   });
 
   it("orders sessions that started in the same instant by id, so the list is deterministic", () => {
-    const [template] = sessionsIn(POPULATED_PAIR).filter((row) => !row.hidden);
+    // A root: replacing the file with two copies of a *child* would leave both naming a parent
+    // the override deleted, which is the fault the tree check exists for (R-M19).
+    const [template] = sessionsIn(POPULATED_PAIR).filter(
+      (row) => !row.hidden && row.parent_session_id === null,
+    );
     if (template === undefined) throw new Error("expected a populated pair");
     const sameInstant = [
       { ...template, id: "ses_zzz9" },
@@ -100,9 +107,36 @@ describe("readDataset", () => {
   });
 
   it("reads `cost` off the row rather than deriving it (R-T11 / R-M4)", () => {
-    const [first] = rawSessions.filter((row) => !row.hidden);
-    const loaded = dataset.sessions.find((row) => row.id === first?.id);
-    expect(loaded?.cost).toBe(first?.cost);
+    const fannedOut = new Set(rawChildren.map((row) => row.parent_session_id));
+    const alone = visibleRoots.find((row) => !fannedOut.has(row.id));
+    const loaded = dataset.sessions.find((row) => row.id === alone?.id);
+    expect(loaded?.cost).toBe(alone?.cost);
+  });
+
+  it("adds a root's children into its cost, and adds nothing else (R-M19)", () => {
+    const parent = rawChildren[0]?.parent_session_id;
+    const root = visibleRoots.find((row) => row.id === parent);
+    const children = rawChildren.filter((row) => row.parent_session_id === parent);
+    const loaded = dataset.sessions.find((row) => row.id === parent);
+
+    expect(children.length).toBeGreaterThan(0);
+    expect(loaded?.cost).toBeCloseTo(
+      (root?.cost ?? 0) + children.reduce((total, row) => total + row.cost, 0),
+      8,
+    );
+    // The wall clock is the root's: a child runs inside its root's window.
+    expect(loaded?.started_at).toBe(root?.started_at);
+    expect(loaded?.ended_at).toBe(root?.ended_at);
+  });
+
+  it("returns roots only, and hands the child rows over separately (R-M19)", () => {
+    expect(dataset.sessions.every((row) => row.parent_session_id === null)).toBe(true);
+    expect(dataset.sessions).toHaveLength(visibleRoots.length);
+    expect([...dataset.childSessions.values()].flat()).toHaveLength(rawChildren.length);
+    for (const [parentId, children] of dataset.childSessions) {
+      expect(dataset.sessions.some((row) => row.id === parentId)).toBe(true);
+      for (const child of children) expect(child.parent_session_id).toBe(parentId);
+    }
   });
 
   it("carries `accepted` as the only outcome field (R-M3)", () => {
@@ -169,6 +203,77 @@ describe("a malformed or missing fixture is a fault, not a valid state", () => {
   });
 });
 
+describe("R-M19 — a child that disagrees with its root is a fault, not a row to drop", () => {
+  /** The pair holds both roots and children, so a mutation here is read in context. */
+  const withChild = (mutate: (child: AgentSession, rows: AgentSession[]) => void): string => {
+    const rows = sessionsIn(POPULATED_PAIR);
+    const child = rows.find((row) => row.parent_session_id !== null);
+    if (child === undefined) throw new Error(`${POPULATED_PAIR} holds no child session`);
+    mutate(child, rows);
+    return JSON.stringify(rows);
+  };
+
+  /** The read, as a thunk, so each test states both halves of its own claim. */
+  const readingOf = (payload: string) => (): Dataset =>
+    readDataset(readerWith({ [POPULATED_PAIR]: payload }));
+
+  it("rejects a child naming a root that is not in the fixture", () => {
+    const read = readingOf(
+      withChild((child) => {
+        Object.assign(child, { parent_session_id: "ses_9999" });
+      }),
+    );
+
+    expect(read).toThrow(FixtureFault);
+    expect(read).toThrow(/parent-missing/);
+  });
+
+  it("rejects a grandchild: the tree is one level deep", () => {
+    const read = readingOf(
+      withChild((child) => {
+        Object.assign(child, { parent_session_id: child.id });
+      }),
+    );
+
+    expect(read).toThrow(FixtureFault);
+    expect(read).toThrow(/parent-is-not-a-root/);
+  });
+
+  it("rejects a child that does not inherit one of the five labels", () => {
+    const read = readingOf(
+      withChild((child) => {
+        Object.assign(child, { member_id: "mem_ngallego" });
+      }),
+    );
+
+    expect(read).toThrow(FixtureFault);
+    expect(read).toThrow(/labels-disagree/);
+  });
+
+  it("rejects a child carrying `accepted`, which belongs to the attempt and so to the root", () => {
+    const read = readingOf(
+      withChild((child) => {
+        Object.assign(child, { accepted: true });
+      }),
+    );
+
+    expect(read).toThrow(FixtureFault);
+    expect(read).toThrow(/child-is-accepted/);
+  });
+
+  it("rejects a visible child under a hidden root, whose cost would roll up into nothing", () => {
+    const read = readingOf(
+      withChild((child, rows) => {
+        const parent = rows.find((row) => row.id === child.parent_session_id);
+        Object.assign(parent ?? {}, { hidden: true });
+      }),
+    );
+
+    expect(read).toThrow(FixtureFault);
+    expect(read).toThrow(/parent-hidden/);
+  });
+});
+
 describe("the dataset is parsed once per process", () => {
   it("returns the identical object on every call", () => {
     expect(loadDataset()).toBe(loadDataset());
@@ -228,13 +333,18 @@ describe("T-U5 — hidden sessions are stripped once, at load (R-M2)", () => {
   // (a) The same query, the same rows, different answers.
   it("answers the same query differently with the filter than without it", () => {
     expect(countByWorkType(dataset.sessions)).not.toEqual(countByWorkType(rawSessions));
-    expect(dataset.sessions).toHaveLength(rawSessions.length - hiddenRows.length);
+    // R-M19 — the loader returns roots, so the row count is the visible roots' and the *cost*
+    // is every visible row's: a child is not a row here, and its money is still in the total.
+    expect(dataset.sessions).toHaveLength(visibleRoots.length);
     expect(totalCost(dataset.sessions)).toBeLessThan(totalCost(rawSessions));
     expect(totalCost(rawSessions) - totalCost(dataset.sessions)).toBeCloseTo(totalCost(hiddenRows), 6);
   });
 
   it("drops exactly the hidden rows and keeps every other one", () => {
-    const kept = new Set(dataset.sessions.map((row) => row.id));
+    const kept = new Set([
+      ...dataset.sessions.map((row) => row.id),
+      ...[...dataset.childSessions.values()].flat().map((row) => row.id),
+    ]);
     expect(kept.size).toBe(rawSessions.length - hiddenRows.length);
     for (const row of hiddenRows) expect(kept.has(row.id)).toBe(false);
     for (const row of rawSessions.filter((candidate) => !candidate.hidden)) {
@@ -293,6 +403,10 @@ describe("T-U5 — hidden sessions are stripped once, at load (R-M2)", () => {
     expect(mentions).toEqual([
       join("src", "data", "load.ts"), // strips them, once
       join("src", "data", "schema.ts"), // validates the field the fixture carries
+      // R-M19 — `childFaults` reads it to refuse a *visible* child of a hidden root, whose
+      // cost would roll up into a row the strip had already removed. It reads the field to
+      // enforce the strip, which is the one other reason to read it.
+      join("src", "domain", "sessions.ts"),
       join("src", "domain", "types.ts"), // declares it
     ]);
   });

@@ -1,11 +1,12 @@
 // Boundary 1 — the only place in the application that reads JSON (technical-spec § 3.1).
 //
 // It reads the committed fixture, validates every file against `schema.ts`, removes hidden
-// sessions **once**, and caches the result for the life of the process. Everything above this
+// sessions **once**, folds every child session into its root **once**, and caches the result for
+// the life of the process. Everything above this
 // line receives typed rows; nothing above it opens a file, and nothing above it can opt back
 // into a hidden row, because no function here takes an option that would let it.
 //
-// Three invariants live here rather than downstream:
+// Four invariants live here rather than downstream:
 //
 //   * **R-M2 — hidden sessions are stripped at parse.** An AgentSession that terminated through
 //     platform or infrastructure failure is absorbed by the platform, is billed to nobody and
@@ -18,9 +19,16 @@
 //   * **R-T11 / R-M4 — `cost` is read.** It is validated here and aggregated upstream of here.
 //     There is no pricing function in this application; the rate cards are generator inputs and,
 //     for the token card only, display data.
+//   * **R-M19 — child sessions are rolled into their root at parse**, on the same line as the
+//     hidden strip and for the same reason (ADR-0008). A sub-agent fan-out is one attempt worked
+//     by several agents, not several attempts, so `sessions` holds **roots**, carrying their
+//     children's cost, tokens and duration. The child rows survive on `childSessions`, keyed by
+//     the root that spawned them, because `/demo/history` shows the raw rows under every
+//     aggregate and a fan-out is exactly what a reader goes there to see.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { childFaults, childrenByRoot, rollUpSessions } from "@/domain/sessions";
 import type {
   AgentSession,
   GithubUser,
@@ -49,8 +57,9 @@ import {
 } from "./schema";
 
 /**
- * The committed fixture, parsed and validated. `sessions` is a single time-ordered list with
- * hidden rows already gone — there is no second list holding them, here or anywhere.
+ * The committed fixture, parsed and validated. `sessions` is a single time-ordered list of
+ * **root** sessions with hidden rows already gone — there is no second list holding them, here or
+ * anywhere.
  */
 export type Dataset = {
   readonly organization: Organization;
@@ -62,7 +71,13 @@ export type Dataset = {
   readonly workTypes: readonly WorkType[];
   readonly models: readonly Model[];
   readonly rateCards: RateCards;
+  /** Roots, each carrying its children's cost, tokens and duration spans (R-M19). */
   readonly sessions: readonly AgentSession[];
+  /**
+   * The child rows as stored, by the id of the root that spawned them. Read by `/demo/history`
+   * alone (R-N20.2): every other surface reads a figure that already has them in it.
+   */
+  readonly childSessions: ReadonlyMap<string, readonly AgentSession[]>;
 };
 
 /** Returns the UTF-8 contents of a fixture file, or throws. Injectable so faults are testable. */
@@ -128,29 +143,69 @@ const byStartedAt = (left: AgentSession, right: AgentSession): number =>
   Date.parse(left.started_at) - Date.parse(right.started_at) || left.id.localeCompare(right.id);
 
 /**
- * Reads every `(repository × work_type)` file the manifest implies, drops hidden rows, and
- * returns one time-ordered list. The strip happens here, at parse, and only here.
+ * **R-M19 — the tree is checked before it is collapsed.** A child that names a root which does
+ * not exist, is not a root, disagrees with one of the five labels it inherits, carries `accepted`
+ * or is visible under a hidden root is a fault, not a row to drop: its cost has nowhere to roll
+ * up to, so keeping it would put a figure in no total, and dropping it would remove one silently.
+ * The rules themselves are `childFaults`, in the domain layer, so the loader and the fixture
+ * invariant test cannot come to different conclusions about what a valid child is.
+ */
+const assertSessionTree = (rows: readonly AgentSession[]): void => {
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  for (const row of rows) {
+    const parentId = row.parent_session_id;
+    if (parentId === null) continue;
+    const faults = childFaults(row, byId.get(parentId));
+    if (faults.length > 0) {
+      throw new FixtureFault(
+        `sessions: child session ${row.id} names root ${parentId} — ${faults.join(", ")}. ` +
+          "A child inherits its root's Task, Member, Repository, WorkType and execution_mode, " +
+          "never carries `accepted`, and rolls up into a root that is itself visible (R-M19).",
+      );
+    }
+  }
+};
+
+/** The two lists the fixture's session files resolve to: the roots, and the children under them. */
+type SessionSet = {
+  readonly sessions: readonly AgentSession[];
+  readonly childSessions: ReadonlyMap<string, readonly AgentSession[]>;
+};
+
+/**
+ * Reads every `(repository × work_type)` file the manifest implies, drops hidden rows, folds each
+ * child into its root, and returns one time-ordered list of roots. Both the strip (R-M2) and the
+ * roll-up (R-M19) happen here, at parse, and only here.
+ *
+ * A child is filed under the same `(repository × work_type)` pair as its root, because it inherits
+ * both labels — so the tree never spans two files and `assertPair` still describes every row.
  */
 const readSessions = (
   reader: FixtureReader,
   repositories: readonly Repository[],
   workTypes: readonly WorkType[],
-): AgentSession[] => {
+): SessionSet => {
   const pairs = repositories.flatMap((repository) =>
     workTypes.map((workType) => ({ repository, workType })),
   );
 
-  const visible: AgentSession[] = [];
+  const stored: AgentSession[] = [];
   for (const { repository, workType } of pairs) {
     const path = sessionFile(repository, workType);
     const rows = readFile(reader, path, arrayOf(sessionSchema));
     assertPair(rows, repository, workType, path);
-    // R-M2, once and for all. Nothing downstream is offered the alternative.
-    visible.push(...rows.filter((row) => !row.hidden));
+    stored.push(...rows);
   }
 
-  assertUniqueIds(visible);
-  return visible.sort(byStartedAt);
+  assertUniqueIds(stored);
+  assertSessionTree(stored);
+  // R-M2, once and for all. Nothing downstream is offered the alternative — and a hidden root
+  // takes its children with it, which `assertSessionTree` is what makes true.
+  const visible = stored.filter((row) => !row.hidden);
+  return {
+    sessions: [...rollUpSessions(visible)].sort(byStartedAt),
+    childSessions: childrenByRoot(visible),
+  };
 };
 
 /**
@@ -173,7 +228,7 @@ export const readDataset = (reader: FixtureReader = readFixtureFile): Dataset =>
     workTypes,
     models: readFile(reader, "models.json", arrayOf(modelSchema)),
     rateCards: readFile(reader, "rate_cards.json", rateCardsSchema),
-    sessions: readSessions(reader, repositories, workTypes),
+    ...readSessions(reader, repositories, workTypes),
   };
 };
 

@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0038",
+    "parent_session_id": null,
     "started_at": "2026-05-05T12:53:16+02:00",
     "ended_at": "2026-05-05T14:28:02+02:00",
     "member_id": "mem_deploybot",
@@ -33,6 +34,7 @@
   },
   {
     "id": "ses_0065",
+    "parent_session_id": null,
     "started_at": "2026-05-13T09:56:36+02:00",
     "ended_at": "2026-05-13T12:22:05+02:00",
     "member_id": "mem_sibanez",
@@ -65,6 +67,7 @@
   },
   {
     "id": "ses_0142",
+    "parent_session_id": null,
     "started_at": "2026-06-03T10:51:20+02:00",
     "ended_at": "2026-06-03T12:55:30+02:00",
     "member_id": "mem_deploybot",
@@ -97,6 +100,7 @@
   },
   {
     "id": "ses_0174",
+    "parent_session_id": null,
     "started_at": "2026-06-11T23:12:51+02:00",
     "ended_at": "2026-06-12T02:20:46+02:00",
     "member_id": "mem_sibanez",
@@ -129,6 +133,7 @@
   },
   {
     "id": "ses_0183",
+    "parent_session_id": null,
     "started_at": "2026-06-15T13:01:50+02:00",
     "ended_at": "2026-06-15T14:44:21+02:00",
     "member_id": "mem_deploybot",
@@ -161,6 +166,7 @@
   },
   {
     "id": "ses_0194",
+    "parent_session_id": null,
     "started_at": "2026-06-16T17:05:05+02:00",
     "ended_at": "2026-06-16T19:19:31+02:00",
     "member_id": "mem_deploybot",
@@ -193,6 +199,7 @@
   },
   {
     "id": "ses_0313",
+    "parent_session_id": null,
     "started_at": "2026-07-10T09:30:23+02:00",
     "ended_at": "2026-07-10T13:00:11+02:00",
     "member_id": "mem_sroldan",
@@ -225,6 +232,7 @@
   },
   {
     "id": "ses_0341",
+    "parent_session_id": null,
     "started_at": "2026-07-15T10:58:18+02:00",
     "ended_at": "2026-07-15T18:12:47+02:00",
     "member_id": "mem_deploybot",
@@ -257,6 +265,7 @@
   },
   {
     "id": "ses_0354",
+    "parent_session_id": null,
     "started_at": "2026-07-16T23:56:46+02:00",
     "ended_at": "2026-07-17T02:39:40+02:00",
     "member_id": "mem_deploybot",
@@ -289,6 +298,7 @@
   },
   {
     "id": "ses_0372",
+    "parent_session_id": null,
     "started_at": "2026-07-21T15:41:47+02:00",
     "ended_at": "2026-07-21T18:30:47+02:00",
     "member_id": "mem_deploybot",
@@ -328,6 +338,7 @@
   },
   {
     "id": "ses_0376",
+    "parent_session_id": null,
     "started_at": "2026-07-21T22:15:07+02:00",
     "ended_at": "2026-07-21T23:54:17+02:00",
     "member_id": "mem_deploybot",
@@ -360,6 +371,7 @@
   },
   {
     "id": "ses_0387",
+    "parent_session_id": null,
     "started_at": "2026-07-23T19:23:21+02:00",
     "ended_at": "2026-07-23T21:08:56+02:00",
     "member_id": "mem_deploybot",
@@ -392,6 +404,7 @@
   },
   {
     "id": "ses_0442",
+    "parent_session_id": null,
     "started_at": "2026-07-31T20:09:39+02:00",
     "ended_at": "2026-07-31T21:29:48+02:00",
     "member_id": "mem_sroldan",
@@ -424,6 +437,7 @@
   },
   {
     "id": "ses_0540",
+    "parent_session_id": null,
     "started_at": "2026-08-12T19:37:57+02:00",
     "ended_at": "2026-08-12T22:44:52+02:00",
     "member_id": "mem_deploybot",
@@ -463,6 +477,7 @@
   },
   {
     "id": "ses_0602",
+    "parent_session_id": null,
     "started_at": "2026-08-20T10:05:36+02:00",
     "ended_at": "2026-08-20T12:27:28+02:00",
     "member_id": "mem_deploybot",

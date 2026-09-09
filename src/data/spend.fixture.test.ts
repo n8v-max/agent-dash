@@ -140,15 +140,17 @@ describe("Total spend is session Cost + Seat cost (R-M1, R-M5, R-D4, T-U12)", ()
   });
 
   it("adds them to the attributed session Cost, and to nothing else", () => {
-    expect(WINDOW_SPEND.sessionCost).toBeCloseTo(4523.63, 2);
+    expect(WINDOW_SPEND.sessionCost).toBeCloseTo(4905.39, 2);
     expect(WINDOW_SPEND.sessionCost).toBeCloseTo(sessionCost(sessions), 10);
-    expect(WINDOW_SPEND.total).toBeCloseTo(8735.63, 2);
+    expect(WINDOW_SPEND.total).toBeCloseTo(9117.39, 2);
   });
 
   it("makes seats ~48% of what the Organization actually pays (R-D4)", () => {
     // The headline the fixture is shaped to produce, and the reason it is low-volume: a
-    // consumption-only model sees $4,523 of spend and misses nearly half the bill.
-    expect(WINDOW_SPEND.seatShare).toBeCloseTo(0.4822, 4);
+    // consumption-only model sees $4,905 of spend and misses nearly half the bill. The
+    // multi-agent fan-out moved it from 48.2% to 46.2% — children are real session spend, and
+    // they are the one thing that dilutes a seat charge (R-D21, ADR-0008).
+    expect(WINDOW_SPEND.seatShare).toBeCloseTo(0.462, 4);
   });
 
   it("would read 20 seats if `kind` were ignored, so the exclusion is doing work", () => {
@@ -222,11 +224,11 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12, T-U13
     expect(APRIL_SPEND.seatCost).toBe(spendOver([MAY]).seatCost);
   });
 
-  it("holds 31 sessions costing $266.87, so the seat charge is most of April's bill", () => {
+  it("holds 31 sessions costing $284.16, so the seat charge is most of April's bill", () => {
     expect(APRIL.rows).toHaveLength(31);
-    expect(APRIL_SPEND.sessionCost).toBeCloseTo(266.87, 2);
-    expect(APRIL_SPEND.total).toBeCloseTo(968.87, 2);
-    expect(APRIL_SPEND.seatShare).toBeCloseTo(0.7246, 3);
+    expect(APRIL_SPEND.sessionCost).toBeCloseTo(284.16, 2);
+    expect(APRIL_SPEND.total).toBeCloseTo(986.16, 2);
+    expect(APRIL_SPEND.seatShare).toBeCloseTo(0.7119, 3);
   });
 
   it("inflates April's Cost per completed Task by construction, and reports it flagged", () => {
@@ -234,9 +236,9 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12, T-U13
     const may = totalSpendPerCompletedTask(spendOver([MAY]));
 
     expect(april.completedTasks).toBe(15);
-    expect(figure(april)).toBeCloseTo(64.59, 2);
-    expect(figure(may)).toBeCloseTo(24.62, 2);
-    // Inflated, flagged, and left alone. A pro-rated April would read ~$47 and would hide the
+    expect(figure(april)).toBeCloseTo(65.74, 2);
+    expect(figure(may)).toBeCloseTo(26.22, 2);
+    // Inflated, flagged, and left alone. A pro-rated April would read ~$48 and would hide the
     // very artefact R-D2 wants a reader to see the flag next to.
     expect(figure(april)).toBeGreaterThan(figure(may));
     expect(april.partial).toBe(true);
@@ -244,8 +246,8 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12, T-U13
   });
 
   it("is the seat charge that does it: on session Cost alone April is the cheaper month", () => {
-    expect(figure(costPerCompletedTask(APRIL))).toBeCloseTo(17.79, 2);
-    expect(figure(costPerCompletedTask(MAY))).toBeCloseTo(12.92, 2);
+    expect(figure(costPerCompletedTask(APRIL))).toBeCloseTo(18.94, 2);
+    expect(figure(costPerCompletedTask(MAY))).toBeCloseTo(14.52, 2);
     expect(figure(totalSpendPerCompletedTask(APRIL_SPEND)) - figure(costPerCompletedTask(APRIL)))
       .toBeCloseTo(702 / 15, 6);
   });
@@ -275,7 +277,7 @@ describe("waste sits in the numerator and not the denominator (R-M1, T-U13)", ()
     const window = totalSpendPerCompletedTask(spendOver(MONTHS));
 
     expect(window.completedTasks).toBe(424);
-    expect(figure(window)).toBeCloseTo(20.6, 2);
+    expect(figure(window)).toBeCloseTo(21.5, 2);
   });
 
   it("counts a Task once even where its sessions span work types (R-D8, R-D14)", () => {

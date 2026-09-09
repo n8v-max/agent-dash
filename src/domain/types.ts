@@ -63,6 +63,16 @@ export type TokenUsage = { model_id: string } & Record<TokenClass, number>;
  */
 export type AgentSession = {
   id: string;
+  /**
+   * The **root** AgentSession this one was spawned by, or `null` where this row *is* a root
+   * (`CONTEXT.md` § Work — Root session, Child session).
+   *
+   * A child is a sub-agent fan-out on the *same* attempt, not a second attempt: it inherits its
+   * root's Task, Member, Repository, WorkType and `execution_mode`, never carries `accepted`, and
+   * rolls its cost, tokens and duration into its root (R-M19, ADR-0008). **One level only** — a
+   * child's parent is always a root, which `src/data/load.ts` enforces over the committed data.
+   */
+  parent_session_id: string | null;
   /** ISO 8601 with offset — the Organization's timezone is what fixes day boundaries. */
   started_at: string;
   ended_at: string;
@@ -73,7 +83,13 @@ export type AgentSession = {
   task_key: string;
   execution_mode: ExecutionMode;
   machine_spec: MachineSpec;
-  /** The session's ONLY outcome field (R-M3). There is no terminal status. */
+  /**
+   * The session's ONLY outcome field (R-M3). There is no terminal status.
+   *
+   * **A child never carries it.** Acceptance is the root's, because the WorkType's criterion is
+   * met once for the attempt, not once per agent that worked on it — so `accepted` is `false` on
+   * every child row and the roll-up never reads it (ADR-0008).
+   */
   accepted: boolean;
   /**
    * Terminated through platform or infrastructure failure. Stripped once at load (R-M2);

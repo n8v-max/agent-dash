@@ -57,6 +57,28 @@ const rowAt = (at: number): HistoryRow => ({
     tokensProcessed: 110_660,
     modelMix: [{ key: "claude-opus-5", label: "Claude Opus 5", value: 110_660 }],
   },
+  // R-N20.2 — every third attempt fanned out to two sub-agents.
+  children:
+    at % 3 === 0
+      ? [1, 2].map((child) => ({
+          key: `ses_${String(at).padStart(4, "0")}_${child}`,
+          startedAt: `${at} Sep 2026, 09:${String(child * 10).padStart(2, "0")}`,
+          durationSeconds: 120 * child,
+          cost: 1.5 * child,
+          detail: {
+            sessionId: `ses_${String(at).padStart(4, "0")}_${child}`,
+            taskKey: `equilibrio/web-console#${400 + at}`,
+            tokensByClass: {
+              uncached_input: 1_240,
+              cache_read: 8_810,
+              cache_write: 625,
+              output: 391,
+            },
+            tokensProcessed: 11_066,
+            modelMix: [{ key: "gpt-5-nano", label: "GPT-5 nano", value: 11_066 }],
+          },
+        }))
+      : [],
 });
 
 const tableOf = (count: number): TableViewModelOf<HistoryRow> => ({
@@ -156,6 +178,58 @@ describe("R-N20 — client pagination at 50, for readability", () => {
 
     expect(screen.queryByRole("navigation", { name: "Session pages" })).toBeNull();
     expect(sessionRows()).toHaveLength(50);
+  });
+});
+
+describe("T-C23 / R-N20.2 — a root expands to the agents that worked it", () => {
+  it("lists nothing extra for a session that fanned out to no sub-agent", async () => {
+    table(3);
+    // Rows 1 and 2 have no children; row 3 has two.
+    const [first] = sessionRows();
+
+    await userEvent.click(first as HTMLElement);
+
+    expect(screen.getByTestId("session-detail")).toBeInTheDocument();
+    expect(screen.queryByTestId("session-children")).toBeNull();
+  });
+
+  it("names the fan-out in the expander's label, before anyone opens it", () => {
+    table(3);
+
+    expect(
+      screen.getByRole("button", { name: /and 2 sub-agent sessions for session/ }),
+    ).toBeInTheDocument();
+    expect(sessionRows()).toHaveLength(3);
+  });
+
+  it("lists each child indented, with its own tokens, cost and Model mix", async () => {
+    table(3);
+    const rows = sessionRows();
+
+    await userEvent.click(rows[2] as HTMLElement);
+
+    const children = within(screen.getByTestId("session-children"));
+    // Two children, one list item each.
+    expect(children.getAllByRole("listitem")).toHaveLength(2);
+    expect(children.getByText(/2 agents ran/)).toBeInTheDocument();
+    // Its own Model, not its root's: a fan-out that reached for a cheaper model is the reading
+    // this list exists for.
+    expect(children.getAllByText("GPT-5 nano")).toHaveLength(2);
+    expect(children.getByText("$1.50")).toBeInTheDocument();
+    expect(children.getAllByText("11,066 tokens")).toHaveLength(2);
+  });
+
+  it("says the figures above already hold them, so nothing invites adding them up", async () => {
+    table(3);
+    const rows = sessionRows();
+
+    await userEvent.click(rows[2] as HTMLElement);
+
+    expect(
+      within(screen.getByTestId("session-children")).getByText(
+        /already in the row above/,
+      ),
+    ).toBeInTheDocument();
   });
 });
 

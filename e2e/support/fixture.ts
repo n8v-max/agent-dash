@@ -5,9 +5,17 @@
 // obeys it: the fixture JSON is read straight off disk with `node:fs`, and nothing in `src/` is
 // called to decide what the test allows. Using `src/data/load.ts` or `src/domain/periods.ts`
 // here would be circular — a filter that wrongly emitted another Member's rows would emit the
-// same values into the allow-list, and the leak would become invisible. The only rule borrowed
-// from the product is R-M2: hidden rows are dropped, exactly as `load.ts` drops them at parse,
-// because a row nothing can render is not a row anything can leak.
+// same values into the allow-list, and the leak would become invisible. Two rules are borrowed
+// from the product, both restated rather than imported, because they are what decides *which
+// figures exist* rather than who may see them:
+//
+//   * **R-M2** — hidden rows are dropped, exactly as `load.ts` drops them at parse: a row nothing
+//     can render is not a row anything can leak.
+//   * **R-M19** — a child session's cost is folded into its root, exactly as `load.ts` folds it.
+//     The cost literal the product serialises for a session that fanned out is the *tree's*, so a
+//     search set built from stored rows would look for figures the page never prints and would
+//     miss the ones it does. This is the roll-up as arithmetic over two fields, and it is the
+//     smallest restatement that keeps the set describing the same population the page renders.
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -18,6 +26,9 @@ import { join } from "node:path";
  * makes the "no application code decides what the test allows" property visible at a glance.
  */
 export type SessionRow = {
+  readonly id: string;
+  /** `null` on a root. A child's figures reach a page through its root's row (R-M19). */
+  readonly parent_session_id: string | null;
   readonly member_id: string;
   readonly cost: number;
   readonly hidden: boolean;
@@ -35,19 +46,62 @@ const FIXTURE_DIRECTORY = join(process.cwd(), "src", "fixtures", "data");
 const readFixture = <Shape>(...path: readonly string[]): Shape =>
   JSON.parse(readFileSync(join(FIXTURE_DIRECTORY, ...path), "utf8")) as Shape;
 
+/**
+ * The Members the viewer shares a Team with. **R-A3's `team` grant over `jobs` and `tokens` is
+ * what makes this population legitimate**: the rates on `/demo/work` are genuinely computed over
+ * it, so a rate it reads out to is a figure the viewer may see. It is used for *count*-derived
+ * readings only — never for money, which the restricted account holds at `self` alone.
+ */
+export const teamMatesOf = (memberId: string): ReadonlySet<string> => {
+  const teams = readFixture<readonly { readonly member_ids: readonly string[] }[]>("teams.json");
+  return new Set(
+    teams.filter((team) => team.member_ids.includes(memberId)).flatMap((team) => team.member_ids),
+  );
+};
+
 /** R-M10 — boundaries fall in the Organization's declared timezone, never UTC. */
 export const orgTimezone = (): string =>
   readFixture<{ readonly timezone: string }>("organization.json").timezone;
 
+/** Cents, so a folded cost is the whole number of them the product's own fold produces. */
+const CENTS = 100;
+
 /**
- * Every session the product can render, hidden rows already gone (R-M2). Read straight off
- * disk: `load.ts` is the application's door to the fixture, and this is not the application.
+ * Every session the product can render as a row: hidden rows gone (R-M2) and every child folded
+ * into its root (R-M19). Read straight off disk: `load.ts` is the application's door to the
+ * fixture, and this is not the application.
  */
-export const visibleSessions = (): readonly SessionRow[] =>
-  readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
+export const visibleSessions = (): readonly SessionRow[] => {
+  const visible = readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
     .filter((name) => name.endsWith(".json"))
     .flatMap((name) => readFixture<readonly SessionRow[]>("sessions", name))
     .filter((row) => !row.hidden);
+
+  const spawned = new Map<string, number>();
+  for (const row of visible) {
+    if (row.parent_session_id === null) continue;
+    spawned.set(row.parent_session_id, (spawned.get(row.parent_session_id) ?? 0) + row.cost);
+  }
+  return visible
+    .filter((row) => row.parent_session_id === null)
+    .map((root) => {
+      const children = spawned.get(root.id);
+      if (children === undefined) return root;
+      return { ...root, cost: Math.round((root.cost + children) * CENTS) / CENTS };
+    });
+};
+
+/**
+ * The child rows, as stored (R-N20.2). They are folded into the roots above for every aggregate,
+ * and `/demo/history` additionally prints each one's **own** cost inside the expanded row — so
+ * their individual figures are literals the payload really carries, and the search set has to
+ * account for them on both sides: granted where they are the viewer's own, ungranted otherwise.
+ */
+export const visibleChildSessions = (): readonly SessionRow[] =>
+  readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
+    .filter((name) => name.endsWith(".json"))
+    .flatMap((name) => readFixture<readonly SessionRow[]>("sessions", name))
+    .filter((row) => !row.hidden && row.parent_session_id !== null);
 
 // --- The published token rate card (R-N11) ----------------------------------------------------
 //

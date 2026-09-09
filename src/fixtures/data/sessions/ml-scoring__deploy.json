@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0109",
+    "parent_session_id": null,
     "started_at": "2026-05-25T17:07:51+02:00",
     "ended_at": "2026-05-25T18:29:05+02:00",
     "member_id": "mem_aquintana",
@@ -33,6 +34,7 @@
   },
   {
     "id": "ses_0176",
+    "parent_session_id": null,
     "started_at": "2026-06-12T12:39:22+02:00",
     "ended_at": "2026-06-12T16:47:19+02:00",
     "member_id": "mem_blorenzo",
@@ -65,6 +67,7 @@
   },
   {
     "id": "ses_0179",
+    "parent_session_id": null,
     "started_at": "2026-06-14T13:44:01+02:00",
     "ended_at": "2026-06-14T15:37:59+02:00",
     "member_id": "mem_hcamps",
@@ -97,6 +100,7 @@
   },
   {
     "id": "ses_0215",
+    "parent_session_id": null,
     "started_at": "2026-06-22T09:45:46+02:00",
     "ended_at": "2026-06-22T10:45:07+02:00",
     "member_id": "mem_hcamps",
@@ -129,6 +133,7 @@
   },
   {
     "id": "ses_0224",
+    "parent_session_id": null,
     "started_at": "2026-06-24T10:02:07+02:00",
     "ended_at": "2026-06-24T11:30:49+02:00",
     "member_id": "mem_sroldan",
@@ -168,6 +173,7 @@
   },
   {
     "id": "ses_0225",
+    "parent_session_id": null,
     "started_at": "2026-06-24T18:11:08+02:00",
     "ended_at": "2026-06-24T19:47:26+02:00",
     "member_id": "mem_hcamps",
@@ -200,6 +206,7 @@
   },
   {
     "id": "ses_0226",
+    "parent_session_id": null,
     "started_at": "2026-06-24T21:30:17+02:00",
     "ended_at": "2026-06-24T23:17:46+02:00",
     "member_id": "mem_sroldan",
@@ -232,6 +239,7 @@
   },
   {
     "id": "ses_0230",
+    "parent_session_id": null,
     "started_at": "2026-06-25T09:27:22+02:00",
     "ended_at": "2026-06-25T11:03:12+02:00",
     "member_id": "mem_blorenzo",
@@ -271,6 +279,7 @@
   },
   {
     "id": "ses_0245",
+    "parent_session_id": null,
     "started_at": "2026-06-30T12:03:58+02:00",
     "ended_at": "2026-06-30T14:29:21+02:00",
     "member_id": "mem_deploybot",
@@ -310,6 +319,7 @@
   },
   {
     "id": "ses_0270",
+    "parent_session_id": null,
     "started_at": "2026-07-03T17:36:29+02:00",
     "ended_at": "2026-07-03T21:37:12+02:00",
     "member_id": "mem_mpena",
@@ -342,6 +352,7 @@
   },
   {
     "id": "ses_0316",
+    "parent_session_id": null,
     "started_at": "2026-07-10T15:21:38+02:00",
     "ended_at": "2026-07-10T17:26:49+02:00",
     "member_id": "mem_deploybot",
@@ -381,6 +392,7 @@
   },
   {
     "id": "ses_0422",
+    "parent_session_id": null,
     "started_at": "2026-07-29T16:02:57+02:00",
     "ended_at": "2026-07-29T18:55:39+02:00",
     "member_id": "mem_deploybot",
@@ -413,6 +425,7 @@
   },
   {
     "id": "ses_0509",
+    "parent_session_id": null,
     "started_at": "2026-08-10T03:41:43+02:00",
     "ended_at": "2026-08-10T04:47:36+02:00",
     "member_id": "mem_nightlybot",
@@ -451,7 +464,45 @@
     ]
   },
   {
+    "id": "ses_0985",
+    "parent_session_id": "ses_0509",
+    "started_at": "2026-08-10T04:10:11+02:00",
+    "ended_at": "2026-08-10T04:18:58+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "deploy",
+    "task_key": "equilibrio/ml-scoring#246",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.85,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 527,
+    "machine_allocation_duration_s": 527,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 9220,
+        "cache_read": 252953,
+        "cache_write": 10154,
+        "output": 4198
+      },
+      {
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 4965,
+        "cache_read": 136205,
+        "cache_write": 5468,
+        "output": 2261
+      }
+    ]
+  },
+  {
     "id": "ses_0524",
+    "parent_session_id": null,
     "started_at": "2026-08-11T12:59:27+02:00",
     "ended_at": "2026-08-11T14:17:52+02:00",
     "member_id": "mem_hcamps",
@@ -491,6 +542,7 @@
   },
   {
     "id": "ses_0589",
+    "parent_session_id": null,
     "started_at": "2026-08-18T17:54:16+02:00",
     "ended_at": "2026-08-18T19:30:28+02:00",
     "member_id": "mem_blorenzo",
@@ -537,6 +589,7 @@
   },
   {
     "id": "ses_0596",
+    "parent_session_id": null,
     "started_at": "2026-08-19T21:01:20+02:00",
     "ended_at": "2026-08-19T23:38:15+02:00",
     "member_id": "mem_ivazquez",
@@ -576,6 +629,7 @@
   },
   {
     "id": "ses_0608",
+    "parent_session_id": null,
     "started_at": "2026-08-20T16:26:11+02:00",
     "ended_at": "2026-08-20T19:13:24+02:00",
     "member_id": "mem_aquintana",
@@ -615,6 +669,7 @@
   },
   {
     "id": "ses_0639",
+    "parent_session_id": null,
     "started_at": "2026-08-25T15:53:40+02:00",
     "ended_at": "2026-08-25T19:00:13+02:00",
     "member_id": "mem_deploybot",
@@ -654,6 +709,7 @@
   },
   {
     "id": "ses_0670",
+    "parent_session_id": null,
     "started_at": "2026-08-28T15:02:43+02:00",
     "ended_at": "2026-08-28T16:40:36+02:00",
     "member_id": "mem_hcamps",
@@ -688,6 +744,43 @@
         "cache_read": 306517,
         "cache_write": 12827,
         "output": 7946
+      }
+    ]
+  },
+  {
+    "id": "ses_1035",
+    "parent_session_id": "ses_0670",
+    "started_at": "2026-08-28T16:03:43+02:00",
+    "ended_at": "2026-08-28T16:18:41+02:00",
+    "member_id": "mem_hcamps",
+    "repository_id": "repo_ml_scoring",
+    "work_type": "deploy",
+    "task_key": "equilibrio/ml-scoring#287",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.2,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 898,
+    "machine_allocation_duration_s": 898,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 2729,
+        "cache_read": 87039,
+        "cache_write": 3642,
+        "output": 2256
+      },
+      {
+        "model_id": "claude-opus-5",
+        "uncached_input": 1470,
+        "cache_read": 46867,
+        "cache_write": 1961,
+        "output": 1215
       }
     ]
   }

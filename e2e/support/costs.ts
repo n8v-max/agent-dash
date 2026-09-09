@@ -49,7 +49,9 @@ import {
   civilDayIn,
   orgTimezone,
   periodKeysOf,
+  teamMatesOf,
   tokenRateCardFigures,
+  visibleChildSessions,
   visibleSessions,
   type SessionRow,
 } from "./fixture";
@@ -153,15 +155,25 @@ const over = (numerator: number, denominator: number): readonly number[] =>
   denominator === 0 ? [] : [numerator / denominator];
 
 /**
- * Every ratio one (period × grouping) key legitimately reads out to, numerator and denominator
- * taken over **the same** key: Cost per session and Cost per completed Job (`/demo/spend`), the
- * acceptance rate (`/demo/work`, R-M6), and the two Task-grain rates beside it.
+ * The **money** ratios one (period × grouping) key reads out to: Cost per session and Cost per
+ * completed Job (`/demo/spend`). Taken over the viewer's own rows only — a teammate's cost is
+ * ungranted, so a teammate's money quotient could mask an ungranted cost.
  */
-const grantedQuotients = (bucket: Bucket): readonly number[] => {
+const moneyQuotients = (bucket: Bucket): readonly number[] => [
+  ...over(bucket.cost, bucket.sessions),
+  ...over(bucket.cost, countOf(bucket.tasks, isCompleted)),
+];
+
+/**
+ * The **count** ratios: the acceptance rate (`/demo/work`, R-M6) and the two Task-grain rates
+ * beside it. Every one of them is a count over a count and **cannot be a cost** — which is why
+ * they are subtracted over the viewer's *Team* as well as over its own rows. R-A3 grants `team`
+ * over `jobs`, so `/demo/work` computes these across the Team; a rate it renders is a figure the
+ * viewer is entitled to, whatever some unrelated session happens to have cost.
+ */
+const countQuotients = (bucket: Bucket): readonly number[] => {
   const tasks = bucket.tasks.size;
   return [
-    ...over(bucket.cost, bucket.sessions),
-    ...over(bucket.cost, countOf(bucket.tasks, isCompleted)),
     ...over(bucket.accepted, bucket.sessions),
     ...over(countOf(bucket.tasks, isRework), tasks),
     ...over(countOf(bucket.tasks, isDecomposition), tasks),
@@ -229,14 +241,31 @@ const literalsFor = (figures: readonly number[]): Set<string> => {
  * no scope over — which is the claim T-E4 makes.
  */
 export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<string> => {
-  const rows = visibleSessions();
+  // Roots carrying their fan-out — the population every page aggregates — and the child rows,
+  // whose own cost `/demo/history` prints under the root that spawned them (R-M19, R-N20.2).
+  const rows = [...visibleSessions(), ...visibleChildSessions()];
   const own = rows.filter((row) => row.member_id === viewerMemberId);
-  const buckets = grantedBuckets(own, orgTimezone());
+  // Bucketed over roots alone: a child is never a row in an aggregate, so no total or ratio in
+  // the product is ever read over one.
+  const buckets = grantedBuckets(
+    own.filter((row) => row.parent_session_id === null),
+    orgTimezone(),
+  );
+
+  // R-A3 — `team` over `jobs`, so the Task- and session-grain *rates* are read across the Team.
+  // Counts only: no money figure is ever taken from this population.
+  const mates = teamMatesOf(viewerMemberId);
+  const teamBuckets = grantedBuckets(
+    rows.filter((row) => row.parent_session_id === null && mates.has(row.member_id)),
+    orgTimezone(),
+  );
 
   const granted = literalsFor([
     ...own.map((row) => row.cost),
     ...buckets.map((bucket) => bucket.cost),
-    ...buckets.flatMap(grantedQuotients),
+    ...buckets.flatMap(moneyQuotients),
+    ...buckets.flatMap(countQuotients),
+    ...teamBuckets.flatMap(countQuotients),
     ...tokenRateCardFigures(),
   ]);
   const ungranted = literalsFor(

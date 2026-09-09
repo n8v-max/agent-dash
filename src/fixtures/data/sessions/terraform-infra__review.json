@@ -1,6 +1,7 @@
 [
   {
     "id": "ses_0047",
+    "parent_session_id": null,
     "started_at": "2026-05-07T02:25:55+02:00",
     "ended_at": "2026-05-07T04:06:12+02:00",
     "member_id": "mem_nightlybot",
@@ -46,6 +47,7 @@
   },
   {
     "id": "ses_0084",
+    "parent_session_id": null,
     "started_at": "2026-05-20T02:59:35+02:00",
     "ended_at": "2026-05-20T09:23:37+02:00",
     "member_id": "mem_nightlybot",
@@ -77,6 +79,7 @@
   },
   {
     "id": "ses_0206",
+    "parent_session_id": null,
     "started_at": "2026-06-19T03:46:08+02:00",
     "ended_at": "2026-06-19T08:23:16+02:00",
     "member_id": "mem_nightlybot",
@@ -114,7 +117,82 @@
     ]
   },
   {
+    "id": "ses_0854",
+    "parent_session_id": "ses_0206",
+    "started_at": "2026-06-19T06:04:15+02:00",
+    "ended_at": "2026-06-19T06:46:52+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "review",
+    "task_key": "equilibrio/terraform-infra#282",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.84,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 2557,
+    "machine_allocation_duration_s": 2557,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 26672,
+        "cache_read": 523616,
+        "cache_write": 34711,
+        "output": 10848
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 14362,
+        "cache_read": 281947,
+        "cache_write": 18690,
+        "output": 5841
+      }
+    ]
+  },
+  {
+    "id": "ses_0855",
+    "parent_session_id": "ses_0206",
+    "started_at": "2026-06-19T06:19:07+02:00",
+    "ended_at": "2026-06-19T07:38:51+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "review",
+    "task_key": "equilibrio/terraform-infra#282",
+    "execution_mode": "headless",
+    "machine_spec": "memory",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 1.57,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 4784,
+    "machine_allocation_duration_s": 4784,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "gpt-5-nano",
+        "uncached_input": 49903,
+        "cache_read": 979655,
+        "cache_write": 64942,
+        "output": 20297
+      },
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 26871,
+        "cache_read": 527506,
+        "cache_write": 34969,
+        "output": 10929
+      }
+    ]
+  },
+  {
     "id": "ses_0228",
+    "parent_session_id": null,
     "started_at": "2026-06-24T23:48:09+02:00",
     "ended_at": "2026-06-25T01:34:19+02:00",
     "member_id": "mem_tferran",
@@ -152,7 +230,119 @@
     ]
   },
   {
+    "id": "ses_0868",
+    "parent_session_id": "ses_0228",
+    "started_at": "2026-06-25T01:01:26+02:00",
+    "ended_at": "2026-06-25T01:15:28+02:00",
+    "member_id": "mem_tferran",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "review",
+    "task_key": "equilibrio/terraform-infra#286",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.17,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 842,
+    "machine_allocation_duration_s": 842,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 6053,
+        "cache_read": 87823,
+        "cache_write": 7156,
+        "output": 1817
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 3260,
+        "cache_read": 47289,
+        "cache_write": 3853,
+        "output": 979
+      }
+    ]
+  },
+  {
+    "id": "ses_0866",
+    "parent_session_id": "ses_0228",
+    "started_at": "2026-06-25T01:06:19+02:00",
+    "ended_at": "2026-06-25T01:31:49+02:00",
+    "member_id": "mem_tferran",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "review",
+    "task_key": "equilibrio/terraform-infra#286",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.31,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1530,
+    "machine_allocation_duration_s": 1530,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 11000,
+        "cache_read": 159583,
+        "cache_write": 13004,
+        "output": 3302
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 5923,
+        "cache_read": 85929,
+        "cache_write": 7002,
+        "output": 1778
+      }
+    ]
+  },
+  {
+    "id": "ses_0867",
+    "parent_session_id": "ses_0228",
+    "started_at": "2026-06-25T01:13:49+02:00",
+    "ended_at": "2026-06-25T01:28:42+02:00",
+    "member_id": "mem_tferran",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "review",
+    "task_key": "equilibrio/terraform-infra#286",
+    "execution_mode": "headless",
+    "machine_spec": "general",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.18,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 893,
+    "machine_allocation_duration_s": 893,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 6420,
+        "cache_read": 93142,
+        "cache_write": 7590,
+        "output": 1927
+      },
+      {
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 3457,
+        "cache_read": 50153,
+        "cache_write": 4087,
+        "output": 1038
+      }
+    ]
+  },
+  {
     "id": "ses_0232",
+    "parent_session_id": null,
     "started_at": "2026-06-25T16:11:17+02:00",
     "ended_at": "2026-06-25T19:21:01+02:00",
     "member_id": "mem_sibanez",
@@ -184,6 +374,7 @@
   },
   {
     "id": "ses_0348",
+    "parent_session_id": null,
     "started_at": "2026-07-16T04:29:42+02:00",
     "ended_at": "2026-07-16T08:38:37+02:00",
     "member_id": "mem_nightlybot",
@@ -215,6 +406,7 @@
   },
   {
     "id": "ses_0385",
+    "parent_session_id": null,
     "started_at": "2026-07-23T05:17:04+02:00",
     "ended_at": "2026-07-23T07:37:57+02:00",
     "member_id": "mem_nightlybot",
@@ -245,7 +437,38 @@
     ]
   },
   {
+    "id": "ses_0922",
+    "parent_session_id": "ses_0385",
+    "started_at": "2026-07-23T05:32:00+02:00",
+    "ended_at": "2026-07-23T05:59:19+02:00",
+    "member_id": "mem_nightlybot",
+    "repository_id": "repo_terraform_infra",
+    "work_type": "review",
+    "task_key": "equilibrio/terraform-infra#307",
+    "execution_mode": "headless",
+    "machine_spec": "storage",
+    "accepted": false,
+    "hidden": false,
+    "prompt_count": 0,
+    "cost": 0.43,
+    "interactive_duration_s": 0,
+    "idle_duration_s": 0,
+    "afk_duration_s": 1639,
+    "machine_allocation_duration_s": 1639,
+    "artefacts": {},
+    "token_usage": [
+      {
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 10879,
+        "cache_read": 359700,
+        "cache_write": 22826,
+        "output": 7862
+      }
+    ]
+  },
+  {
     "id": "ses_0401",
+    "parent_session_id": null,
     "started_at": "2026-07-28T05:57:38+02:00",
     "ended_at": "2026-07-28T09:12:03+02:00",
     "member_id": "mem_nightlybot",
@@ -277,6 +500,7 @@
   },
   {
     "id": "ses_0694",
+    "parent_session_id": null,
     "started_at": "2026-09-01T03:41:05+02:00",
     "ended_at": "2026-09-01T05:31:14+02:00",
     "member_id": "mem_nightlybot",

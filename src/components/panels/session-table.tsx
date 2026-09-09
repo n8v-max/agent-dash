@@ -27,7 +27,7 @@ import type { TableCell, TableColumn, TableViewModelOf } from "@/domain/viewmode
 import { cn } from "@/lib/utils";
 import { TABLE_SCROLLER, TABLE_SCROLLER_CLASS } from "./data-table";
 import { formatFigure, WITHHELD } from "./figures";
-import { SessionDetailPanel } from "./session-detail";
+import { SessionChildren, SessionDetailPanel } from "./session-detail";
 
 /** Deterministic and locale-pinned: a server's locale must not decide what a figure reads as. */
 const number = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
@@ -55,6 +55,11 @@ function SessionRow(props: {
   readonly onToggle: () => void;
 }) {
   const { row, columns } = props;
+  // R-N20.2 — the fan-out is named in the label, so a reader who cannot see the indent still
+  // learns that this attempt was worked by more than one agent *before* opening it.
+  const agents = row.children.length;
+  const sessionWord = agents === 1 ? "session" : "sessions";
+  const fanOut = agents === 0 ? "" : ` and ${agents} sub-agent ${sessionWord}`;
   return (
     <>
       {/*
@@ -72,7 +77,7 @@ function SessionRow(props: {
             type="button"
             onClick={props.onToggle}
             aria-expanded={props.open}
-            aria-label={`Token classes and Model mix for session ${row.detail.taskKey}`}
+            aria-label={`Token classes and Model mix${fanOut} for session ${row.detail.taskKey}`}
             className="flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             <span aria-hidden className={cn("transition-transform", props.open && "rotate-90")}>
@@ -98,7 +103,11 @@ function SessionRow(props: {
       {props.open ? (
         <tr className="border-b border-border/60 bg-muted/30">
           <td colSpan={columns.length + 1} className="px-6 py-5">
-            <SessionDetailPanel detail={row.detail} />
+            <div className="space-y-6">
+              <SessionDetailPanel detail={row.detail} />
+              {/* R-N20.2 — the fan-out under the attempt, already inside the figures above. */}
+              <SessionChildren rows={row.children} />
+            </div>
           </td>
         </tr>
       ) : null}
