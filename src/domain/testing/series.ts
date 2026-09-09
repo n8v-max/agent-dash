@@ -1,4 +1,4 @@
-// Series generators — ticket 51, testing-spec T-U32. Feeds the property that the capped set —
+// Series generators — ticket 51, testing-spec T-U34. Feeds the property that the capped set —
 // the top four plus "Other" — sums to the same figure as the uncapped grouping (R-V4, R-V5,
 // A13).
 //

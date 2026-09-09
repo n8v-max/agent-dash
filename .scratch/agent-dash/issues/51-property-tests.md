@@ -33,7 +33,7 @@ All seven pass at 200 runs each in CI. Any failure records the shrunk counterexa
 **What landed.** `fast-check@4.9.0` as a dev dependency; generators in `src/domain/testing/`
 (`population.ts` — Members and Teams, `sessions.ts` — sessions and trees, `periods.ts` — timezones,
 grains, ranges and instants, `series.ts` — buckets and keyed rows); the seven properties as seven
-`it`s in `src/domain/properties.test.ts`, **200 runs each**, allocated **T-U26…T-U32**. Spec:
+`it`s in `src/domain/properties.test.ts`, **200 runs each**, allocated **T-U28…T-U34**. Spec:
 `testing-spec.md` gains § 3.5 naming all seven, and six rows of § 9 (A5, A6, A7, A13, A29, A41)
 gain their property alongside the example-based test that already owned them. The IDs were checked
 free before allocating — `T-U*` ran to T-U25, `T-C*` to T-C23, `T-E*` to T-E18, `T-F*` to T-F10,
@@ -47,13 +47,13 @@ is about, and each was caught **by the property that owns it**:
 
 | Mutation | Caught by |
 |---|---|
-| `rollUp` splits a row's figure across the keys it belongs to instead of counting it whole | T-U26 |
-| `bucketRows` buckets on the UTC date instead of the Organization's civil day | T-U27 |
-| `isSeatHolder` drops the `kind === "human"` clause and reads the seat flag alone | T-U28 |
-| `ratio` returns `null` for a zero *numerator* too | T-U29 (and T-U28, which reads a per-capita value) |
-| `taskFacts` stops dropping children from the grouping pass | T-U30 |
-| `rollUpSession` folds the children's cost but not the root's own | T-U31 |
-| `capSeries` keeps the top four and drops the "Other" bucket | T-U32 |
+| `rollUp` splits a row's figure across the keys it belongs to instead of counting it whole | T-U28 |
+| `bucketRows` buckets on the UTC date instead of the Organization's civil day | T-U29 |
+| `isSeatHolder` drops the `kind === "human"` clause and reads the seat flag alone | T-U30 |
+| `ratio` returns `null` for a zero *numerator* too | T-U31 (and T-U30, which reads a per-capita value) |
+| `taskFacts` stops dropping children from the grouping pass | T-U32 |
+| `rollUpSession` folds the children's cost but not the root's own | T-U33 |
+| `capSeries` keeps the top four and drops the "Other" bucket | T-U34 |
 
 ### How each generator was shown to reach its case
 

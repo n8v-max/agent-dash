@@ -1,4 +1,4 @@
-// Period generators — ticket 51, testing-spec T-U27. Feeds the property that period buckets
+// Period generators — ticket 51, testing-spec T-U29. Feeds the property that period buckets
 // **partition** the selected range, with the boundaries falling in the Organization's declared
 // timezone (`CONTEXT.md` § Period semantics, `spec.md` R-M10, R-M11, R-E2).
 //

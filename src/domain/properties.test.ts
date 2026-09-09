@@ -1,4 +1,4 @@
-// T-U26…T-U32 — the seven aggregation invariants, as properties. Ticket 51, `testing-spec.md`
+// T-U28…T-U34 — the seven aggregation invariants, as properties. Ticket 51, `testing-spec.md`
 // § 3.5.
 //
 // **Why these seven and not others.** ADR-0005 moved cost attribution upstream and said what
@@ -136,7 +136,7 @@ const shapeOf = (buckets: readonly PeriodBucket<PeriodRow>[], range: PeriodRange
   keysAreDistinct: new Set(buckets.map((bucket) => bucket.key)).size === buckets.length,
 });
 
-/** Every row a chart holds, in bucket order. The population both sides of T-U32 are read over. */
+/** Every row a chart holds, in bucket order. The population both sides of T-U34 are read over. */
 const rowsOf = (chart: SeriesCase): readonly KeyedRow[] =>
   chart.buckets.flatMap((bucket) => bucket.rows);
 
@@ -167,7 +167,7 @@ const A_PARTITION = {
 };
 
 describe("the seven aggregation invariants, as properties", () => {
-  it("T-U26 — the sum of every Team's figure is at least the Organization's, for every additive measure", () => {
+  it("T-U28 — the sum of every Team's figure is at least the Organization's, for every additive measure", () => {
     const reach = tally();
 
     fc.assert(
@@ -236,7 +236,7 @@ describe("the seven aggregation invariants, as properties", () => {
     reach.reached("a roster that happens not to overlap", 5);
   });
 
-  it("T-U27 — period buckets partition the range, in the Organization's timezone", () => {
+  it("T-U29 — period buckets partition the range, in the Organization's timezone", () => {
     const reach = tally();
 
     fc.assert(
@@ -296,7 +296,7 @@ describe("the seven aggregation invariants, as properties", () => {
     reach.reached("a period holding nothing", 40);
   });
 
-  it("T-U28 — a per-capita denominator never counts a service account", () => {
+  it("T-U30 — a per-capita denominator never counts a service account", () => {
     const reach = tally();
 
     fc.assert(
@@ -363,7 +363,7 @@ describe("the seven aggregation invariants, as properties", () => {
     reach.reached("a group with no per-capita reading", 100);
   });
 
-  it("T-U29 — a ratio is null if and only if its denominator is zero", () => {
+  it("T-U31 — a ratio is null if and only if its denominator is zero", () => {
     const reach = tally();
     // Unrestricted doubles on both sides: `ratio` deliberately carries no guard for a NaN or
     // infinite denominator, and the biconditional is why — neither is zero, so neither is null.
@@ -415,7 +415,7 @@ describe("the seven aggregation invariants, as properties", () => {
     reach.reached("an ordinary reading", 30);
   });
 
-  it("T-U30 — Rework needs two root sessions, and Decomposition two accepted ones", () => {
+  it("T-U32 — Rework needs two root sessions, and Decomposition two accepted ones", () => {
     const reach = tally();
 
     fc.assert(
@@ -470,7 +470,7 @@ describe("the seven aggregation invariants, as properties", () => {
     reach.reached("a single-attempt Task that fanned out", 30);
   });
 
-  it("T-U31 — a root's cost is its own plus its children's, and the total survives regrouping", () => {
+  it("T-U33 — a root's cost is its own plus its children's, and the total survives regrouping", () => {
     const reach = tally();
 
     fc.assert(
@@ -541,7 +541,7 @@ describe("the seven aggregation invariants, as properties", () => {
     reach.reached("a regrouping that actually moved a child", 40);
   });
 
-  it("T-U32 — the top four plus Other sum to the ungrouped total", () => {
+  it("T-U34 — the top four plus Other sum to the ungrouped total", () => {
     const reach = tally();
 
     fc.assert(

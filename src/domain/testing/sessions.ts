@@ -1,4 +1,4 @@
-// AgentSession generators — ticket 51, testing-spec T-U26, T-U28, T-U30 and T-U31. Feeds the
+// AgentSession generators — ticket 51, testing-spec T-U28, T-U30, T-U32 and T-U33. Feeds the
 // three properties about the session tree ADR-0008 introduced: Rework and Decomposition count
 // **roots**, a root's folded cost is its own plus its children's, and the Organization's total is
 // invariant to how the children are grouped under the roots.
@@ -7,10 +7,10 @@
 //
 //   * **A Task worked by several roots.** The Task pool is three keys against up to eight roots,
 //     so a Task carrying two attempts — the population Rework and Decomposition are defined over —
-//     is the common case rather than the tail. T-U30 counts it.
+//     is the common case rather than the tail. T-U32 counts it.
 //   * **A root with children.** Every root draws 0–3 of them, so a fan-out and a lone attempt both
 //     occur in almost every generated population. A generator that produced no child would leave
-//     T-U30 and T-U31 asserting nothing at all — the fold would have nothing to fold.
+//     T-U32 and T-U33 asserting nothing at all — the fold would have nothing to fold.
 //   * **A child that is well-formed.** It inherits the five labels of `INHERITED_LABELS`, carries
 //     no `accepted`, receives no user messages, and runs strictly inside its root's window. A
 //     malformed child is `childFaults`' subject and is tested there (T-U24), not here.
@@ -178,7 +178,7 @@ export type SessionTree = {
   readonly sessions: readonly AgentSession[];
   readonly roots: readonly AgentSession[];
   readonly children: readonly AgentSession[];
-  /** One pick per child: the root it is re-parented to when the grouping is shuffled (T-U31). */
+  /** One pick per child: the root it is re-parented to when the grouping is shuffled (T-U33). */
   readonly regroup: readonly number[];
 };
 

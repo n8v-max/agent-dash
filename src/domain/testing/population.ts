@@ -1,4 +1,4 @@
-// Member and Team generators — ticket 51, testing-spec T-U26 and T-U28. Feeds the two properties
+// Member and Team generators — ticket 51, testing-spec T-U28 and T-U30. Feeds the two properties
 // ADR-0005 named as the replacement targets for the pricing function it deleted: **Team is
 // non-additive** (`CONTEXT.md` § Aggregation Dimensions, R-V3) and **a per-capita denominator
 // counts no service account** (R-M14).
@@ -10,7 +10,7 @@
 //     a Member on *no* Team contributes to the Organization figure and to no Team's, so the sum
 //     of the Teams would fall *below* the Organization. `aggregate.ts` handles that row (it is
 //     placed nowhere), and this generator does not produce it, because the property under test is
-//     the glossary's claim rather than the wider one. T-U26 re-states the precondition as an
+//     the glossary's claim rather than the wider one. T-U28 re-states the precondition as an
 //     assertion so the reason is visible where the property is.
 //   * **A `service_account` may carry `seat_active: true`.** The roster never does, and the
 //     denominator must exclude it anyway: `isSeatHolder` is `kind === "human" && seat_active`, so
@@ -18,7 +18,7 @@
 //     than riding on a seat flag that happens to agree with it.
 //
 // The Team count is small (1–4) against up to 12 Members, so multi-Team Members — R-V3's whole
-// subject — are reached on most runs rather than in the tail. T-U26 counts them and fails if not.
+// subject — are reached on most runs rather than in the tail. T-U28 counts them and fails if not.
 //
 // Determinism (P5, R-T5): pure functions of what fast-check's seeded generator chose.
 

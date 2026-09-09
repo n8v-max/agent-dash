@@ -40,7 +40,9 @@ Out of scope, each already argued and recorded:
 - Quota, budgets, enforcement, alerting, notifications. This is an analytical dashboard, not a
   control plane. Cost *projection* is in; cost *limits* are out.
 - Real OAuth, live API integration, a real GitHub App. Fixture data throughout.
-- Role authoring UI. Permissions are data; the matrix renders read-only.
+- Role authoring UI. Permissions are data, and no matrix renders at all — § 11 C9 withdrew the
+  read-only grid this line used to promise. `/demo/people` states the acting account's visibility
+  in one sentence instead (R-A10, A28).
 - `/features`, `/compare`, `/pricing`. The dashboard is the value demonstration.
 - A designed zero-data state (ticket 11, `wontfix`). See R-E1.
 - Quality signals — defect, revert, change-failure rates. They need Git and incident systems the

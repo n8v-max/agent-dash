@@ -366,9 +366,9 @@ watches it throw does not make it.
 
 ---
 
-### 3.5 Property tests — the seven aggregation invariants
+### 3.6 Property tests — the seven aggregation invariants
 
-**T-U26…T-U32** (`src/domain/properties.test.ts`, generators in `src/domain/testing/`, ticket 51).
+**T-U28…T-U34** (`src/domain/properties.test.ts`, generators in `src/domain/testing/`, ticket 51).
 `fast-check`, **200 runs each**, one property per test.
 
 **Why a seventh layer of the same layer.** The tests above assert a rule against rows a person
@@ -392,7 +392,7 @@ too low**: an overlapping Member, a row the timezone moved to another civil day,
 holding an active seat, a zero denominator, a Task worked by two roots, a root with two children,
 a sixth series. The thresholds sit well under the rates measured when the generators were written.
 
-- **T-U26 — Team figures sum past the Organization's, for every additive measure** (R-V3, A5).
+- **T-U28 — Team figures sum past the Organization's, for every additive measure** (R-V3, A5).
   Session Cost in cents, `prompt_count`, tokens processed and machine allocation, over generated
   rosters of 1–12 Members across 1–4 overlapping Teams. The excess is asserted as an identity
   rather than an inequality: `sumGroups − total` equals `Σ (teamCount(m) − 1) × figure(m)`, which
@@ -400,32 +400,32 @@ a sixth series. The thresholds sit well under the rates measured when the genera
   as the contrast. The property holds **because a Member belongs to one or more Teams**
   (`CONTEXT.md` § Organisation & People) — a Member on no Team would make the sum fall *below* —
   so the test restates that precondition as an assertion over the generated roster.
-- **T-U27 — period buckets partition the range, in the Organization's timezone** (R-M10, R-M11,
+- **T-U29 — period buckets partition the range, in the Organization's timezone** (R-M10, R-M11,
   R-E2, A7). Over six IANA zones including two whose offset is not a whole hour, with instants
   written at offsets that are *not* the Organization's and biased onto the minutes either side of
   midnight. No gap, no overlap, no in-range day uncovered, every in-range row in exactly one
   bucket and every out-of-range row in none. A refused plan is asserted to be R-M11's refusal and
   nothing else.
-- **T-U28 — a per-capita denominator never counts a service account** (R-M14, A6). At all three
+- **T-U30 — a per-capita denominator never counts a service account** (R-M14, A6). At all three
   roll-up levels and in every group. The sharp case is one the roster never writes: a
   `service_account` carrying `seat_active: true`. Flipping every service account's seat on changes
   no denominator, and dropping them from the population changes no denominator either — while
   their work stays in the numerator, which the property asserts as an equality on the total.
-- **T-U29 — a ratio is null if and only if its denominator is zero** (R-M18, A29). T-U22's grid,
+- **T-U31 — a ratio is null if and only if its denominator is zero** (R-M18, A29). T-U22's grid,
   extended to the search: unrestricted doubles on both sides, `-0`, `NaN` and both infinities.
   The biconditional is one expression, and a defined reading is asserted to be the division
   itself — unrounded, unclamped, uncoerced.
-- **T-U30 — Rework implies two root sessions; Decomposition implies two accepted roots** (R-M1,
+- **T-U32 — Rework implies two root sessions; Decomposition implies two accepted roots** (R-M1,
   R-M19, A41). Over Task populations where roots fan out to 0–3 sub-agents each. The case that
   matters is a Task with **one** root and several children: it exhibits neither label, however
   wide the fan-out, which is the error ADR-0008 exists to remove. `taskFacts` over the whole
   population is asserted identical to `taskFacts` over the roots alone.
-- **T-U31 — a root's cost is its own plus its children's, and the total survives regrouping**
+- **T-U33 — a root's cost is its own plus its children's, and the total survives regrouping**
   (R-M19, A41). Per root: cost in cents, the four duration fields, R-T12's span identity surviving
   the fold, and the wall clock, outcome and prompt count staying the root's own. Then the same
   children re-parented to different roots: a different tree, the same population, and the same
   Organization total to the cent.
-- **T-U32 — the top four plus "Other" sum to the ungrouped total** (R-V4, R-V5, A13). Over 1–12
+- **T-U34 — the top four plus "Other" sum to the ungrouped total** (R-V4, R-V5, A13). Over 1–12
   series in 1–5 buckets, with rows carrying several keys (R-V3's Team shape) and rows carrying
   none. The cap engaging and not engaging is asserted as one equality rather than two branches, so
   the five-series case is a stated expectation and not an `else`. Both readings of an absent
@@ -892,15 +892,15 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A2 `/demo` offers month only | T-E7 |
 | A3 Day grain rejected over >2 months | T-U1, T-C5 |
 | A4 No hidden session anywhere | T-U5, T-F4 |
-| A5 Team totals exceed Org; overlap stated | T-U6, T-U26, T-C8 |
-| A6 Per-capita excludes service accounts | T-U7, T-U28 |
-| A7 00:30 Madrid buckets to the local day | T-U1, T-U8, T-U27, T-F6 |
+| A5 Team totals exceed Org; overlap stated | T-U6, T-U28, T-C8 |
+| A6 Per-capita excludes service accounts | T-U7, T-U30 |
+| A7 00:30 Madrid buckets to the local day | T-U1, T-U8, T-U29, T-F6 |
 | A8 Change suppressed iff the prior period is zero, or either period is incomplete | T-U3 |
 | A9 Restricted account: fewer rows, same nav | T-E1, T-E2 |
 | A10 No ungranted figure in the payload | T-E4, T-U10 |
 | A11 Org mismatch → 404 | T-E3 |
 | A12 Stacking only where the grouping partitions the measure; no pie | T-C11 |
-| A13 Cap engages above five, not at five | T-U11, T-U32 |
+| A13 Cap engages above five, not at five | T-U11, T-U34 |
 | A14 Series identity stable across buckets and roll-up | T-U11, T-C3 |
 | A15 Mirror matches rendered series | T-C1 |
 | A16 `aria-label` names the roll-up level | T-C2 |
@@ -916,7 +916,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A26 April and September flagged partial | T-U1, T-U12 |
 | A27 Spans are `interactive`-only and say so | T-U20, T-C1 |
 | A28 No matrix anywhere; visibility stated in words | T-E2.1 |
-| A29 A zero denominator is an absence, never a zero | T-U22, T-U29, T-C1.1, T-E10 |
+| A29 A zero denominator is an absence, never a zero | T-U22, T-U31, T-C1.1, T-E10 |
 | A30 A tile chart carries no axis, tick, grid or legend | T-C12 |
 | A31 One money formatter; no raw `Member.kind` enum on screen | T-C9.2, T-C9.3 |
 | A32 Panel-local controls stand where they are read, on the same parameters | T-C14, T-E12 |
@@ -928,7 +928,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A38 One visible sentence per panel; the rest folded, verbatim | T-C20, T-E16 |
 | A39 The as-of stamp on every surface, matching the History top row | T-U23, T-C21, T-E15 |
 | A40 | Every route fits a 390px phone; nothing is hidden to make it fit | T-E17, T-C22 |
-| A41 | A child session rolls up into its root, is no attempt of its own, and is a row on `/demo/history` alone | T-U24, T-U25, T-U30, T-U31, T-C23, T-E18, T-F10 |
+| A41 | A child session rolls up into its root, is no attempt of its own, and is a row on `/demo/history` alone | T-U24, T-U25, T-U32, T-U33, T-C23, T-E18, T-F10 |
 
 ---
 
