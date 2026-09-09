@@ -116,14 +116,27 @@ const later = (left: string, right: string): string => (left > right ? left : ri
 const earlier = (left: string, right: string): string => (left < right ? left : right);
 
 /**
- * The whole window, then every calendar month it touches, newest first.
+ * **Which pages offer the whole observation window as a period** (ticket 39).
  *
- * Calendar months rather than trailing day counts because a month is the unit the Organization is
- * billed in (R-M5) and the unit `/demo` reports (R-N6) — and because a single month is short
- * enough for R-M11 to offer day grain, so the period and grain controls visibly interact instead
- * of one silently constraining the other.
+ * `/demo` does not. It is month-locked (R-N6) and every tile on it is a month against the month
+ * before, so "All data" was a period the page's own argument could not be read over: five months
+ * of spend beside a change figure measured on the last of them. The other pages keep it — they
+ * plot series over the range, where the whole window is the most useful default there is.
+ *
+ * A total record rather than a set, so a new page has to answer the question rather than inherit
+ * an answer from whichever side of a `!==` it happens to fall on.
  */
-export function periodOptions(bounds: PeriodRange): readonly PeriodOption[] {
+const OFFERS_WHOLE_WINDOW: Readonly<Record<PageKey, boolean>> = {
+  summary: false,
+  spend: true,
+  work: true,
+  people: true,
+  history: true,
+  projection: true,
+};
+
+/** Every calendar month the window touches, newest first. One construction, shared by all pages. */
+const monthsIn = (bounds: PeriodRange): readonly PeriodOption[] => {
   const [firstYear, firstMonth] = [Number(bounds.start.slice(0, 4)), Number(bounds.start.slice(5, 7))];
   const lastIndex = Number(bounds.end.slice(0, 4)) * 12 + Number(bounds.end.slice(5, 7)) - 1;
   const months: PeriodOption[] = [];
@@ -139,18 +152,45 @@ export function periodOptions(bounds: PeriodRange): readonly PeriodOption[] {
       },
     });
   }
-  return [
-    { value: WHOLE_WINDOW, label: "All data", range: bounds },
-    ...months.reverse(),
-  ];
+  return months.reverse();
+};
+
+/**
+ * **The periods a page offers**: the whole window where the page takes one, then every calendar
+ * month it touches, newest first.
+ *
+ * Calendar months rather than trailing day counts because a month is the unit the Organization is
+ * billed in (R-M5) and the unit `/demo` reports (R-N6) — and because a single month is short
+ * enough for R-M11 to offer day grain, so the period and grain controls visibly interact instead
+ * of one silently constraining the other.
+ *
+ * The months are the *fixture's* months, because the bounds are the Organization's observation
+ * window: a period holding no data is not offered, on any page.
+ */
+export function periodOptions(page: PageKey, bounds: PeriodRange): readonly PeriodOption[] {
+  const months = monthsIn(bounds);
+  return OFFERS_WHOLE_WINDOW[page]
+    ? [{ value: WHOLE_WINDOW, label: "All data", range: bounds }, ...months]
+    : months;
 }
+
+/**
+ * **The period a bare route opens on** (R-C4) — the whole window, or, where a page does not offer
+ * it, the newest month the window touches. That is the *current* month: the clock is clamped to
+ * the window's last day (`clock.ts`), so the newest month is the month in progress.
+ *
+ * It is the first offered option in both cases, which is what keeps the default a value the
+ * control can also be returned to rather than a hidden seventh state.
+ */
+export const defaultPeriodRange = (page: PageKey, bounds: PeriodRange): PeriodRange =>
+  periodOptions(page, bounds)[0]?.range ?? bounds;
 
 const rangeEquals = (left: PeriodRange, right: PeriodRange): boolean =>
   left.start === right.start && left.end === right.end;
 
 /** The token a range serialises back to, or `undefined` where only `from`/`to` can express it. */
-const tokenFor = (range: PeriodRange, bounds: PeriodRange): string | undefined =>
-  periodOptions(bounds).find((option) => rangeEquals(option.range, range))?.value;
+const tokenFor = (page: PageKey, range: PeriodRange, bounds: PeriodRange): string | undefined =>
+  periodOptions(page, bounds).find((option) => rangeEquals(option.range, range))?.value;
 
 export { rangeEquals };
 
@@ -237,7 +277,9 @@ const rangeFrom = (input: ParseInput): PeriodRange => {
   }
   if (!declared.has("period")) return input.window;
   const token = first(input.query[QUERY_KEYS.period]);
-  return periodOptions(input.window).find((option) => option.value === token)?.range ?? input.window;
+  const offered = periodOptions(input.page, input.window).find((option) => option.value === token);
+  // A token this page does not offer is not a period: the page default stands (R-C4, R-T26).
+  return offered?.range ?? defaultPeriodRange(input.page, input.window);
 };
 
 /**
@@ -312,14 +354,17 @@ const scalarEntries = (controls: ControlSet, base: ControlSet): readonly Entry[]
 ];
 
 const putRange = (query: URLSearchParams, controls: ControlSet, bounds: PeriodRange): void => {
-  if (rangeEquals(controls.range, bounds)) return;
   const declared = new Set(DECLARED_CONTROLS[controls.page]);
   if (declared.has("dateRange")) {
+    if (rangeEquals(controls.range, bounds)) return;
     query.set(QUERY_KEYS.dateRange, controls.range.start);
     query.set(RANGE_END_KEY, controls.range.end);
     return;
   }
-  const token = declared.has("period") ? tokenFor(controls.range, bounds) : undefined;
+  if (!declared.has("period")) return;
+  // R-C4 — against the *page's* default period, which is not the window on every page.
+  if (rangeEquals(controls.range, defaultPeriodRange(controls.page, bounds))) return;
+  const token = tokenFor(controls.page, controls.range, bounds);
   if (token) query.set(QUERY_KEYS.period, token);
 };
 

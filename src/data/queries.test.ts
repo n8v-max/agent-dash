@@ -36,6 +36,9 @@ const membership = membershipFromTeams(data.teams);
 /** P5 — the instant every query is run against. The committed window ends 2026-09-08. */
 const NOW = "2026-09-08T12:00:00+02:00";
 const RANGE = { start: data.organization.window_start, end: data.organization.window_end };
+/** The two months ticket 39's rule is read at either end of: one unfinished, one whole. */
+const SEPTEMBER = { start: "2026-09-01", end: data.organization.window_end };
+const AUGUST = { start: "2026-08-01", end: "2026-08-31" };
 
 const viewerFor = (memberRole: string): Viewer => {
   const member = data.members.find((candidate) => candidate.role === memberRole);
@@ -107,32 +110,58 @@ const allPages = (viewer: Viewer) => ({
 const OPEN_PAGES = allPages(OPEN);
 
 describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel", () => {
-  it("`/demo` (R-N4) — four tiles, the fourth carrying the WorkType chart", () => {
+  it("`/demo` (R-N4) — four tiles, the breakdown beside the count it breaks down", () => {
+    // Ticket 39's order: the breakdown sits third, next to Completed Jobs, because it is that
+    // tile's own measure cut by template. The ratio is last, where the sentence ends.
     expect(OPEN_PAGES.summary.tiles.map((held) => held.key)).toEqual([
       "total-spend",
       "completed-tasks",
-      "cost-per-completed-task",
       "completed-tasks-by-work-type",
+      "cost-per-completed-task",
     ]);
-    // R-N7 — each *figure* tile carries a change, subject to R-M12's floor and C13's baseline.
-    // The fourth is a breakdown and carries neither figure nor change (C11).
+    // R-N7 — each *figure* tile carries a change, subject to R-M12's floor and C13's rules.
+    // The breakdown carries neither figure nor change (C11).
     const kinds = OPEN_PAGES.summary.tiles.map((held) => held.kind);
-    expect(kinds).toEqual(["figure", "figure", "figure", "breakdown"]);
+    expect(kinds).toEqual(["figure", "figure", "breakdown", "figure"]);
     const changes = OPEN_PAGES.summary.tiles.flatMap((held) =>
       held.kind === "figure" ? [held.change] : [],
     );
     expect(changes).toHaveLength(3);
     for (const change of changes) expect(change).toHaveProperty("shown");
 
-    const mix = OPEN_PAGES.summary.tiles[3];
+    const mix = OPEN_PAGES.summary.tiles[2];
     if (mix.kind !== "breakdown") throw new Error("expected the breakdown tile");
     expect(mix.chart.series).toHaveLength(5);
     // C11 — one bucket, the reported month, so R-V5's whole-range ranking is the sort.
     expect(mix.chart.buckets).toHaveLength(1);
   });
 
-  it("prints no figure on the mix tile, because tile 2 already prints it (C11)", () => {
-    const [, tasks, , mix] = OPEN_PAGES.summary.tiles;
+  it("suppresses every change on a part-month, and names the reason once per tile (C13)", () => {
+    // The committed window ends mid-September, so the month the page opens on is unfinished.
+    // Ticket 39: the delta is withheld rather than flagged, because eight days against a whole
+    // August is the calendar rather than the spend. Read here through the real query, over the
+    // real fixture, because the reason has to reach the tile a component renders.
+    const september = summaryPage(OPEN, paramsFor("summary", { range: SEPTEMBER }));
+    const reasons = september.tiles.flatMap((held) =>
+      held.kind === "figure" && !held.change.shown ? [held.change.reason] : [],
+    );
+
+    expect(september.period).toMatchObject({ key: "2026-09", partial: true });
+    expect(reasons).toEqual([
+      "current-period-incomplete",
+      "current-period-incomplete",
+      "current-period-incomplete",
+    ]);
+
+    // …and the contrast case, which is what stops the rule above passing vacuously: August is
+    // whole, July is whole, so all three figures are shown.
+    const august = summaryPage(OPEN, paramsFor("summary", { range: AUGUST }));
+    expect(august.period).toMatchObject({ key: "2026-08", partial: false });
+    expect(august.tiles.every((held) => held.kind === "breakdown" || held.change.shown)).toBe(true);
+  });
+
+  it("prints no figure on the mix tile, because the tile beside it already prints it (C11)", () => {
+    const [, tasks, mix] = OPEN_PAGES.summary.tiles;
     if (tasks.kind !== "figure" || mix.kind !== "breakdown") throw new Error("wrong tile kinds");
 
     // The defect this replaced: the mix tile spread the Completed Tasks reading, so `/demo`
@@ -143,7 +172,7 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
   });
 
   it("the mix tile's slices exceed the Completed Jobs tile, which is why it cannot stack (C11)", () => {
-    const [, tasks, , mix] = OPEN_PAGES.summary.tiles;
+    const [, tasks, mix] = OPEN_PAGES.summary.tiles;
     if (tasks.kind !== "figure" || mix.kind !== "breakdown") throw new Error("wrong tile kinds");
 
     // WorkType partitions sessions; this tile counts Tasks, whose sessions may span WorkTypes.
@@ -529,7 +558,7 @@ describe("the degenerate arms — a range with nothing in it, and an id that nam
 
     expect(page.tiles).toHaveLength(4);
 
-    const [, tasks, , mix] = page.tiles;
+    const [, tasks, mix] = page.tiles;
     if (tasks.kind !== "figure" || mix.kind !== "breakdown") throw new Error("wrong tile kinds");
     expect(tasks.value).toBe(0);
     expect(mix.chart.empty).toBe(true);

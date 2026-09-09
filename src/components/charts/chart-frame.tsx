@@ -97,6 +97,17 @@ export type ChartFrameProps = {
    * values stay reachable; what goes is the chrome. See `chart-shapes.tsx`'s `ShapeInput.bare`.
    */
   readonly bare?: boolean;
+  /**
+   * Put each bar's own figure on the bar, for a panel rendered without a measure axis — R-N8's
+   * `/demo` tile is the one. Presentational, and the only prop here that is: see
+   * `chart-shapes.tsx`, which says why it is not a fact on the ViewModel.
+   */
+  readonly valueLabels?: boolean;
+  /**
+   * Draw the axes and their grid. Off for a panel too small to carry a scale — see R-N8's tile,
+   * which drops the scale but keeps its legend, and so wants this rather than `bare`.
+   */
+  readonly axes?: boolean;
   readonly className?: string;
 };
 
@@ -130,6 +141,8 @@ export function ChartFrame(props: ChartFrameProps) {
             tickFormat: props.tickFormat ?? defaultTickFormat,
             measureDomain: props.measureDomain,
             bare: props.bare,
+            valueLabels: props.valueLabels,
+            axes: props.axes,
           })}
         </ChartContainer>
       </ChartBox>

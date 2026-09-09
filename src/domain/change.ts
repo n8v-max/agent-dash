@@ -2,10 +2,11 @@
 // (**Comparison floor**), `spec.md` R-M12 / R-M13 / R-N7 / A8, `technical-spec.md` § 3.2,
 // ticket 27. Tested by T-U3.
 //
-// **The floor is a count of one, not a magnitude threshold.** A change figure is suppressed
-// only when the prior period holds *nothing at all* to compare against. Above nothing it is
-// shown, however large: two to three sessions week-over-week really is +50%, and on a narrow
-// self-view that is the honest reading, not noise.
+// **The floor is a count of one, not a magnitude threshold.** A change figure is suppressed when
+// the prior period holds *nothing at all* to compare against — and never for being small or for
+// being implausibly large. Above nothing it is shown, however large: two to three sessions
+// week-over-week really is +50%, and on a narrow self-view that is the honest reading, not noise.
+// The other suppressions, below, are about periods that have not finished; none is about size.
 //
 // That is the whole rule, and the module is deliberately arranged so the other rule — the one
 // every dashboard reaches for — cannot be added by accident:
@@ -16,35 +17,40 @@
 //     (`spec.md` § 1). A configurable threshold defaulting to zero would be the same rule with
 //     a switch on it, so there is no option object and no parameter to widen.
 //
-//   * **Suppression is a closed vocabulary** (`CHANGE_SUPPRESSIONS`), and none of its members is
-//     about the size of the change. Three say something about the *prior* period — it does not
-//     exist, it holds nothing, or it is unfinished — and the fourth, added by ticket 40, says that
-//     one of the two periods has **no figure at all**: R-M18 makes a ratio over a zero denominator
-//     `null`, and a `null` coerced to `0` here would report a fall to nothing where nothing was
-//     measured. A tile printing "—" beside "−100% on the prior period" is the failure it prevents.
-//     Any further reason would have to be named here, in a list a reader compares against R-M12.
+//   * **Suppression is a closed vocabulary** (`CHANGE_SUPPRESSIONS`), and none of its five
+//     members is about the size of the change. Each says something about a *period*. Three are
+//     about the prior one — it does not exist, it holds nothing, or it is unfinished. One, added
+//     by ticket 39, is about the current one being unfinished. The fifth, added by ticket 40,
+//     says that one of the two has **no figure at all**: R-M18 makes a ratio over a zero
+//     denominator `null`, and a `null` coerced to `0` here would report a fall to nothing where
+//     nothing was measured — a tile printing "—" beside "−100% on the prior period" is the
+//     failure it prevents. Any further reason would have to be named here, in a list a reader
+//     compares against R-M12.
 //
 //   * **The ratio is unreachable when the figure is suppressed.** `Change` is a discriminated
 //     union: a renderer that has not narrowed on `shown` has no `ratio` in scope to print, so
 //     "suppressed" cannot degrade into "rendered as ∞ or NaN". That is the failure the floor
 //     exists to prevent, made unrepresentable rather than guarded.
 //
-// **R-M13 — comparison is unrestricted. An incomplete *current* period is flagged; an incomplete
-// *prior* period is withheld.** `Comparison` holds two figures and asserts no relation between
-// them: any period may be compared with any other, adjacent or not.
+// **R-M13 — comparison is unrestricted; an unfinished period on either side of it is withheld.**
+// `Comparison` holds two figures and asserts no relation between them: any period may be compared
+// with any other, adjacent or not.
 //
-// The asymmetry is C13's, and it is deliberate. A part-month on screen is visible, already
-// flagged (R-E2) and the thing the viewer chose to look at, so it renders and carries
-// `incomplete`. A part-month used as a *baseline* is none of those things — under C12 the prior
-// month is read outside the selected window, so it is invisible — and dividing a whole month by a
-// fragment inflates the comparison without bound. It suppresses.
+// C13 originally drew this asymmetrically — a part-month **baseline** withheld, a part-month
+// **current period** shown with its flag, on the grounds that the viewer chose to look at it.
+// **Amended by ticket 39**, which made the current month `/demo`'s default period: the flag
+// qualifies a figure, and a part-month against a whole month is not a provisional figure but a
+// wrong one. On the committed fixture, eight days of September against the whole of August
+// reports Completed Tasks down 73% and Cost per completed Task **up 96%** — a whole month of seat
+// cost over eight days of work — on the page owning the ten-second read. So both sides suppress,
+// and the flag now stands *instead of* the figure rather than beside it.
 //
 // This is not pro-rating. R-E2 forbids inventing the missing days; it does not require dividing
 // by them. The rejected alternative was comparing equal elapsed days of each month, which is
 // honest and non-empty but invents a second comparison mode.
 //
-// `incomplete` therefore survives on a *shown* figure only when the current period is the
-// unfinished one — which is the common case, because the reported month usually is.
+// `incomplete` therefore rides on suppressed figures and never on a shown one. It is kept on the
+// shown arm because a comparison of two finished periods must be able to say it is *not* flagged.
 //
 // **Direction is read off the absolute difference, not the ratio**, so it states what happened
 // to the figure whatever the arithmetic does to the sign.
@@ -56,7 +62,7 @@
 
 /**
  * One period's figure: its stable identity, what the measure came to over it, and whether the
- * period is incomplete (R-E2). `partial` is carried, never acted on — see `incomplete`.
+ * period is incomplete (R-E2). It is what both of C13's suppressions are read off.
  */
 export type PeriodFigure = {
   /** The period's key — `2026-04`, `2026-W15`. A stable identity, never an index (R-T8). */
@@ -92,16 +98,19 @@ export const CHANGE_DIRECTIONS = ["up", "down", "flat"] as const;
 export type ChangeDirection = (typeof CHANGE_DIRECTIONS)[number];
 
 /**
- * Why a change figure is suppressed. R-M12, R-M13 and R-M18 admit exactly these four. Three are
- * statements about the prior period — that it does not exist, holds nothing, or has not finished
- * — and one is a statement about a period having no figure at all. **None is about the size of
- * the change**, which is the property this list exists to make visible.
+ * Why a change figure is suppressed. R-M12, R-M13 and R-M18 admit exactly these five, and each
+ * is a statement about one of the two periods — one of them has no figure at all; the prior one
+ * does not exist, holds nothing or has not finished; the current one has not finished. **None is
+ * about the size of the change**, which is the property this list exists to make visible.
+ *
+ * The order is the order they are checked in, and it is read out loud by the test that pins it.
  */
 export const CHANGE_SUPPRESSIONS = [
   "no-figure-to-compare",
   "no-prior-period",
   "prior-period-holds-nothing",
   "prior-period-incomplete",
+  "current-period-incomplete",
 ] as const;
 export type ChangeSuppression = (typeof CHANGE_SUPPRESSIONS)[number];
 
@@ -115,7 +124,11 @@ export type ChangeShown = {
   /** `(current − prior) / prior`, a fraction. `0.5` is +50%; formatting belongs upstream. */
   readonly ratio: number;
   readonly direction: ChangeDirection;
-  /** R-M13 — either period is unfinished or clipped. A flag on a shown figure, never a veto. */
+  /**
+   * R-M13 — either period is unfinished or clipped. **Always `false` here** since C13's
+   * amendment, because an unfinished period on either side suppresses; it is carried so that a
+   * comparison of two finished periods can state that it is not flagged.
+   */
   readonly incomplete: boolean;
 };
 
@@ -149,16 +162,18 @@ const figure = (reading: PeriodReading, value: number): PeriodFigure => ({
 });
 
 /**
- * **R-M12 — the change floor, C13's partial baseline, and R-M18's absent reading.** The figure is
- * suppressed when, and only when, there is nothing to divide by: one of the two periods has no
- * figure at all (R-M18), or the prior period is not a baseline — it does not exist, it holds
- * zero, or it has not finished. Everything else is shown.
+ * **R-M12 — the change floor, C13's two unfinished periods, and R-M18's absent reading.** The
+ * figure is suppressed when, and only when, one of the periods cannot carry the comparison: it
+ * has no figure at all (R-M18), or the prior one does not exist, holds zero or has not finished,
+ * or the current one has not finished. Everything else is shown.
  *
- * There is deliberately no condition on the *size* of the change. A prior period of 2 against a current of 3 returns
- * `+0.5` and a prior of 1 against a current of 1000 returns `+999`; both are shown, because the
- * product's position is that a large change off a small base is the honest reading rather than
- * noise to be filtered. A current period of zero against a prior that held something is shown
- * too — the floor is on the base, and a fall to nothing is exactly the reading a viewer needs.
+ * There is deliberately no condition on the *size* of the change. A prior period of 2 against a
+ * current of 3 returns `+0.5` and a prior of 1 against a current of 1000 returns `+999`; both are
+ * shown, because the product's position is that a large change off a small base is the honest
+ * reading rather than noise to be filtered. A *measured* current period of zero against a prior
+ * that held something is shown too — the floor is on the base, a fall to nothing is exactly the
+ * reading a viewer needs, and an *empty* period is neither an *unfinished* one nor one with no
+ * figure.
  */
 export function changeBetween(comparison: Comparison): Change {
   const { current, prior } = comparison;
@@ -220,6 +235,19 @@ export function changeBetween(comparison: Comparison): Change {
       shown: false,
       reason: "prior-period-incomplete",
       message: `${prior.key} is unfinished, so it is not a baseline for ${current.key}`,
+      current,
+      prior,
+      incomplete,
+    };
+  }
+
+  // C13 as amended — checked last, so a comparison that fails on both sides is reported against
+  // the *baseline*: a period with no basis to compare against is the more fundamental fact.
+  if (current.partial) {
+    return {
+      shown: false,
+      reason: "current-period-incomplete",
+      message: `${current.key} is unfinished, so no change is shown against ${prior.key}`,
       current,
       prior,
       incomplete,

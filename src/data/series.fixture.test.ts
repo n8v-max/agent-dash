@@ -170,7 +170,7 @@ describe("T-U11 / A13 — the cap engages on 20 Members and not on 5 Repositorie
     expect(BY_REPOSITORY.series.map((series) => series.key)).not.toContain(OTHER_SERIES_KEY);
   });
 
-  it("renders all five WorkTypes, so the fourth headline tile has no Other bucket (R-N8)", () => {
+  it("renders all five WorkTypes, so the breakdown tile has no Other bucket (R-N8)", () => {
     const byWorkType = capSeries({
       buckets: MONTHS,
       seriesKeysOf: (session) => [session.work_type],

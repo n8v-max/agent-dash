@@ -47,6 +47,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  LabelList,
   Line,
   LineChart,
   XAxis,
@@ -145,8 +146,36 @@ type ShapeInput = {
    * **The tooltip and the accessibility layer stay** (R-X3), and so does the R-X1 mirror: the
    * values are not withdrawn, only the chrome. A reader who wants the numbers has them in the
    * mirror and in the tile's own headline, which is where a tile's figures belong.
+   *
+   * **`bare` is the whole of R-V11; `axes` below is the weaker half of it**, for a tile that
+   * still wants its legend. R-N8's summary tile is that case: it drops the scale but keeps the
+   * one-entry-per-WorkType legend, because the legend is where the five names are.
    */
   readonly bare?: boolean;
+  /**
+   * Put each bar's own figure on the bar.
+   *
+   * For panels read **without a measure axis** — R-N8's tile is the one, at 128px high inside a
+   * card, where a tick scale is four numbers along an edge nobody measures against. The label is
+   * the axis in that case, not an ornament on top of one, which is why it is off by default:
+   * a chart that has an axis and labels states every figure twice.
+   *
+   * It is a rendering choice and it is spelled as one — a `boolean` a panel passes, not a fact
+   * on the ViewModel. `stackable` is domain-supplied because stacking makes a *claim* about the
+   * data; a label on a bar makes none.
+   */
+  readonly valueLabels?: boolean;
+  /**
+   * Draw the axes and the grid they index. **On by default**; off for a panel small enough that
+   * a scale is noise rather than information — R-N8's `/demo` tile, 128px of card with five bars
+   * in it, where the ticks would be four numbers along an edge nobody measures against.
+   *
+   * It is `hide` on the axis elements rather than their absence, because the axes *are* the
+   * scales: dropping them would drop the category mapping with them. Recharts reclaims their
+   * reserved space when they are hidden, which is the difference between five bars across the
+   * card and five bars in the right two thirds of it.
+   */
+  readonly axes?: boolean;
 };
 
 /**
@@ -155,14 +184,29 @@ type ShapeInput = {
  */
 const axesFor = (input: ShapeInput): readonly ReactElement[] => {
   const domain = input.measureDomain ? { domain: input.measureDomain } : {};
+  const hide = input.axes === false;
   return input.shape === "horizontal-bar"
     ? [
-        <XAxis key="measure" type="number" tickFormatter={input.tickFormat} {...domain} {...AXIS} />,
-        <YAxis key="bucket" type="category" dataKey={BUCKET_KEY} width={120} {...AXIS} />,
+        <XAxis
+          key="measure"
+          type="number"
+          tickFormatter={input.tickFormat}
+          hide={hide}
+          {...domain}
+          {...AXIS}
+        />,
+        <YAxis key="bucket" type="category" dataKey={BUCKET_KEY} width={120} hide={hide} {...AXIS} />,
       ]
     : [
-        <XAxis key="bucket" dataKey={BUCKET_KEY} {...AXIS} />,
-        <YAxis key="measure" tickFormatter={input.tickFormat} width={56} {...domain} {...AXIS} />,
+        <XAxis key="bucket" dataKey={BUCKET_KEY} hide={hide} {...AXIS} />,
+        <YAxis
+          key="measure"
+          tickFormatter={input.tickFormat}
+          width={56}
+          hide={hide}
+          {...domain}
+          {...AXIS}
+        />,
       ];
 };
 
@@ -173,6 +217,10 @@ const axesFor = (input: ShapeInput): readonly ReactElement[] => {
  * on each piece so that "a tile chart is a bare line" is a single decision, and so that the
  * tooltip and the accessibility layer cannot be dropped with the chrome by accident.
  *
+ * **`axes: false` is the weaker form** (R-N8): the scale goes and the legend stays, for a tile
+ * whose series names are only stated in the legend. The grid goes with the ticks it indexes,
+ * because a dashed grid against no scale is a texture rather than a reading aid.
+ *
  * Exported for the same reason `stackIdOf` is: it is the *only* expression in the product that
  * decides whether a chart has axes, so R-V11 is assertable over the decision rather than over
  * Recharts' class names in jsdom.
@@ -182,12 +230,16 @@ export const furnitureFor = (input: ShapeInput): readonly ReactElement[] => {
   if (input.bare) return [tooltip];
 
   return [
-    <CartesianGrid
-      key="grid"
-      horizontal={input.shape !== "horizontal-bar"}
-      vertical={input.shape === "horizontal-bar"}
-      strokeDasharray="3 3"
-    />,
+    ...(input.axes === false
+      ? []
+      : [
+          <CartesianGrid
+            key="grid"
+            horizontal={input.shape !== "horizontal-bar"}
+            vertical={input.shape === "horizontal-bar"}
+            strokeDasharray="3 3"
+          />,
+        ]),
     ...axesFor(input),
     tooltip,
     <ChartLegend key="legend" content={<SeriesLegend />} />,
@@ -228,8 +280,27 @@ const areasFor = (
     />
   ));
 
-const barsFor = (chart: ChartViewModel, stackId: string | undefined): readonly ReactElement[] =>
-  chart.series.map((series) => (
+/**
+ * The label on a bar. Decimal-free through the chart's own tick formatter, so a labelled bar and
+ * a labelled axis cannot read differently — and so no bare decimal reaches the payload T-E4
+ * scans (`figures.ts` argues this at length).
+ *
+ * Recharts types a label formatter over its whole renderable-text union, where `tickFormat`
+ * takes a number: a `null` point (a bucket a series has no reading in) is passed through as the
+ * gap it is, rather than formatted into a `0` the ViewModel never claimed.
+ */
+const barLabel = (input: ShapeInput, series: SeriesViewModel): ReactElement => (
+  <LabelList
+    dataKey={series.key}
+    position={input.shape === "horizontal-bar" ? "right" : "top"}
+    className="fill-muted-foreground"
+    fontSize={11}
+    formatter={(value) => (typeof value === "number" ? input.tickFormat(value) : value)}
+  />
+);
+
+const barsFor = (input: ShapeInput, stackId: string | undefined): readonly ReactElement[] =>
+  input.chart.series.map((series) => (
     <Bar
       key={series.key}
       dataKey={series.key}
@@ -238,8 +309,18 @@ const barsFor = (chart: ChartViewModel, stackId: string | undefined): readonly R
       fill={colorOf(series)}
       radius={2}
       isAnimationActive={false}
-    />
+    >
+      {input.valueLabels ? barLabel(input, series) : null}
+    </Bar>
   ));
+
+/**
+ * Room for the labels, and only when there are labels. Recharts lays a bar out to the plot's
+ * edge, so a label sitting past the end of the longest bar is drawn into the margin: without
+ * one it is clipped, and the longest bar — the one the tile is about — is the one that loses
+ * its figure. Both edges the two positions use, so one margin serves either layout.
+ */
+const MARGIN_WITH_LABELS = { top: 12, right: 40, bottom: 4, left: 4 } as const;
 
 /**
  * **The chart element.** One switch, five shapes, and the series marks are the only thing that
@@ -274,9 +355,10 @@ export function chartElementFor(input: ShapeInput): ReactElement {
       accessibilityLayer
       data={data}
       layout={input.shape === "horizontal-bar" ? "vertical" : "horizontal"}
+      margin={input.valueLabels ? MARGIN_WITH_LABELS : undefined}
     >
       {furniture}
-      {barsFor(input.chart, stackId)}
+      {barsFor(input, stackId)}
     </BarChart>
   );
 }

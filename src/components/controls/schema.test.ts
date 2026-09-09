@@ -21,6 +21,7 @@ import {
   canonicalQuery,
   controlHref,
   declaredControls,
+  defaultPeriodRange,
   parseControls,
   pathFor,
   periodOptions,
@@ -36,8 +37,13 @@ const ORG = "demo";
 const parse = (page: PageKey, query: ControlQuery): ControlSet =>
   parseControls({ page, orgSlug: ORG, window: WINDOW, now: NOW, query });
 
+/**
+ * The page defaults, over **that page's** default period. `/demo` opens on the current month
+ * rather than on the whole window (R-N6, ticket 39), so a helper hard-coding `WINDOW` here would
+ * be asserting the summary's defaults against a range the page never resolves to.
+ */
 const defaults = (page: PageKey): ControlSet =>
-  defaultControls({ page, orgSlug: ORG, range: WINDOW, now: NOW });
+  defaultControls({ page, orgSlug: ORG, range: defaultPeriodRange(page, WINDOW), now: NOW });
 
 const href = (page: PageKey, overrides: ControlOverrides): string =>
   controlHref({ controls: defaults(page), window: WINDOW, overrides });
@@ -47,7 +53,7 @@ const queryOf = (url: string): Record<string, string> =>
   Object.fromEntries(new URLSearchParams(url.split("?")[1] ?? ""));
 
 const monthOption = (key: string) => {
-  const option = periodOptions(WINDOW).find((candidate) => candidate.value === key);
+  const option = periodOptions("spend", WINDOW).find((candidate) => candidate.value === key);
   if (!option) throw new Error(`the committed window does not contain ${key}`);
   return option;
 };
@@ -209,6 +215,62 @@ describe("T-C4 — controls serialise to the query string and round-trip (A19, R
     for (const page of Object.keys(DECLARED_CONTROLS) as PageKey[]) {
       expect(pathFor(page, ORG)).not.toContain("?");
     }
+  });
+});
+
+describe("R-N6 — `/demo` offers the fixture's months, and no 'All data' (ticket 39)", () => {
+  it("offers every month the window touches, newest first, and nothing else", () => {
+    const offered = periodOptions("summary", WINDOW);
+
+    expect(offered.map((option) => option.value)).toEqual([
+      "2026-09",
+      "2026-08",
+      "2026-07",
+      "2026-06",
+      "2026-05",
+      "2026-04",
+    ]);
+    expect(offered.map((option) => option.label)).not.toContain("All data");
+  });
+
+  it("is the other pages' list with the whole window taken off the front", () => {
+    // The months themselves are one construction, so a month cannot mean one range on `/demo`
+    // and another on `/demo/spend`. Only the whole-window option differs.
+    const [whole, ...months] = periodOptions("spend", WINDOW);
+
+    expect(whole.label).toBe("All data");
+    expect(periodOptions("summary", WINDOW)).toEqual(months);
+  });
+
+  it("opens on the current month, and the other pages open on the whole window", () => {
+    const september = periodOptions("summary", WINDOW)[0];
+
+    expect(defaultPeriodRange("summary", WINDOW)).toEqual(september.range);
+    expect(september.range.end).toBe(WINDOW.end);
+    expect(parse("summary", {}).range).toEqual(september.range);
+
+    for (const page of ["spend", "work", "people", "history"] as const) {
+      expect(defaultPeriodRange(page, WINDOW)).toEqual(WINDOW);
+      expect(parse(page, {}).range).toEqual(WINDOW);
+    }
+  });
+
+  it("drops the whole-window token on `/demo`, and honours it everywhere else", () => {
+    // Dropped rather than 404'd: a shared URL carrying a period this page no longer offers is a
+    // viewer's link, and the honest answer is the page default (R-T26, R-C4).
+    for (const token of ["window", "all"]) {
+      expect(parse("summary", { period: token }).range).toEqual(defaultPeriodRange("summary", WINDOW));
+    }
+    expect(parse("spend", { period: "window" }).range).toEqual(WINDOW);
+  });
+
+  it("still serialises a month the viewer chose, and omits the one it opens on (R-C4)", () => {
+    expect(canonicalQuery(parse("summary", {}), WINDOW).toString()).toBe("");
+    expect(canonicalQuery(parse("summary", { period: "2026-08" }), WINDOW).toString()).toBe(
+      "period=2026-08",
+    );
+    // …and the reverse: the current month is reachable by token, and normalises to the bare route.
+    expect(canonicalQuery(parse("summary", { period: "2026-09" }), WINDOW).toString()).toBe("");
   });
 });
 
