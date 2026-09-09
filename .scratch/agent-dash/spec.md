@@ -127,18 +127,27 @@ vary *inside* a page, in the query string. They never appear in a path.
 | `/demo/history` | The raw rows under every aggregate | Date range |
 | `/demo/projection` | Where the current month lands | Current month |
 
-**R-N2 — `/demo/history` and `/demo/projection` are secondary**, reached from a flat two-item
-ellipsis menu in the header, each item carrying a one-line description. Two items do not earn a
-grouping; a third would.
+**R-N2 — `/demo/history` and `/demo/projection` are nav items at secondary weight** (amended
+2026-09-09, ticket 43). All six surfaces are links in the header. The two secondary ones may read
+smaller and sit apart from the four primary questions; **they may not be hidden**, and no overflow
+control exists.
 
-**R-N3 — Shell.** Top header: product mark · nav (`/demo`, spend, work, people) · ellipsis
-(history, projection) · account switcher. Below it a **sticky page toolbar** holding that page's
-declared controls, period first. The toolbar is absent on pages declaring no controls.
+They were behind a flat two-item ellipsis, on the argument that *"two items do not earn a grouping;
+a third would"*. That argument is still right and it argued for the wrong thing: a menu is not a
+grouping either, and what the disclosure actually cost was two of the product's six surfaces
+needing a click and a guess to find. The one-line descriptions each item carried go with it — a
+description is what a menu row needs to justify opening the menu, and a nav item does not.
+
+**R-N3 — Shell.** Top header: product mark · nav (`/demo`, spend, work, people, then history and
+projection at secondary weight) · account switcher. Below it a **sticky page toolbar** holding that
+page's **global** controls, period first; the panel-local controls render in panel headers instead
+(R-C6). The toolbar is absent on pages holding none.
+
+Under the page heading, the **active-filter sentence** (R-C7).
 
 The header holds *who you are*; the toolbar holds *what is in the URL*. Keeping them visibly
-separate keeps the two kinds of state distinct. No sidebar: four nav items plus an overflow do not
-fill one, and the seven-column people table and the acceptance small multiples both want the
-horizontal space.
+separate keeps the two kinds of state distinct. No sidebar: six nav items do not fill one, and the
+seven-column people table and the acceptance small multiples both want the horizontal space.
 
 ### 3.1 `/demo` — the summary
 
@@ -298,6 +307,17 @@ WorkType · Repository · Task key · execution mode · `accepted` · duration �
 
 **R-N20 — Selectors: date range, Member, WorkType, Repository.** Default sort newest first,
 client pagination at 50.
+
+**The date range is a pair of native date inputs, in the browser's locale, and it applies on
+change** (amended 2026-09-09, ticket 43). There is no Apply button. Every other control in the
+product is a link and following it is the whole gesture; a range that also needed a button was the
+one control asking for a second one. Native, because the calendar, the keyboard behaviour and the
+field order are then the viewer's own platform's rather than this project's opinion of them — the
+value crossing the wire stays ISO `YYYY-MM-DD` whatever the display order is.
+
+An edit that is incomplete, or outside the observation window, **does not navigate**: the inputs
+carry the window as `min`/`max` and are `required`, and the form submits only when it is valid.
+That is R-T26's coercion arrived at before the navigation rather than after it.
 
 **R-N20.1 — A row expands to show that session's four disjoint token class volumes and its Model
 mix.** This is the only surface in the product carrying either. Per-session Model mix is meaningful
@@ -498,6 +518,44 @@ most filters do, so omitting it would break the share.
 
 **R-C5 — Control state does not persist across pages.** Carrying it would make `/demo/work` show a
 period the viewer set on `/demo/spend` and never sees again.
+
+**R-C6 — A control renders where its reach is** (added 2026-09-09, ticket 43). R-C1 says *which*
+controls a page has; this says *where on the page* each one stands.
+
+| Placement | Controls | Why |
+|---|---|---|
+| The global toolbar | period · grain · subject · Repository · template · date range · Team · Member kind · Member · sort | each narrows or orders the **population every panel on the page is read off** |
+| The header of each panel that reads it | `accepted` · per-capita · Model roll-up · `execution_mode` | each changes **some** of the page's panels and not the rest |
+
+`/demo/spend` showed nine control groups and `/demo/work` ten, in two rows at 1440px, and half of
+them changed one panel out of seven. A bar reads as a page-wide claim, and for those it was not
+one: `accepted` narrows Cost per session alone, the Model roll-up redraws one chart inside the
+Adoption section, and per-capita divides the two additive money panels and leaves the three ratios
+beside them untouched. The bar now holds five groups and fits one row at 1440px.
+
+**A control reaching two panels renders on both, bound to the one parameter.** Per-capita stands
+on Total spend and on Cost by Repository; `execution_mode` stands on the acceptance multiples and
+on the duration panel, which is R-C2's *"across duration and acceptance"* read literally. Two
+nodes, one query parameter: they cannot disagree, and following either writes the same URL.
+
+**No parameter and no URL changes** — this is the constraint the change was made under. A
+panel-local control is the same key, spelled the same way in the query string, serialised by the
+same rules (R-C3, R-C4). A link shared before this change and one shared after it are the same
+link.
+
+**R-C7 — Every controlled page states its active filters in one line under the heading** (added
+2026-09-09, ticket 43), e.g. *"Week grain · by Team · mobile-app · all templates"*.
+
+**Every filter has a phrase, including the ones nobody set.** "all templates" appears when no
+template is chosen, because the reading a viewer needs is *what population is this figure over* —
+and an omitted phrase makes that answer depend on knowing what could have been there. It is the
+same reason a nullable filter offers "All templates" as an option rather than as an absence
+(R-C1's "no greyed control" has the same shape).
+
+The period is not in the sentence — the period control prints its own current value in the bar
+above it — and neither is sort, which changes which row is first rather than which rows there are.
+The sentence is absent, not empty, on a page that filters nothing. Reset is unchanged and stays in
+the toolbar.
 
 ---
 
@@ -753,6 +811,10 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A29 | A ratio over a zero denominator is absent everywhere it appears — a gap in the chart, an em dash in the mirror, "—" and a reason on a headline figure — and never a zero | R-M18, R-V10 |
 | A30 | A chart inside a tile renders no axis, no tick, no grid and no legend, and keeps its mirror | R-V11, R-N13 |
 | A31 | Every money figure renders with a currency symbol and two decimals, from one formatter; no raw `Member.kind` enum reaches a reader | R-N15, R-T9 |
+| A32 | Every control the toolbar does not hold renders in the header of each panel that reads it, bound to the same parameter, producing the same URL a share link carried before the move | R-C6 |
+| A33 | All six routes are links in the header nav; no overflow control exists on any surface | R-N2 |
+| A34 | `/demo/history` applies its date range on change, with no Apply control, and an out-of-window or incomplete edit does not navigate | R-N20 |
+| A35 | Every controlled page states its active filters in one line under the heading, naming the off state of each filter it does not narrow | R-C7 |
 
 ---
 

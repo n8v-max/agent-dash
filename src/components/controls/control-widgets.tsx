@@ -11,8 +11,13 @@
 // **No control is ever greyed** (R-C1). An unavailable option is absent from its list: day grain
 // over a long range (R-M11) is not offered rather than offered-and-disabled, which is why nothing
 // below accepts a `disabled` prop.
+//
+// The date range is the one control that is a form rather than a link, and the one that needs a
+// change event to apply itself. That event lives in `components/forms/auto-submit-form.tsx`,
+// outside this directory, precisely so the paragraph above stays true of every module in it.
 
 import Link from "next/link";
+import { AutoSubmitForm } from "@/components/forms/auto-submit-form";
 import { cn } from "@/lib/utils";
 
 /** One offered value: what it reads as, where it goes, and whether it is the current one. */
@@ -118,7 +123,22 @@ export function MenuControl(props: {
 
 /**
  * `/demo/history`'s free date range (R-N20). A `GET` form: the browser assembles the query string
- * from the two inputs, which is the same write path every other control uses and needs no script.
+ * from the two inputs, which is the same write path every other control uses.
+ *
+ * **Native date inputs, in the browser's own locale.** `type="date"` is the control, so the
+ * calendar, the keyboard behaviour and the field order are the ones the viewer's own platform
+ * gives them — a hand-rolled picker would have to reimplement all three and would spell 1 August
+ * in this project's opinion rather than in theirs. The *value* crossing the wire stays ISO
+ * `YYYY-MM-DD` whatever the display order is, which is what `schema.ts` parses (R-T26).
+ *
+ * **It applies on change; there is no Apply button.** Every other control in the product is a
+ * link, and following it is the whole gesture; a range that also needed a button was the one
+ * control asking for a second one. `AutoSubmitForm` carries the change event and the validity
+ * guard, and it sits outside `components/controls/` so that this directory stays free of
+ * `"use client"` (R-T25).
+ *
+ * `min`/`max` are the Organization's observation window and `required` refuses an emptied field,
+ * so an incomplete or out-of-window edit simply does not submit — see `AutoSubmitForm`.
  *
  * `carried` holds the page's *other* parameters as `type="hidden"` inputs, because a `GET` form
  * replaces the query string wholesale — without them, narrowing the dates would silently clear
@@ -136,7 +156,11 @@ export function DateRangeControl(props: {
     "[color-scheme:light] dark:[color-scheme:dark]",
   );
   return (
-    <form method="get" action={props.action} className="flex items-center gap-2">
+    <AutoSubmitForm
+      label="Date range"
+      action={props.action}
+      className="flex items-center gap-2"
+    >
       {props.carried.map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
@@ -145,6 +169,7 @@ export function DateRangeControl(props: {
         type="date"
         name="from"
         aria-label="From"
+        required
         defaultValue={props.range.start}
         min={props.bounds.start}
         max={props.bounds.end}
@@ -155,17 +180,12 @@ export function DateRangeControl(props: {
         type="date"
         name="to"
         aria-label="To"
+        required
         defaultValue={props.range.end}
         min={props.bounds.start}
         max={props.bounds.end}
         className={field}
       />
-      <button
-        type="submit"
-        className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
-      >
-        Apply
-      </button>
-    </form>
+    </AutoSubmitForm>
   );
 }

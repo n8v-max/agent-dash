@@ -25,6 +25,7 @@
 
 "use client";
 
+import type { ReactNode } from "react";
 import { ChartFrame } from "@/components/charts/chart-frame";
 import type {
   DurationPanel,
@@ -42,9 +43,17 @@ const perCapitaNote = (panel: VelocityPanel): string | null =>
     : null;
 
 /** **Panel 1.** Completed Jobs per period, raw or per-capita. */
-export function VelocityChart(props: { readonly panel: VelocityPanel }) {
+export function VelocityChart(props: {
+  readonly panel: VelocityPanel;
+  /** R-C6 — the per-capita toggle, in the header of the one panel on this page it divides. */
+  readonly controls?: ReactNode;
+}) {
   return (
-    <WorkPanel title={props.panel.chart.title} note={perCapitaNote(props.panel)}>
+    <WorkPanel
+      title={props.panel.chart.title}
+      note={perCapitaNote(props.panel)}
+      controls={props.controls}
+    >
       <ChartFrame chart={props.panel.chart} shape="bar" className={PANEL_CHART} />
     </WorkPanel>
   );
@@ -140,11 +149,20 @@ const durationFigures = (panel: DurationPanel): readonly PanelFigure[] => [
  * Both charts keep their axes and their legends: a tick strip is what makes a duration line a
  * duration, and the one-entry legend is how a reader tells the left chart from the right one.
  */
-export function DurationChart(props: { readonly panel: DurationPanel }) {
+export function DurationChart(props: {
+  readonly panel: DurationPanel;
+  /** R-C6 / R-C2 — the `execution_mode` filter, in the header of one of the two panels it is for. */
+  readonly controls?: ReactNode;
+}) {
   const { panel } = props;
 
   return (
-    <WorkPanel title={panel.title} note={DURATION_NOTE} figures={durationFigures(panel)}>
+    <WorkPanel
+      title={panel.title}
+      note={DURATION_NOTE}
+      figures={durationFigures(panel)}
+      controls={props.controls}
+    >
       <div className="grid gap-5 lg:grid-cols-2">
         {[panel.median, panel.p95].map((chart) => (
           <ChartFrame

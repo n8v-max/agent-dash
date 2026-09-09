@@ -5,8 +5,8 @@
 // absent, not an empty bar.
 //
 // **R-N25 — nothing else in the product depends on this page.** It is reached from the header's
-// two-item ellipsis (R-N2) and links nowhere further; the projection is deliberately kept off
-// `/demo` and `/demo/spend`, because moving a forecast off the core surfaces is the mitigation
+// nav, at secondary weight (R-N2), and links nowhere further; the projection is deliberately kept
+// off `/demo` and `/demo/spend`, because moving a forecast off the core surfaces is the mitigation
 // ticket 07 chose over dressing it up.
 
 import { pageRequest } from "@/components/controls/request";

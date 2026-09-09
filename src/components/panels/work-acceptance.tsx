@@ -41,6 +41,7 @@
 
 "use client";
 
+import type { ReactNode } from "react";
 import { ChartFrame } from "@/components/charts/chart-frame";
 import type { AcceptancePanel, WorkPageViewModel } from "@/data/queries";
 import { countText, percentText } from "./work-format";
@@ -133,11 +134,14 @@ function AcceptanceTile(props: {
 export function AcceptanceMultiples(props: {
   readonly panels: readonly AcceptancePanel[];
   readonly axis: AcceptanceAxis;
+  /** R-C6 / R-C2 — the `execution_mode` filter. One node over all five tiles: the filter is on
+   *  the population the multiples are read off, not on any one WorkType within it. */
+  readonly controls?: ReactNode;
   /** R-T29 / T-C0 — set by the suite, absent on a page. See `TileDimension`. */
   readonly dimension?: TileDimension;
 }) {
   return (
-    <WorkPanel title={ACCEPTANCE_TITLE}>
+    <WorkPanel title={ACCEPTANCE_TITLE} controls={props.controls}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {props.panels.map((panel) => (
           <AcceptanceTile

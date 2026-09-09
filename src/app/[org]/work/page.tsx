@@ -11,7 +11,14 @@
 // panel 6 (R-C2): it is the one control that separates unattended runs from supervised ones
 // across duration and acceptance, and the session model makes it deliberately independent of
 // `Member.kind` — an independence that is invisible unless a viewer can filter on both.
+//
+// **R-C6 — two of the seven are panel-local, and this is where they are placed.** Per-capita
+// divides the velocity panel and nothing else on this page. `execution_mode` stands on the two
+// panels R-C2 names it for — acceptance and duration — one node each, both bound to
+// `?execution_mode=`, so the two headers carry the same links and the URL is the one the toolbar
+// used to write.
 
+import { PanelControl } from "@/components/controls/panel-control";
 import { pageRequest } from "@/components/controls/request";
 import { WorkPanels } from "@/components/panels/work-page-panels";
 import { PageFrame } from "@/components/shell/page-frame";
@@ -21,6 +28,9 @@ export default async function WorkPage(props: PageProps<"/[org]/work">) {
   const { org } = await props.params;
   const request = await pageRequest("work", org, await props.searchParams);
   const view = workPage(request.viewer, request.controls);
+  const control = (key: "perCapita" | "executionMode") => (
+    <PanelControl context={request} control={key} />
+  );
 
   return (
     <PageFrame
@@ -28,7 +38,10 @@ export default async function WorkPage(props: PageProps<"/[org]/work">) {
       title="Work"
       lede="Velocity, acceptance and duration — period over period, never against a pre-agent baseline."
     >
-      <WorkPanels view={view} />
+      <WorkPanels
+        view={view}
+        controls={{ perCapita: control("perCapita"), executionMode: control("executionMode") }}
+      />
     </PageFrame>
   );
 }

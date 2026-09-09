@@ -337,8 +337,12 @@ product's central interaction.
   period, grain, filters, roll-up level, subject, sort. A bare route renders page defaults (R-C4).
 - **T-C5 — Invalid control combinations are coerced or rejected, never rendered** (A3) — day grain
   over a range longer than two months is the named case.
-- **T-C6 — A page renders only its declared controls** (R-C1), and **no greyed control appears
-  anywhere**. Table-driven over the six pages.
+- **T-C6 — The toolbar renders exactly this page's global controls** (R-C1, R-C6), and **no greyed
+  control appears anywhere**. Table-driven over the six pages. Amended 2026-09-09: the claim used
+  to read "only its declared controls", and the declared set was the whole of what a page could
+  show. R-C6 split it, so both halves are asserted — the bar shows every toolbar control, in order,
+  **and** no panel-local one — and a third assertion checks the two lists are a *partition* of the
+  declared set on every page, so a control cannot be dropped from both and pass both files.
 - **T-C6.1 — Every declared control changes something** (R-C1, C14). For each page, each declared
   control is toggled and the resulting ViewModel asserted to differ. This is the test that would
   have caught per-capita being declared for `/demo/spend` and read by nothing — T-C6 passed
@@ -375,6 +379,26 @@ product's central interaction.
   41). The six panel headings are unchanged — the split must not turn R-N12's five into a six —
   the panel carries a median chart and a p95 chart, each with exactly one series and its own
   mirror column, and both magnitudes are stated in the figure strip above them.
+- **T-C14 — A panel-local control stands in the header of every panel that reads it, and moving it
+  changed no parameter and no URL** (A32, R-C6). Two claims, and the second is the one worth the
+  file: placement is easy to assert and easy to get right, while what a rearrangement of this kind
+  actually breaks is the *share link*. So the `href`s are asserted against `controlHref` — the one
+  expression every control link in the product is built from — rather than against a string typed
+  out in the test. The two-panel case (per-capita on Total spend and Cost by Repository,
+  `execution_mode` on acceptance and duration) is asserted as an **equality between the two
+  copies**, because the interesting failure there is not "one is missing" but "the two disagree
+  about one query parameter". The guard is asserted too: a control the page does not declare
+  renders nothing, so a panel shared across pages cannot smuggle one in.
+- **T-C15 — The active-filter sentence** (A35, R-C7). Every phrase is asserted against a
+  `ControlSet` parsed from a query string, so the sentence cannot drift from the controls. The off
+  states are asserted as text — "all templates" is *in* the sentence when nothing is chosen — and
+  the period and the sort are asserted **absent**. A page that filters nothing renders no element
+  at all, which is the difference between absent and empty.
+- **T-C16 — The shell nav is six links and no overflow** (A33, R-N2). The claim is an absence, so
+  the six labels and `href`s are asserted as an ordered list first: without that, "no disclosure"
+  passes against a nav that renders nothing. Secondary is asserted as a **weight** — the two
+  secondary items carry a smaller type class and the four primary ones do not, and both secondary
+  items are visible links reachable with no interaction.
 - **T-C10 — "Other" is inert** (R-V6): not clickable, does not expand, and its tooltip lists what
   it holds.
 - **T-C11 — Chart-shape rules** (A12, R-V1, R-V2). Two claims, asserted differently:
@@ -469,6 +493,20 @@ request per account per route, asserting rows rather than pixels."*
   filter, the bucketing, the ViewModel, the RSC boundary and the renderer to arrive on a running
   page. A week the same account *did* finish work in is asserted to still carry its figure, so a
   panel that rendered nothing could not pass.
+- **T-E12 — The controls stand where R-C6 put them, and the URLs did not move with them** (A32,
+  A33, A35). At **1440px**, because that is the width R-C6 is stated at: the global bar on
+  `/demo/spend` holds five groups and one row, measured against the height a single row occupies
+  rather than eyeballed. Each moved toggle is found inside its panel's `region`, and asserted
+  absent from the bar. The URL after a toggle click is asserted as a **literal** — `?per_capita=1`,
+  `?accepted=accepted`, `?model_level=tier` — because "unchanged from today's" is a claim about
+  specific strings and a comparison against the code would pass whatever the code did. The nav is
+  swept over four routes for six links, no button and no "⋯", and the active-filter sentence is
+  read off two different query strings.
+- **T-E13 — `/demo/history` applies its date range on change** (A34, R-N20). The unit layer proves
+  the form *asks* to submit and that an incomplete or out-of-window edit does not
+  (`auto-submit-form.test.tsx`); only a browser can prove it answered, wrote the query string and
+  re-rendered. The carried filter is asserted in the same navigation, because a `GET` form replaces
+  the query string wholesale and dropping the page's other parameters is how this feature breaks.
 - **T-E11 — The projection's four numbers are on the page and sum** (R-N23.1). Read off the
   rendered text of `/demo/projection`: session cost to date, the seat charge, the projected
   session cost and the projected total, with the two totals equal to their components to within
@@ -581,6 +619,10 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A29 A zero denominator is an absence, never a zero | T-U22, T-C1.1, T-E10 |
 | A30 A tile chart carries no axis, tick, grid or legend | T-C12 |
 | A31 One money formatter; no raw `Member.kind` enum on screen | T-C9.2, T-C9.3 |
+| A32 Panel-local controls stand where they are read, on the same parameters | T-C14, T-E12 |
+| A33 Six nav links, no overflow | T-C16, T-E12 |
+| A34 The history date range applies on change | T-E13 |
+| A35 Every controlled page states its active filters | T-C15, T-E12 |
 
 ---
 

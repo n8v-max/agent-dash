@@ -22,7 +22,7 @@
 // repositories) and its ViewModel says so, so the same shape renders side by side. Neither
 // decision is taken here.
 
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import type {
   CostPerSessionPanel as CostPerSessionViewModel,
   SpendPageViewModel,
@@ -100,12 +100,15 @@ export const perCapitaNote = (perCapita: SpendPageViewModel["perCapita"]): strin
 export function TotalSpendPanel(props: {
   readonly panel: TotalSpendViewModel;
   readonly perCapitaNote?: string | null;
+  /** R-C6 — the per-capita toggle, in this panel's header because this panel is one it divides. */
+  readonly controls?: ReactNode;
   readonly dimension?: PanelDimension;
 }) {
   const { panel } = props;
 
   return (
     <PanelCard
+      controls={props.controls}
       title={panel.chart.title}
       question="What the period cost in total, and how much of it was seats rather than sessions. A seat is charged by whole months, so this panel reads months whatever grain the page is set to. The seat charge is one fee per seat per month — a seat-month — so it grows with the Organization as well as with the calendar."
       footnote={[props.perCapitaNote, panel.note].filter(Boolean).join(" ")}
@@ -135,12 +138,15 @@ export function TotalSpendPanel(props: {
 /** R-N9 panel 3 — Cost per session, under the `accepted` filter (R-M1). */
 export function CostPerSessionPanel(props: {
   readonly panel: CostPerSessionViewModel;
+  /** R-C6 — the `accepted` filter, which narrows this panel and no other on the page. */
+  readonly controls?: ReactNode;
   readonly dimension?: PanelDimension;
 }) {
   const { panel } = props;
 
   return (
     <PanelCard
+      controls={props.controls}
       title={panel.chart.title}
       question={`What one session costs on average. Seat cost is not in it — a monthly fee shared across sessions would be the apportioning R-M5 refuses. ${OUTCOME_SENTENCE[panel.outcome] ?? ""}`}
       figures={
@@ -179,9 +185,12 @@ export function CostByWorkTypePanel(props: PanelChart) {
 }
 
 /** R-N9 panel 5 — Cost by Repository. Flat: no work-domain roll-up (ADR-0004, § 11 C2). */
-export function CostByRepositoryPanel(props: PanelChart & { readonly footnote?: string | null }) {
+export function CostByRepositoryPanel(
+  props: PanelChart & { readonly footnote?: string | null; readonly controls?: ReactNode },
+) {
   return (
     <PanelCard
+      controls={props.controls}
       title={props.chart.title}
       question="Where the money went, by Repository. A Job's sessions may span repositories, so these totals sit beside each other rather than summing into one bar."
       footnote={props.footnote ?? undefined}
@@ -191,12 +200,26 @@ export function CostByRepositoryPanel(props: PanelChart & { readonly footnote?: 
   );
 }
 
+/**
+ * R-C6 — the panel-local controls this page's panels read, already rendered by the page.
+ *
+ * Two fields and five panels, because a control belongs to the *reading* rather than to the card:
+ * per-capita is one node handed to the two money panels it divides, and the three ratios beside
+ * them are handed nothing, which is the same fact `perCapitaNote` states in words.
+ */
+export type SpendPanelControls = {
+  readonly accepted?: ReactNode;
+  readonly perCapita?: ReactNode;
+};
+
 /** R-N9 panels 1–5, in order. The Adoption section follows, under its own heading. */
 export function SpendPanels(props: {
   readonly page: SpendPageViewModel;
+  readonly controls?: SpendPanelControls;
   readonly dimension?: PanelDimension;
 }) {
   const { page, dimension } = props;
+  const controls = props.controls ?? {};
   // C14 — the note goes on the two panels the toggle actually divides, and on no others. The
   // three ratios below are already normalised, so per-capita neither changes them nor claims to.
   const note = perCapitaNote(page.perCapita);
@@ -204,12 +227,26 @@ export function SpendPanels(props: {
   return (
     <div className="space-y-6">
       <CostPerCompletedTaskPanel chart={page.costPerCompletedTask} dimension={dimension} />
-      <TotalSpendPanel panel={page.totalSpend} perCapitaNote={note} dimension={dimension} />
+      <TotalSpendPanel
+        panel={page.totalSpend}
+        perCapitaNote={note}
+        controls={controls.perCapita}
+        dimension={dimension}
+      />
       <div className="grid gap-6 xl:grid-cols-2">
-        <CostPerSessionPanel panel={page.costPerSession} dimension={dimension} />
+        <CostPerSessionPanel
+          panel={page.costPerSession}
+          controls={controls.accepted}
+          dimension={dimension}
+        />
         <CostByWorkTypePanel chart={page.costPerCompletedTaskByWorkType} dimension={dimension} />
       </div>
-      <CostByRepositoryPanel chart={page.costByRepository} footnote={note} dimension={dimension} />
+      <CostByRepositoryPanel
+        chart={page.costByRepository}
+        footnote={note}
+        controls={controls.perCapita}
+        dimension={dimension}
+      />
     </div>
   );
 }

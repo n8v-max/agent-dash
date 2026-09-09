@@ -8,7 +8,8 @@
 //
 // **Model is a breakdown, not an axis** (R-M7). Nothing here groups a per-session metric by
 // Model: the mix is a distribution over token readings at the roll-up level the viewer chose,
-// and the level control is the one control on this page **scoped to this section** (R-C1).
+// and the level control is scoped to this section (R-C1) — which is now where it physically
+// stands, in the header of the one panel it redraws (R-C6).
 //
 // **The four token classes are not here.** They are volumes, and R-N20.1 puts per-session
 // volumes on `/demo/history` alone; on this page the four classes appear only as the rate card's
@@ -16,6 +17,7 @@
 //
 // **It computes nothing** (R-T6): the shares arrived resolved, and `levels[level]` is a lookup.
 
+import type { ReactNode } from "react";
 import type { AdoptionSection as AdoptionViewModel, DistributionViewModel } from "@/data/queries";
 import { ChartFrame } from "@/components/charts/chart-frame";
 import { Figure, FigureList, count, share } from "./money-figure";
@@ -61,6 +63,12 @@ function ModelMixList(props: { readonly distribution: DistributionViewModel }) {
 
 export function AdoptionSection(props: {
   readonly adoption: AdoptionViewModel;
+  /**
+   * R-C6 — the Model roll-up control, already rendered, for the Model mix panel's header. R-C1
+   * always scoped this control to this section; standing it on the panel it redraws is that scope
+   * made visible, and it is why the control no longer has to spell "(Adoption)" in its own label.
+   */
+  readonly modelLevelControl?: ReactNode;
   /** R-T29 / T-C0 — set by tests only, exactly as `ChartFrame` and the money panels carry it. */
   readonly dimension?: PanelDimension;
 }) {
@@ -97,6 +105,7 @@ export function AdoptionSection(props: {
 
       <PanelCard
         level="h3"
+        controls={props.modelLevelControl}
         title={mix.chart.title}
         question={`Which Models the tokens went to, rolled up by ${level}. A breakdown and not a comparison axis: a session may span several Models, so no per-session metric is grouped by one.`}
       >

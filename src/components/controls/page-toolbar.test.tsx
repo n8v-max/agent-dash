@@ -1,5 +1,13 @@
-// **T-C6 — a page renders only its declared controls, and no greyed control appears anywhere**
-// (R-C1). Table-driven over the six pages.
+// **T-C6 — the toolbar renders exactly this page's global controls, and no greyed control appears
+// anywhere** (R-C1, R-C6). Table-driven over the six pages.
+//
+// The claim narrowed when R-C6 split the declared set in two. It used to read "only its declared
+// controls", and the declared set was the whole of what a page could show; the bar now holds the
+// controls that narrow the *population* — period, grain, subject, Repository, template — and the
+// four panel-local toggles render in the header of each panel that reads them
+// (`panel-control.test.tsx`, T-C14). Both halves are asserted here: the bar shows every toolbar
+// control, in order, **and** it shows no panel-local one. A control that was quietly dropped
+// altogether therefore fails one file or the other rather than passing both.
 //
 // It also carries the structural half of **R-T25 — the query string is the single source of
 // truth**. "No React state mirrors it" is asserted as an *absence over the directory*, not by
@@ -17,7 +25,15 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { observationWindow } from "@/data/clock";
-import { DECLARED_CONTROLS, PAGES, type ControlKey, type PageKey } from "@/data/params";
+import {
+  DECLARED_CONTROLS,
+  PAGES,
+  PANEL_LOCAL_CONTROLS,
+  panelLocalControls,
+  toolbarControls,
+  type ControlKey,
+  type PageKey,
+} from "@/data/params";
 import type { ControlOptions } from "@/data/queries";
 import { PageToolbar } from "./page-toolbar";
 import { parseControls, periodOptions, type ControlQuery } from "./schema";
@@ -59,14 +75,32 @@ const rendered = (): readonly (string | null)[] =>
   screen.queryAllByTestId(/^control-/).map((node) => node.getAttribute("data-testid"));
 
 const testIds = (page: PageKey): readonly string[] =>
-  DECLARED_CONTROLS[page].map((key) => `control-${key}`);
+  toolbarControls(page).map((key) => `control-${key}`);
 
-const CONTROLLED = PAGES.filter((page) => DECLARED_CONTROLS[page].length > 0);
+const CONTROLLED = PAGES.filter((page) => toolbarControls(page).length > 0);
 
-describe("T-C6 — a page renders only its declared controls (R-C1)", () => {
-  it.each(CONTROLLED)("%s renders exactly its declared set, in declaration order", (page) => {
+describe("T-C6 — the toolbar renders exactly this page's global controls (R-C1, R-C6)", () => {
+  it.each(CONTROLLED)("%s renders exactly its toolbar set, in declaration order", (page) => {
     toolbar(page);
     expect(rendered()).toEqual(testIds(page));
+  });
+
+  it.each(CONTROLLED)("%s holds no panel-local control in the bar (R-C6)", (page) => {
+    toolbar(page);
+    const shown = new Set(rendered());
+    for (const key of PANEL_LOCAL_CONTROLS) expect(shown.has(`control-${key}`)).toBe(false);
+  });
+
+  it("moves four controls out of the bar and loses none of them (R-C6)", () => {
+    // The two halves are a partition of the declared set, on every page. Without this the split
+    // could drop a control from both lists and every placement assertion would still pass.
+    for (const page of PAGES) {
+      expect([...toolbarControls(page), ...panelLocalControls(page)].sort()).toEqual(
+        [...DECLARED_CONTROLS[page]].sort(),
+      );
+    }
+    expect(panelLocalControls("spend")).toEqual(["accepted", "perCapita", "modelLevel"]);
+    expect(panelLocalControls("work")).toEqual(["executionMode", "perCapita"]);
   });
 
   it.each(CONTROLLED)("%s puts the period control first (R-N3)", (page) => {
@@ -105,7 +139,7 @@ describe("T-C6 — a page renders only its declared controls (R-C1)", () => {
       const { unmount } = toolbar(page);
       const shown = new Set(rendered());
       for (const key of everyControl) {
-        expect(shown.has(`control-${key}`)).toBe(DECLARED_CONTROLS[page].includes(key));
+        expect(shown.has(`control-${key}`)).toBe(toolbarControls(page).includes(key));
       }
       unmount();
     }
@@ -178,7 +212,27 @@ describe("Controls are links, and the link is the whole mechanism (R-T25)", () =
     toolbar("history", { work_type: "bugfix" });
 
     expect(screen.getByLabelText("From")).toHaveValue(WINDOW.start);
-    expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled();
+    expect(screen.getByLabelText("To")).toHaveValue(WINDOW.end);
+    // The carried parameter is what makes narrowing the dates a *narrowing* rather than a reset:
+    // a `GET` form replaces the query string wholesale, so the template filter rides as a hidden
+    // field or it is lost.
+    expect(screen.getByDisplayValue("bugfix")).toHaveAttribute("name", "work_type");
+  });
+
+  it("applies the date range on change, with no Apply button (R-N20)", () => {
+    toolbar("history");
+    const bar = screen.getByTestId("page-toolbar");
+
+    // The button is gone, and the two inputs are the native control in its place: `required` and
+    // the window's own bounds are what `AutoSubmitForm` checks before it submits anything.
+    expect(within(bar).queryByRole("button", { name: "Apply" })).toBeNull();
+    for (const label of ["From", "To"]) {
+      const field = screen.getByLabelText(label);
+      expect(field).toHaveAttribute("type", "date");
+      expect(field).toBeRequired();
+      expect(field).toHaveAttribute("min", WINDOW.start);
+      expect(field).toHaveAttribute("max", WINDOW.end);
+    }
   });
 });
 

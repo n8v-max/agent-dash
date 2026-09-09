@@ -74,6 +74,13 @@ export function WorkPanel(props: {
   readonly title: string;
   /** A restriction on the population, stated beside the heading rather than under the chart. */
   readonly badge?: ReactNode;
+  /**
+   * R-C6 — the panel-local control this panel reads, already rendered, right-aligned in the
+   * header. Per-capita divides the velocity panel; `execution_mode` separates supervised runs
+   * from unattended ones across acceptance and duration (R-C2). A panel builds no control of its
+   * own: it is handed one node or none.
+   */
+  readonly controls?: ReactNode;
   /** A restriction, a denominator or a definition the ViewModel carries in words. */
   readonly note?: string | null;
   readonly figures?: readonly PanelFigure[];
@@ -88,6 +95,7 @@ export function WorkPanel(props: {
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-base font-semibold tracking-tight text-foreground">{props.title}</h2>
         {props.badge}
+        {props.controls}
       </div>
       {props.note ? (
         <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">

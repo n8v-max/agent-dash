@@ -114,8 +114,10 @@ src/
 
   components/
     charts/                       ChartFrame, TableMirror, the five chart shapes
-    controls/                     toolbar controls, URL serialisation hooks
+    controls/                     control widgets, URL parse/serialise. Server Components only
+    forms/                        the one client form behaviour the controls need (R-T25)
     panels/                       one component per panel in spec.md §3
+    shell/                        header, nav, account switcher, page frame
     ui/                           shadcn primitives
 
   fixtures/
@@ -364,6 +366,14 @@ exactly 200× with no adjustment.
 
 **R-T25 — The query string is the single source of truth for control state.** No React state
 mirrors it, no context caches it. Controls read from `searchParams` and write with the History API.
+
+**The guarantee is structural, and `components/controls/` is where it is structural.** No module in
+that directory carries `"use client"`, so `useState` is not in scope there and a mirror of the URL
+is not expressible; `page-toolbar.test.tsx` asserts the absence over the whole directory rather
+than over a diff. `/demo/history`'s date range is the one control that needs a change event to
+apply itself (R-N20), and its handler therefore lives in **`components/forms/`** rather than being
+bought at the price of that guarantee. It holds no state either — it reads the form element the
+event handed it, checks validity and submits — so the rule above is untouched by it.
 
 **R-T26 — One parse/serialise module owns the schema**, in `components/controls/`. It:
 

@@ -88,6 +88,43 @@ export const DECLARED_CONTROLS: Readonly<Record<PageKey, readonly ControlKey[]>>
 };
 
 /**
+ * **R-C6 — where a declared control renders.** R-C1 says *which* controls a page has; this says
+ * *where on the page* each one stands, and the two are separate questions.
+ *
+ * A control listed here is **panel-local**: it moves out of the global bar and into the header of
+ * every panel that reads it, because half the controls on `/demo/spend` and `/demo/work` changed
+ * one panel out of seven while standing in a bar that reads as a page-wide filter. Everything not
+ * listed narrows the *population* every panel is read off — period, grain, subject, Repository,
+ * template — and stays in the bar, where a page-wide claim belongs.
+ *
+ * **It changes no parameter and no URL.** A panel-local control is the same `ControlKey`, spelled
+ * the same way in the query string, serialised by the same `canonicalQuery`; only the DOM node it
+ * renders in moves. That is what makes a share link cut before this change and one cut after it
+ * the same link (T-C14).
+ *
+ * A control reaching **two** panels renders on both, bound to the one parameter: per-capita
+ * divides Total spend and Cost by Repository, and `execution_mode` separates supervised runs from
+ * unattended ones across acceptance and duration (R-C2).
+ */
+export const PANEL_LOCAL_CONTROLS = [
+  "accepted",
+  "perCapita",
+  "modelLevel",
+  "executionMode",
+] as const;
+export type PanelLocalControl = (typeof PANEL_LOCAL_CONTROLS)[number];
+
+const PANEL_LOCAL = new Set<ControlKey>(PANEL_LOCAL_CONTROLS);
+
+/** R-C6 — the controls the sticky page toolbar holds: the declared set, less the panel-local. */
+export const toolbarControls = (page: PageKey): readonly ControlKey[] =>
+  DECLARED_CONTROLS[page].filter((key) => !PANEL_LOCAL.has(key));
+
+/** R-C6 — the controls that render in a panel header instead. Never in the bar. */
+export const panelLocalControls = (page: PageKey): readonly ControlKey[] =>
+  DECLARED_CONTROLS[page].filter((key) => PANEL_LOCAL.has(key));
+
+/**
  * The closed vocabularies a URL parser validates against, in one place.
  *
  * They are re-exported through the data layer rather than read from `src/domain` by the parser

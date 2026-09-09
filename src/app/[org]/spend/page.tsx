@@ -9,7 +9,16 @@
 //
 // **The rate card is last** (R-N11) — collapsed, labelled "illustrative rates", and outside the
 // Adoption section, because rates are prices and the Adoption section carries no money (R-M9).
+//
+// **R-C6 — three of this page's eight declared controls are panel-local, and this is where they
+// are placed.** The page knows which panel reads which control; the panels do not, and the
+// toolbar no longer holds them. `accepted` narrows Cost per session. Per-capita divides Total
+// spend and Cost by Repository — one node, handed to both, bound to `?per_capita=`. The Model
+// roll-up redraws the Model mix chart inside the Adoption section, which is the scope R-C1 always
+// gave it. Nothing about the query string changes: `PanelControl` renders the same widget from
+// the same `ControlSet` the bar rendered it from.
 
+import { PanelControl } from "@/components/controls/panel-control";
 import { pageRequest } from "@/components/controls/request";
 import { AdoptionSection } from "@/components/panels/adoption-section";
 import { RateCard } from "@/components/panels/rate-card";
@@ -21,6 +30,9 @@ export default async function SpendPage(props: PageProps<"/[org]/spend">) {
   const { org } = await props.params;
   const request = await pageRequest("spend", org, await props.searchParams);
   const page = spendPage(request.viewer, request.controls);
+  const control = (key: "accepted" | "perCapita" | "modelLevel") => (
+    <PanelControl context={request} control={key} />
+  );
 
   return (
     <PageFrame
@@ -29,8 +41,11 @@ export default async function SpendPage(props: PageProps<"/[org]/spend">) {
       lede="The ratio first: cost per completed Job is the figure the total cannot give you."
     >
       <div className="space-y-6">
-        <SpendPanels page={page} />
-        <AdoptionSection adoption={page.adoption} />
+        <SpendPanels
+          page={page}
+          controls={{ accepted: control("accepted"), perCapita: control("perCapita") }}
+        />
+        <AdoptionSection adoption={page.adoption} modelLevelControl={control("modelLevel")} />
         <RateCard card={page.adoption.rateCard} />
       </div>
     </PageFrame>

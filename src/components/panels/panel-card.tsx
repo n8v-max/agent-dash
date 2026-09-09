@@ -7,6 +7,13 @@
 //
 // **It renders no overlap note.** R-V3's sentence travels on the ChartViewModel and `ChartFrame`
 // renders it (R-T28); a panel that rendered `footnote={chart.overlapNote}` would print it twice.
+//
+// **R-C6 — the header carries the panel's own control, where it has one.** `accepted` narrows
+// Cost per session and no other panel; per-capita divides Total spend and Cost by Repository and
+// leaves the three ratios beside them alone. A toggle standing in the header of the figure it
+// moves says that without a caption, which a page-wide bar could not. The slot takes a node and
+// builds nothing: what a control *is* belongs to `components/controls/`, and a panel that could
+// construct one would be a panel that could construct the wrong one.
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -17,6 +24,8 @@ export function PanelCard(props: {
   readonly question: string;
   /** `h2` for a top-level panel, `h3` for one inside a section with its own heading. */
   readonly level?: "h2" | "h3";
+  /** R-C6 — the panel-local control this panel reads, already rendered. Right of the heading. */
+  readonly controls?: ReactNode;
   /** The readings that sit beside the chart — a `FigureList`, or nothing. */
   readonly figures?: ReactNode;
   /** A qualification the ViewModel carried, such as R-M5's monthly-grain note. */
@@ -28,21 +37,25 @@ export function PanelCard(props: {
 
   return (
     <section
+      aria-label={props.title}
       className={cn(
         "rounded-2xl border border-border bg-card p-5 shadow-xs sm:p-6",
         props.className,
       )}
     >
-      <div className="max-w-3xl">
-        <Heading
-          className={cn(
-            "font-semibold tracking-tight text-foreground",
-            Heading === "h2" ? "text-lg" : "text-base",
-          )}
-        >
-          {props.title}
-        </Heading>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{props.question}</p>
+      <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
+        <div className="max-w-3xl">
+          <Heading
+            className={cn(
+              "font-semibold tracking-tight text-foreground",
+              Heading === "h2" ? "text-lg" : "text-base",
+            )}
+          >
+            {props.title}
+          </Heading>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{props.question}</p>
+        </div>
+        {props.controls}
       </div>
       {props.figures ? <div className="mt-5">{props.figures}</div> : null}
       {/*

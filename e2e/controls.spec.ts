@@ -94,10 +94,14 @@ test.describe("T-E5 — control state does not survive navigation (A20, R-C5)", 
   });
 
   test("a filter set on /work is gone on /people", async ({ page }) => {
+    // R-C6 — `execution_mode` reads off the *panel* now rather than off the bar, so the handle is
+    // the acceptance panel's own header. What R-C5 claims is unchanged by the move: the state is
+    // in the query string, and navigation drops the query string.
     await page.goto(`/${SLUG}/work?execution_mode=headless&per_capita=1`);
-    await expect(page.getByTestId("page-toolbar")).toContainText("Headless");
+    const acceptance = page.getByRole("region", { name: "Acceptance rate by template" });
+    await expect(acceptance.getByTestId("control-executionMode")).toContainText("Headless");
 
-    await page.getByRole("navigation").getByRole("link", { name: "People" }).click();
+    await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "People" }).click();
 
     await expect(page).toHaveURL(`/${SLUG}/people`);
     await expect(page.getByTestId("page-toolbar")).not.toContainText("Headless");
@@ -172,6 +176,161 @@ test.describe("T-E6 — the account switcher stays on the current URL (A5, R-A5)
 
     await expect(page).toHaveURL(`/${SLUG}/projection`);
     await expect(page.getByTestId("viewer")).toHaveText(OPEN_ACCOUNT.fullName);
+  });
+});
+
+/**
+ * **T-E12 — the controls stand where R-C6 put them, and the URLs did not move with them.**
+ *
+ * The two halves are asserted together on purpose. Placement alone would pass against a
+ * rearrangement that quietly renamed a parameter, and the parameter alone would pass against a
+ * page that never moved the control at all. What the ticket promised is both at once: a toggle in
+ * a panel header producing the URL the bar produced.
+ *
+ * **1440px is the width the requirement is stated at.** The global bar's five groups have to fit
+ * one row there, which is the whole reason four of the nine moved out of it — so the row is
+ * measured rather than eyeballed, against the height a single row of controls occupies.
+ */
+test.describe("T-E12 — global bar, panel-local toggles, and the nav (R-C6, R-N2)", () => {
+  const WIDE = { width: 1440, height: 1000 };
+
+  test.beforeEach(async ({ context, baseURL, page }) => {
+    await useSession(
+      context,
+      { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG },
+      baseURL ?? BASE,
+    );
+    await page.setViewportSize(WIDE);
+  });
+
+  const panel = (page: Page, name: string) => page.getByRole("region", { name });
+
+  test("the global bar on /spend holds five groups, in one row at 1440", async ({ page }) => {
+    await page.goto(`/${SLUG}/spend`);
+    const bar = page.getByTestId("page-toolbar");
+
+    await expect(bar.locator('[data-testid^="control-"]')).toHaveCount(5);
+    for (const key of ["period", "grain", "subject", "repository", "workType"]) {
+      await expect(bar.locator(`[data-testid="control-${key}"]`)).toHaveCount(1);
+    }
+
+    // One row: a second row of controls roughly doubles the bar, so the threshold sits between
+    // the two rather than at a pixel the design has to hit.
+    const box = await bar.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThan(0);
+    expect(box?.height ?? 0).toBeLessThan(72);
+  });
+
+  test("each moved toggle is in the header of the panel that reads it", async ({ page }) => {
+    await page.goto(`/${SLUG}/spend`);
+
+    await expect(panel(page, "Cost per session").getByTestId("control-accepted")).toHaveCount(1);
+    await expect(panel(page, "Total spend").getByTestId("control-perCapita")).toHaveCount(1);
+    await expect(panel(page, "Cost by Repository").getByTestId("control-perCapita")).toHaveCount(1);
+    await expect(panel(page, "Model mix").getByTestId("control-modelLevel")).toHaveCount(1);
+    // ...and nowhere else: the bar is the place these four are no longer.
+    const bar = page.getByTestId("page-toolbar");
+    for (const key of ["accepted", "perCapita", "modelLevel"]) {
+      await expect(bar.locator(`[data-testid="control-${key}"]`)).toHaveCount(0);
+    }
+  });
+
+  test("the URL after a toggle click is the URL it was before the move", async ({ page }) => {
+    await page.goto(`/${SLUG}/spend`);
+
+    await panel(page, "Total spend").getByRole("link", { name: "Per capita" }).click();
+    await expect(page).toHaveURL(`/${SLUG}/spend?per_capita=1`);
+
+    await page.goto(`/${SLUG}/spend`);
+    await panel(page, "Cost per session").getByRole("link", { name: "Accepted", exact: true }).click();
+    await expect(page).toHaveURL(`/${SLUG}/spend?accepted=accepted`);
+
+    await page.goto(`/${SLUG}/spend`);
+    await panel(page, "Model mix").getByRole("link", { name: "Tier" }).click();
+    await expect(page).toHaveURL(`/${SLUG}/spend?model_level=tier`);
+  });
+
+  test("a toggle reaching two panels renders on both, bound to one parameter", async ({ page }) => {
+    await page.goto(`/${SLUG}/work`);
+    const onAcceptance = panel(page, "Acceptance rate by template").getByTestId(
+      "control-executionMode",
+    );
+    const onDuration = panel(page, "Session duration").getByTestId("control-executionMode");
+    await expect(onAcceptance).toHaveCount(1);
+    await expect(onDuration).toHaveCount(1);
+
+    await onDuration.getByText("Mode", { exact: true }).click();
+    await onDuration.getByRole("link", { name: "Headless" }).click();
+
+    await expect(page).toHaveURL(`/${SLUG}/work?execution_mode=headless`);
+    // One parameter, so the copy in the other panel's header moved with it.
+    await expect(onAcceptance).toContainText("Headless");
+  });
+
+  test("the nav has six links and no overflow button (R-N2)", async ({ page }) => {
+    for (const path of ["", "/spend", "/history", "/projection"]) {
+      await page.goto(`/${SLUG}${path}`);
+      const sections = page.getByRole("navigation", { name: "Sections" });
+
+      await expect(sections.getByRole("link")).toHaveCount(6);
+      await expect(sections.getByRole("button")).toHaveCount(0);
+      await expect(sections).not.toContainText("⋯");
+      for (const label of ["Summary", "Spend", "Work", "People", "History", "Projection"]) {
+        await expect(sections.getByRole("link", { name: label })).toBeVisible();
+      }
+    }
+  });
+
+  test("the page heading carries the active-filter sentence (R-C7)", async ({ page }) => {
+    await page.goto(`/${SLUG}/spend`);
+    await expect(page.getByTestId("active-filters")).toHaveText(
+      "Week grain · by Organization · all repositories · all templates",
+    );
+
+    await page.goto(`/${SLUG}/spend?subject=team&grain=month`);
+    await expect(page.getByTestId("active-filters")).toHaveText(
+      "Month grain · by Team · all repositories · all templates",
+    );
+  });
+});
+
+/**
+ * **T-E13 — `/demo/history` applies its date range on change** (R-N20).
+ *
+ * The Apply button is gone, and the claim it leaves behind is only checkable in a browser: the
+ * unit layer can prove the form asks to submit (`auto-submit-form.test.tsx`), and only this can
+ * prove the browser answered, wrote the query string and re-rendered the table over the narrower
+ * range. The carried filter is asserted in the same navigation, because a `GET` form replaces the
+ * query string wholesale and dropping the other parameters is the way this feature breaks.
+ */
+test.describe("T-E13 — the history date range applies on change (R-N20)", () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await useSession(
+      context,
+      { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG },
+      baseURL ?? BASE,
+    );
+  });
+
+  test("changing a date navigates, with no Apply click", async ({ page }) => {
+    await page.goto(`/${SLUG}/history`);
+    await expect(page.getByRole("button", { name: "Apply" })).toHaveCount(0);
+
+    // `exact`, because `/demo/history`'s expander buttons are labelled "…for session owner/repo#n"
+    // and a substring match on "To" finds every one of them.
+    await page.getByLabel("From", { exact: true }).fill("2026-08-01");
+
+    await expect(page).toHaveURL(/from=2026-08-01/);
+    await expect(page.getByLabel("From", { exact: true })).toHaveValue("2026-08-01");
+  });
+
+  test("keeps the page's other filters across the change", async ({ page }) => {
+    await page.goto(`/${SLUG}/history?work_type=bugfix`);
+
+    await page.getByLabel("To", { exact: true }).fill("2026-08-31");
+
+    await expect(page).toHaveURL(/to=2026-08-31/);
+    await expect(page).toHaveURL(/work_type=bugfix/);
   });
 });
 

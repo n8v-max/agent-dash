@@ -16,6 +16,7 @@
 // It takes the whole `WorkPageViewModel` because that is what one call to `workPage()` returns
 // (R-T16): one load, one permission filter, one bucketing, six projections of the same rows.
 
+import type { ReactNode } from "react";
 import type { WorkPageViewModel } from "@/data/queries";
 import { AcceptanceMultiples } from "./work-acceptance";
 import { PresenceSpans } from "./work-presence";
@@ -26,16 +27,37 @@ import {
   VelocityChart,
 } from "./work-panels";
 
-export function WorkPanels(props: { readonly view: WorkPageViewModel }) {
+/**
+ * R-C6 — the two panel-local controls this page's panels read, already rendered by the page.
+ *
+ * `executionMode` is one node handed to **two** panels, which is R-C2 read literally: the control
+ * earns its place because it separates unattended runs from supervised ones *across duration and
+ * acceptance*, and those are the two headers it stands in. It is one parameter, so the two nodes
+ * carry the same `href`s and cannot disagree.
+ */
+export type WorkPanelControls = {
+  readonly perCapita?: ReactNode;
+  readonly executionMode?: ReactNode;
+};
+
+export function WorkPanels(props: {
+  readonly view: WorkPageViewModel;
+  readonly controls?: WorkPanelControls;
+}) {
   const { view } = props;
+  const controls = props.controls ?? {};
 
   return (
     <div className="space-y-6">
-      <VelocityChart panel={view.velocity} />
-      <AcceptanceMultiples panels={view.acceptance} axis={view.acceptanceAxis} />
+      <VelocityChart panel={view.velocity} controls={controls.perCapita} />
+      <AcceptanceMultiples
+        panels={view.acceptance}
+        axis={view.acceptanceAxis}
+        controls={controls.executionMode}
+      />
       <TaskRatesChart panel={view.taskRates} />
       <IncompleteAgesChart panel={view.incompleteAges} />
-      <DurationChart panel={view.duration} />
+      <DurationChart panel={view.duration} controls={controls.executionMode} />
       <PresenceSpans panel={view.presenceSpans} />
     </div>
   );

@@ -7,8 +7,14 @@
 //
 // The toolbar is **absent** rather than empty where the page declares no controls: `PageToolbar`
 // returns `null` and this frame renders `<main>` directly under the header.
+//
+// **R-C7's active-filter sentence is here too, and under the heading rather than in the bar.**
+// It is a reading of the page — *"Week grain · by Team · mobile-app · all templates"* — not a
+// control, and it belongs with the title it qualifies. Deciding that once, here, is the same
+// argument the toolbar's placement was decided by.
 
 import type { ReactNode } from "react";
+import { ActiveFilters } from "@/components/controls/active-filters";
 import { PageToolbar } from "@/components/controls/page-toolbar";
 import type { PageRequest } from "@/components/controls/request";
 
@@ -30,6 +36,7 @@ export function PageFrame(props: {
         <div className="mb-6 max-w-3xl">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">{props.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{props.lede}</p>
+          <ActiveFilters context={props.request} />
         </div>
         {props.children}
       </main>
