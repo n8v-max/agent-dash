@@ -6,7 +6,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { REPO_NAMES, WORK_TYPE_KEYS } from "./allocation.mts";
 import { models, organization, rateCards, repositories, workTypes } from "./catalog.mts";
-import { githubUsers, members, teams } from "./people.mts";
+import { githubUsers, members, memberships, teams } from "./people.mts";
 import type { AgentSession, Task } from "./types.mts";
 
 export type Fixture = { sessions: AgentSession[]; tasks: Task[] };
@@ -41,6 +41,7 @@ export const writeFixture = (directory: string, fixture: Fixture): number => {
   const files = writeSessions(join(directory, "sessions"), fixture.sessions);
   writeJson(join(directory, "organization.json"), organization);
   writeJson(join(directory, "members.json"), { github_users: githubUsers, members });
+  writeJson(join(directory, "memberships.json"), memberships);
   writeJson(join(directory, "teams.json"), teams);
   writeJson(join(directory, "repositories.json"), repositories);
   writeJson(join(directory, "work_types.json"), workTypes);

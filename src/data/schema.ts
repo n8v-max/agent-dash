@@ -25,6 +25,7 @@ import {
   type ArtefactKind,
   type GithubUser,
   type Member,
+  type Membership,
   type Model,
   type Organization,
   type RateCards,
@@ -251,9 +252,19 @@ export const memberSchema: Validator<Member> = object({
   full_name: string,
   email: string,
   kind: oneOf(MEMBER_KINDS),
-  role: string,
   team_ids: arrayOf(string),
   seat_active: boolean,
+});
+
+/**
+ * The Member↔Organization join row. `role` is validated only as a string here: which strings
+ * resolve to which preset is `roleFor`'s business, and it falls closed, so an unrecognised value
+ * is a narrower viewer rather than a fault.
+ */
+export const membershipSchema: Validator<Membership> = object({
+  organization_id: string,
+  member_id: string,
+  role: string,
 });
 
 export const membersFileSchema = object<{ github_users: GithubUser[]; members: Member[] }>({

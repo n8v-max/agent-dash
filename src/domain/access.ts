@@ -174,13 +174,40 @@ export function roleFor(memberRole: string): Role {
 
 // --- The relation, and the row filter ----------------------------------------------------
 
-/** The acting Member, resolved once per request and threaded into every query (R-T16). */
+/**
+ * Not exported, so no module other than this one can name it — which is what makes `sealViewer`
+ * the only expression in the application that produces a `Viewer`. A structural type would let
+ * any object literal of the right shape be one, and ticket 58 found `queries.ts` claiming
+ * otherwise as a *type* guarantee when only convention and a lint rule held it up.
+ */
+declare const VIEWER_BRAND: unique symbol;
+
+/**
+ * The acting Member, resolved once per request and threaded into every query (R-T16).
+ *
+ * **Nominal, not structural.** The brand is unforgeable outside this module, so a `Viewer` cannot
+ * be written as a literal anywhere else — grants arrive from `roleFor` over fixture data, never
+ * from a caller assembling the shape it wants. What the type does *not* enforce is which module
+ * calls `sealViewer`; that `resolveViewer` is the only one is convention, and `queries.ts` now
+ * says so in those terms.
+ */
 export type Viewer = {
   readonly memberId: string;
   /** The Teams the acting Member belongs to. Many-to-many, so this is a list. */
   readonly teamIds: readonly string[];
   readonly role: Role;
+  readonly [VIEWER_BRAND]: true;
 };
+
+/** The unbranded shape `sealViewer` takes — everything a `Viewer` is, minus the brand. */
+export type ViewerFacts = Omit<Viewer, typeof VIEWER_BRAND>;
+
+/**
+ * The only constructor of a `Viewer`. Applies no policy of its own: it exists so that the
+ * brand has exactly one source, and so that a reader grepping for who can mint one finds a
+ * single answer.
+ */
+export const sealViewer = (facts: ViewerFacts): Viewer => facts as Viewer;
 
 /** Member id → the Teams that Member belongs to. Built from fixture Teams, never guessed. */
 export type TeamMembership = ReadonlyMap<string, readonly string[]>;

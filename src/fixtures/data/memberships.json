@@ -1,0 +1,102 @@
+[
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_ncastells",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_aruiz",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_mpena",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_jdominguez",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_lbermejo",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_sibanez",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_ccruz",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_pherrera",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_esaez",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_dnavarro",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_ivazquez",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_rmarin",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_blorenzo",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_aquintana",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_sroldan",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_tferran",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_ngallego",
+    "role": "member"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_hcamps",
+    "role": "contractor"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_deploybot",
+    "role": "automation"
+  },
+  {
+    "organization_id": "org_equilibrio",
+    "member_id": "mem_nightlybot",
+    "role": "automation"
+  }
+]

@@ -1,5 +1,5 @@
 Type: grilling
-Status: partially resolved (2026-09-07)
+Status: resolved
 Blocked by: 01, 02
 Label: wayfinder:grilling
 
@@ -53,12 +53,17 @@ analytics endpoint, scoped to conversation *segments* rather than whole sessions
 Copilot, Gemini Code Assist and Cline have no work-type dimension at all. The six-value set
 above is close to a subset of Devin's, which is corroboration rather than coincidence.
 
-## Still open
+## Closed 2026-09-10 — the remaining half was answered by ticket 16
 
-- **Repository work domain** — the vocabulary, how many, how assigned, whether a Repository can
-  hold more than one.
-- **Model roster** — which vendors and models populate the fixture, and whether
-  `frontier`/`balanced`/`fast` survives contact with a real multi-vendor lineup.
+This ticket carried `partially resolved` for three days after it had stopped being partial. Both
+items below were closed by [ticket 16](16-work-domain-and-model-roster.md) on **2026-09-07**, which
+is where their reasoning lives; nothing further is owed here.
 
-Both are taxonomy-*population* questions rather than model-*shape* questions, and both feed 10
-directly.
+- **Repository work domain** — **cut, not filled.** Repository is flat and carries no work-domain
+  label. One label per repository is false, several break additivity, and `Repository × WorkType`
+  already meets the standard this ticket set. → `docs/adr/0004-repository-carries-no-work-domain.md`
+- **Model roster** — **seven models, three vendors**, with `family` carrying the vendor.
+  `frontier`/`balanced`/`fast` survived. → ticket 16 § Answer.
+
+Both were taxonomy-*population* questions rather than model-*shape* questions, and both fed 10
+directly, as this ticket predicted.

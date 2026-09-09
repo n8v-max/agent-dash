@@ -142,7 +142,14 @@ export type GithubUser = {
   email: string | null;
 };
 
-/** An account that belongs to an Organization and runs Tasks. */
+/**
+ * A person or service account that runs Tasks.
+ *
+ * **A Member carries no Organization and no Role.** Both live on `Membership`, because a Member
+ * is many-to-many with Organization and the Role is held *per Organization* — the same person can
+ * be an org owner in one and a contractor in another. A `role` field here would have to pick one
+ * of those to be true, and would silently be the wrong one everywhere else.
+ */
 export type Member = {
   id: string;
   github_id: number;
@@ -150,10 +157,28 @@ export type Member = {
   full_name: string;
   email: string;
   kind: MemberKind;
-  role: string;
   /** Many-to-many with Team, which is why Team is the one non-additive level. */
   team_ids: string[];
   seat_active: boolean;
+};
+
+/**
+ * **One Member's standing in one Organization** — the join row, and the only place tenancy is
+ * stated.
+ *
+ * A join file rather than an array on either side, for the reason `Team` already demonstrates:
+ * the relation needs one authoritative direction, and this one has a field of its own. `role` is
+ * a property of the *pairing*, not of the person and not of the Organization.
+ *
+ * **This is what `resolveViewer` checks.** Before it existed, the acting Member was looked up
+ * across the whole dataset with no Organization predicate, so a token minted for one Organization
+ * naming a Member of another resolved signed-in (ticket 58).
+ */
+export type Membership = {
+  organization_id: string;
+  member_id: string;
+  /** Resolved to a `Role` by `roleFor`. Unrecognised values fall closed, never open. */
+  role: string;
 };
 
 /** A group of Members, imported from a GitHubTeam. Overlapping, so figures do not sum. */

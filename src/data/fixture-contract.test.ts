@@ -13,7 +13,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { roleFor, type Viewer } from "@/domain/access";
+import { roleFor,
+  sealViewer, type Viewer } from "@/domain/access";
 import type { AgentSession, Model, Repository, WorkType } from "@/domain/types";
 import { readDataset, type Dataset, type FixtureReader } from "./load";
 import { defaultControls, type ControlSet } from "./params";
@@ -307,13 +308,13 @@ describe("T-U27 — `load()` is the only entry into the data", () => {
 
 describe("T-U27 — the façade faults on an invalid dataset rather than answering", () => {
   const committed = readDataset(fixtureReader);
-  const member = committed.members.find((candidate) => candidate.role === "member");
+  const held = committed.memberships.find((candidate) => candidate.role === "member");
 
-  const viewer: Viewer = {
-    memberId: member?.id ?? "",
+  const viewer: Viewer = sealViewer({
+    memberId: held?.member_id ?? "",
     teamIds: [],
-    role: roleFor(member?.role ?? "member"),
-  };
+    role: roleFor(held?.role ?? "member"),
+  });
 
   const params: ControlSet = defaultControls({
     page: "summary",

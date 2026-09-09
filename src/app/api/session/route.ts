@@ -10,14 +10,14 @@
 // under the Organization the freshly-issued token names — so it cannot be used as an open
 // redirect, and it cannot be used to land a viewer on another tenant's path (R-A2, R-A7).
 //
-// The fallback is `/${account.orgSlug}`, read from the account rather than written as `/demo`:
-// `demo` is a slug, not a prefix (R-A1), and a literal here is the first place a second
+// The fallback is `/${orgSlug}`, read from the resolved Organization rather than written as
+// `/demo`: `demo` is a slug, not a prefix (R-A1), and a literal here is the first place a second
 // Organization would break.
 
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from "@/data/session-cookie";
 import { issueSession } from "@/data/session";
-import { signInAccounts } from "@/data/accounts";
+import { organizationsFor, signInAccounts } from "@/data/accounts";
 
 /** The name the return path travels under, when a caller states it rather than implying it. */
 const RETURN_FIELD = "return_to";
@@ -64,8 +64,23 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "unknown account" }, { status: 400 });
   }
 
-  const token = await issueSession({ member_id: account.memberId, org_slug: account.orgSlug });
-  const destination = returnPath(request, account.orgSlug, fields[RETURN_FIELD]);
+  // **The Organization is resolved through the Member's Memberships, never taken from the form.**
+  // The switcher states `org_slug` when it offers an Organization switch, and a caller can state
+  // anything; a token pairing a Member with an Organization they hold no Membership in is exactly
+  // the artefact ticket 58 was about, and minting one here would reopen on the issuing side the
+  // hole `resolveViewer` closes on the reading side. Absent or unrecognised falls back to the
+  // account's own Organization rather than failing, because an unknown slug is not a sign-in
+  // failure — it is a switch to somewhere this Member does not have standing.
+  const orgSlug =
+    organizationsFor(account.memberId).find(
+      (organization) => organization.slug === fields.org_slug,
+    )?.slug ?? account.orgSlug;
+
+  const token = await issueSession({ member_id: account.memberId, org_slug: orgSlug });
+  // The return path is validated against the Organization the *token* names, not the one the
+  // account started in — an Organization switch must not bounce the viewer back into the tenant
+  // they just left.
+  const destination = returnPath(request, orgSlug, fields[RETURN_FIELD]);
   // 303: a form POST must become a GET, or the browser re-posts to the dashboard route.
   const response = NextResponse.redirect(new URL(destination, request.url), 303);
   response.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);

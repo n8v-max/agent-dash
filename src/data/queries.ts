@@ -12,9 +12,16 @@
 // (R-T17) and the bucketing happen once, and the page ViewModel holds one fully-resolved panel
 // ViewModel per panel.
 //
-// **R-T16 is enforced by the type.** Every function here takes a `Viewer` first, and a `Viewer`
-// is producible only by `resolveViewer`, which verifies the JWT. An unfiltered query does not
-// typecheck, because there is no expression that names one.
+// **R-T16 is enforced by the type, in one half and not the other.** Every function here takes a
+// `Viewer` first, and an unfiltered query does not typecheck, because there is no expression that
+// names one — that half is real, and it is the half that matters. `Viewer` is also nominal: it
+// carries a brand whose symbol `src/domain/access.ts` does not export, so `sealViewer` is the only
+// expression in the application that produces one and no module can assemble the shape it wants.
+//
+// What the compiler does **not** enforce is that `resolveViewer` is `sealViewer`'s only caller.
+// That is convention plus the layering lint rule, and it is stated here as convention because
+// ticket 58 found this comment claiming it as a type guarantee when `Viewer` was still a plain
+// structural type — a comment that overstates the compiler is worse than one that omits it.
 //
 // The page modules live under `queries/` because this file's own budget is 300 lines and one of
 // them alone would spend it; they are re-exported here so the façade is still one import.

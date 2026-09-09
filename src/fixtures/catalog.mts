@@ -19,7 +19,7 @@ export const GITHUB_ORG = "equilibrio";
 export const organization: Organization = {
   id: "org_equilibrio",
   slug: "demo",
-  name: "Equilibrio",
+  name: "Equilibrio S.L.",
   timezone: "Europe/Madrid",
   github_org: GITHUB_ORG,
   window_start: WINDOW_START_DAY,
