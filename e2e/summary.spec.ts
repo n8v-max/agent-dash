@@ -179,9 +179,17 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
     // Unstacked, asserted as geometry rather than as a class name: in a horizontal bar chart
     // every unstacked bar starts at the axis, so they share one `x`. Stacked, each would begin
     // where the last ended, and there would be five different values here.
-    const barStarts = await mixTile
-      .locator(".recharts-bar-rectangle path")
-      .evaluateAll((held) => held.map((bar) => Math.round(bar.getBoundingClientRect().left)));
+    const bars = mixTile.locator(".recharts-bar-rectangle path");
+
+    // `evaluateAll` does not auto-wait — it returns whatever matches at the instant it runs, so
+    // on a slow first paint it reads an empty list and the geometry claim below passes over
+    // nothing. The count is the gate that makes the measurement deterministic, and it is the
+    // same gate the labelled-bars test above puts in front of its own `evaluateAll`.
+    await expect(bars).toHaveCount(5);
+
+    const barStarts = await bars.evaluateAll((held) =>
+      held.map((bar) => Math.round(bar.getBoundingClientRect().left)),
+    );
 
     expect(barStarts).toHaveLength(5);
     expect(new Set(barStarts).size).toBe(1);
