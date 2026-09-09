@@ -10,7 +10,7 @@
 // what is left for a component test is that nothing here dresses the figure in one anyway — a
 // "±", a range, or the word itself.
 //
-// **T-C13 (ticket 42) — both figures are printed beside the two components they are the sum of**,
+// **T-C17 (ticket 42) — both figures are printed beside the two components they are the sum of**,
 // and the projection's arithmetic is on the page with the month's real numbers in it. The two
 // sums are not the same sum: only session Cost is extrapolated, and the seat charge crosses whole
 // (R-M5, R-D2), which is why the seat figure is asserted *identical* in both tiles. R-N24's
@@ -181,7 +181,7 @@ describe("a month with no elapsed share to extrapolate from", () => {
   });
 });
 
-describe("T-C13 — the figure is verifiable from what is on screen (R-N23.1, R-M5)", () => {
+describe("T-C17 — the figure is verifiable from what is on screen (R-N23.1, R-M5)", () => {
   it("breaks both tiles into session cost and seat cost, under the headline", () => {
     panel();
 

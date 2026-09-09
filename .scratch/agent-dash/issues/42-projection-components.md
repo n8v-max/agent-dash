@@ -74,7 +74,7 @@ figures, same identity, house spelling.
 **Spec amendments in this commit:** `spec.md` gains **R-N23.1** (both figures broken into their
 components, the arithmetic printed, the seat charge beside the chart and never in it);
 `testing-spec.md` gains **T-U21.1** (the ViewModel identity, at the seam — the extrapolation
-itself stays T-U21's in the domain layer), **T-C13** (the tiles print their components; R-N24's
+itself stays T-U21's in the domain layer), **T-C17** (the tiles print their components; R-N24's
 "one figure, no bound" claim restated over the new layout rather than dropped) and **T-E11** (the
 four numbers are on the page and sum).
 

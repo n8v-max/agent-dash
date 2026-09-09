@@ -418,7 +418,7 @@ product's central interaction.
     **greater** than the Completed Tasks tile against the committed fixture (162 against 150 for the
     open account in August 2026). A future change that made them equal would mean the measure had
     silently been re-keyed, and that should fail here rather than pass quietly.
-- **T-C13 — The projection tiles print their components** (R-N23.1, R-M5). Both tiles render a
+- **T-C17 — The projection tiles print their components** (R-N23.1, R-M5). Both tiles render a
   `Session cost` / `Seat cost` pair under the headline, the seat figure is the **same string in
   both** because it is never extrapolated, and the arithmetic line carries the month's real
   numbers. R-N24's "one figure, no bound" claim is restated rather than dropped: the projected
