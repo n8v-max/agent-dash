@@ -42,6 +42,29 @@ import type { ChartConfig } from "@/components/ui/chart";
  */
 export const CHART_INTERPOLATION = "linear";
 
+/**
+ * **R-V15 — the period axis thins its tick labels rather than colliding them**, and like the
+ * interpolation it is named here once and applied once (`chart-shapes.tsx`).
+ *
+ * Twenty-two weekly buckets have 22 labels to place and 358px of card to place them in on a
+ * phone. `equidistantPreserveStart` picks the smallest N for which every Nth label fits without
+ * collision — every other bucket at one width, every third at another — so the axis reads as a
+ * *scale* at both, with the step it was thinned by implied by the labels that remain.
+ *
+ * **Stated rather than inherited**, for the reason `connectNulls={false}` is: Recharts' own
+ * default is `preserveEnd`, which drops whichever labels collide and keeps the last. That is
+ * thinning too, but it is not *even* thinning — it can leave three labels at irregular
+ * distances, which reads as three arbitrary weeks rather than as a sampled axis. A default is
+ * not a decision, and a future version changing this one should fail a test rather than quietly
+ * change what an axis says.
+ *
+ * **It applies to the period axis only.** A `horizontal-bar` panel's category axis holds one
+ * tick per bar — the age buckets on `/demo/work`, the Members of a ranked chart — and thinning
+ * that would delete a bar's name while leaving the bar. Those labels stack vertically and have
+ * the room; the period axis lays its labels side by side and is the one that runs out.
+ */
+export const BUCKET_TICK_INTERVAL = "equidistantPreserveStart";
+
 /** The swatch's accessible name. `testing-spec.md` T-C3 names `/legend icon/` as its handle. */
 export const legendIconLabel = (label: string): string => `${label} legend icon`;
 

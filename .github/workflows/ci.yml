@@ -55,10 +55,15 @@ jobs:
         run: pnpm build
 
       # The Playwright config starts `next start` against this build when CI is set.
+      # One browser download serves both projects: `mobile-chromium` is the same engine at a
+      # 390x844 viewport (R-V15), not a second one.
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: End-to-end tests
+      # Both projects, in one run: `pnpm e2e` names no project, so Playwright runs `chromium`
+      # and `mobile-chromium` together against the one server it starts. Splitting them into two
+      # steps would start the server twice for no gain.
+      - name: End-to-end tests, at both widths
         run: pnpm e2e
 
       - name: Upload Playwright report

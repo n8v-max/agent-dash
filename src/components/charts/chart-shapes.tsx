@@ -30,6 +30,12 @@
 // drawn through, which puts an acceptance rate above 100% and a cost below $0 between two real
 // readings.
 //
+// **R-V15 — the period axis's tick interval arrives from `chart-config.tsx` too.** Same shape of
+// decision as the interpolation and for the same reason: twenty-two weekly labels do not fit
+// 358px of card, and which of them survive is a claim about the axis rather than a panel's
+// styling. `axesFor` applies `BUCKET_TICK_INTERVAL` on the period axis and deliberately not on a
+// `horizontal-bar`'s category axis, where a thinned tick would delete a bar's own name.
+//
 // **R-M18 — `connectNulls={false}`, stated rather than inherited.** A series point is `null`
 // where the domain layer had no reading for that bucket: a week with no Completed Job has no
 // Cost per completed Job, and the rule is that such a figure is absent, never zero. A connected
@@ -62,7 +68,7 @@ import {
 } from "recharts";
 import { ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { ChartViewModel, SeriesViewModel } from "@/domain/viewmodel";
-import { CHART_INTERPOLATION } from "./chart-config";
+import { BUCKET_TICK_INTERVAL, CHART_INTERPOLATION } from "./chart-config";
 import { SeriesLegend } from "./series-legend";
 
 /** The five shapes the panels in `spec.md` § 3 need. There is no sixth, and no pie (R-V2). */
@@ -238,7 +244,14 @@ const axesFor = (input: ShapeInput): readonly ReactElement[] => {
         />,
       ]
     : [
-        <XAxis key="bucket" dataKey={BUCKET_KEY} hide={hide} {...AXIS} />,
+        // R-V15 — the period axis is the one that runs out of room, so it is the one that thins.
+        <XAxis
+          key="bucket"
+          dataKey={BUCKET_KEY}
+          hide={hide}
+          interval={BUCKET_TICK_INTERVAL}
+          {...AXIS}
+        />,
         <YAxis
           key="measure"
           tickFormatter={input.tickFormat}

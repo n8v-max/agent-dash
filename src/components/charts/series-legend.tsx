@@ -14,19 +14,31 @@
 //
 // The vendored component is rendered unchanged and is the thing under test in T-C3: this file
 // wraps it, it does not replace it.
+//
+// **R-V15 — the legend wraps** (ticket 46). shadcn ships its legend row as `flex` with no
+// `flex-wrap`, so five entries at 390px ran off both edges of the card and Recharts' own
+// `overflow: hidden` cut the first and last labels in half — a legend that silently deletes two
+// of the five names it exists to give. `flex-wrap` is passed as a class rather than patched into
+// the vendored file, which keeps `chart.tsx` a verbatim copy of upstream and keeps this the only
+// place the product has an opinion about how a legend lays out. This is patch 5 in the R-T32
+// sense: applied on encounter, and the encounter was a phone.
 
 "use client";
 
 import type { ComponentProps } from "react";
 import { ChartLegendContent } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 
 /** The container's accessible name. T-C3 scopes its queries with it. */
 export const LEGEND_LABEL = "Chart legend";
 
+/** R-V15. `gap-y` is tighter than `gap-x` so a second row reads as one legend, not two. */
+export const LEGEND_LAYOUT = "flex-wrap gap-x-4 gap-y-1";
+
 export function SeriesLegend(props: ComponentProps<typeof ChartLegendContent>) {
   return (
     <div role="group" aria-label={LEGEND_LABEL}>
-      <ChartLegendContent {...props} />
+      <ChartLegendContent {...props} className={cn(LEGEND_LAYOUT, props.className)} />
     </div>
   );
 }

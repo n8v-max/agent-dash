@@ -25,6 +25,7 @@ import { useState } from "react";
 import type { HistoryRow } from "@/data/queries";
 import type { TableCell, TableColumn, TableViewModelOf } from "@/domain/viewmodel";
 import { cn } from "@/lib/utils";
+import { TABLE_SCROLLER, TABLE_SCROLLER_CLASS } from "./data-table";
 import { formatFigure, WITHHELD } from "./figures";
 import { SessionDetailPanel } from "./session-detail";
 
@@ -198,7 +199,8 @@ export function SessionTable(props: {
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-border">
+      {/* R-V15 — the scroller `data-table.tsx` documents; ten columns need it most. */}
+      <div data-testid={TABLE_SCROLLER} className={TABLE_SCROLLER_CLASS}>
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">{props.caption}</caption>
           <TableHead table={props.table} />

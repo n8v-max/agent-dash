@@ -33,10 +33,19 @@ export type NavItem = {
   readonly secondary: boolean;
 };
 
+// **R-V15 — the phone gets the same six labels, one step tighter** (ticket 46). Below `sm` the
+// nav has the header's second line to itself and spends it on all six items: the padding and both
+// type sizes come down a step, which is what makes six labels fit 358px of usable width instead
+// of asking for 588. The labels themselves are not abbreviated — "Summary" is already the short
+// form, and a nav whose words change with the viewport is a nav a viewer cannot be told about.
+//
+// **Both sizes move, so R-N2's step between them survives the phone.** Shrinking only the primary
+// items would land them on the secondary size and flatten the one distinction this nav makes;
+// the pair stays a pair, one notch smaller.
 const ITEM = "rounded-lg transition-colors";
-const PRIMARY = "px-3 py-1 text-sm font-medium";
+const PRIMARY = "px-1.5 py-1 text-xs font-medium sm:px-3 sm:text-sm";
 /** R-N2's "secondary weight": one step down in size, and no bolder than the page around it. */
-const SECONDARY = "px-2 py-1 text-xs font-medium";
+const SECONDARY = "px-1.5 py-1 text-[11px] font-medium sm:px-2 sm:text-xs";
 
 export function ShellNav(props: { readonly items: readonly NavItem[] }) {
   const pathname = usePathname();
@@ -46,7 +55,12 @@ export function ShellNav(props: { readonly items: readonly NavItem[] }) {
   const firstSecondary = props.items.find((item) => item.secondary)?.href;
 
   return (
-    <nav aria-label="Sections" className="flex min-w-0 flex-1 items-center gap-1">
+    <nav
+      aria-label="Sections"
+      // `basis-full order-last` is the wrap: below `sm` the nav takes the header's whole second
+      // line, so the mark and the switcher keep the first one.
+      className="order-last flex min-w-0 basis-full items-center gap-0.5 sm:order-none sm:basis-auto sm:flex-1 sm:gap-1"
+    >
       {props.items.map((item) => (
         <Link
           key={item.href}

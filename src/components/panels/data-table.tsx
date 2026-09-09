@@ -116,6 +116,20 @@ function BodyCell(props: {
   );
 }
 
+/**
+ * **R-V15 — a wide table scrolls inside its own card, never sideways on the page**
+ * (ticket 46). The seven People columns are 906px wide and the ten History ones 1332px, and
+ * neither narrows to a phone without dropping a column a viewer came for. Making the card the
+ * scroll container is what keeps the document 390px, so the header, the toolbar and every
+ * other panel stay where a thumb left them.
+ *
+ * `SessionTable` carries the same pair, because it is the same claim about the other table.
+ * The `data-testid` is how `e2e/mobile.spec.ts` asserts the *mechanism* — that the element
+ * really scrolls — rather than only its consequence.
+ */
+export const TABLE_SCROLLER = "table-scroller";
+export const TABLE_SCROLLER_CLASS = "overflow-x-auto rounded-xl border border-border";
+
 export function DataTable<Row extends TableRow>(props: {
   readonly table: TableViewModelOf<Row>;
   readonly caption: string;
@@ -145,7 +159,7 @@ export function DataTable<Row extends TableRow>(props: {
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div data-testid={TABLE_SCROLLER} className={TABLE_SCROLLER_CLASS}>
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">{props.caption}</caption>
           <thead>

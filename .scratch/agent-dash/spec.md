@@ -746,6 +746,35 @@ per-capita denominator, R-M5's monthly-grain note and the `accepted` filter's se
 below the chart: each moves with a control, and a divisor a reader has to open a drawer to find is
 the failure C14 was fixed to prevent.
 
+**R-V15 — Every surface fits a 390px phone, and the page never scrolls sideways** (added
+2026-09-09, ticket 46). Full phone support, not tablet-and-up: at a 390×844 viewport
+`document.documentElement.scrollWidth` is **at most 390** on every one of R-N1's six authenticated
+routes. It is stated as a measurement rather than as a look, because a horizontal scrollbar on the
+document is the one layout fault a reader meets before they have read anything, and it is
+invisible at the width the rest of this spec is written at. The six routes measured 572–784px
+before this rule existed.
+
+**Nothing is hidden to make it fit.** The five mechanisms, each stated because each is the
+alternative to dropping something:
+
+| Surface | At 390px | Instead of |
+|---|---|---|
+| The header | wraps to two lines — mark and switcher, then the whole nav one step tighter | an overflow menu, which R-N2 removed and A33 forbids |
+| The account switcher | the avatar alone; the name and Role line drop | a second bar |
+| A wide table | scrolls **inside its own card** | dropping columns a viewer came for |
+| A chart | caps at its container; its legend **wraps** | a legend clipped at both edges, which silently deletes two of five series names |
+| A period axis | thins its tick labels to an evenly-spaced subset — every other bucket, or every third, as the width allows | twenty-two labels drawn over each other |
+
+**The last two are chart-layer decisions and are declared where R-V13's interpolation is** — once,
+in the shared chart config, applied once in the shape factory. The thinning is on the **period**
+axis only: a `horizontal-bar`'s category axis holds one tick per bar, and thinning it would delete
+a bar's name while leaving the bar, which is a chart that lies rather than one that is crowded.
+
+**Panel-local controls (R-C6) wrap inside their panel header and the global toolbar wraps in
+place**, so R-C6's placement rule holds at both widths and no control moves to a different owner
+on a phone. The summary tiles stack one per row, and R-N8's breakdown bars stay labelled — which
+is the width R-N8 was already stated at.
+
 ---
 
 ## 7. Accessibility
@@ -927,6 +956,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A37 | Every line and area is drawn with the one interpolation constant; no module outside the shared chart config names a curve | R-V13 |
 | A38 | Each panel shows one visible paragraph of prose, and the rest of it is reachable, verbatim, behind that panel's "Why this number" disclosure | R-V14 |
 | A39 | Every `/[org]` surface carries the as-of stamp in its toolbar, naming the same instant, and that instant is the top row of `/demo/history` | R-N3, R-N3.1 |
+| A40 | At 390×844, `document.documentElement.scrollWidth <= 390` on all six authenticated routes, with six nav links still visible, the account switcher reduced to its avatar, and every wide table scrolling inside its own card | R-V15 |
 
 ---
 
@@ -1200,5 +1230,11 @@ spend does include seat cost (R-M5), and a reader who takes it the other way wil
 contradiction one click in. Kept deliberately, the contrast being with per-seat and per-token
 *pricing models* rather than with this product's cost base.
 
-**Onboarding beyond the empty state, demo-mode role-switching UX beyond R-A5, responsive
-breakpoints and dark mode** are unspecified and deliberately so.
+**Onboarding beyond the empty state, demo-mode role-switching UX beyond R-A5, and dark mode**
+are unspecified and deliberately so.
+
+**Responsive breakpoints were on that list until 2026-09-09** (ticket 46). What replaced them is
+not a breakpoint system: R-V15 states **one** width and **one** measurement at it, and every rule
+under it is a mechanism for keeping something rather than a size at which something changes. The
+tablet range between 390 and 1440 is still unspecified, and still deliberately so — the two widths
+the product is stated at are the phone and the desk.

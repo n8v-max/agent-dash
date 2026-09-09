@@ -9,6 +9,14 @@
 // accessibility tree. `display: none` or `aria-hidden` would take it out of the tree and leave
 // the requirement satisfied only in the markup.
 //
+// **The `sr-only` box is a wrapping `<div>`, not the `<table>` itself** (R-V15, ticket 46). A
+// table's used width is never less than its min-content width, so `width: 1px` does not hold it
+// and `overflow: hidden` clips its *contents* rather than its own box. An absolutely positioned
+// box that wide still counts towards the document's scroll width, which is how a mirror nobody
+// can see was the widest thing on `/demo/work` at 390px — 784px of hidden table pushing every
+// visible surface sideways. Moving the class onto a `<div>` gives the clip something with a real
+// 1px box to clip against; the table inside is unchanged, and so is what a screen reader reads.
+//
 // **The values are the domain layer's** (R-T7). `mirror` is summed out of the aggregation grid
 // on a path that never reads a `SeriesPoint`, so this component prints a second, independent
 // statement of what the chart claims — which is what makes T-C1 a cross-check rather than one
@@ -32,6 +40,13 @@ const number = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
  */
 export const NO_READING = "—";
 
+/**
+ * The wrapper's handle. The `sr-only` box is a `<div>` rather than the `<table>` (see the header),
+ * and a test asserting "the mirror is visually hidden" has to reach that `<div>` — through a
+ * testid, because reaching it from the table would be DOM traversal.
+ */
+export const MIRROR_TEST_ID = "chart-mirror";
+
 const text = (cell: string | number | null): string => {
   if (cell === null) return NO_READING;
   return typeof cell === "number" ? number.format(cell) : cell;
@@ -45,38 +60,40 @@ export function TableMirror(props: {
   const { columns, rows } = props.mirror;
 
   return (
-    <table className="sr-only">
-      <caption>{props.caption}</caption>
-      <thead>
-        <tr>
-          {/*
-            Keyed by the column heading, never by position (R-T8). The mirror's headings are the
-            bucket column plus the series labels, and a repeated heading would be an unreadable
-            table before it was a duplicate key.
-          */}
-          {columns.map((column) => (
-            <th key={column} scope="col">
-              {column}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={String(row[0])}>
-            {columns.map((column, at) => {
-              const cell = row[at];
-              return at === 0 ? (
-                <th key={column} scope="row">
-                  {cell === undefined ? "" : text(cell)}
-                </th>
-              ) : (
-                <td key={column}>{cell === undefined ? "" : text(cell)}</td>
-              );
-            })}
+    <div data-testid={MIRROR_TEST_ID} className="sr-only">
+      <table>
+        <caption>{props.caption}</caption>
+        <thead>
+          <tr>
+            {/*
+              Keyed by the column heading, never by position (R-T8). The mirror's headings are
+              the bucket column plus the series labels, and a repeated heading would be an
+              unreadable table before it was a duplicate key.
+            */}
+            {columns.map((column) => (
+              <th key={column} scope="col">
+                {column}
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={String(row[0])}>
+              {columns.map((column, at) => {
+                const cell = row[at];
+                return at === 0 ? (
+                  <th key={column} scope="row">
+                    {cell === undefined ? "" : text(cell)}
+                  </th>
+                ) : (
+                  <td key={column}>{cell === undefined ? "" : text(cell)}</td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

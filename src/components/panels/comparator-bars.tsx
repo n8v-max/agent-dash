@@ -65,16 +65,28 @@ function PairedBar(props: {
   readonly barClass: string;
 }) {
   return (
-    <div className="grid grid-cols-[11rem_1fr_6.5rem] items-center gap-3">
+    /*
+      **R-V15 — below `sm` the pair is two lines, because otherwise it is no bars at all**
+      (ticket 46). The three fixed tracks want 304px and the card offers 286 on a phone, so the
+      `1fr` middle track — the bar itself — collapsed to zero width and R-N17's *paired bars*
+      rendered as a two-column table of figures. The name and the figure keep the first line and
+      the bar takes the whole of the second, where a length is a length again. The placement is
+      explicit rather than left to auto-flow, because the reading order is name, bar, figure at
+      both widths and auto-flow would put the figure under the name.
+    */
+    <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5 sm:grid-cols-[11rem_1fr_6.5rem] sm:gap-y-0">
       <span className="truncate text-xs text-muted-foreground">{props.label}</span>
-      <span className="h-3 w-full overflow-hidden rounded-full bg-muted" aria-hidden="true">
+      <span
+        className="col-span-2 row-start-2 h-3 w-full overflow-hidden rounded-full bg-muted sm:col-span-1 sm:col-start-2 sm:row-start-1"
+        aria-hidden="true"
+      >
         <span
           data-testid={BAR_TEST_ID}
           className={cn("block h-full rounded-full", props.barClass)}
           style={{ width: `${lengthOf(props.value, props.longest)}%` }}
         />
       </span>
-      <span className="text-right text-sm tabular-nums text-foreground">
+      <span className="col-start-2 row-start-1 text-right text-sm tabular-nums text-foreground sm:col-start-3">
         {formatFigure(props.value, props.unit)}
       </span>
     </div>

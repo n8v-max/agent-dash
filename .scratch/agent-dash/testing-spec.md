@@ -491,6 +491,23 @@ product's central interaction.
   off — which is what lets T-E15 assert "matches the History top row" as an identity between two
   ids rather than as a coincidence between two formatted strings. An Organization holding no
   session renders **no stamp** rather than a blank one. What the value *is* belongs to T-U23.
+- **T-C22 — the period axis thins and the legend wraps** (A40, R-V15, ticket 46). The two
+  chart-layer halves of R-V15, asserted over the expressions that decide them — the same shape of
+  claim T-C11 makes over `stackIdOf` and T-C12 over `furnitureFor`. The interval constant is
+  `equidistantPreserveStart`; `furnitureFor` puts it on the period axis of all four period-shaped
+  charts and on neither of a `horizontal-bar`'s axes; and the rendered legend row carries
+  `flex-wrap`, asserted on the DOM rather than on the constant because the class has to survive
+  shadcn's `cn` merge against `ChartLegendContent`'s own `flex` row to do anything.
+
+  **The negative arm is the one that matters.** A crowded axis is a chart that is hard to read; a
+  thinned *category* axis is a chart that lies, because the tick disappears and the bar it named
+  does not. So the exclusion is asserted directly rather than left to follow from where the
+  constant happens to be applied.
+
+  **The e2e sweep cannot make either claim.** T-E17 asserts the document does not overflow, and
+  both of these fit inside a chart that was already clipping them: Recharts' own
+  `overflow: hidden` meant a legend running off both edges of the card cost nothing in scroll
+  width and silently deleted two of five series names.
 
 ---
 
@@ -498,6 +515,15 @@ product's central interaction.
 
 **Small and structural.** Ticket 07 designed the surface to give the suite a clean target: *"one
 request per account per route, asserting rows rather than pixels."*
+
+**Two projects, one engine, one width each** (added 2026-09-09, ticket 46). `chromium` runs the
+suite at the desktop viewport and `mobile-chromium` runs `mobile.spec.ts` at 390×844 — and only
+that file, matched by `testMatch` with the desktop project excluding it by `testIgnore`. Running
+every spec at both widths would roughly double the suite to re-prove claims a viewport cannot
+change: rows, URLs, payload contents and mirror cells read the same at 390 as at 1440. What a
+viewport *does* change is the one thing the new file asserts. The two existing tests that need a
+second width — T-E7's breakdown tile and T-E12's toolbar — call `setViewportSize` themselves
+inside the desktop project, which keeps each width beside the requirement it belongs to.
 
 - **T-E1 — Every route renders for both accounts.** 6 authenticated routes × 2 accounts = 12
   navigations, asserting a page landmark and no error boundary. Navigation is identical for both
@@ -608,6 +634,28 @@ request per account per route, asserting rows rather than pixels."*
   rather than a stub. Asserted through the prose block rather than over every `<p>` in the panel,
   because a panel's **figures** are paragraphs too — the acceptance multiples print a rate and a
   denominator above each tile's sparkline, and neither is prose.
+- **T-E17 — no surface scrolls sideways on a phone** (A40, R-V15, ticket 46). At 390×844, for
+  each of the six authenticated routes, `document.documentElement.scrollWidth <= 390`. It is one
+  number per route and it is the whole claim: a page that overflows by a pixel and a page that
+  overflows by four hundred fail the same assertion, and no screenshot is compared. The failure
+  message names the three widest elements in the document, so a red run says *what* to fix.
+
+  **It is at this layer because there is no other.** Layout is the one thing this product asserts
+  that jsdom cannot answer at all — it computes no geometry, so a component test can read a class
+  name but never a width. And it is the whole document rather than the elements under it,
+  deliberately: a table that overflows *inside its card* is the design (R-V15), and only the
+  overflow that reaches `<html>` is the fault.
+
+  **Four claims stand beside the sweep, because each is a mechanism the sweep would not notice
+  going wrong.** A nav that fits because two items vanished passes a scroll-width assertion and
+  breaks R-A8, so the six links are asserted **visible** at 390 with no button and no "⋯", and
+  the nav is asserted not to overflow its own row — a nav that scrolled instead would leave the
+  document 390px wide and two of R-N1's surfaces off the edge of a bar nothing says can scroll; the
+  account switcher is asserted to have dropped its name and to still open and still offer both
+  accounts; `/demo/history`'s table is asserted to **really scroll** — `scrollWidth >
+  clientWidth` on the card, so a card that merely clipped its columns would fail; and the
+  restricted account is swept over `/demo/people`, whose visibility sentence and one-row table are
+  markup the open account never renders.
 
 ---
 
@@ -655,7 +703,8 @@ Stating these is part of the spec. Each is a decision, not an omission.
 | **DST transitions** | No transition falls inside the window (R-D5). Recorded in T-U1 so the gap is visible |
 | **Quarter buckets** | `quarter` was dropped (`spec.md` § 11 C7). `CONTEXT.md` defines Period as day, week or month, and nothing implements a quarter |
 | **Vendor-shaped token normalisation** | Ticket 13 `wontfix`; no un-normalisable rows exist in the fixture |
-| **Visual regression / screenshots** | High maintenance, low signal on a fixture-backed dashboard. The structural claims are asserted directly |
+| **Visual regression / screenshots** | High maintenance, low signal on a fixture-backed dashboard. The structural claims are asserted directly — including R-V15's, which is a **number** (`scrollWidth`) and not an image, so T-E17 is not an exception to this row |
+| **Widths between 390 and 1440** | The product is stated at two widths and asserted at both (R-V15, T-E17, T-E12). The tablet range is unspecified, so there is nothing there to assert against |
 | **Route shells** (`layout`/`error`/`loading`/`not-found`) | They compose and carry no logic. Already excluded from coverage in `vitest.config.mts`; E2E covers that they render |
 | **Landing copy** | Unwritten (`spec.md` § 13) |
 
@@ -723,6 +772,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A37 One interpolation, named in one place and overridden nowhere | T-C19 |
 | A38 One visible sentence per panel; the rest folded, verbatim | T-C20, T-E16 |
 | A39 The as-of stamp on every surface, matching the History top row | T-U23, T-C21, T-E15 |
+| A40 Every route fits a 390px phone; nothing is hidden to make it fit | T-E17, T-C22 |
 
 ---
 

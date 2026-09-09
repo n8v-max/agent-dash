@@ -31,7 +31,7 @@ import {
   TEAM_SERIES,
 } from "./chart-viewmodels.fixture";
 import { LEGEND_LABEL } from "./series-legend";
-import { NO_READING } from "./table-mirror";
+import { MIRROR_TEST_ID, NO_READING } from "./table-mirror";
 
 const SIZE = { width: 640, height: 320 };
 
@@ -90,11 +90,18 @@ describe("T-C1 — every chart renders a visually-hidden table mirror", () => {
   it.each(CHART_SHAPES)("%s carries the mirror", (shape) => {
     render(<ChartFrame chart={BY_MEMBER} shape={shape} dimension={SIZE} />);
 
-    const table = screen.getByRole("table");
+    const mirror = screen.getByTestId(MIRROR_TEST_ID);
+    const table = within(mirror).getByRole("table");
 
     // Visually hidden, and still in the accessibility tree: `hidden` or `aria-hidden` would
     // satisfy the markup and remove the affordance R-X1 exists for.
-    expect(table).toHaveClass("sr-only");
+    //
+    // **The `sr-only` box is the table's wrapper, not the table** (R-V15, ticket 46). A table's
+    // used width is never less than its min-content width, so the class on the `<table>` left a
+    // 784px hidden box pushing the document sideways on a phone. The claim is unchanged — the
+    // mirror is off-screen and in the tree — and it is asserted on the box that now carries it.
+    expect(mirror).toHaveClass("sr-only");
+    expect(table).not.toHaveAttribute("aria-hidden");
     expect(within(table).getByText(/Cost per session, grouped by Member/)).toBeInTheDocument();
   });
 

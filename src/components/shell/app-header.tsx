@@ -9,6 +9,13 @@
 // **No sidebar** (R-N3). Six items do not fill one, and the seven-column People table and the
 // acceptance small multiples both want the horizontal space.
 //
+// **On a phone the bar is two rows, not fewer doors** (R-V15, ticket 46). Six labels plus the
+// mark plus the switcher need 588px, which was the widest thing on every one of the six surfaces
+// at 390. The row wraps instead: identity — the mark and the switcher — on the first line, the
+// whole nav on the second. Nothing is hidden and nothing is moved behind a control, because
+// R-A8 and R-N2 are the two rules this bar exists to keep, and a "⋯" is exactly what ticket 43
+// took out.
+//
 // **R-A8 — one nav list, no grant consulted.** `sectionNav` below is built from `pathFor` and
 // nothing else. There is no expression here that could hide or disable an item for the restricted
 // account: fewer rows, never fewer doors — which is now literal, since R-N2's overflow is gone
@@ -38,7 +45,7 @@ const sectionNav = (orgSlug: string): readonly NavItem[] => [
 export function AppHeader(props: { readonly orgSlug: string; readonly account: Account }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-      <div className="mx-auto flex h-14 w-full max-w-[110rem] items-center gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-[110rem] flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 sm:h-14 sm:flex-nowrap sm:gap-y-0 sm:px-6 sm:py-0">
         <Link
           href={pathFor("summary", props.orgSlug)}
           className="flex shrink-0 items-center gap-2"
@@ -52,12 +59,17 @@ export function AppHeader(props: { readonly orgSlug: string; readonly account: A
           <span className="text-sm font-semibold tracking-tight text-foreground">agent-dash</span>
         </Link>
 
-        {/* A hairline between the mark and the nav: two jobs, one bar, visibly separated. */}
-        <span aria-hidden className="h-5 w-px bg-border" />
+        {/*
+          A hairline between the mark and the nav: two jobs, one bar, visibly separated. It is
+          gone below `sm`, where the wrap has already separated them onto two lines and a rule
+          standing between the mark and the switcher would divide the wrong pair.
+        */}
+        <span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
 
         <ShellNav items={sectionNav(props.orgSlug)} />
 
-        <div className="flex shrink-0 items-center gap-3">
+        {/* Wrapped, the switcher shares the first line with the mark and sits at its far end. */}
+        <div className="ml-auto flex shrink-0 items-center gap-3 sm:ml-0">
           <AccountSwitcher account={props.account} />
         </div>
       </div>

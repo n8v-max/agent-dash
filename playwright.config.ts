@@ -31,7 +31,35 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   // Cross-browser rendering is not what this project demonstrates; one engine keeps CI cheap.
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  //
+  // Two projects, one engine, and **one width each** (ticket 46). `mobile-chromium` exists
+  // because R-V15's claim is a measurement that only exists at a phone width — every other spec
+  // asserts rows, URLs and mirror cells, which a viewport cannot change. Running the whole file
+  // set twice would roughly double the suite's runtime to re-prove them, so the split is by
+  // file: `mobile.spec.ts` runs at 390 and nowhere else, and the desktop project ignores it.
+  //
+  // The two existing tests that genuinely need a second width — the R-N8 breakdown tile and the
+  // R-C6 toolbar — call `setViewportSize` themselves inside the desktop project, which keeps the
+  // width beside the requirement it belongs to rather than in this file.
+  projects: [
+    {
+      name: "chromium",
+      testIgnore: /mobile\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "mobile-chromium",
+      testMatch: /mobile\.spec\.ts/,
+      // 390×844 — the iPhone 14 CSS viewport, which is the width ticket 46 states R-V15 at.
+      // Chromium's own descriptor rather than a WebKit device profile: the engine stays one.
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+  ],
   webServer: {
     // CI runs the production build (the workflow builds first); locally, dev is fast enough.
     command: isCI

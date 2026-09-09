@@ -27,7 +27,7 @@ import { Children, isValidElement, type ReactElement, type ReactNode } from "rea
 import { describe, expect, it } from "vitest";
 import type { Grouping } from "@/domain/viewmodel";
 import { ChartFrame } from "./chart-frame";
-import { CHART_INTERPOLATION } from "./chart-config";
+import { BUCKET_TICK_INTERVAL, CHART_INTERPOLATION } from "./chart-config";
 import {
   CHART_SHAPES,
   STACKING_SHAPES,
@@ -40,6 +40,7 @@ import {
   type ChartShape,
 } from "./chart-shapes";
 import { chartFixture, MEMBER_SERIES } from "./chart-viewmodels.fixture";
+import { LEGEND_LABEL, LEGEND_LAYOUT } from "./series-legend";
 
 /** A Recharts component's own name, which is what its element's type is identified by. */
 const nameOf = (element: ReactElement): string => {
@@ -439,5 +440,70 @@ describe("T-C19 — every line and area is interpolated `linear` (R-V13)", () =>
     for (const [path, source] of modules) {
       expect({ path, curve: namesACurve(String(source)) }).toEqual({ path, curve: false });
     }
+  });
+});
+
+/**
+ * **T-C22 — the two things that make a chart fit a phone** (R-V15, A40, ticket 46).
+ *
+ * The e2e sweep asserts the *consequence* — no route scrolls sideways at 390px — and a
+ * consequence is satisfiable by accident. These are the two mechanisms behind it, each asserted
+ * over the one expression that decides it, in the same shape as T-C11 over `stackIdOf` and T-C12
+ * over `furnitureFor`.
+ *
+ * **The tick interval is asserted with its exclusion**, because the failure that matters is not
+ * a crowded axis: it is a `horizontal-bar`'s category axis thinning, which deletes a bar's own
+ * name while leaving the bar. That is a chart that lies, where a crowded axis is only a chart
+ * that is hard to read, so the negative arm is the one carrying the weight.
+ */
+describe("T-C22 — the period axis thins and the legend wraps (R-V15)", () => {
+  const CHART = chartFixture();
+
+  const axesOf = (input: Parameters<typeof furnitureFor>[0]) =>
+    furnitureFor(input).filter((mark) => nameOf(mark).endsWith("Axis"));
+
+  const intervalOf = (axis: ReactElement): unknown =>
+    (axis.props as { readonly interval?: unknown }).interval;
+
+  it("is `equidistantPreserveStart`, so the labels that survive are evenly spaced", () => {
+    // `preserveEnd` — Recharts' own default — also thins, but unevenly: it drops whichever
+    // labels collide, which can leave three weeks at three different distances and read as
+    // three arbitrary buckets rather than as a sampled axis.
+    expect(BUCKET_TICK_INTERVAL).toBe("equidistantPreserveStart");
+  });
+
+  it.each(["line", "area", "bar", "grouped-bar"] as const)(
+    "puts it on %s's period axis and on no other axis",
+    (shape) => {
+      const axes = axesOf({ chart: CHART, shape, tickFormat: String });
+      const [bucket, measure] = axes;
+
+      expect(axes).toHaveLength(2);
+      expect(nameOf(bucket as ReactElement)).toBe("XAxis");
+      expect(intervalOf(bucket as ReactElement)).toBe(BUCKET_TICK_INTERVAL);
+      // The measure axis is numeric: its ticks are Recharts' own and thinning them would move
+      // the scale rather than sample it.
+      expect(intervalOf(measure as ReactElement)).toBeUndefined();
+    },
+  );
+
+  it("leaves a horizontal bar's category axis alone, so no bar loses its name", () => {
+    const axes = axesOf({ chart: CHART, shape: "horizontal-bar", tickFormat: String });
+
+    for (const axis of axes) expect(intervalOf(axis)).toBeUndefined();
+  });
+
+  it("wraps the legend, so five entries at 390px keep all five names", () => {
+    // Asserted on the **rendered markup** rather than on the constant, because the class has to
+    // survive two things to do anything: `SeriesLegend` forwarding it, and `cn`'s Tailwind merge
+    // against `ChartLegendContent`'s own `flex ... gap-4` row, which is what it overrides. The
+    // row carries no role and no name of its own — the named `group` is the wrapper around it —
+    // so the assertion reads the legend's markup instead of walking into it.
+    render(<ChartFrame chart={CHART} shape="line" dimension={SIZE} />);
+
+    const legend = screen.getByRole("group", { name: LEGEND_LABEL });
+
+    expect(legend.innerHTML).toContain("flex-wrap");
+    expect(LEGEND_LAYOUT).toContain("flex-wrap");
   });
 });
