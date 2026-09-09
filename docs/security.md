@@ -39,7 +39,7 @@ three attributes, in `e2e/enforcement.spec.ts:84-87`.
 
 **Grants are not in the token.** `issueSession` writes exactly two claims
 (`src/data/session.ts:52`); the Role is resolved server-side from the Member's fixture row on every
-request (`src/data/viewer.ts:53` → `roleFor`, `src/domain/access.ts:171`). A token carrying its own
+request (`src/data/viewer.ts:75` → `roleFor`, `src/domain/access.ts:171`). A token carrying its own
 grants is a token that can be edited to widen them. This is asserted adversarially rather than
 assumed: `src/data/viewer.test.ts:117` signs a *valid* token carrying `role`, `grants` and `scopes`
 fields and checks the resolved viewer is still the restricted preset.
@@ -106,8 +106,8 @@ There is one secret, held in one constant (`src/data/session.ts:45`), and verifi
 exactly that one (`:76`). There is no key ring, no `kid` header and no overlap window, so every
 cookie issued under the old key stops verifying the moment the new one is live. What a visitor
 actually experiences: `readSession` returns `undefined` (`src/data/session.ts:78`) →
-`resolveViewer` reports `no-session` (`src/data/viewer.ts:44`) → the layout redirects to `/sign-in`
-(`src/app/[org]/layout.tsx:33`). No error, no broken page, one click to recover.
+`resolveViewer` reports `no-session` (`src/data/viewer.ts:57`) → the layout redirects to `/sign-in`
+(`src/app/[org]/layout.tsx:34`). No error, no broken page, one click to recover.
 
 Accepting that is cheap here and would not be everywhere. A session in this product is worth 8
 hours (`src/data/session-cookie.ts:14`) and holds nothing: there is no write path anywhere in the
@@ -131,13 +131,13 @@ issued token before its 8 hours elapse, and it invalidates all of them.
   Server Actions at all — no `"use server"` directive appears anywhere under `src/`. Every other
   surface is a GET.
 - **It writes a cookie, not data.** It mints a JWT and sets it
-  (`src/app/api/session/route.ts:67-71`). Nothing in this application mutates any stored data,
+  (`src/app/api/session/route.ts:79-87`). Nothing in this application mutates any stored data,
   because the only data is the committed fixture and `src/data/load.ts` opens it read-only.
 - **Its input is one field, matched against a two-element list.** `member_id` is looked up in
   `signInAccounts()`; anything else is a 400 (`src/app/api/session/route.ts:62-65`). The endpoint
   *issues* tokens; it does not accept an identity claim.
 - **The cookie is `SameSite=Lax`** (`src/data/session-cookie.ts:28`).
-- **There is no Origin or Host check.** Read `src/app/api/session/route.ts:58-73`: the only header
+- **There is no Origin or Host check.** Read `src/app/api/session/route.ts:58-88`: the only header
   consulted anywhere in the file is `referer` (`:52`), and it is used solely to pick a redirect
   target.
 - **Next.js's built-in Origin-vs-Host CSRF check does not cover this endpoint.** It is a Server
@@ -152,7 +152,7 @@ issued token before its 8 hours elapse, and it invalidates all of them.
 
 SameSite governs when a cookie is **sent**, not when it may be **set**. A cross-site
 `<form method="post" action="https://…/api/session">` is a top-level navigation; the endpoint
-answers 303 with `Set-Cookie` (`src/app/api/session/route.ts:70-71`); the browser stores the Lax
+answers 303 with `Set-Cookie` (`src/app/api/session/route.ts:85-86`); the browser stores the Lax
 cookie, and the victim's subsequent top-level GETs carry it. The forgery works. This is login CSRF,
 and `sameSite: "lax"` is not the answer to it — it is the answer to a *different* attack, in which
 an attacker's page causes the victim's browser to send an existing session cookie on a cross-site
@@ -164,23 +164,24 @@ A forged POST switches the victim between the two seeded accounts. It cannot:
 
 - **mint a token for any other Member** — 400 (`src/app/api/session/route.ts:63-65`);
 - **widen grants** — the token carries two claims (`src/data/session.ts:52`) and the Role is
-  resolved from the fixture per request (`src/data/viewer.ts:53`), proven adversarially at
+  resolved from the fixture per request (`src/data/viewer.ts:75`), proven adversarially at
   `src/data/viewer.test.ts:117`;
-- **cross a tenancy boundary** — `org_slug` is taken from the resolved account, never from the
-  request (`src/app/api/session/route.ts:67`);
+- **cross a tenancy boundary** — `org_slug` is resolved through the Member's own Memberships and
+  never taken from the request (`src/app/api/session/route.ts:74-77`), and the reading side checks
+  the Member against the Organization independently (`src/data/viewer.ts:62-73`);
 - **redirect anywhere useful** — the return path is honoured only if it is same-origin *and* under
   the account's own Organization (`src/app/api/session/route.ts:50-56`), with five escape shapes
   asserted rejected at `src/app/api/session/route.test.ts:99-110`;
 - **read anything back** — no CORS headers are configured; `next.config.ts` is fourteen lines and
   declares only `outputFileTracingIncludes`;
 - **destroy anything** — there is nothing to destroy, and the switch is reversed by one click in the
-  header (`src/components/shell/account-switcher.tsx:73-92`).
+  header (`src/components/shell/account-switcher.tsx:51-79`).
 
 Both target identities are **public and freely obtainable**: `/sign-in` hands either one to any
 anonymous visitor (`src/app/sign-in/page.tsx:77-113`). So the attacker forces the victim into a
 state the attacker can already occupy, over data the attacker can already read. The residual harm
 is that a victim reads the dashboard as the *other* demo account — visibly, since the header shows
-whose account it is and which Role (`src/components/shell/account-switcher.tsx:47-60`), and the two
+whose account it is and which Role (`src/components/shell/account-switcher.tsx:133-146`), and the two
 accounts differ only in how many rows they receive, never in navigation
 (`src/components/shell/app-header.tsx:19-22`).
 
@@ -219,27 +220,28 @@ reasoning rather than against the conclusion:
 
 ### `DELETE` is protected, but by CORS and by accident
 
-`DELETE /api/session` clears the cookie (`src/app/api/session/route.ts:75-81`). An HTML form cannot
+`DELETE /api/session` clears the cookie (`src/app/api/session/route.ts:90-96`). An HTML form cannot
 issue `DELETE`, and a cross-origin `fetch` with that method is not a simple request, so the browser
 preflights it — and with no CORS headers configured anywhere (`next.config.ts`), the preflight
 fails. That is a real protection and it is incidental: nothing in this repo asserts it, and it would
 evaporate the day a `headers()` block is added for an unrelated reason. The harm ceiling is low in
 any case — a forced sign-out bounces the victim to `/sign-in`
-(`src/app/[org]/layout.tsx:33`).
+(`src/app/[org]/layout.tsx:34`).
 
 ---
 
 ## 3. 404, never 403
 
 **Three different failures produce one indistinguishable outcome.**
-`src/data/viewer.ts:39-59` resolves a request, and returns the single `NOT_FOUND` value
+`src/data/viewer.ts:51-82` resolves a request, and returns the single `NOT_FOUND` value
 (`src/data/viewer.ts:30`) for all of:
 
-- an Organization slug that names no Organization (`src/data/viewer.ts:47`);
-- a validly signed token whose `org_slug` is not the `[org]` path segment (`:47`);
-- a validly signed token naming a Member the dataset does not have (`:50`).
+- an Organization slug that names no Organization (`src/data/viewer.ts:60`);
+- a validly signed token whose `org_slug` is not the `[org]` path segment (`:60`);
+- a validly signed token naming a Member the Organization does not hold, whether because no such
+  Member exists or because they belong to another Organization (`:73`).
 
-Callers turn that into `notFound()` — `src/app/[org]/layout.tsx:34` and
+Callers turn that into `notFound()` — `src/app/[org]/layout.tsx:35` and
 `src/components/controls/request.ts:62`.
 
 **Why 404 and not 403.** A 403 says *"this Organization exists and is not yours"*, which is exactly
@@ -255,7 +257,7 @@ layer up, and it is what makes the boundary hold rather than merely be checked: 
 cannot see is an outcome a caller cannot leak.
 
 **The redirect is the deliberate exception.** No verifiable session at all → redirect to `/sign-in`
-(`src/app/[org]/layout.tsx:33`, `src/components/controls/request.ts:60`), not 404. It discloses
+(`src/app/[org]/layout.tsx:34`, `src/components/controls/request.ts:60`), not 404. It discloses
 nothing: the visitor has claimed no tenancy yet, and `/sign-in` is public to everyone
 (`src/proxy.ts:16`).
 
@@ -296,9 +298,9 @@ contractor's browser and makes the access model theatre.
 **Where it happens.**
 
 1. **The viewer is resolved once per request**, from the cookie, by `resolveViewer`
-   (`src/data/viewer.ts:39`). Grants come from the fixture Role (`:53`), never from the token.
+   (`src/data/viewer.ts:51`). Grants come from the fixture Role (`:75`), never from the token.
 2. **The filter runs on rows, before any aggregation.** `filterRows`
-   (`src/domain/access.ts:290-305`) takes rows and returns rows — never a total — and it is called
+   (`src/domain/access.ts:317-332`) takes rows and returns rows — never a total — and it is called
    at `src/data/queries/context.ts:258`, ahead of every bucket and every sum. Filtering a computed
    aggregate leaks by arithmetic; filtering rows does not.
 3. **It runs once per datapoint class, because grants are per class**
@@ -307,7 +309,7 @@ contractor's browser and makes the access model theatre.
    its money panels see only its own. Filtering once "for the page" would have to pick one class,
    and would either leak cost or hide tokens.
 4. **A name is a separate grant from a number.** `resolvesName`
-   (`src/domain/access.ts:266`) is true only when a *granted covering* scope is an identifying one;
+   (`src/domain/access.ts:293`) is true only when a *granted covering* scope is an identifying one;
    a subject reachable solely through `team`, `peer-team` or `org` contributes to totals and is
    never labelled. The label map itself withholds it — `src/data/queries/context.ts:227` returns
    `"Unnamed Member"` — so no panel can print a name it was not handed.
@@ -316,11 +318,11 @@ contractor's browser and makes the access model theatre.
    (`eslint.config.mjs:197-213`). A panel cannot import `filterRows`, cannot import `roleFor`, and
    receives a fully resolved ViewModel.
 6. **Nothing is prerendered or cached across viewers.** Every `/[org]` surface reads `cookies()`
-   (`src/app/[org]/layout.tsx:30`, `src/components/controls/request.ts:58`), which makes the route
+   (`src/app/[org]/layout.tsx:31`, `src/components/controls/request.ts:58`), which makes the route
    dynamic; there is no `revalidate`, no `unstable_cache` and no `force-static` anywhere in `src/`.
    `pnpm build` confirms it: all six `/[org]` routes print `ƒ (Dynamic)`, and only `/`, `/sign-in`
    and `/_not-found` are prerendered.
-   The one process-lifetime cache holds the **unfiltered** fixture (`src/data/load.ts:309-316`) and
+   The one process-lifetime cache holds the **unfiltered** fixture (`src/data/load.ts:369-376`) and
    the permission filter runs per request over it (`src/data/queries/context.ts:258`), so the cache
    cannot serve one viewer's filtered rows to another.
 
@@ -337,12 +339,16 @@ rather than in a function.
 
 **What the type system does and does not guarantee.** Every query function in
 `src/data/queries.ts` takes a `Viewer` first, so there is no expression that names an unfiltered
-query — that half is real and it is the half that matters. The stronger phrasing in that file's
-header (`src/data/queries.ts:15-17`), that a `Viewer` "is producible only by `resolveViewer`", is a
-convention rather than a type guarantee: `Viewer` is a plain exported structural type
-(`src/domain/access.ts:178`) and any module could write one. In practice nothing does — `src/app`
-and `src/components` construct none, and the ESLint rule above stops them importing `roleFor` to
-build a plausible one — but the mechanism is lint and call-site discipline, not the type.
+query — that half is real and it is the half that matters. The second half is now also carried by
+the type: `Viewer` is **nominal**, holding a brand whose `unique symbol` `src/domain/access.ts` does
+not export, so `sealViewer` is the only expression in the application that produces one and no other
+module can write the shape it wants. Ticket 58 fixed this; before it, `Viewer` was a plain
+structural type and this file's header claimed otherwise as a *type* guarantee.
+
+What remains convention is narrower and is stated as convention: that `resolveViewer` is
+`sealViewer`'s only production caller. `src/app` and `src/components` construct no `Viewer`, and the
+ESLint rule above stops them importing `roleFor` to build a plausible one — but that mechanism is
+lint and call-site discipline, not the type.
 
 ---
 
@@ -361,7 +367,7 @@ are properties of *this* endpoint set rather than general excuses:
   one.
 
 *What it costs:* a signed-in visitor can drive fixture aggregation at whatever rate they like. The
-dataset is memoised for the process (`src/data/load.ts:316`) so the cost is CPU in
+dataset is memoised for the process (`src/data/load.ts:376`) so the cost is CPU in
 `src/data/queries/**`, and there is no per-viewer budget. On a demo behind a public URL, accepted.
 
 **Audit log — none.** Nothing records who read what. Acceptable for a demo on two grounds. First,
@@ -384,7 +390,7 @@ the one with a real, small consequence, because `Referer` is read for the return
 (`src/app/api/session/route.ts:52`); browsers' default `strict-origin-when-cross-origin` already
 limits what leaves the origin, and the return path is validated same-origin regardless (`:53`).
 
-**No sign-out.** `DELETE /api/session` exists (`src/app/api/session/route.ts:75`) and is exercised
+**No sign-out.** `DELETE /api/session` exists (`src/app/api/session/route.ts:90`) and is exercised
 by `e2e/enforcement.spec.ts:90-104`, but **nothing in the UI calls it** — there is no sign-out
 control in the header (`src/components/shell/app-header.tsx`) or anywhere else in `src/`. A session
 ends when its 8 hours elapse (`src/data/session-cookie.ts:14`) or when the visitor clears cookies.
@@ -403,27 +409,60 @@ reused.
 
 ---
 
-## 6. Two things found while checking, recorded rather than fixed
+## 6. Two things found while checking — both since fixed (ticket 58)
 
-Neither is a live vulnerability. Both are places where a document or a comment claims more than the
-code delivers, which is the class of defect this note exists to prevent.
+Neither was a live vulnerability. Both were places where a document or a comment claimed more than
+the code delivered, which is the class of defect this note exists to prevent. They are recorded here
+with what they were, because the fix is only legible against the thing it fixed.
 
-**1. Multi-tenancy is a property of the URL and the token, not of the data model.**
-`resolveViewer` compares the token's `org_slug` against the `[org]` path segment
-(`src/data/viewer.ts:47`) and then looks the Member up **across the whole dataset**
-(`src/data/viewer.ts:50`) without checking that the Member belongs to that Organization. Today the
-two checks coincide and there is no hole, because there is exactly one Organization: `Dataset` holds
-`organization` singular (`src/data/load.ts:70`), `organizations()` returns a one-element list
-(`src/data/accounts.ts:28`), and `Member` carries no organization identifier at all
-(`src/domain/types.ts:146-157`). But `src/data/accounts.ts:24-27` states that *"a second
-Organization is a fixture change and no code change"*, and that is not true of this path: a second
-Organization needs a Member→Organization relation in the schema **and** an org-scoped member lookup
-in `resolveViewer`, or a token naming org A and a Member of org B resolves to a signed-in viewer.
-The tenancy check that exists is real and tested (`e2e/enforcement.spec.ts:17`); the one that would
-be needed alongside it does not exist yet.
+**1. Multi-tenancy was a property of the URL and the token, not of the data model. Now it is all
+three.**
 
-**2. `src/data/queries.ts:15-17` overstates its own guarantee.** See § 4 — an unfiltered query
-genuinely does not typecheck; a hand-built `Viewer` genuinely does.
+*What was found.* `resolveViewer` compared the token's `org_slug` against the `[org]` path segment
+and then looked the Member up **across the whole dataset**, with no Organization predicate. A token
+minted for Organization A naming a Member of Organization B satisfied both surviving checks and
+resolved signed-in. It was vacuous in practice — one Organization was seeded and `Member` carried no
+organization identifier at all, so the bad state could not be expressed — and that vacuity is
+exactly why no test caught it. `src/data/accounts.ts` stated that *"a second Organization is a
+fixture change and no code change"*, which was false for this path.
+
+*What the code does now.* Tenancy is stated in `src/fixtures/data/memberships.json` — a
+Member↔Organization join carrying the Role, because the Role is held **per Organization** and a
+Member may in principle hold several. `resolveViewer` resolves the acting Member *through* a
+Membership in the Organization the path and the token already agree on
+(`src/data/viewer.ts:62-73`), so a Member of another Organization is **unfindable** rather than
+found-and-then-refused. The 404-not-403 collapse is preserved and asserted as *indistinguishability*
+by deep equality on the whole resolution, not merely as "both are errors"
+(`src/data/viewer.test.ts`). The mint path is closed on the same terms: `POST /api/session` resolves
+the Organization through the Member's own Memberships and never from the submitted form, so a token
+pairing a Member with a tenant they have no standing in is not issuable either
+(`src/app/api/session/route.ts:67-77`).
+
+*What is validated at load.* A Membership naming an Organization nothing declares, one naming a
+Member the directory does not hold, and two Memberships for one Member in one Organization are each
+a `FixtureFault` naming the file, the row index and the field (`src/data/load.ts`, ticket 53's
+format).
+
+*Non-vacuity, stated plainly.* The committed fixture still seeds **one** Organization, so the bad
+state is still not expressible in it — this was a deliberate decision, not an oversight. The
+regression test therefore builds a two-Organization `Dataset` in the test file and passes it to
+`resolveViewer`, which takes its dataset as a parameter for exactly this reason. The test was
+verified to fail when the Organization predicate is removed. The consequence worth knowing: this
+path has **unit** coverage and no e2e coverage, because with one Organization seeded there is no
+browser journey that crosses a tenant boundary.
+
+*What the R-A1 claim says now.* Narrowed rather than repeated. The code path is genuinely
+indifferent to how many Organizations exist; what a second one still costs is *data* —
+`organization.json` holds one row and every Membership is validated against it, so a second means
+pluralising that file and its check plus a Repository set, a Task set, and the full
+(repository × work_type) session matrix R-D19 requires.
+
+**2. `src/data/queries.ts:15-17` overstated its own guarantee. Now the type carries it.** `Viewer`
+is nominal: it holds a brand whose `unique symbol` `src/domain/access.ts` does not export, so
+`sealViewer` is the only expression in the application that produces one and no module can assemble
+the shape it wants. What the compiler still does *not* enforce is that `resolveViewer` is
+`sealViewer`'s only caller — that remains convention plus the layering lint rule, and the comment
+now says so in those terms. See § 4.
 
 ---
 

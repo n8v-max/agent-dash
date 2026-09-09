@@ -23,6 +23,7 @@
 
 import Link from "next/link";
 import type { Account } from "@/data/accounts";
+import type { Organization } from "@/domain/types";
 import { pathFor } from "@/components/controls/schema";
 import { AccountSwitcher } from "./account-switcher";
 import { ShellNav, type NavItem } from "./shell-nav";
@@ -42,7 +43,12 @@ const sectionNav = (orgSlug: string): readonly NavItem[] => [
   { href: pathFor("projection", orgSlug), label: "Projection", secondary: true },
 ];
 
-export function AppHeader(props: { readonly orgSlug: string; readonly account: Account }) {
+export function AppHeader(props: {
+  readonly orgSlug: string;
+  readonly account: Account;
+  /** Threaded to the switcher, which decides whether an Organization switch is offered at all. */
+  readonly organizations: readonly Organization[];
+}) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
       <div className="mx-auto flex w-full max-w-[110rem] flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 sm:h-14 sm:flex-nowrap sm:gap-y-0 sm:px-6 sm:py-0">
@@ -70,7 +76,7 @@ export function AppHeader(props: { readonly orgSlug: string; readonly account: A
 
         {/* Wrapped, the switcher shares the first line with the mark and sits at its far end. */}
         <div className="ml-auto flex shrink-0 items-center gap-3 sm:ml-0">
-          <AccountSwitcher account={props.account} />
+          <AccountSwitcher account={props.account} organizations={props.organizations} />
         </div>
       </div>
     </header>

@@ -54,8 +54,26 @@ Out of scope, each already argued and recorded:
 
 ## 2. Actors, tenancy and access
 
-**R-A1 — The product is multi-tenant.** `demo` is an Organization slug, not a demo-mode prefix.
-The code supports arbitrarily many Organizations; only `demo` is seeded.
+**R-A1 — The product is multi-tenant.** `demo` is an Organization slug, not a demo-mode prefix —
+and the seeded Organization's *name* is "Equilibrio S.L.", so the two are visibly different
+strings rather than a claim a reader has to take on trust.
+
+Tenancy is a **Member↔Organization Membership** (`memberships.json`), many-to-many, carrying the
+Role — because the Role is held per Organization and the same person may be an owner in one and a
+contractor in another. `resolveViewer` resolves the acting Member *through* a Membership in the
+Organization the path and the token agree on, so all three must agree and not merely two.
+
+**Amended 2026-09-10 by ticket 58.** This requirement previously said "the code supports
+arbitrarily many Organizations; only `demo` is seeded", and `src/data/accounts.ts` glossed that as
+"a second Organization is a fixture change and no code change". That was **false** for the sign-in
+path: the Member was looked up across the whole dataset with no Organization predicate, so a token
+minted for one Organization naming a Member of another resolved signed-in. It was unreachable only
+because one Organization was seeded and `Member` carried no Organization at all — which is why no
+test caught it. The narrowed and true claim: the *code* path is indifferent to how many
+Organizations exist; a second one costs **data** — pluralising `organization.json` and its load
+check, plus a Repository set, a Task set and the full (repository × work_type) session matrix
+R-D19 requires. Still one seeded, deliberately; the two-Organization case is covered by unit tests
+against a hand-built `Dataset`, and has no e2e coverage for that reason.
 
 **R-A2 — The Organization slug lives in the URL path**, not only in a token. Tenancy that exists
 only in a token is invisible in the artefact a reviewer inspects, and breaks the moment one

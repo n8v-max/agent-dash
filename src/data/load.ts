@@ -38,6 +38,7 @@ import type {
   AgentSession,
   GithubUser,
   Member,
+  Membership,
   Model,
   Organization,
   RateCards,
@@ -50,6 +51,7 @@ import {
   arrayOf,
   FixtureFault,
   membersFileSchema,
+  membershipSchema,
   modelSchema,
   organizationSchema,
   rateCardsSchema,
@@ -71,6 +73,12 @@ export type Dataset = {
   readonly repositories: readonly Repository[];
   readonly teams: readonly Team[];
   readonly members: readonly Member[];
+  /**
+   * Member↔Organization, with the Role held per pairing. **Tenancy is stated here and nowhere
+   * else** — `resolveViewer` resolves the acting Member *through* this list, so a Member of
+   * another Organization is not findable rather than merely not permitted (ticket 58).
+   */
+  readonly memberships: readonly Membership[];
   readonly githubUsers: readonly GithubUser[];
   readonly tasks: readonly Task[];
   readonly workTypes: readonly WorkType[];
@@ -205,6 +213,54 @@ const assertKnownModels = (
   }
 };
 
+/**
+ * **A Membership names an Organization and a Member, and both live in other files.** `schema.ts`
+ * sees two strings; whether either resolves is a claim across three files, so it is checked here.
+ *
+ * Both are faults rather than dropped rows, and for the same reason the model check gives: a
+ * membership naming an Organization nothing declares grants standing in a tenant that does not
+ * exist, and one naming an absent Member is a grant to nobody. Ticket 58 exists because the
+ * absence of this check is what made "a second Organization is a fixture change and no code
+ * change" *look* true — there was no way to express the bad state, so nothing caught it.
+ *
+ * The duplicate check is here too: two rows for one pairing are two Roles for one Member in one
+ * Organization, and which one wins would be file order.
+ */
+const assertMemberships = (
+  memberships: readonly Membership[],
+  organization: Organization,
+  members: readonly Member[],
+): void => {
+  const memberIds = new Set(members.map((member) => member.id));
+  const seen = new Set<string>();
+  memberships.forEach((membership, index) => {
+    const at = `memberships.json[${String(index)}]`;
+    if (membership.organization_id !== organization.id) {
+      throw new FixtureFault(
+        `${at}.organization_id: unknown Organization ${JSON.stringify(membership.organization_id)} — ` +
+          `organization.json declares ${organization.id}, and a Membership in an Organization ` +
+          "nothing declares is standing in a tenant that does not exist.",
+      );
+    }
+    if (!memberIds.has(membership.member_id)) {
+      throw new FixtureFault(
+        `${at}.member_id: unknown Member ${JSON.stringify(membership.member_id)} — ` +
+          "members.json declares the directory, and a Membership naming a Member it does not " +
+          "hold is a grant to nobody.",
+      );
+    }
+    const pair = `${membership.organization_id}\u0000${membership.member_id}`;
+    if (seen.has(pair)) {
+      throw new FixtureFault(
+        `${at}.member_id: duplicate Membership for ${membership.member_id} in ` +
+          `${membership.organization_id} — one Member holds one Role per Organization, and which ` +
+          "of two rows won would be file order.",
+      );
+    }
+    seen.add(pair);
+  });
+};
+
 const byStartedAt = (left: AgentSession, right: AgentSession): number =>
   Date.parse(left.started_at) - Date.parse(right.started_at) || left.id.localeCompare(right.id);
 
@@ -291,12 +347,16 @@ export const readDataset = (reader: FixtureReader = readFixtureFile): Dataset =>
   // Read before the sessions, because a session's TokenUsage names a Model and this file is
   // where the roster is declared: the check spans the two, so both have to be in scope.
   const models = readFile(reader, "models.json", arrayOf(modelSchema));
+  const organization = readFile(reader, "organization.json", organizationSchema);
+  const memberships = readFile(reader, "memberships.json", arrayOf(membershipSchema));
+  assertMemberships(memberships, organization, directory.members);
 
   return {
-    organization: readFile(reader, "organization.json", organizationSchema),
+    organization,
     repositories,
     teams: readFile(reader, "teams.json", arrayOf(teamSchema)),
     members: directory.members,
+    memberships,
     githubUsers: directory.github_users,
     tasks: readFile(reader, "tasks.json", arrayOf(taskSchema)),
     workTypes,

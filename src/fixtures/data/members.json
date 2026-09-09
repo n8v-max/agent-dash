@@ -129,7 +129,6 @@
       "full_name": "Nuria Castells Vidal",
       "email": "nuria.castells@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_platform"
       ],
@@ -142,7 +141,6 @@
       "full_name": "Álvaro Ruiz Ortega",
       "email": "alvaro.ruiz@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_platform"
       ],
@@ -155,7 +153,6 @@
       "full_name": "Marta Peña Serrano",
       "email": "marta.pena@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_platform",
         "team_product"
@@ -169,7 +166,6 @@
       "full_name": "Javier Domínguez Lara",
       "email": "javier.dominguez@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_platform"
       ],
@@ -182,7 +178,6 @@
       "full_name": "Lucía Bermejo Ferrer",
       "email": "lucia.bermejo@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_product"
       ],
@@ -195,7 +190,6 @@
       "full_name": "Sergio Ibáñez Molina",
       "email": "sergio.ibanez@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_platform",
         "team_infrastructure"
@@ -209,7 +203,6 @@
       "full_name": "Carmen Cruz Delgado",
       "email": "carmen.cruz@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_product"
       ],
@@ -222,7 +215,6 @@
       "full_name": "Pablo Herrera Gil",
       "email": "pablo.herrera@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_product"
       ],
@@ -235,7 +227,6 @@
       "full_name": "Elena Sáez Roldán",
       "email": "elena.saez@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_product",
         "team_data"
@@ -249,7 +240,6 @@
       "full_name": "Diego Navarro Prieto",
       "email": "diego.navarro@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_platform"
       ],
@@ -262,7 +252,6 @@
       "full_name": "Irene Vázquez Soto",
       "email": "irene.vazquez@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_data"
       ],
@@ -275,7 +264,6 @@
       "full_name": "Rubén Marín Cano",
       "email": "ruben.marin@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_data"
       ],
@@ -288,7 +276,6 @@
       "full_name": "Beatriz Lorenzo Pardo",
       "email": "beatriz.lorenzo@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_data"
       ],
@@ -301,7 +288,6 @@
       "full_name": "Andrés Quintana Rey",
       "email": "andres.quintana@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_data",
         "team_infrastructure"
@@ -315,7 +301,6 @@
       "full_name": "Silvia Roldán Nieto",
       "email": "silvia.roldan@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_infrastructure"
       ],
@@ -328,7 +313,6 @@
       "full_name": "Tomás Ferrán Blasco",
       "email": "tomas.ferran@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_infrastructure"
       ],
@@ -341,7 +325,6 @@
       "full_name": "Noelia Gallego Ruano",
       "email": "noelia.gallego@equilibrio.io",
       "kind": "human",
-      "role": "member",
       "team_ids": [
         "team_product"
       ],
@@ -354,7 +337,6 @@
       "full_name": "Héctor Camps Vidal",
       "email": "hector.camps@equilibrio.io",
       "kind": "human",
-      "role": "contractor",
       "team_ids": [
         "team_data"
       ],
@@ -367,7 +349,6 @@
       "full_name": "Equilibrio Deploy Bot",
       "email": "deploy-bot@equilibrio.io",
       "kind": "service_account",
-      "role": "automation",
       "team_ids": [
         "team_infrastructure"
       ],
@@ -380,7 +361,6 @@
       "full_name": "Equilibrio Nightly Runner",
       "email": "nightly-runner@equilibrio.io",
       "kind": "service_account",
-      "role": "automation",
       "team_ids": [
         "team_infrastructure"
       ],

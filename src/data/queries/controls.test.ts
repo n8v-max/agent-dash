@@ -8,7 +8,8 @@
 // fixture that lost its roster would fail here rather than pass vacuously.
 
 import { describe, expect, it } from "vitest";
-import { membershipFromTeams, roleFor, type Viewer } from "@/domain/access";
+import { membershipFromTeams, roleFor,
+  sealViewer, type Viewer } from "@/domain/access";
 import { loadDataset } from "../load";
 import { controlsWith, defaultControls, type ControlSet, type PageKey } from "../params";
 import { controlOptions, PEOPLE_SORT_COLUMNS } from "./controls";
@@ -19,14 +20,17 @@ const membership = membershipFromTeams(data.teams);
 const NOW = "2026-09-08T12:00:00+02:00";
 const WINDOW = { start: data.organization.window_start, end: data.organization.window_end };
 
+// Resolved through `memberships` rather than `members`, because the Role is held per
+// Organization (ticket 58) — the same shape `resolveViewer` uses.
 const viewerFor = (memberRole: string): Viewer => {
-  const member = data.members.find((candidate) => candidate.role === memberRole);
-  if (!member) throw new Error(`no Member carries the role ${memberRole}`);
-  return {
+  const held = data.memberships.find((candidate) => candidate.role === memberRole);
+  const member = data.members.find((candidate) => candidate.id === held?.member_id);
+  if (!held || !member) throw new Error(`no Membership carries the role ${memberRole}`);
+  return sealViewer({
     memberId: member.id,
     teamIds: membership.get(member.id) ?? [],
-    role: roleFor(member.role),
-  };
+    role: roleFor(held.role),
+  });
 };
 
 const OPEN = viewerFor("member");

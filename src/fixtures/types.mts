@@ -86,9 +86,15 @@ export type Member = {
   full_name: string;
   email: string;
   kind: MemberKind;
-  role: string;
   team_ids: string[];
   seat_active: boolean;
+};
+
+/** Member↔Organization, with the Role held per pairing. Mirrors `src/domain/types.ts`. */
+export type Membership = {
+  organization_id: string;
+  member_id: string;
+  role: string;
 };
 
 export type MembersFile = {

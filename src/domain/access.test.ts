@@ -25,6 +25,7 @@ import {
   permissions,
   resolvesName,
   roleFor,
+  sealViewer,
   scopesCovering,
   type AccessRequest,
   type DatapointClass,
@@ -46,11 +47,12 @@ const TEAMS: readonly Team[] = [
 
 const MEMBERSHIP = membershipFromTeams(TEAMS);
 
-const viewerFor = (memberId: string, role: Role): Viewer => ({
-  memberId,
-  teamIds: MEMBERSHIP.get(memberId) ?? [],
-  role,
-});
+const viewerFor = (memberId: string, role: Role): Viewer =>
+  sealViewer({
+    memberId,
+    teamIds: MEMBERSHIP.get(memberId) ?? [],
+    role,
+  });
 
 const requestFor = (viewer: Viewer, datapoint: DatapointClass): AccessRequest => ({
   viewer,
@@ -493,7 +495,7 @@ describe("visibility under the open default is symmetric (R-A9, ADR-0003)", () =
       { id: "team_solo", github_id: 3, slug: "solo", name: "Solo", member_ids: ["mem_c"] },
     ];
     const membership = membershipFromTeams(soloTeams);
-    const viewer: Viewer = { memberId: "mem_a", teamIds: [], role: OPEN_DEFAULT_ROLE };
+    const viewer: Viewer = sealViewer({ memberId: "mem_a", teamIds: [], role: OPEN_DEFAULT_ROLE });
     const view = filterRows({ viewer, datapoint: "cost", membership }, [ROWS[2]]);
     expect(idsOf([...view.rows])).toEqual(["s_c"]);
     expect([...view.identifiedSubjects]).toEqual(["mem_c"]);

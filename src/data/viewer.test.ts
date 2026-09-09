@@ -7,6 +7,8 @@
 import { SignJWT } from "jose";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OPEN_DEFAULT_ROLE, RESTRICTED_ROLE } from "@/domain/access";
+import type { Member, Organization } from "@/domain/types";
+import type { Dataset } from "./load";
 
 const SECRET = "a-thirty-two-byte-or-longer-testing-key";
 
@@ -138,5 +140,132 @@ describe("grants are resolved from the fixture, never from the token", () => {
     const resolution = await resolveViewer(token, "demo");
 
     expect(resolution.outcome === "signed-in" && resolution.viewer.teamIds).not.toContain("x");
+  });
+});
+
+/**
+ * **Ticket 58 — the two-Organization world, hand-built.**
+ *
+ * The committed fixture seeds one Organization, so the bad state this describes cannot be
+ * expressed in it. That is not a reason to assert nothing; it is the reason the assertion has to
+ * be built here. `resolveViewer` takes its `Dataset` as a parameter precisely so this test can
+ * hand it a world with two Organizations in it and watch the resolution fail.
+ *
+ * Everything that is not tenancy is stubbed to empty: this exercises the Membership predicate and
+ * nothing else, and a row that is not read is a row that cannot make the test pass by accident.
+ */
+const ORG_A: Organization = {
+  id: "org_a",
+  slug: "alpha",
+  name: "Alpha S.L.",
+  timezone: "Europe/Madrid",
+  github_org: "alpha",
+  window_start: "2026-04-12",
+  window_end: "2026-09-08",
+  window_days: 150,
+};
+
+const memberIn = (id: string): Member => ({
+  id,
+  github_id: 1,
+  github_login: id,
+  full_name: `Person ${id}`,
+  email: `${id}@example.test`,
+  kind: "human",
+  team_ids: [],
+  seat_active: true,
+});
+
+/**
+ * A `Dataset` serving Organization A, in which `mem_here` holds a Membership and `mem_elsewhere`
+ * holds one in Organization B — an Organization this dataset does not serve. That asymmetry is
+ * the whole point: B exists only as the target of a Membership, which is exactly the shape a
+ * cross-tenant token has.
+ */
+const TWO_ORG_DATASET = {
+  organization: ORG_A,
+  repositories: [],
+  teams: [],
+  members: [memberIn("mem_here"), memberIn("mem_elsewhere")],
+  memberships: [
+    { organization_id: "org_a", member_id: "mem_here", role: "member" },
+    { organization_id: "org_b", member_id: "mem_elsewhere", role: "member" },
+  ],
+  githubUsers: [],
+  tasks: [],
+  workTypes: [],
+  models: [],
+  rateCards: { token: [], compute: [], seat: [] },
+  sessions: [],
+  childSessions: new Map(),
+} as unknown as Dataset;
+
+describe("ticket 58 — the acting Member is checked against the Organization, not just the token", () => {
+  it("signs in a Member who holds a Membership in the Organization on the path", async () => {
+    const { resolveViewer } = await loadModule();
+    const token = await forge({ member_id: "mem_here", org_slug: "alpha" });
+
+    const resolution = await resolveViewer(token, "alpha", TWO_ORG_DATASET);
+
+    expect(resolution.outcome).toBe("signed-in");
+  });
+
+  /**
+   * **The regression.** Before ticket 58 this resolved `signed-in`: the token's `org_slug` matched
+   * the path, and the Member lookup ran across the whole dataset with no Organization predicate.
+   * Both surviving checks passed and the third did not exist.
+   */
+  it("refuses a token for one Organization naming a Member of another", async () => {
+    const { resolveViewer } = await loadModule();
+    const token = await forge({ member_id: "mem_elsewhere", org_slug: "alpha" });
+
+    const resolution = await resolveViewer(token, "alpha", TWO_ORG_DATASET);
+
+    expect(resolution.outcome).toBe("not-found");
+  });
+
+  /**
+   * **R-A7 — indistinguishable, not merely both errors.** A resolution that told the two apart
+   * would confirm that `mem_elsewhere` is a real Member somewhere, which is the membership oracle
+   * the 404-not-403 collapse exists to deny. Asserted by deep equality on the whole resolution,
+   * so a later field that differed between the two would fail this rather than slip through.
+   */
+  it("makes a Member of another Organization indistinguishable from one that does not exist", async () => {
+    const { resolveViewer } = await loadModule();
+    const [foreign, absent] = await Promise.all([
+      forge({ member_id: "mem_elsewhere", org_slug: "alpha" }),
+      forge({ member_id: "mem_nobody", org_slug: "alpha" }),
+    ]);
+
+    const [foreignResolution, absentResolution] = await Promise.all([
+      resolveViewer(foreign, "alpha", TWO_ORG_DATASET),
+      resolveViewer(absent, "alpha", TWO_ORG_DATASET),
+    ]);
+
+    expect(foreignResolution).toEqual(absentResolution);
+    expect(foreignResolution).toEqual({ outcome: "not-found" });
+  });
+
+  it("resolves the Role from the Membership, so it is held per Organization", async () => {
+    const { resolveViewer } = await loadModule();
+    const dataset = {
+      ...TWO_ORG_DATASET,
+      memberships: [
+        { organization_id: "org_a", member_id: "mem_here", role: "contractor" },
+        { organization_id: "org_b", member_id: "mem_here", role: "member" },
+      ],
+    } as unknown as Dataset;
+    const token = await forge({ member_id: "mem_here", org_slug: "alpha" });
+
+    const resolution = await resolveViewer(token, "alpha", dataset);
+
+    expect(resolution.outcome === "signed-in" && resolution.viewer.role).toEqual(RESTRICTED_ROLE);
+  });
+
+  it("reports only the Organizations a Member holds a Membership in", async () => {
+    const { organizationsFor } = await loadModule();
+
+    expect(organizationsFor("mem_here", TWO_ORG_DATASET).map((org) => org.slug)).toEqual(["alpha"]);
+    expect(organizationsFor("mem_elsewhere", TWO_ORG_DATASET)).toEqual([]);
   });
 });

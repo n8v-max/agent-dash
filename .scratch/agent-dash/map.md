@@ -484,3 +484,33 @@ contradicted its own derived columns and had been propagated into two specs as a
 - **Real GitHub OAuth or live API integration.** Fixture data throughout.
 - **Alerting and notifications.** Follows quota out of scope.
 - **The build itself.** The destination boundary — see Notes.
+
+- **Tenancy is a Membership, and the Viewer type is nominal** ([ticket
+  58](issues/58-viewer-tenancy-is-not-enforced-on-the-member.md), 2026-09-10, HITL scope): the
+  finding ticket 56 recorded, fixed. `resolveViewer` checked the token's `org_slug` against the
+  `[org]` path and then looked the Member up **across the whole dataset**, so a token minted for
+  one Organization naming a Member of another resolved signed-in. Vacuous in practice — one
+  Organization seeded, `Member` carrying no Organization at all — and **that vacuity is why nothing
+  caught it**, which is the transferable lesson rather than the bug.
+  **The human widened the fix twice and narrowed it once.** Member↔Organization became
+  **many-to-many** via a `memberships.json` join file carrying the **Role per pairing** — because
+  the same person may be an owner in one Organization and a contractor in another, and a `role`
+  field on `Member` would have to pick one of those to be true. A second Organization in the
+  fixture was asked for, then withdrawn: **one dataset, slug still `demo`, display name now
+  "Equilibrio S.L."** — which demonstrates R-A1's "slug, not a mode" claim better than a rename
+  would, because the two are now visibly different strings.
+  **The cost, recorded rather than glossed:** with one Organization seeded no Member can hold two
+  Memberships, so the switcher's Organization-switch group **never renders in the shipped app**. It
+  has unit coverage against a hand-built two-Organization `Dataset` and no e2e coverage, and the
+  regression test was verified to fail when the Organization predicate is removed — ticket 58 § 4
+  asked for exactly that and it was the easy thing to skip. The mint path was closed on the same
+  terms as the reading path, since closing one alone leaves the artefact issuable.
+  **58-B folded in:** `Viewer` is now branded with a non-exported `unique symbol`, so `queries.ts`'s
+  claim that it "is producible only by `resolveViewer`" is half type-enforced and half convention —
+  and the comment now says which half is which. → R-A1 § Amendment, `docs/security.md` § 6.
+
+- **Ticket 08 closed** (2026-09-10, bookkeeping): it carried `partially resolved` for three days
+  after ticket 16 answered both of its remaining items on 2026-09-07 — Repository work domain cut,
+  Model roster settled at seven models over three vendors. No new reasoning; the status line was
+  simply stale. → [ticket 08](issues/08-dimension-taxonomies.md) § Closed.
+

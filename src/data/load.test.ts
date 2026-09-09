@@ -6,7 +6,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { AgentSession, Repository, WorkType } from "@/domain/types";
+import type { AgentSession, Membership, Repository, WorkType } from "@/domain/types";
 import * as loadModule from "./load";
 import { loadDataset, readDataset, readFixtureFile, type Dataset, type FixtureReader } from "./load";
 import { FixtureFault } from "./schema";
@@ -421,3 +421,73 @@ function countOf(file: string, dataset: Dataset): number {
   const ids = new Set(sessionsIn(file).map((row) => row.id));
   return dataset.sessions.filter((row) => ids.has(row.id)).length;
 }
+
+/**
+ * **Ticket 58 — tenancy is validated at load, in the file that states it.**
+ *
+ * Every fault here names the file, the row index and the field (T-U26): a Membership is the row
+ * that decides who may read an Organization's data, so "which one" is the first thing a reader
+ * needs and the last thing they should have to grep for.
+ */
+describe("memberships.json — the Member↔Organization join is validated at load", () => {
+  const rawMemberships = readRaw<Membership[]>("memberships.json");
+
+  it("resolves every committed Membership to the seeded Organization and a real Member", () => {
+    const dataset = readDataset(fixtureReader);
+    const memberIds = new Set(dataset.members.map((member) => member.id));
+
+    expect(dataset.memberships).toHaveLength(dataset.members.length);
+    expect(
+      dataset.memberships.every(
+        (membership) =>
+          membership.organization_id === dataset.organization.id &&
+          memberIds.has(membership.member_id),
+      ),
+    ).toBe(true);
+  });
+
+  it("faults on a Membership naming an Organization nothing declares", () => {
+    const payload = JSON.stringify([
+      ...rawMemberships,
+      { organization_id: "org_nowhere", member_id: rawMemberships[0]?.member_id, role: "member" },
+    ]);
+
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(FixtureFault);
+    // File, row and field — all three, which is what makes the fault openable.
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(
+      new RegExp(`memberships\\.json\\[${String(rawMemberships.length)}\\]\\.organization_id`),
+    );
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(
+      /unknown Organization "org_nowhere"/,
+    );
+  });
+
+  it("faults on a Membership naming a Member the directory does not hold", () => {
+    const payload = JSON.stringify([
+      ...rawMemberships,
+      { organization_id: "org_equilibrio", member_id: "mem_ghost", role: "member" },
+    ]);
+
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(
+      new RegExp(`memberships\\.json\\[${String(rawMemberships.length)}\\]\\.member_id`),
+    );
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(
+      /unknown Member "mem_ghost"/,
+    );
+  });
+
+  it("faults on two Memberships for one Member in one Organization", () => {
+    const first = rawMemberships[0];
+    const payload = JSON.stringify([...rawMemberships, { ...first, role: "contractor" }]);
+
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(
+      /duplicate Membership/,
+    );
+  });
+
+  it("faults on a Membership row that is not shaped like one", () => {
+    const payload = JSON.stringify([{ organization_id: "org_equilibrio", member_id: 7 }]);
+
+    expect(() => readDataset(readerWith({ "memberships.json": payload }))).toThrow(FixtureFault);
+  });
+});

@@ -6,7 +6,8 @@
 // equality check on a string the reader can see is the same string.
 
 import { joinGithubUser } from "./join.mts";
-import type { GithubUser, Member, MemberKind, Team } from "./types.mts";
+import { organization } from "./catalog.mts";
+import type { GithubUser, Member, Membership, MemberKind, Team } from "./types.mts";
 
 // [memberId, fullName, emailLocal, kind, role, teamSlugs, githubId, login, githubName, githubEmail]
 type PersonRow = readonly [
@@ -81,7 +82,7 @@ const candidates = PEOPLE.map(([id, fullName, emailLocal]) => ({
 // The join runs here, not in a comment: every GitHub user is resolved through the documented
 // rule, and a user that failed to resolve — or resolved to the wrong Member — stops the build.
 export const members: Member[] = PEOPLE.map((person) => {
-  const [id, fullName, emailLocal, kind, role, teamSlugs, githubId, login] = person;
+  const [id, fullName, emailLocal, kind, , teamSlugs, githubId, login] = person;
   const user = githubUsers.find((candidate) => candidate.id === githubId);
   if (user === undefined) throw new Error(`no GitHub user for ${id}`);
   const outcome = joinGithubUser(user, candidates);
@@ -96,11 +97,23 @@ export const members: Member[] = PEOPLE.map((person) => {
     full_name: fullName,
     email: directoryEmail(emailLocal),
     kind,
-    role,
     team_ids: teamSlugs.map((slug) => `team_${slug}`),
     seat_active: kind === "human",
   };
 });
+
+/**
+ * The Member↔Organization join, generated from the same `PEOPLE` table the directory is.
+ *
+ * The Role lives here rather than on the Member because it is a property of the *pairing*
+ * (ticket 58). One Organization is seeded, so this is one row per person — the many-to-many is
+ * in the shape, not yet in the data.
+ */
+export const memberships: Membership[] = PEOPLE.map((person) => ({
+  organization_id: organization.id,
+  member_id: person[0],
+  role: person[4],
+}));
 
 export const teams: Team[] = TEAM_ROWS.map(([slug, name, githubId]) => ({
   id: `team_${slug}`,

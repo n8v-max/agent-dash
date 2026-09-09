@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by:
-Label: ready-for-agent
+Label: resolved
 
 # `resolveViewer` checks the org on the URL and the token, but not on the Member
 
@@ -58,3 +58,75 @@ Ticket 56 also recorded a second, smaller discrepancy worth folding in here or c
 `resolveViewer`", but `Viewer` is a plain structural type (`access.ts:178`) and only convention and
 lint enforce it. The enforced half — that no unfiltered query is nameable — is real. Either make the
 type claim true with a branded type, or reword the comment to claim only what holds.
+
+## Comments
+
+### 2026-09-10 — scope widened by the human, then built (branch `ticket/58-tenancy`)
+
+**What changed about the ask, before any code.** The ticket as written asked for
+`Member.organization_id` — a single Organization per Member. The human widened it to
+**many-to-many**, chose a `memberships.json` join file over an array on either side, and asked
+that the account switcher be able to re-mint the JWT against another Organization when a Member
+holds more than one. Two clarification rounds settled the rest, and the second reversed the first:
+
+- **No second Organization in the fixture.** Asked for and then withdrawn — "single dataset,
+  always demo". The slug stays `demo`; the display name becomes **"Equilibrio S.L."**, which
+  demonstrates R-A1's point better than a rename would, because slug and name are now visibly
+  different strings. No new routes.
+- **58-B folded in**, as § Notes offered.
+- **Ticket 59 explicitly excluded.** Three rows, closed completely.
+
+**The consequence that had to be said out loud.** With one Organization seeded, no Member can hold
+two Memberships, so the switcher's Organization group **never renders in the shipped application**.
+That is a deliberate cost of the single-dataset decision, not an oversight. It is carried by unit
+tests that hand the component a two-Organization list directly, and it is stated in the component's
+own header rather than left for a reader to discover.
+
+#### What was built
+
+| | |
+|---|---|
+| `memberships.json` | 20 rows, `(organization_id, member_id, role)`. Generated from the same `PEOPLE` table the directory is; `npm run fixtures:generate` reproduces the whole fixture **byte-identically**. |
+| `Member` | Loses `role`. A Role held per pairing cannot live on the person — that was the modelling error that made the M2M expressible only by accident. |
+| `load.ts` | `Dataset.memberships`, plus three faults, each naming file, row index and field (ticket 53's format): unknown Organization, unknown Member, duplicate pairing. |
+| `viewer.ts` | The lookup is now **through** a Membership in the Organization the path and token already agree on. Takes its `Dataset` as a parameter, following the `FixtureReader` precedent, so the two-Organization world is expressible without seeding one. |
+| `api/session/route.ts` | The mint path closed on the same terms — `org_slug` is resolved through the Member's own Memberships and never read from the form. Closing only the reading side would have left the artefact issuable. |
+| `account-switcher.tsx` | Organization name and Role on every entry; the Organization group gated on holding more than one. Split into `AccountEntry` and `OrganizationGroup` at the lint layer's function-length ceiling. |
+| `access.ts` | `Viewer` branded with a non-exported `unique symbol`; `sealViewer` is its only constructor (58-B). |
+
+#### Done-when, checked
+
+- **Indistinguishability** — asserted by deep equality on the *whole* `ViewerResolution`, not by
+  "both are errors", so a field that later differed between the two would fail this test.
+- **The test can fail.** Verified by removing the Organization predicate from `viewer.ts` and
+  re-running: exactly the two tenancy tests fail, the other fourteen pass. § Scope item 4 asked
+  for this and it would have been the easy thing to skip.
+- **Load faults** — three, each asserted on file, row index and field.
+- **`docs/security.md`** — § 6's finding replaced by what the code does now, and § 4's "a
+  hand-built `Viewer` genuinely does [typecheck]" corrected, since it no longer does.
+
+#### Decisions taken under the escalation rule
+
+**`Dataset.organization` was not pluralised, though a first reading of the ticket implies it.**
+Seventeen call sites read it, and every one means *the Organization being served* — timezone,
+window, name. The two-Organization test needs Organization B only as the **target of a Membership**,
+never as a served tenant, so pluralising would have touched seventeen files to express something
+the test does not need. The cost: a hand-built `Dataset` can hold a Membership pointing at an
+Organization the dataset does not serve, which is incoherent as data and is exactly the attack
+shape as a test. Stated here because it is the one place the model is deliberately loose.
+
+**The switcher does not name the other account's Member, though the human asked for "user name,
+org name and role".** Doing so would put a named individual in the payload of a viewer holding no
+identifying scope over them — the leak `T-E4` exists to catch, and `e2e/payload.spec.ts` would
+have failed. Delivered instead: the **acting** Member's own name on their own entry, where
+R-A3.1's universal `self` grant makes it theirs to read, with Organization and Role on both. The
+request minus the one part of it that would have re-opened a tested security property. Asserted
+both ways in `account-switcher.test.tsx`, since asserting only the absence would pass against a
+menu rendering no names at all.
+
+**Gates:** `lint` · `typecheck` · `test` (1405) · `test:coverage` (98.43 / 89.21 / 98.98 / 99.53) ·
+`build` · `e2e` (152, including the T-E4 payload specs) — all green.
+
+**Not done, and not owed here:** `docs/coverage-gaps.md` is stamped "measured on ticket 38,
+2026-09-08" and its ranked list is unaffected by this change; regenerating it is that document's
+own cadence, not this ticket's.
