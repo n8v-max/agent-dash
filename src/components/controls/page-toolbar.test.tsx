@@ -24,7 +24,7 @@
 
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { observationWindow } from "@/data/clock";
+import { dataAsOf, observationWindow, type DataAsOf } from "@/data/clock";
 import {
   DECLARED_CONTROLS,
   PAGES,
@@ -35,11 +35,18 @@ import {
   type PageKey,
 } from "@/data/params";
 import type { ControlOptions } from "@/data/queries";
-import { PageToolbar } from "./page-toolbar";
+import { AS_OF_PREFIX, PageToolbar, asOfText } from "./page-toolbar";
 import { parseControls, periodOptions, type ControlQuery } from "./schema";
 
 const WINDOW = observationWindow();
 const NOW = "2026-09-08T12:00:00+02:00";
+
+/**
+ * R-N3.1's stamp, read off the committed fixture rather than invented (P6). It is a data-layer
+ * value and takes no viewer, so a component test may hold it — what it *is* is asserted in
+ * `src/data/clock.test.ts`, over the same rows the product serves.
+ */
+const AS_OF = dataAsOf();
 
 const optionsWith = (grains: ControlOptions["grains"]): ControlOptions => ({
   repositories: [
@@ -66,7 +73,12 @@ const toolbar = (
 ) => {
   const controls = parseControls({ page, orgSlug: "demo", window: WINDOW, now: NOW, query });
   return render(
-    <PageToolbar controls={controls} options={optionsWith(grains)} window={WINDOW} />,
+    <PageToolbar
+      controls={controls}
+      options={optionsWith(grains)}
+      window={WINDOW}
+      asOf={AS_OF}
+    />,
   );
 };
 
@@ -109,15 +121,23 @@ describe("T-C6 — the toolbar renders exactly this page's global controls (R-C1
     expect(["control-period", "control-dateRange"]).toContain(firstControl);
   });
 
-  it("renders no toolbar at all where a page declares none (R-N3)", () => {
+  it("renders the bar with no control at all where a page declares none (R-N3.1)", () => {
+    // **Amended by ticket 45.** R-N3 made the bar *absent* here, on the argument that an empty
+    // toolbar promises controls that never arrive. It is no longer empty: R-N3.1 puts the as-of
+    // stamp in it on every surface, and a freshness claim missing from one of six reads as that
+    // one being stale. What survives of the old rule is asserted instead — the bar holds **no
+    // control**, so the page still offers nothing its panels cannot use.
     expect(DECLARED_CONTROLS.projection).toEqual([]);
-    const { container } = toolbar("projection");
-    // Absent, not empty: no landmark, no bar, no element of any kind.
-    expect(screen.queryByTestId("page-toolbar")).toBeNull();
-    expect(container).toBeEmptyDOMElement();
+    toolbar("projection");
+
+    expect(screen.getByTestId("page-toolbar")).toBeInTheDocument();
+    expect(rendered()).toEqual([]);
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByTestId("data-as-of")).toBeVisible();
   });
 
   it.each(CONTROLLED)("%s greys nothing — every offered value is a live link", (page) => {
+    // The stamp is not a control and carries no link, so it cannot satisfy this on its own.
     toolbar(page);
     const bar = screen.getByTestId("page-toolbar");
 
@@ -270,5 +290,53 @@ describe("R-T25 — no React state mirrors the query string", () => {
     ]) {
       expect(source).not.toContain(`${hook}(`);
     }
+  });
+});
+
+/**
+ * **T-C21 — the as-of stamp stands in the bar, on every surface** (R-N3.1, A39).
+ *
+ * Three claims, and the third is the one the requirement is actually about: the stamp names the
+ * session it was read off, so "matches the History top row" is an identity the E2E layer can
+ * assert (T-E15) rather than a coincidence between two formatted strings. What the *value* is —
+ * the greatest `ended_at`, printed as that session's start in the Organization's timezone — is
+ * `src/domain/observation.test.ts`'s and `src/data/clock.test.ts`'s, over real rows.
+ */
+describe("T-C21 — the as-of stamp (R-N3.1)", () => {
+  const stamp = () => screen.getByTestId("data-as-of");
+
+  it.each(PAGES)("stands in %s's bar, whatever that page declares", (page) => {
+    toolbar(page);
+
+    expect(stamp()).toBeVisible();
+    expect(stamp()).toHaveTextContent(asOfText(AS_OF as DataAsOf));
+  });
+
+  it("reads as where the rows stop, not as a refresh the product does not do", () => {
+    toolbar("spend");
+
+    expect(AS_OF_PREFIX).toBe("Data to");
+    expect(stamp().textContent).toMatch(/^Data to \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+  });
+
+  it("names the session it was read off, which is what the History row is checked against", () => {
+    toolbar("history");
+
+    expect(stamp()).toHaveAttribute("data-session", (AS_OF as DataAsOf).sessionId);
+  });
+
+  it("is absent, not blank, for an Organization holding no session", () => {
+    const controls = parseControls({
+      page: "spend",
+      orgSlug: "demo",
+      window: WINDOW,
+      now: NOW,
+      query: {},
+    });
+    render(
+      <PageToolbar controls={controls} options={optionsWith(["week"])} window={WINDOW} asOf={null} />,
+    );
+
+    expect(screen.queryByTestId("data-as-of")).toBeNull();
   });
 });

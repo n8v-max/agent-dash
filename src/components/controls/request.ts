@@ -11,14 +11,16 @@
 //
 // **`now` and the observation window arrive here and nowhere else** (P5). Everything below this
 // point takes them as arguments, which is what keeps `src/domain` clock-free and the queries
-// reproducible.
+// reproducible. The as-of stamp (R-N3.1) rides with them: it is the third of `clock.ts`'s answers
+// to "when", it is a property of the dataset rather than of this request's controls, and it is
+// resolved once here so six surfaces cannot print six different freshness claims.
 
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Viewer } from "@/domain/access";
 import type { PeriodRange } from "@/domain/periods";
 import type { Account } from "@/data/accounts";
-import { observationWindow, requestNow } from "@/data/clock";
+import { dataAsOf, observationWindow, requestNow, type DataAsOf } from "@/data/clock";
 import type { ControlSet, PageKey } from "@/data/params";
 import { controlOptions, type ControlOptions } from "@/data/queries";
 import { SESSION_COOKIE } from "@/data/session-cookie";
@@ -33,6 +35,12 @@ export type PageRequest = {
   readonly options: ControlOptions;
   /** The Organization's observation window, so a control can tell "default" from "chosen". */
   readonly window: PeriodRange;
+  /**
+   * R-N3.1 — how fresh the rows behind this page are. `null` only for an Organization holding no
+   * session at all, which `demo` never is (R-E1); the type carries the case rather than asserting
+   * it away.
+   */
+  readonly asOf: DataAsOf | null;
 };
 
 /**
@@ -61,5 +69,6 @@ export async function pageRequest(
     controls,
     options: controlOptions(resolution.viewer, controls),
     window: bounds,
+    asOf: dataAsOf(),
   };
 }

@@ -6,6 +6,12 @@
 // in the same pass as the figures. The restriction survives an empty selection, because R-V9's
 // fallback replaces the chart and not the panel.
 //
+// **R-V14 folded the note without shortening it** (ticket 45). The restriction — *"Interactive
+// sessions only: 30 of 42"* — is the note's first sentence and stays on screen; the argument for
+// it, that a headless session is AFK by construction, is in the panel's "Why this number"
+// disclosure. So the assertions below read both halves and check the ViewModel's `note` is still
+// rendered whole, which is the claim A27 actually makes.
+//
 // **T-C1 — the mirror's values equal the rendered series.** The mirror is built in the domain
 // layer on a path that never reads a `SeriesPoint` (R-T7), so on real data the two agree only if
 // the same arithmetic produced both. What this file adds is the panel-level cross-check the
@@ -23,6 +29,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { EMPTY_TEXT } from "@/components/charts/chart-frame";
 import { chartFixture } from "../charts/chart-viewmodels.fixture";
+import { splitProse } from "./panel-prose";
 import { PresenceSpans } from "./work-presence";
 import { PRESENCE_NOTE, PRESENCE_SPANS } from "./work-viewmodels.fixture";
 
@@ -50,8 +57,12 @@ describe("A27 — the panel is interactive-only and says so", () => {
 
   it("renders the ViewModel's note, with the counts it was computed beside", () => {
     render(<PresenceSpans panel={PRESENCE_SPANS} />);
+    const { lead, rest } = splitProse(PRESENCE_NOTE);
 
-    expect(within(panel()).getByText(PRESENCE_NOTE)).toBeInTheDocument();
+    // The restriction itself is on screen; its justification is folded, not cut (R-V14).
+    expect(within(panel()).getByText(lead)).toBeVisible();
+    expect(within(panel()).getByText(rest ?? "")).toBeInTheDocument();
+    expect(`${lead} ${rest}`).toBe(PRESENCE_NOTE);
     expect(PRESENCE_NOTE).toContain("30 of 42");
     expect(PRESENCE_NOTE).toContain("12 headless sessions are excluded");
   });
@@ -68,7 +79,7 @@ describe("A27 — the panel is interactive-only and says so", () => {
 
     expect(within(panel()).getByText(EMPTY_TEXT)).toBeInTheDocument();
     expect(within(panel()).getByText("interactive sessions only")).toBeInTheDocument();
-    expect(within(panel()).getByText(PRESENCE_NOTE)).toBeInTheDocument();
+    expect(within(panel()).getByText(splitProse(PRESENCE_NOTE).lead)).toBeVisible();
   });
 });
 

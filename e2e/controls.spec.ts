@@ -158,7 +158,7 @@ test.describe("T-E6 — the account switcher stays on the current URL (A5, R-A5)
     expect(reissued?.httpOnly).toBe(true);
   });
 
-  test("switching from a page with no toolbar keeps that page too", async ({
+  test("switching from a page with no control in its bar keeps that page too", async ({
     page,
     context,
     baseURL,
@@ -169,7 +169,11 @@ test.describe("T-E6 — the account switcher stays on the current URL (A5, R-A5)
       baseURL ?? BASE,
     );
     await page.goto(`/${SLUG}/projection`);
-    await expect(page.getByTestId("page-toolbar")).toHaveCount(0);
+    // R-N3.1 — the bar is here, holding the as-of stamp and no control. What this test needs of
+    // the page is the second half of that, which is what it now asserts.
+    await expect(page.getByTestId("page-toolbar").locator('[data-testid^="control-"]')).toHaveCount(
+      0,
+    );
 
     await openMenu(page, '[data-testid="account-switcher"]');
     await switchTo(page, OPEN_ACCOUNT.roleName);
@@ -334,7 +338,17 @@ test.describe("T-E13 — the history date range applies on change (R-N20)", () =
   });
 });
 
-test.describe("R-N3 — the toolbar is absent, not empty, where a page declares no controls", () => {
+/**
+ * **R-N3.1 — the bar is on every surface, and it offers no control a page's panels cannot use.**
+ *
+ * This block used to assert the bar was *absent* on `/demo/projection`, on R-N3's argument that
+ * an empty toolbar promises controls that never arrive. Ticket 45 put the as-of stamp in the bar,
+ * so the bar there is no longer empty — and a freshness claim standing on five surfaces out of
+ * six would read as the sixth being stale. The half of R-N3 that mattered is asserted instead,
+ * and asserted more sharply than before: `/demo/projection` renders the bar **and no control in
+ * it**, which is R-C1's ban read at the page that declares nothing.
+ */
+test.describe("R-N3.1 — every surface has the bar; the one with no controls shows none", () => {
   test.beforeEach(async ({ context, baseURL }) => {
     await useSession(
       context,
@@ -343,15 +357,19 @@ test.describe("R-N3 — the toolbar is absent, not empty, where a page declares 
     );
   });
 
-  test("every page that declares controls has a toolbar, and /projection has none", async ({
-    page,
-  }) => {
+  test("every page has a toolbar, and /projection's holds no control", async ({ page }) => {
     for (const path of ["", "/spend", "/work", "/people", "/history"]) {
       await page.goto(`/${SLUG}${path}`);
       await expect(page.getByTestId("page-toolbar")).toHaveCount(1);
+      await expect(
+        page.getByTestId("page-toolbar").locator('[data-testid^="control-"]'),
+      ).not.toHaveCount(0);
     }
 
     await page.goto(`/${SLUG}/projection`);
-    await expect(page.getByTestId("page-toolbar")).toHaveCount(0);
+    await expect(page.getByTestId("page-toolbar")).toHaveCount(1);
+    await expect(page.getByTestId("page-toolbar").locator('[data-testid^="control-"]')).toHaveCount(
+      0,
+    );
   });
 });

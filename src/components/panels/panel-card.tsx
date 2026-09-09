@@ -17,10 +17,18 @@
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { PanelProse } from "./panel-prose";
 
 export function PanelCard(props: {
   readonly title: string;
-  /** One line saying what this panel answers. The panel's own copy, never a metric. */
+  /**
+   * What this panel answers. The panel's own copy, never a metric.
+   *
+   * **R-V14 — the first sentence is what a reader sees**; everything after it is folded into the
+   * "Why this number" disclosure `PanelProse` renders, verbatim. A panel therefore keeps writing
+   * whole paragraphs — the argument is not shortened, it is relocated — and no panel decides
+   * where the cut falls.
+   */
   readonly question: string;
   /** `h2` for a top-level panel, `h3` for one inside a section with its own heading. */
   readonly level?: "h2" | "h3";
@@ -28,7 +36,14 @@ export function PanelCard(props: {
   readonly controls?: ReactNode;
   /** The readings that sit beside the chart — a `FigureList`, or nothing. */
   readonly figures?: ReactNode;
-  /** A qualification the ViewModel carried, such as R-M5's monthly-grain note. */
+  /**
+   * A qualification the ViewModel carried, such as R-M5's monthly-grain note.
+   *
+   * It stays **below the chart and outside the header**, unfolded, which is R-V14 read at its
+   * own boundary: the rule governs the panel's standing prose, and this is a reading of the
+   * *current selection* — the per-capita denominator is the sharpest case, and a denominator
+   * behind a disclosure is a divisor a reader has to open a drawer to find (C14).
+   */
   readonly footnote?: string | null;
   readonly children: ReactNode;
   readonly className?: string;
@@ -53,7 +68,7 @@ export function PanelCard(props: {
           >
             {props.title}
           </Heading>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{props.question}</p>
+          <PanelProse text={props.question} className="mt-1" />
         </div>
         {props.controls}
       </div>

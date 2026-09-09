@@ -5,8 +5,9 @@
 // page rather than content in it, and because a page that had to remember to render its own
 // toolbar is a page that can forget.
 //
-// The toolbar is **absent** rather than empty where the page declares no controls: `PageToolbar`
-// returns `null` and this frame renders `<main>` directly under the header.
+// **R-N3.1 — the bar is on every controlled surface, because the as-of stamp is.** It used to be
+// absent where a page declared no controls; `/demo/projection` now renders it holding the stamp
+// alone. A freshness claim on five of six surfaces reads as the sixth being stale.
 //
 // **R-C7's active-filter sentence is here too, and under the heading rather than in the bar.**
 // It is a reading of the page — *"Week grain · by Team · mobile-app · all templates"* — not a
@@ -31,6 +32,7 @@ export function PageFrame(props: {
         controls={props.request.controls}
         options={props.request.options}
         window={props.request.window}
+        asOf={props.request.asOf}
       />
       <main className="mx-auto w-full max-w-[110rem] px-4 py-8 sm:px-6">
         <div className="mb-6 max-w-3xl">

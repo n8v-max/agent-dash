@@ -281,6 +281,19 @@ against.
     grain holds no reading in weeks 15–17, 20, 21 and 23, and **no bucket of that chart reads
     zero** — a finished Job cannot have cost nothing, so a zero there could only be the coercion
     this rule removed. `src/data/queries.test.ts`.
+- **T-U23 — the dataset's own edge** (`domain/observation.ts`, R-N3.1, A39). The rule is "the
+  greatest `ended_at`", and every case is a way of getting that wrong: reading `started_at`
+  instead — a long session started before a short one finishes after it, and the two orders
+  disagree — taking the last row of an already-ordered list (`load.ts` orders by `started_at`),
+  comparing ISO strings rather than instants across two offsets, or letting an unreadable
+  timestamp rank as a `NaN`. A genuine tie breaks by id, so the answer is one row and always the
+  same row. **No clock is read** (P5): the observation is a property of the rows and takes no
+  `now`, so it cannot drift with the day the suite runs.
+  - **Over the committed fixture**, in `src/data/clock.test.ts`: `dataAsOf()` names the session
+    that ended last out of all 742, prints that session's **start** through the one instant
+    formatter in the Organization's timezone, lands **inside `window_end`** — which is the reason
+    it prints the start rather than the end — and is the same string when the wall clock is moved
+    five years forward.
 
 ---
 
@@ -346,7 +359,11 @@ product's central interaction.
 - **T-C5 — Invalid control combinations are coerced or rejected, never rendered** (A3) — day grain
   over a range longer than two months is the named case.
 - **T-C6 — The toolbar renders exactly this page's global controls** (R-C1, R-C6), and **no greyed
-  control appears anywhere**. Table-driven over the six pages. Amended 2026-09-09: the claim used
+  control appears anywhere**. Table-driven over the six pages. **Amended again 2026-09-09 (ticket
+  45)**: the claim about `/demo/projection` was "no toolbar renders at all", and R-N3.1 puts the
+  as-of stamp in every bar. What is asserted there now is the half of R-N3 that carried the
+  requirement — the bar renders and holds **no control**, and no link at all — so a page that
+  quietly started offering a control its panels cannot use still fails here. Amended 2026-09-09: the claim used
   to read "only its declared controls", and the declared set was the whole of what a page could
   show. R-C6 split it, so both halves are asserted — the bar shows every toolbar control, in order,
   **and** no panel-local one — and a third assertion checks the two lists are a *partition* of the
@@ -449,6 +466,31 @@ product's central interaction.
     the transpose. It has to be there — a component test may not import `src/domain` at runtime
     (R-T6) — and `src/data/queries.test.ts` closes the loop by asserting which *subject level*
     the query gives which form.
+- **T-C19 — one interpolation, and no panel overrides it** (A37, R-V13, ticket 45). Three claims,
+  and the third is the one worth the file. The constant is `linear`; every `line` and `area` mark
+  is drawn with it; and **no module anywhere in `src/` names a curve of its own** — which is what
+  "no panel overrides it" means, asserted as an absence over the source rather than as a promise
+  from thirteen panels. A rendering assertion alone would pass against a product where one panel
+  had quietly gone back to a spline, because that panel's chart is not the one rendered in the
+  test. The absence is matched as the *shape of the prop* — `type=` followed by a curve name —
+  rather than as the bare word, because `step`, `natural` and `linear` are English and appear in
+  the prose of modules that draw nothing.
+- **T-C20 — one sentence visible, and the fold keeps every word** (A38, R-V14, ticket 45). The
+  second claim is the one that matters: "the panel shows one sentence" is satisfiable by
+  *deleting* the other three, which is exactly what R-V14 forbids. So the assertion is the **round
+  trip** — `lead` plus `rest` is the paragraph that was handed in, word for word — over
+  `splitProse`, the one expression that decides the cut, in the same shape T-C11 asserts
+  `stackIdOf` and T-C12 asserts `furnitureFor`. Its boundary cases are the ones that would cut a
+  figure in half: `42.5`, `p95.` and `30 of 42.` are inside their sentences, because a terminator
+  ends a sentence only when whitespace follows it. The rendering half asserts the disclosure is a
+  native `<details>` with **no button and no handler**, that the folded paragraph is *in the
+  document and not visible* while it is closed, and that clicking the summary reveals it.
+- **T-C21 — the as-of stamp stands in the bar** (A39, R-N3.1, ticket 45). Table-driven over the
+  six pages, including the one that declares no control. The stamp reads `Data to ` and an instant
+  in the Organization's format, and it carries `data-session` — the id of the session it was read
+  off — which is what lets T-E15 assert "matches the History top row" as an identity between two
+  ids rather than as a coincidence between two formatted strings. An Organization holding no
+  session renders **no stamp** rather than a blank one. What the value *is* belongs to T-U23.
 
 ---
 
@@ -550,6 +592,22 @@ request per account per route, asserting rows rather than pixels."*
   asserted to still draw a line and still head its mirror "Period", and Cost per session is
   asserted to still be on weeks. Without them a page that had simply lost its charts, or one that
   had stopped honouring its grain control at all, would pass the file.
+- **T-E15 — the as-of stamp reaches every surface, and is checkable** (A39, R-N3, R-N3.1, ticket
+  45). Every layer below proves a piece — the domain layer decides which session is the dataset's
+  edge, `clock.ts` prints it in the Organization's timezone, the toolbar renders it — and none of
+  them proves the same string reaches all **six** routes, or that the claim can be *checked*. So:
+  the stamp is in the `page-toolbar` of all six and names one instant across them; on
+  `/demo/history` it equals the top row's **Started** cell and carries that row's own session id;
+  it **does not move** when a filter narrows the page, because it is the dataset's edge and not
+  the selection's; and the restricted account is told the same thing, because a freshness claim
+  carries no cost, no name and no count.
+- **T-E16 — a panel states one sentence and folds the rest** (A38, R-V14, ticket 45). At the
+  panel, over the two panelled surfaces: every panel prose block shows exactly **one** visible
+  paragraph, a named panel on each page carries exactly one such block, the "Why this number"
+  disclosure exists on more than one panel per page, and opening the first one reveals prose
+  rather than a stub. Asserted through the prose block rather than over every `<p>` in the panel,
+  because a panel's **figures** are paragraphs too — the acceptance multiples print a rate and a
+  denominator above each tile's sparkline, and neither is prose.
 
 ---
 
@@ -662,6 +720,9 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A34 The history date range applies on change | T-E13 |
 | A35 Every controlled page states its active filters | T-C15, T-E12 |
 | A36 `subject=member` is ranked bars with a transposed mirror; Cost by Repository reads months | T-C18, T-C1, T-E14 |
+| A37 One interpolation, named in one place and overridden nowhere | T-C19 |
+| A38 One visible sentence per panel; the rest folded, verbatim | T-C20, T-E16 |
+| A39 The as-of stamp on every surface, matching the History top row | T-U23, T-C21, T-E15 |
 
 ---
 

@@ -27,6 +27,7 @@ import { Children, isValidElement, type ReactElement, type ReactNode } from "rea
 import { describe, expect, it } from "vitest";
 import type { Grouping } from "@/domain/viewmodel";
 import { ChartFrame } from "./chart-frame";
+import { CHART_INTERPOLATION } from "./chart-config";
 import {
   CHART_SHAPES,
   STACKING_SHAPES,
@@ -342,5 +343,101 @@ describe("T-C18 — a ranked ViewModel draws horizontal bars, whatever shape the
       true,
     ]);
     expect(drawn.map(nameOf)).toContain("Legend");
+  });
+});
+
+/**
+ * **T-C19 — one interpolation, declared once and overridden by nobody** (R-V13, A37).
+ *
+ * Three claims, and the third is the one worth the file. The constant is `linear`; the marks are
+ * drawn with it; and **no other module in the product names a curve at all** — which is what
+ * "no panel overrides it" means, asserted as an absence over the source rather than as a promise
+ * from the panels. A rendering assertion alone would pass against a product where one panel had
+ * quietly gone back to a spline, because that panel's chart is not the one rendered here.
+ *
+ * The absence is spelled as the *shape of the prop* — `type=` followed by a curve name — rather
+ * than as the bare word, because `step`, `natural` and `linear` are English and appear in the
+ * prose of modules that draw nothing.
+ */
+describe("T-C19 — every line and area is interpolated `linear` (R-V13)", () => {
+  const propsOf = (element: ReactElement): Record<string, unknown> =>
+    element.props as Record<string, unknown>;
+
+  const childrenOf = (element: ReactElement): ReactNode => {
+    const { children } = propsOf(element) as { readonly children?: ReactNode };
+    return children;
+  };
+
+  const marksFor = (shape: "line" | "area"): readonly ReactElement[] => {
+    const chart = chartFixture();
+    const keys = new Set(chart.series.map((series) => series.key));
+    const element = chartElementFor({ chart, shape, tickFormat: String });
+
+    return Children.toArray(childrenOf(element))
+      .filter((child): child is ReactElement => isValidElement(child))
+      .filter((child) => keys.has(String(propsOf(child).dataKey)));
+  };
+
+  it("is `linear`, and the constant is what the product means by an interpolation", () => {
+    expect(CHART_INTERPOLATION).toBe("linear");
+  });
+
+  it.each(["line", "area"] as const)("draws every %s mark with it", (shape) => {
+    const marks = marksFor(shape);
+
+    expect(marks.length).toBeGreaterThan(0);
+    for (const mark of marks) expect(propsOf(mark).type).toBe(CHART_INTERPOLATION);
+  });
+
+  it("is the only curve the chart layer names", () => {
+    const sources = import.meta.glob("./*.tsx", { query: "?raw", import: "default", eager: true });
+    const uses = Object.entries(sources)
+      .filter(([path]) => !path.includes(".test."))
+      .flatMap(([, source]) => String(source).match(/\btype=\{[^}]*\}/g) ?? []);
+
+    expect(uses).toContain("type={CHART_INTERPOLATION}");
+    for (const use of uses) expect(use).toBe("type={CHART_INTERPOLATION}");
+  });
+
+  it("and no module anywhere in src spells a curve of its own", () => {
+    const everything = import.meta.glob("../../**/*.{ts,tsx}", {
+      query: "?raw",
+      import: "default",
+      eager: true,
+    });
+    const chartLayer = import.meta.glob("./*.{ts,tsx}", {
+      query: "?raw",
+      import: "default",
+      eager: true,
+    });
+    const modules = [...Object.entries(everything), ...Object.entries(chartLayer)].filter(
+      ([path]) => !path.includes(".test.") && !path.includes(".spec."),
+    );
+    // Recharts' whole `CurveType` union, less `linear` itself, matched in the one position that
+    // makes a string a curve: the `type` prop of a mark. Built from the list rather than written
+    // as one alternation, so each pattern stays readable and the union is the thing under review.
+    const CURVES = [
+      "monotone",
+      "monotoneX",
+      "monotoneY",
+      "basis",
+      "basisClosed",
+      "basisOpen",
+      "natural",
+      "step",
+      "stepBefore",
+      "stepAfter",
+      "bump",
+      "bumpX",
+      "bumpY",
+      "linearClosed",
+    ];
+    const namesACurve = (source: string): boolean =>
+      CURVES.some((curve) => new RegExp(`type=["{']?\\s*["']?${curve}\\b`).test(source));
+
+    expect(modules.length).toBeGreaterThan(40);
+    for (const [path, source] of modules) {
+      expect({ path, curve: namesACurve(String(source)) }).toEqual({ path, curve: false });
+    }
   });
 });

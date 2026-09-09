@@ -23,6 +23,13 @@
 // row-major shape Recharts reads; it sums nothing, sorts nothing and drops nothing. Every number
 // that reaches a mark is the one `src/domain/` put on the series.
 //
+// **R-V13 — one interpolation, and it arrives from `chart-config.tsx`.** `linesFor` and
+// `areasFor` read `CHART_INTERPOLATION` and neither spells a curve of its own; `ShapeInput`
+// carries no curve field, so a panel has nothing to override it with. Why `linear` rather than a
+// spline is argued where the constant is declared: a curve leaves the range of the points it was
+// drawn through, which puts an acceptance rate above 100% and a cost below $0 between two real
+// readings.
+//
 // **R-M18 — `connectNulls={false}`, stated rather than inherited.** A series point is `null`
 // where the domain layer had no reading for that bucket: a week with no Completed Job has no
 // Cost per completed Job, and the rule is that such a figure is absent, never zero. A connected
@@ -55,6 +62,7 @@ import {
 } from "recharts";
 import { ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { ChartViewModel, SeriesViewModel } from "@/domain/viewmodel";
+import { CHART_INTERPOLATION } from "./chart-config";
 import { SeriesLegend } from "./series-legend";
 
 /** The five shapes the panels in `spec.md` § 3 need. There is no sixth, and no pie (R-V2). */
@@ -288,7 +296,7 @@ const linesFor = (chart: ChartViewModel): readonly ReactElement[] =>
       key={series.key}
       dataKey={series.key}
       name={series.label}
-      type="monotone"
+      type={CHART_INTERPOLATION}
       stroke={colorOf(series)}
       strokeWidth={2}
       dot={false}
@@ -306,7 +314,7 @@ const areasFor = (
       key={series.key}
       dataKey={series.key}
       name={series.label}
-      type="monotone"
+      type={CHART_INTERPOLATION}
       stackId={stackId}
       stroke={colorOf(series)}
       strokeWidth={2}

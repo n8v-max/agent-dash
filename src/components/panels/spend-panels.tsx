@@ -50,7 +50,15 @@ const seatHint = (panel: TotalSpendViewModel): string =>
   `${count(panel.seats)} human Members × ${count(panel.months)} months = ` +
   `${count(panel.seatMonths)} seat-months`;
 
-/** Copy for R-M1's `accepted` filter, in the words a reader of panel 3 needs. */
+/**
+ * Copy for R-M1's `accepted` filter, in the words a reader of panel 3 needs.
+ *
+ * It is the panel's **footnote** rather than part of its question (R-V14): the question is what
+ * the panel answers and stands whatever the URL says, while this is a reading of the current
+ * selection and changes with the toggle in the header. A sentence that moves with a control does
+ * not belong behind a disclosure, which is the same line `PanelCard` draws for the per-capita
+ * denominator.
+ */
 const OUTCOME_SENTENCE: Readonly<Record<string, string>> = {
   any: "Every session in the period is counted.",
   accepted: "Counting accepted sessions only.",
@@ -149,7 +157,8 @@ export function CostPerSessionPanel(props: {
     <PanelCard
       controls={props.controls}
       title={panel.chart.title}
-      question={`What one session costs on average. Seat cost is not in it — a monthly fee shared across sessions would be the apportioning R-M5 refuses. ${OUTCOME_SENTENCE[panel.outcome] ?? ""}`}
+      question="What one session costs on average. Seat cost is not in it — a monthly fee shared across sessions would be the apportioning R-M5 refuses."
+      footnote={OUTCOME_SENTENCE[panel.outcome] ?? null}
       figures={
         <FigureList>
           {/*

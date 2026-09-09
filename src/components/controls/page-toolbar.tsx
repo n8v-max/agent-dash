@@ -9,27 +9,66 @@
 // `toolbarControls(page)` and not the whole declared set; both come from the same table in
 // `params.ts`, so there is no second list here to disagree with it.
 //
-// It is **absent, not empty, on a page declaring none**: `toolbarControls` is `[]` for
-// `/demo/projection` and this component returns `null`, so no bar, no border and no reserved
-// height reach the document. An empty toolbar would be a promise of controls that never arrive.
+// **R-N3.1 — the bar also carries the as-of stamp, right-aligned**, and that is what makes it
+// present on every `/[org]` surface including `/demo/projection`, which declares no controls at
+// all. R-N3 used to make the bar *absent* on that page, on the argument that an empty toolbar is
+// a promise of controls that never arrive. The argument holds and no longer applies: the bar is
+// not empty there, it holds a fact — how fresh the data under the page is — and a freshness stamp
+// that appeared on five surfaces and not the sixth would be read as the sixth being stale.
+//
+// The stamp is the *dataset's* edge, not this page's selection: it does not move when a filter
+// does, which is why it sits apart from the controls rather than among them, past the Reset link.
 //
 // Nothing here holds state. Every control is an `href` built by `schema.ts` from the current
 // `ControlSet`, which was itself parsed from the query string on this request (R-T25).
 
 import Link from "next/link";
+import type { DataAsOf } from "@/data/clock";
 import { toolbarControls } from "@/data/params";
 import { cn } from "@/lib/utils";
 import { ControlWidget, type ControlContext } from "./control-renderers";
 import { canonicalQuery, pathFor } from "./schema";
 
 /**
- * **The toolbar.** `null` where the page holds nothing in the bar, which is R-N3's "absent" read
- * literally: `/demo/projection` renders a header and a page, and no bar between them.
+ * The stamp's words. *"Data to"* rather than *"Updated"* or *"Last sync"*: this product ingests
+ * nothing and refreshes nothing, and a verb implying it would be a claim about a pipeline that
+ * does not exist. What the sentence says is where the rows stop.
  */
-export function PageToolbar(props: ControlContext) {
-  const shown = toolbarControls(props.controls.page);
-  if (shown.length === 0) return null;
+export const AS_OF_PREFIX = "Data to";
 
+export const asOfText = (asOf: DataAsOf): string => `${AS_OF_PREFIX} ${asOf.label}`;
+
+/**
+ * **R-N3.1 — the as-of stamp.** The instant is the Organization's (R-M10) and the string is the
+ * one `/demo/history`'s Started column prints, so a reader can check the claim against the top
+ * row of the page that exists to be checked against. `data-session` names the row it was read
+ * off, which is how T-E15 asserts "matches the History top row" as an identity rather than as an
+ * arithmetic coincidence between two formatted strings.
+ */
+function AsOfStamp(props: { readonly asOf: DataAsOf }) {
+  return (
+    <p
+      data-testid="data-as-of"
+      data-session={props.asOf.sessionId}
+      className="shrink-0 text-xs tabular-nums text-muted-foreground"
+    >
+      {asOfText(props.asOf)}
+    </p>
+  );
+}
+
+/**
+ * **The toolbar.** Always rendered on a controlled surface, because the as-of stamp is on every
+ * one of them (R-N3.1); a page declaring no control renders the bar holding the stamp and
+ * nothing else, which is `/demo/projection`.
+ */
+export function PageToolbar(props: ControlContext & { readonly asOf: DataAsOf | null }) {
+  const context: ControlContext = {
+    controls: props.controls,
+    options: props.options,
+    window: props.window,
+  };
+  const shown = toolbarControls(props.controls.page);
   const bare = pathFor(props.controls.page, props.controls.orgSlug);
   const changed = canonicalQuery(props.controls, props.window).size > 0;
 
@@ -45,16 +84,24 @@ export function PageToolbar(props: ControlContext) {
     >
       <div className="mx-auto flex w-full max-w-[110rem] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6">
         {shown.map((key) => (
-          <ControlWidget key={key} control={key} {...props} />
+          <ControlWidget key={key} control={key} {...context} />
         ))}
-        {changed ? (
-          <Link
-            href={bare}
-            className="ml-auto rounded-lg px-3 py-1 text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Reset
-          </Link>
-        ) : null}
+        {/*
+          Reset and the stamp share one right-aligned group, rather than each claiming `ml-auto`
+          for itself: two auto margins in a flex row split the free space between them and put the
+          Reset link in the middle of the bar.
+        */}
+        <div className="ml-auto flex items-center gap-3">
+          {changed ? (
+            <Link
+              href={bare}
+              className="rounded-lg px-3 py-1 text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Reset
+            </Link>
+          ) : null}
+          {props.asOf ? <AsOfStamp asOf={props.asOf} /> : null}
+        </div>
       </div>
     </div>
   );

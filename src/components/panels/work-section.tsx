@@ -20,10 +20,15 @@
 // costs are `1.5`, so a spacing utility can fail a tenancy assertion. The integer step is
 // indistinguishable at this scale and cannot be read as a figure.
 //
+// **R-V14 — the note is one sentence, and the rest is folded.** `PanelProse` decides the cut,
+// once, for this chrome and for `PanelCard`, so the two pages cannot disagree about how much
+// prose a panel shows.
+//
 // **It computes nothing** (R-T6). Every string it renders arrived on a ViewModel or is copy.
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { PanelProse } from "./panel-prose";
 
 /** A full-width panel's chart. Tall enough to read a trend, short enough to scroll past. */
 export const PANEL_CHART = "[&_[data-slot=chart]]:aspect-auto [&_[data-slot=chart]]:h-72";
@@ -81,7 +86,15 @@ export function WorkPanel(props: {
    * own: it is handed one node or none.
    */
   readonly controls?: ReactNode;
-  /** A restriction, a denominator or a definition the ViewModel carries in words. */
+  /**
+   * A restriction, a denominator or a definition the ViewModel carries in words.
+   *
+   * **R-V14 — one sentence of it stands and the rest folds** into `PanelProse`'s "Why this
+   * number" disclosure, verbatim. The cut is mechanical and the panel does not make it, which is
+   * what keeps the lead sentence the *reading* — "Interactive sessions only: 30 of 42",
+   * "Per Member: divided by 18 active human Members" — with the argument for it one click away
+   * rather than three lines above the chart it qualifies.
+   */
   readonly note?: string | null;
   readonly figures?: readonly PanelFigure[];
   readonly children: ReactNode;
@@ -97,11 +110,7 @@ export function WorkPanel(props: {
         {props.badge}
         {props.controls}
       </div>
-      {props.note ? (
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          {props.note}
-        </p>
-      ) : null}
+      <PanelProse text={props.note} scale="xs" className="mt-1" />
       {props.figures ? (
         <div className="mt-4">
           <PanelFigures figures={props.figures} />

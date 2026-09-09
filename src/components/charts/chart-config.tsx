@@ -21,6 +21,27 @@
 import type { ChartViewModel, SeriesViewModel } from "@/domain/viewmodel";
 import type { ChartConfig } from "@/components/ui/chart";
 
+/**
+ * **R-V13 — every line and every area in the product is interpolated `linear`**, and this is the
+ * only place the interpolation is named (T-C19).
+ *
+ * A spline draws a curve through the points it was given, and the curve leaves the range those
+ * points span: on `/demo/work`'s acceptance multiples it rises past 100% and dips below 0%
+ * between two real readings, and on `/demo/spend` it dips below $0 between two real costs. Every
+ * one of those is a value the domain layer never computed and the product could not defend —
+ * the same fault R-V10 forbids `connectNulls` from committing across a gap, with a smooth edge
+ * on it. `monotone` overshoots less and still invents the shape between two measurements;
+ * `linear` invents the least a mark joining two points can, and it is the reading a viewer
+ * already assumes a chart is making.
+ *
+ * **It lives here, in the shared config, rather than on the shapes**, because a panel that could
+ * name its own curve could name a different one from the panel beside it, and two charts of the
+ * same measure would then be smoothed differently on one page. No panel can reach it:
+ * `ChartFrameProps` carries no curve prop, so this is applied once in `chart-shapes.tsx` and
+ * nowhere else.
+ */
+export const CHART_INTERPOLATION = "linear";
+
 /** The swatch's accessible name. `testing-spec.md` T-C3 names `/legend icon/` as its handle. */
 export const legendIconLabel = (label: string): string => `${label} legend icon`;
 

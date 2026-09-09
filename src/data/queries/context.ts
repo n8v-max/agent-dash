@@ -34,6 +34,7 @@ import {
 } from "@/domain/periods";
 import type { AgentSession, Member } from "@/domain/types";
 import type { BucketViewModel } from "@/domain/viewmodel";
+import { instantIn } from "../instant";
 import { loadDataset, type Dataset } from "../load";
 import type { ControlSet } from "../params";
 
@@ -191,31 +192,6 @@ const populationFor = (data: Dataset, params: ControlSet, membership: TeamMember
       (!params.team || (membership.get(candidate.id) ?? []).includes(params.team)) &&
       (!params.memberKind || candidate.kind === params.memberKind),
   );
-
-/**
- * An instant as the Organization reads it (R-N19). Assembled from parts rather than from a
- * formatted string, so the order of the fields does not depend on a locale, and pinned to the
- * declared timezone rather than the server's (R-M10).
- */
-const instantIn = (timezone: string): ((iso: string) => string) => {
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  return (iso) => {
-    const at = new Date(iso);
-    if (Number.isNaN(at.getTime())) return iso;
-    const parts = Object.fromEntries(
-      formatter.formatToParts(at).map((part) => [part.type, part.value]),
-    );
-    return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
-  };
-};
 
 /**
  * **`Member.kind`, in the words a reader reads** (ticket 41).

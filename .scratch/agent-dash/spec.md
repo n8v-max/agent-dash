@@ -141,9 +141,40 @@ description is what a menu row needs to justify opening the menu, and a nav item
 **R-N3 — Shell.** Top header: product mark · nav (`/demo`, spend, work, people, then history and
 projection at secondary weight) · account switcher. Below it a **sticky page toolbar** holding that
 page's **global** controls, period first; the panel-local controls render in panel headers instead
-(R-C6). The toolbar is absent on pages holding none.
+(R-C6).
+
+**The toolbar stands on every `/[org]` surface** (amended 2026-09-09, ticket 45). It was absent on
+a page holding no global control — `/demo/projection` — on the argument that an empty bar is a
+promise of controls that never arrive. The argument holds and no longer applies: R-N3.1 puts the
+as-of stamp in the bar, so the bar there is not empty, it carries a fact. A freshness claim
+standing on five surfaces out of six would read as the sixth being stale. What survives of the old
+rule is the part that mattered — `/demo/projection` renders the bar **holding no control at all**,
+so R-C1's ban on offering a control a page's panels cannot use is unchanged.
 
 Under the page heading, the **active-filter sentence** (R-C7).
+
+**R-N3.1 — The toolbar carries an as-of stamp, right-aligned** (added 2026-09-09, ticket 45):
+*"Data to 2026-09-08 23:28"*. Every page states a **period**; none of them stated how fresh the
+rows behind it are, and a stalled ingest and a quiet week are the same picture — an empty bucket at
+the right-hand end of a chart.
+
+**The stamp is a domain and data fact, not a component's formatting of a date.** The session it is
+read off is the one with the greatest **`ended_at`**: a session's measures are observable at session
+end (`CONTEXT.md` § Session measures), so the last thing the platform knows is the last session
+that *finished*, not the last one that began, and the two are different rows in general. That
+instant is the watermark ticket 55's ingest sketch takes, and it travels on the value with the
+session id beside it.
+
+**What the stamp prints is that session's start**, in the Organization's declared timezone (R-M10)
+and through the product's one instant formatter — so the string is, character for character, the
+top row of `/demo/history` under its default newest-first sort (R-N19, R-N20), which is the page a
+reader checks it against. Printing the end instant would name a moment **past `window_end`**
+(R-D2), which every date control on the page is bounded by, and would match no row on any surface.
+The two readings are one row apart and the choice is recorded rather than left implicit.
+
+It is **not viewer-scoped**: it carries no cost, no name and no count, in the same way the
+observation window does, and both accounts already meet that window in `/demo/history`'s date
+bounds. R-A6 governs figures reaching a payload; this is the calendar the figures were taken over.
 
 The header holds *who you are*; the toolbar holds *what is in the URL*. Keeping them visibly
 separate keeps the two kinds of state distinct. No sidebar: six nav items do not fill one, and the
@@ -684,6 +715,37 @@ its `series` form takes; it never names the ranked one.
 
 Decided by the human, 2026-09-09, rounds 2 and 3. Added by ticket 44.
 
+**R-V13 — One interpolation, `linear`, for every line and every area** (added 2026-09-09, ticket
+45). It is declared once, in the shared chart config, and applied once, in the shape factory. No
+panel names a curve: `ChartFrame` carries no curve prop, so overriding it is not expressible.
+
+A spline draws a curve *through* the points it was given, and the curve leaves the range those
+points span — above 100% and below 0% between two real acceptance readings, below $0 between two
+real costs. Each of those is a value the domain layer never computed, which is the same fault
+R-V10 forbids `connectNulls` from committing across a gap, with a smooth edge on it. `monotone`
+overshoots less and still invents the shape between two measurements; `linear` invents the least a
+mark joining two points can, and it is the reading a viewer already assumes a chart is making.
+
+**R-V14 — A panel states one sentence, and folds the rest behind "Why this number"** (added
+2026-09-09, ticket 45). Each panel's standing prose renders as **one visible paragraph** — its
+first sentence — with everything after it inside a native `<details>` disclosure in the panel
+header. `<details>` rather than a control, so the fold costs no client JavaScript, survives
+scripting being off, and keeps the panel chromes Server Components.
+
+**No argument is deleted; it is relocated.** Several of these paragraphs carry an ADR's reasoning —
+ADR-0004's flat Repository on Cost by Repository, ADR-0005's attributed cost on Cost per session,
+R-M5's whole-month seat charge on Total spend — and shortening one would lose a position the
+project's own docs record. The fold is therefore **mechanical**: the cut is at the first sentence
+terminator and the remainder is carried verbatim, so the copy a panel writes and the copy a reader
+can reach are the same words. Seven panels on `/demo/spend` and six on `/demo/work` each carried a
+three-sentence paragraph above their chart, and a wall of justification is prose a viewer skips —
+taking the sentence that says *what the panel answers* with it.
+
+**A qualification of the current selection is not standing prose and does not fold.** The
+per-capita denominator, R-M5's monthly-grain note and the `accepted` filter's sentence stay visible
+below the chart: each moves with a control, and a divisor a reader has to open a drawer to find is
+the failure C14 was fixed to prevent.
+
 ---
 
 ## 7. Accessibility
@@ -862,6 +924,9 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A34 | `/demo/history` applies its date range on change, with no Apply control, and an out-of-window or incomplete edit does not navigate | R-N20 |
 | A35 | Every controlled page states its active filters in one line under the heading, naming the off state of each filter it does not narrow | R-C7 |
 | A36 | At `subject=member` every subject-grouped panel renders ranked bars and no line series, with one mirror row per Member; Cost by Repository renders months at every page grain, under the same note Total spend carries | R-V12, R-N9.1 |
+| A37 | Every line and area is drawn with the one interpolation constant; no module outside the shared chart config names a curve | R-V13 |
+| A38 | Each panel shows one visible paragraph of prose, and the rest of it is reachable, verbatim, behind that panel's "Why this number" disclosure | R-V14 |
+| A39 | Every `/[org]` surface carries the as-of stamp in its toolbar, naming the same instant, and that instant is the top row of `/demo/history` | R-N3, R-N3.1 |
 
 ---
 

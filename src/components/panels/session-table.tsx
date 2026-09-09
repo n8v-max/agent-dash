@@ -56,7 +56,16 @@ function SessionRow(props: {
   const { row, columns } = props;
   return (
     <>
-      <tr className={cn("border-b border-border/60", props.open ? "bg-muted/50" : "hover:bg-muted/40")}>
+      {/*
+        `data-session` is the row's own identity — the AgentSession id the ViewModel keyed it by
+        (R-T8) — put where a reader of the document can see it. R-N3.1's as-of stamp names the
+        session it was read off in the same way, so "the stamp matches the History top row" is an
+        identity between two ids rather than a coincidence between two formatted instants (T-E15).
+      */}
+      <tr
+        data-session={row.key}
+        className={cn("border-b border-border/60", props.open ? "bg-muted/50" : "hover:bg-muted/40")}
+      >
         <td className="w-8 px-2 py-2">
           <button
             type="button"
