@@ -155,14 +155,29 @@ export const tokenUsageSchema: Validator<TokenUsage> = object({
   ...tokenClassCounts,
 });
 
-export const sessionSchema: Validator<AgentSession> = object({
+/**
+ * An ISO 8601 instant that parses. Every duration, bucket edge and as-of stamp in the product is
+ * read off `started_at`/`ended_at` through `Date.parse`, and a string that does not parse ranks
+ * as `NaN` rather than throwing — it sorts nowhere, buckets nowhere and prints "Invalid Date".
+ */
+const instant: Validator<string> = (value, path) => {
+  const parsed = string(value, path);
+  if (Number.isNaN(Date.parse(parsed))) {
+    throw new FixtureFault(
+      `${path}: expected an ISO 8601 instant, received ${JSON.stringify(parsed)}`,
+    );
+  }
+  return parsed;
+};
+
+const sessionFields: Validator<AgentSession> = object({
   id: string,
   // The tree link. `null` is a root; a string names one. Whether that string names a row that
   // *exists*, is itself a root, and agrees with this row's five inherited labels is a claim
   // about the whole file set and is checked in `load.ts`, where every row is in scope.
   parent_session_id: nullableString,
-  started_at: string,
-  ended_at: string,
+  started_at: instant,
+  ended_at: instant,
   member_id: string,
   repository_id: string,
   work_type: oneOf(WORK_TYPE_KEYS),
@@ -181,6 +196,26 @@ export const sessionSchema: Validator<AgentSession> = object({
   artefacts: artefactCounts,
   token_usage: arrayOf(tokenUsageSchema),
 });
+
+/**
+ * A session row, plus the one claim that spans two of its fields: **it ends after it starts**.
+ *
+ * Checked here rather than in `load.ts` because it is a property of the row alone — no other row
+ * and no other file is in scope — and because `load.ts`'s cross-row pass runs after the fold,
+ * by which point a negative span has already been summed. A row whose `ended_at` precedes its
+ * `started_at` is a negative duration: it nets off against real ones in every median and p95,
+ * and it can make a fan-out's child look like it ran outside its root's window.
+ */
+export const sessionSchema: Validator<AgentSession> = (value, path) => {
+  const row = sessionFields(value, path);
+  if (Date.parse(row.ended_at) < Date.parse(row.started_at)) {
+    throw new FixtureFault(
+      `${path}.ended_at: ${row.ended_at} is before started_at ${row.started_at} — ` +
+        "a session ends after it starts; a negative span nets off against real ones.",
+    );
+  }
+  return row;
+};
 
 export const organizationSchema: Validator<Organization> = object({
   id: string,
