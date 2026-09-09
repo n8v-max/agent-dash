@@ -34,10 +34,38 @@ import {
 import type { ControlSet } from "../params";
 import { pageContext, type PageContext } from "./context";
 
-export type ProjectionFigures = {
+/** The month's attributed figures, as `totalSpend` reports them. Internal: what leaves this
+ * module is the component breakdown below, so nothing downstream holds two shapes for one month. */
+type MonthSpend = {
   readonly sessionCost: number;
   readonly seatCost: number;
   readonly total: number;
+};
+
+/**
+ * **The four figures the page is built from, as four figures** (ticket 42).
+ *
+ * A reader cannot verify a projected total they are shown only the answer to, and the two
+ * components are not interchangeable: one is extrapolated and the other is not (R-M5, R-D2).
+ * Carrying them separately is what lets the tile print the arithmetic and what makes the
+ * identity below a property of the ViewModel rather than of a component's layout.
+ *
+ * **`projectedTotal === projectedSession + seat`, by construction.** It is assigned as that sum
+ * in `projectedComponents`, so the two cannot drift and the assertion in `queries.test.ts` is an
+ * equality rather than a tolerance.
+ */
+export type ProjectionComponents = {
+  /** Session Cost attributed over the month so far (R-M4). The only figure extrapolated. */
+  readonly sessionToDate: number;
+  /**
+   * The month's **whole** seat charge. A seat is charged by whole months and never pro-rated
+   * across elapsed days (R-M5, R-D2), so it is already its final figure and crosses unchanged.
+   */
+  readonly seat: number;
+  /** `sessionToDate` over the elapsed share. `null` where no share has elapsed. */
+  readonly projectedSession: number | null;
+  /** `projectedSession + seat`. `null` with `projectedSession`, never a bare seat charge. */
+  readonly projectedTotal: number | null;
 };
 
 export type ProjectionPageViewModel = {
@@ -50,22 +78,28 @@ export type ProjectionPageViewModel = {
   readonly method: string;
   /** R-N23's incomplete-period flag. */
   readonly incomplete: boolean;
-  readonly actual: ProjectionFigures;
-  /** `null` before any of the period has elapsed — there is no basis, so there is no figure. */
-  readonly projected: ProjectionFigures | null;
+  /** The two components of each figure, and the identity between them (ticket 42). */
+  readonly components: ProjectionComponents;
   /** Two tiles: spend to date, and the month-end projection R-V8 labels "estimated". */
   readonly tiles: readonly TileViewModel[];
   /** Actual spend by day within the month, so the extrapolation sits beside what it read. */
   readonly chart: ChartViewModel;
-  /** Why the seat charge is not extrapolated (R-M5, R-D2). */
+  /** Why the seat charge is beside the daily bars rather than in them (R-M5, R-D2). */
   readonly note: string;
   /** Populated where the month cannot be projected at all; both figures are then absent. */
   readonly unavailable: string | null;
 };
 
+/**
+ * The chart's note, and the reason there is a note rather than a fourteenth bar.
+ *
+ * R-M5 charges a seat by whole months, so a daily series carrying it would apportion a monthly
+ * fee across days — the invented precision R-M5 names. The seat charge is stated beside the
+ * bars, at the grain it is actually charged at, and the bars stay session Cost alone.
+ */
 const SEAT_NOTE =
-  "Only session Cost is extrapolated. A seat is charged by whole months and is never pro-rated " +
-  "across elapsed days, so this month's seat cost is already its final figure.";
+  "A seat is charged by whole months and is never pro-rated across days, so it is stated here " +
+  "rather than spread over the bars.";
 
 const NO_ELAPSED: Elapsed = { days: 0, totalDays: 0, fraction: 0 };
 
@@ -101,7 +135,7 @@ const dailyChart = (
 const figuresFor = (
   context: PageContext,
   month: PeriodBucket<AgentSession> | undefined,
-): ProjectionFigures => {
+): MonthSpend => {
   const period = month && seatBearingPeriod([month]);
   if (!period?.ok) return { sessionCost: 0, seatCost: 0, total: 0 };
   const spend = totalSpend(period.period, context.population, context.data.rateCards.seat.usd);
@@ -110,8 +144,8 @@ const figuresFor = (
 
 const tilesFor = (input: {
   readonly period: BucketViewModel;
-  readonly actual: ProjectionFigures;
-  readonly projected: ProjectionFigures | null;
+  readonly actual: MonthSpend;
+  readonly components: ProjectionComponents;
 }): readonly TileViewModel[] => [
   {
     key: "spend-to-date",
@@ -136,9 +170,10 @@ const tilesFor = (input: {
     // R-V8 — **"Estimated"** belongs to this figure alone, and the label is copy: it is applied
     // in `components/`, not here.
     title: "Projected month-end spend",
-    value: input.projected?.total ?? null,
+    value: input.components.projectedTotal,
     unit: "usd",
-    caption: input.projected ? null : "None of this period has elapsed yet.",
+    caption:
+      input.components.projectedTotal === null ? "None of this period has elapsed yet." : null,
     period: input.period,
     change: {
       shown: false,
@@ -146,7 +181,7 @@ const tilesFor = (input: {
       message: "A projection is a forecast of this month, not a comparison with another.",
       current: {
         key: input.period.key,
-        value: input.projected?.total ?? 0,
+        value: input.components.projectedTotal ?? 0,
         partial: input.period.partial,
       },
       prior: null,
@@ -158,7 +193,7 @@ const tilesFor = (input: {
 const projectionOf = (
   context: PageContext,
   month: PeriodBucket<AgentSession> | undefined,
-  actual: ProjectionFigures,
+  actual: MonthSpend,
 ): Projection | null => {
   if (!month) return null;
   const result = projectPeriodSpend({
@@ -172,20 +207,24 @@ const projectionOf = (
 };
 
 /**
- * The projected total: the extrapolated session Cost with the month's whole seat charge added
- * back. `null` where no share has elapsed, so nothing downstream can print a figure that had no
- * basis.
+ * **The four components, and the identity between them** (ticket 42).
+ *
+ * `projectedTotal` is *assigned* the sum of the other two rather than read off a second total,
+ * which is what makes `projectedTotal === projectedSession + seat` an identity of the ViewModel
+ * instead of an agreement between two figures. Both projected fields are `null` together where
+ * no share has elapsed: a projected total that was only the seat charge would read as a forecast
+ * of a month nobody has spent anything in.
  */
-const projectedFigures = (
+const componentsOf = (
   projection: Projection | null,
-  actual: ProjectionFigures,
-): ProjectionFigures | null => {
-  const extrapolated = projection?.projected;
-  if (extrapolated === undefined || extrapolated === null) return null;
+  actual: MonthSpend,
+): ProjectionComponents => {
+  const extrapolated = projection?.projected ?? null;
   return {
-    sessionCost: extrapolated,
-    seatCost: actual.seatCost,
-    total: extrapolated + actual.seatCost,
+    sessionToDate: actual.sessionCost,
+    seat: actual.seatCost,
+    projectedSession: extrapolated,
+    projectedTotal: extrapolated === null ? null : extrapolated + actual.seatCost,
   };
 };
 
@@ -202,7 +241,7 @@ export function projectionPage(viewer: Viewer, params: ControlSet): ProjectionPa
   const projection = projectionOf(context, month, actual);
   const period = context.label.bucket(month ?? { key: params.range.end, partial: true });
 
-  const projected = projectedFigures(projection, actual);
+  const components = componentsOf(projection, actual);
 
   return {
     orgSlug: params.orgSlug,
@@ -210,14 +249,14 @@ export function projectionPage(viewer: Viewer, params: ControlSet): ProjectionPa
     elapsed: projection?.elapsed ?? NO_ELAPSED,
     method: projection?.method ?? "",
     incomplete: projection?.incomplete ?? period.partial,
-    actual,
-    projected,
-    tiles: tilesFor({ period, actual, projected }),
+    components,
+    tiles: tilesFor({ period, actual, components }),
     chart: dailyChart(context, month),
     note: SEAT_NOTE,
     // Set whenever there is no figure — a month outside the range, or one that has not begun.
-    unavailable: projected
-      ? null
-      : "This period cannot be projected: there is no elapsed share to extrapolate from.",
+    unavailable:
+      components.projectedTotal === null
+        ? "This period cannot be projected: there is no elapsed share to extrapolate from."
+        : null,
   };
 }

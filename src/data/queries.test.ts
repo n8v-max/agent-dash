@@ -314,13 +314,53 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
     expect(page.elapsed.fraction).toBeLessThan(1);
     expect(page.incomplete).toBe(true);
     expect(page.method).toMatch(/proportion to the period elapsed/);
-    expect(page.projected?.total ?? 0).toBeGreaterThan(page.actual.total);
+    expect(page.components.projectedTotal ?? 0).toBeGreaterThan(page.tiles[0].value ?? 0);
     expect(page.chart.series.length).toBeGreaterThan(0);
+  });
+
+  // T-U21.1 (ticket 42) — the figure has to be **verifiable from what is on screen**, which
+  // means the two components travel as components and the total is their sum exactly, not a
+  // second figure that happens to agree with them. The extrapolation itself is T-U21's, in the
+  // domain layer; what is asserted here is the composition the seam performs on top of it.
+  it("T-U21.1 — the four components, and the total is their sum exactly (R-M5)", () => {
+    const { components, elapsed } = OPEN_PAGES.projection;
+
+    expect(components.sessionToDate).toBeGreaterThan(0);
+    expect(components.seat).toBeGreaterThan(0);
+    expect(components.projectedSession).not.toBeNull();
+    // The identity, as an identity: no tolerance, because the projected total *is* the sum
+    // rather than a figure that agrees with it.
+    expect(components.projectedTotal).toBe((components.projectedSession ?? 0) + components.seat);
+    // Only session Cost is extrapolated (R-M5, R-D2); the seat charge crosses whole.
+    expect(components.projectedSession).toBeCloseTo(components.sessionToDate / elapsed.fraction, 6);
+    expect(components.projectedSession).toBeGreaterThan(components.sessionToDate);
+  });
+
+  it("T-U21.1 — each tile's headline is its own two components, summed", () => {
+    const page = OPEN_PAGES.projection;
+    const { components } = page;
+
+    expect(page.tiles[0].value).toBe(components.sessionToDate + components.seat);
+    expect(page.tiles[1].value).toBe(components.projectedTotal);
+  });
+
+  // R-M5 — a daily chart carrying the seat charge would apportion a monthly fee across days,
+  // which is the invented precision R-M5 forbids. One series, and it is session Cost.
+  it("T-U21.1 — the daily chart holds session Cost only, unstacked (R-M5)", () => {
+    const { chart } = OPEN_PAGES.projection;
+
+    expect(chart.series.map((series) => series.label)).toEqual(["Session cost"]);
+    expect(chart.stackable).toBe(false);
+    expect(chart.mirror.columns).toEqual(["Day", "Session cost"]);
   });
 
   it("`/demo/projection` produces no confidence band (R-N24)", () => {
     const page = OPEN_PAGES.projection;
-    const keys = [...Object.keys(page), ...Object.keys(page.elapsed)];
+    const keys = [
+      ...Object.keys(page),
+      ...Object.keys(page.elapsed),
+      ...Object.keys(page.components),
+    ];
 
     expect(keys.filter((key) => /band|confidence|interval|margin/i.test(key))).toEqual([]);
   });
@@ -597,7 +637,8 @@ describe("the degenerate arms — a range with nothing in it, and an id that nam
     const page = projectionPage(OPEN, emptyParams("projection"));
 
     expect(page.elapsed.fraction).toBe(0);
-    expect(page.projected).toBeNull();
+    expect(page.components.projectedSession).toBeNull();
+    expect(page.components.projectedTotal).toBeNull();
     expect(page.unavailable).toMatch(/no elapsed share/);
   });
 

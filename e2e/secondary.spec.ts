@@ -259,6 +259,41 @@ test.describe("/demo/projection — where the current month lands", () => {
     await expect(page.getByRole("main").getByText(/estimated/i)).toHaveCount(1);
   });
 
+  // Ticket 42 — the reader has to be able to check the forecast against what is on the page.
+  // Both totals are printed beside the two components they are the sum of, so the check is
+  // arithmetic over rendered text rather than a claim about a ViewModel nobody can see.
+  test("T-E11 — prints the components of both figures, and both sums come out (R-N23.1)", async ({
+    page,
+  }) => {
+    await page.goto(`/${OPEN_ACCOUNT.orgSlug}/projection`);
+
+    const usd = async (testId: string): Promise<number> => {
+      const text = (await page.getByTestId(testId).textContent()) ?? "";
+      const figure = text.replace(/[^\d.]/g, "");
+      expect(figure, `${testId} renders a money figure`).toMatch(/^\d+(\.\d{2})?$/);
+      return Number(figure);
+    };
+
+    const sessionToDate = await usd("spend-to-date-session");
+    const seat = await usd("spend-to-date-seat");
+    const projectedSession = await usd("projected-cost-session");
+    const projectedTotal = await usd("figure-value-projected-cost");
+
+    // The four figures are real, and the seat charge is the same one in both tiles: a seat is
+    // charged by whole months and is never extrapolated (R-M5, R-D2).
+    expect(sessionToDate).toBeGreaterThan(0);
+    expect(seat).toBeGreaterThan(0);
+    expect(projectedSession).toBeGreaterThan(sessionToDate);
+    expect(await usd("projected-cost-seat")).toBe(seat);
+
+    // They sum. The one-cent tolerance is rounding on the *rendered strings* — two figures each
+    // rounded to the nearest cent can differ from the rounded sum by that much. The ViewModel
+    // identity behind them is exact and is asserted as an equality in `src/data/queries.test.ts`.
+    const spendToDate = await usd("figure-value-spend-to-date");
+    expect(Math.abs(spendToDate - (sessionToDate + seat))).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(projectedTotal - (projectedSession + seat))).toBeLessThanOrEqual(0.01);
+  });
+
   test("renders no confidence band and no rate card (R-N24, R-N11)", async ({ page }) => {
     await page.goto(`/${OPEN_ACCOUNT.orgSlug}/projection`);
 

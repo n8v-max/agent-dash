@@ -255,6 +255,13 @@ against.
   asserted, because they are different claims. **No confidence band is produced** (R-N24). Before
   any of the period has elapsed there is no elapsed share to divide by, so the projection is
   `null` (R-M18) and not the actual figure.
+- **T-U21.1 — The projection's components** (R-N23.1, R-M5). The `/demo/projection` ViewModel
+  carries `sessionToDate`, `seat`, `projectedSession` and `projectedTotal`, and
+  **`projectedTotal === projectedSession + seat`** — asserted as an equality, not a tolerance,
+  because the total is *assigned* that sum rather than summed a second time. The seat charge is
+  identical in both figures (it is never extrapolated), and the daily chart carries one series,
+  session Cost, unstacked. It sits in `src/data/queries.test.ts` because the ViewModel is
+  assembled at the seam; the extrapolation itself is T-U21's, in the domain layer.
 - **T-U22 — The zero-denominator rule** (`domain/ratio.ts`, R-M18, A29). The rule is one
   expression, so it gets one test rather than nine, and the nine call sites get one assertion each
   that they divide through it:
@@ -387,6 +394,12 @@ product's central interaction.
     **greater** than the Completed Tasks tile against the committed fixture (162 against 150 for the
     open account in August 2026). A future change that made them equal would mean the measure had
     silently been re-keyed, and that should fail here rather than pass quietly.
+- **T-C13 — The projection tiles print their components** (R-N23.1, R-M5). Both tiles render a
+  `Session cost` / `Seat cost` pair under the headline, the seat figure is the **same string in
+  both** because it is never extrapolated, and the arithmetic line carries the month's real
+  numbers. R-N24's "one figure, no bound" claim is restated rather than dropped: the projected
+  tile's money figures are exactly the headline and its two named components, so a fourth number
+  fails the test. The seat charge is asserted **beside** the chart, never as a series in it.
 
 ---
 
@@ -456,6 +469,11 @@ request per account per route, asserting rows rather than pixels."*
   filter, the bucketing, the ViewModel, the RSC boundary and the renderer to arrive on a running
   page. A week the same account *did* finish work in is asserted to still carry its figure, so a
   panel that rendered nothing could not pass.
+- **T-E11 — The projection's four numbers are on the page and sum** (R-N23.1). Read off the
+  rendered text of `/demo/projection`: session cost to date, the seat charge, the projected
+  session cost and the projected total, with the two totals equal to their components to within
+  the cent the strings are rounded to. The exact identity is T-U21.1's; what this test adds is
+  that the figures a reader can *see* are the ones it holds between.
 
 ---
 

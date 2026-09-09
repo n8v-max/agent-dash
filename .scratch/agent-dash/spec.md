@@ -319,6 +319,15 @@ is imaginary; a dead link is worse than none.
 elapsed.** The method is stated in one sentence, the elapsed fraction is shown as a share, and the
 incomplete-period flag is present.
 
+**R-N23.1 — Both figures are broken into the two components they are the sum of**, and the
+projection's arithmetic is printed with the month's real numbers: `session cost × (days in the
+month ÷ days elapsed) + seat cost = projected total`. The two figures are not the same sum —
+spend to date is session Cost plus a **whole** month's seat charge, and **only the session part is
+extrapolated** (R-M5, R-D2) — so two totals alone are unverifiable from the page. The method text
+is one sentence and the arithmetic stands in place of prose explaining it. The seat charge is
+stated **beside** the daily chart as a flat monthly figure and is never a series in it:
+apportioning a monthly fee across days is the invented precision R-M5 forbids.
+
 **R-N24 — No confidence band.** A band computed over authored fixture data would be fabricated
 precision dressed as rigour. The method plus the elapsed fraction is the honest uncertainty
 statement available here — a projection at 10% elapsed and one at 90% are different claims.
