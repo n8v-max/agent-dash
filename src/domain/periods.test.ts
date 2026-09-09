@@ -41,6 +41,7 @@ import {
   civilDaysBetween,
   parseGrain,
   planPeriods,
+  priorMonthStart,
   type PeriodBucket,
   type PeriodGrain,
   type PeriodPlan,
@@ -424,5 +425,69 @@ describe("civil days, in the Organization's declared timezone", () => {
   it("has no count where either end is not a civil date", () => {
     expect(civilDaysBetween("September", "2026-09-08")).toBeUndefined();
     expect(civilDaysBetween("2026-09-01", "2026-02-31")).toBeUndefined();
+  });
+});
+
+// --- The turn of the year, and the month before a January -----------------------------------
+//
+// Neither case is in the fixture window (R-D2 runs 2026-04-12 to 2026-09-08), so neither was
+// reached by anything above. Ticket 52's mutation run found them the way a gap like this is
+// normally found: the arithmetic that decides them survived being changed.
+//
+// No spec was edited and no requirement was re-decided; this is added coverage.
+
+describe("the ISO week key is fixed by the week's Thursday, so the year turn is unambiguous", () => {
+  // The discriminating case, and the only one there is: a week that *starts* in one year and
+  // belongs to the next. 2025-12-29 is a Monday; its Thursday is 2026-01-01, so the whole week
+  // is 2026-W01 — including the three days of it that fall in 2025. Reading the year off the
+  // Monday instead would file those three days under 2025, and reading it off any day but the
+  // Thursday gets one end of the week or the other wrong.
+  const yearTurn: PeriodRange = { start: "2025-12-22", end: "2026-01-11" };
+
+  it("files the December days of a January week under the January week-numbering year", () => {
+    const weeks = bucketFor(
+      [row("mon-29-dec", "2025-12-29T09:00:00+01:00"), row("thu-01-jan", "2026-01-01T09:00:00+01:00")],
+      "week",
+      yearTurn,
+    );
+
+    expect(keyHolding(weeks, "mon-29-dec")).toBe("2026-W01");
+    expect(keyHolding(weeks, "thu-01-jan")).toBe("2026-W01");
+  });
+
+  it("numbers the weeks either side of the turn in order, and pads a single-digit week", () => {
+    // "2026-W01", not "2026-W1": the key is sorted and compared as text everywhere it travels
+    // (R-T8), and an unpadded week sorts after "2026-W10".
+    expect(bucketFor([], "week", yearTurn).map((bucket) => bucket.key)).toEqual([
+      "2025-W52",
+      "2026-W01",
+      "2026-W02",
+    ]);
+  });
+});
+
+describe("priorMonthStart widens a range backwards by one whole month", () => {
+  it("steps back to the first of the month before", () => {
+    expect(priorMonthStart("2026-05-12")).toBe("2026-04-01");
+    expect(priorMonthStart("2026-12-31")).toBe("2026-11-01");
+  });
+
+  it("crosses the turn of the year rather than naming a month zero", () => {
+    expect(priorMonthStart("2026-01-01")).toBe("2025-12-01");
+    expect(priorMonthStart("2026-01-31")).toBe("2025-12-01");
+  });
+
+  it("has no prior month for anything that is not exactly a civil date", () => {
+    // The anchors are the point: a date with an instant glued to either end is not a date, and
+    // accepting one would widen the range off a string the caller never meant as a day.
+    expect(priorMonthStart("2026-05-12T00:00:00Z")).toBeUndefined();
+    expect(priorMonthStart("from 2026-05-12")).toBeUndefined();
+    expect(priorMonthStart("2026-05")).toBeUndefined();
+    expect(priorMonthStart("")).toBeUndefined();
+  });
+
+  it("has no prior month for a well-shaped date naming no month of the year", () => {
+    expect(priorMonthStart("2026-13-01")).toBeUndefined();
+    expect(priorMonthStart("2026-00-01")).toBeUndefined();
   });
 });

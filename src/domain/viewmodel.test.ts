@@ -271,6 +271,78 @@ describe("the table ViewModel sorts in the domain layer (R-T6)", () => {
     expect(table.empty).toBe(true);
     expect(table.note).toBeNull();
   });
+
+  // --- What the three rows above cannot tell apart (ticket 52) -------------------------------
+  //
+  // Ticket 52's mutation run reported the whole comparator as changeable without a failure, and
+  // it was right: three rows carrying 3, 9 and `null` pass under a comparator that *adds* the
+  // two values instead of subtracting them, because every value is positive, and they pass under
+  // one that compares the values as text, because "3" and "9" sort the same way the numbers do.
+  // The order asserted was reachable by arithmetic that means nothing. These rows are chosen so
+  // that it is not: a two-digit figure whose text sorts *below* every one-digit one, and a zero,
+  // which a comparator that adds cannot tell from any other value it is placed beside. The
+  // withheld rows get their own fixture below, keyed so that sinking them and floating them are
+  // two different answers.
+  //
+  // No spec was edited and no requirement was re-decided; this is added coverage.
+
+  const ranked = [
+    { key: "mem_p", cells: ["Ada", 3] },
+    { key: "mem_q", cells: ["Grace", 12] },
+    { key: "mem_r", cells: ["Alan", 0] },
+    { key: "mem_s", cells: ["Edsger", 7] },
+  ];
+
+  const rankedBy = (direction: "asc" | "desc") =>
+    tableViewModel({ columns, rows: ranked, sort: { column: "tasks", direction } }).rows.map(
+      (row) => row.cells[1],
+    );
+
+  it("ranks a numeric column by the number, not by the text of it", () => {
+    // 12 outranks 7, 3 and 0, which "12" does not: as text it sorts below every one of them.
+    expect(rankedBy("desc")).toEqual([12, 7, 3, 0]);
+    expect(rankedBy("asc")).toEqual([0, 3, 7, 12]);
+  });
+
+  it("reads the direction off the comparison, so the two orderings are each other reversed", () => {
+    expect(rankedBy("asc")).toEqual([...rankedBy("desc")].reverse());
+  });
+
+  it("keeps a withheld figure last however the column is read, and however the row is keyed", () => {
+    // R-A6: `null` is a withheld grant, not a small number. Both withheld rows are keyed ahead
+    // of the figures they sit beside, so a comparator that let them fall through to the key
+    // tie-break would float them to the top of both readings instead of sinking them.
+    const withheld = [
+      { key: "mem_b", cells: ["Edsger", null] },
+      { key: "mem_c", cells: ["Grace", 12] },
+      { key: "mem_a", cells: ["Alan", null] },
+      { key: "mem_d", cells: ["Ada", 3] },
+    ];
+    const keysBy = (direction: "asc" | "desc") =>
+      tableViewModel({ columns, rows: withheld, sort: { column: "tasks", direction } }).rows.map(
+        (row) => row.key,
+      );
+
+    // The two withheld rows hold the last two places in both readings, and they are handed over
+    // in the reverse of their key order, so the tie between them is broken on the key — the only
+    // ordering left once the figure has stopped deciding anything — and not on arrival order.
+    expect(keysBy("desc")).toEqual(["mem_c", "mem_d", "mem_a", "mem_b"]);
+    expect(keysBy("asc")).toEqual(["mem_d", "mem_c", "mem_a", "mem_b"]);
+  });
+
+  it("leaves the rows as built when the sort names no column, even out of key order", () => {
+    // The rows are handed over in the reverse of their key order, so "as built" and "by key"
+    // are two different answers here and the assertion can tell which one it got.
+    const table = tableViewModel({
+      columns,
+      rows: [ranked[1], ranked[0]],
+      sort: { column: "percentile", direction: "desc" },
+    });
+
+    expect(table.rows.map((row) => row.key)).toEqual(["mem_q", "mem_p"]);
+    // R-V9 read from the other end: a panel that has rows must not report itself emptied.
+    expect(table.empty).toBe(false);
+  });
 });
 
 // --- R-M18 — a ratio chart breaks at a bucket it has no reading for (ticket 40) --------------
