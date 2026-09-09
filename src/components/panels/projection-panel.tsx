@@ -22,16 +22,14 @@
 //
 // **It computes nothing** (R-T6). The figures, the share, the method sentence and the flag all
 // arrived on the ViewModel; percent and currency here are formatting, not arithmetic.
+//
+// **Money is `figures.ts`'s `usd`**, not a fourth local copy of it (ticket 41). A page that
+// spells its own currency format is a page that can disagree with the tile a reader arrived from.
 
 import { ChartFrame } from "@/components/charts/chart-frame";
 import type { ProjectionPageViewModel } from "@/data/queries";
 import type { TileViewModel } from "@/domain/viewmodel";
-
-/** Locale-pinned, exactly as every other figure in the product is pinned. */
-const money = new Intl.NumberFormat("en-GB", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+import { usd } from "./figures";
 
 /** The share R-N23 asks for, as a share. Whole percent: the input is a count of civil days. */
 const share = new Intl.NumberFormat("en-GB", { style: "percent", maximumFractionDigits: 0 });
@@ -69,7 +67,7 @@ function Figure(props: { readonly tile: TileViewModel }) {
         {estimated ? <Pill tone="estimate">Estimated</Pill> : null}
       </div>
       <p className="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-foreground">
-        {tile.value === null ? "—" : `$${money.format(tile.value)}`}
+        {usd(tile.value)}
       </p>
       <p className="mt-2 text-xs text-muted-foreground">{tile.caption ?? tile.period.label}</p>
     </div>

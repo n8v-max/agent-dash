@@ -148,6 +148,51 @@ describe("A21 — no cross-WorkType acceptance figure is rendered", () => {
   });
 });
 
+/**
+ * **R-V11 — the multiples are sparklines** (ticket 41).
+ *
+ * The panel's job is five trends read at once beside five figures. The axes, the grid and the
+ * one-entry legends were furniture restating the `<h3>` above them and taking most of a 144px
+ * tile to do it. `chart-shapes.test.tsx` proves what `bare` removes; this proves the panel asks
+ * for it — asserted on the legend, because a legend entry is the one piece of that furniture that
+ * carries an accessible name and is therefore reachable without querying the SVG.
+ *
+ * **The fixed dimension is load-bearing.** A Recharts chart given none in jsdom draws nothing at
+ * all, so "there is no legend here" would pass against five blank tiles. The first test is the
+ * control: the charts *are* drawn.
+ */
+describe("R-V11 — no axis, no grid and no legend inside a multiple", () => {
+  const renderDrawn = () =>
+    render(
+      <AcceptanceMultiples
+        panels={ACCEPTANCE_PANELS}
+        axis={ACCEPTANCE_AXIS}
+        dimension={{ width: 240, height: 144 }}
+      />,
+    );
+
+  it("draws all five charts — the control the absence below is measured against", () => {
+    renderDrawn();
+
+    expect(screen.getAllByRole("application")).toHaveLength(ACCEPTANCE_PANELS.length);
+  });
+
+  it("renders no legend entry in any of the five tiles", () => {
+    renderDrawn();
+
+    expect(screen.queryAllByLabelText(/legend icon/)).toEqual([]);
+  });
+
+  it("keeps every figure a reader needs: the rate, the counts and the mirror", () => {
+    renderDrawn();
+
+    for (const [at, tile] of tiles().entries()) {
+      expect(within(tile).getByText(RATES[at])).toBeInTheDocument();
+      expect(within(tile).getByRole("table")).toBeInTheDocument();
+    }
+  });
+});
+
 describe("T-C1 — every multiple carries its own mirror", () => {
   it("mirrors each WorkType's series under that WorkType's caption", () => {
     renderPanel();

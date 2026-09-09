@@ -10,9 +10,11 @@
 //      rather than a partition, so the chart is a line chart and nothing about it stacks.
 //   4. **Incomplete Jobs by age bucket** (R-M16), horizontally, because the four categories are
 //      long words and the axis they belong on is the one with room for them.
-//   5. **Session duration — median and p95** (R-M1). Two unlike readings of one population, so
-//      `measure` is the grouping and the geometry claims no part of a whole. There is no mean:
-//      the distribution is right-skewed and a mean would report a typical session nobody ran.
+//   5. **Session duration — median and p95** (R-M1), as **two small multiples side by side**.
+//      Two unlike readings of one population, so `measure` is the grouping and the geometry
+//      claims no part of a whole — and, since the p95 is several times the median, they get an
+//      axis each rather than one axis that flattens the median onto the floor (ticket 41). There
+//      is no mean: the distribution is right-skewed and a mean would report a session nobody ran.
 //
 // **The overlap statement is not rendered here** (R-V3, T-C8). Where the subject control groups
 // by Team the ViewModel carries `overlapNote` and `ChartFrame` renders it, once, for every chart
@@ -31,7 +33,7 @@ import type {
   VelocityPanel,
 } from "@/data/queries";
 import { countText, durationText, hoursTick, percentText, percentTick } from "./work-format";
-import { PANEL_CHART, WorkPanel, type PanelFigure } from "./work-section";
+import { HALF_CHART, PANEL_CHART, WorkPanel, type PanelFigure } from "./work-section";
 
 /** R-M14's denominator, said in words where the toggle is on. Copy — the number is the ViewModel's. */
 const perCapitaNote = (panel: VelocityPanel): string | null =>
@@ -125,20 +127,35 @@ const durationFigures = (panel: DurationPanel): readonly PanelFigure[] => [
   { key: "p95", label: "p95", value: durationText(panel.summary.p95) },
 ];
 
-/** **Panel 5.** Session duration — median and p95, and no third figure. */
+/**
+ * **Panel 5.** Session duration — median and p95, and no third figure.
+ *
+ * **Two small multiples, each on its own axis** (ticket 41). Drawn together on one linear axis the
+ * median sat on the floor: the p95 is ~4.4× it over the committed fixture, so the axis was the
+ * p95's and the median line was a flat rule along the bottom of the panel with no readable shape.
+ * Side by side, each line is read for its own trend and the two are compared through the figure
+ * strip above them, which is where the *magnitudes* belong. The alternative — a log axis — is
+ * rejected in the ticket's closing note.
+ *
+ * Both charts keep their axes and their legends: a tick strip is what makes a duration line a
+ * duration, and the one-entry legend is how a reader tells the left chart from the right one.
+ */
 export function DurationChart(props: { readonly panel: DurationPanel }) {
+  const { panel } = props;
+
   return (
-    <WorkPanel
-      title={props.panel.chart.title}
-      note={DURATION_NOTE}
-      figures={durationFigures(props.panel)}
-    >
-      <ChartFrame
-        chart={props.panel.chart}
-        shape="line"
-        tickFormat={hoursTick}
-        className={PANEL_CHART}
-      />
+    <WorkPanel title={panel.title} note={DURATION_NOTE} figures={durationFigures(panel)}>
+      <div className="grid gap-5 lg:grid-cols-2">
+        {[panel.median, panel.p95].map((chart) => (
+          <ChartFrame
+            key={chart.title}
+            chart={chart}
+            shape="line"
+            tickFormat={hoursTick}
+            className={HALF_CHART}
+          />
+        ))}
+      </div>
     </WorkPanel>
   );
 }

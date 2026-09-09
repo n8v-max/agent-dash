@@ -19,9 +19,16 @@
 //
 // **It computes nothing** (R-T6). Formatting a number that arrived resolved is not computing
 // one: nothing here filters, sums, sorts, ranks or compares.
+//
+// **The money formatter is not here.** It was, and it was also in `figures.ts`, in
+// `projection-panel.tsx` and — as a bare two-decimal number — in `data-table.tsx`, which is how
+// `/demo/people` came to print `310.5` in a Cost column beside a tile reading `$310.50`. Ticket
+// 41 collapsed the four into `figures.ts`'s `usd` / `usdTick`; this module keeps only the two
+// formatters nothing else spells, and R-V8's two labels, which are its actual subject.
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { WITHHELD } from "./figures";
 
 /** R-V8 — attaches to Projected cost and to nothing attributed. */
 export const ESTIMATED_MARKER = "Estimated";
@@ -29,43 +36,12 @@ export const ESTIMATED_MARKER = "Estimated";
 /** R-N11 / R-V8 — the token rate card's label, because the rates are invented. */
 export const ILLUSTRATIVE_RATES = "Illustrative rates";
 
-/**
- * Locale-pinned, exactly as `data-table.tsx` pins its own: a server's locale must not decide
- * what a figure reads as, and the mirror is an assertion target (T-C1).
- */
-const MONEY = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "USD",
-  currencyDisplay: "narrowSymbol",
-});
-
-/**
- * A measure-axis tick. **Whole dollars, and deliberately not compact.**
- *
- * Decimal-free for `chart-shapes.tsx`'s reason: a tick is serialised into the response payload
- * and `e2e/payload.spec.ts` searches that payload for two-decimal cost literals, so `$1,650`
- * cannot collide with a figure while `$1.65K` can. But *compact* and decimal-free together are
- * worse than either: Recharts' ticks at 550 / 1,100 / 1,650 / 2,200 render as "$1k, $2k, $2k",
- * two of them identical, and an axis with two ticks reading the same is unreadable. Grouped
- * thousands are decimal-free and never collapse.
- */
-const MONEY_TICK = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "USD",
-  currencyDisplay: "narrowSymbol",
-  maximumFractionDigits: 0,
-});
-
 const COUNT = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
 
 const SHARE = new Intl.NumberFormat("en-GB", { style: "percent", maximumFractionDigits: 0 });
 
 /** `null` is a figure that does not exist — no Completed Job to divide by — never a zero. */
-const DASH = "—";
-
-export const usd = (value: number | null): string => (value === null ? DASH : MONEY.format(value));
-
-export const usdTick = (value: number): string => MONEY_TICK.format(value);
+const DASH = WITHHELD;
 
 export const count = (value: number | null): string =>
   value === null ? DASH : COUNT.format(value);

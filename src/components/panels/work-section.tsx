@@ -31,6 +31,13 @@ export const PANEL_CHART = "[&_[data-slot=chart]]:aspect-auto [&_[data-slot=char
 /** One small multiple. Short on purpose: five of them are read together, not one at a time. */
 export const TILE_CHART = "[&_[data-slot=chart]]:aspect-auto [&_[data-slot=chart]]:h-36";
 
+/**
+ * Half of a panel: two charts side by side, each on its own measure axis. Taller than a tile
+ * because it keeps its axes and its legend — that is what makes two charts read as two
+ * *measures* rather than as one chart drawn twice (R-N12 panel 5, ticket 41).
+ */
+export const HALF_CHART = "[&_[data-slot=chart]]:aspect-auto [&_[data-slot=chart]]:h-56";
+
 /** One resolved figure and the evidence under it. Both arrive as strings, already formatted. */
 export type PanelFigure = {
   /** R-T8 — a domain-supplied identity. A series key, a span key, a bucket key. */

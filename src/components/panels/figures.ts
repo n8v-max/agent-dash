@@ -27,6 +27,18 @@
 // because **an attributed figure is the bill, not an estimate of it** (R-V8/A17). Projected cost
 // is `/demo/projection`'s panel and carries its own "estimated" marker there; nothing this module
 // formats carries one.
+//
+// **Ticket 41 — this module owns the money formatter, and it is the only one.** Four renderings
+// of the same figure had accumulated: this file's `$` + two decimals, `money-figure.tsx`'s
+// `style: "currency"`, `projection-panel.tsx`'s own copy of the first, and — the one a reader
+// actually noticed — `data-table.tsx`'s bare `maximumFractionDigits: 2`, which put the People
+// table's Cost column on screen as `310.5` beside a summary tile reading `$310.50`. `usd` and
+// `usdTick` below are what the other three now call, and a table column reaches them through its
+// `unit` (`TableColumn.unit`, a domain fact) rather than by hard-coding a currency in a cell.
+//
+// `style: "currency"` is the surviving spelling because it is the one that cannot drift: the
+// symbol, its position and the two decimals all come from the locale and the currency code
+// rather than from a template literal that happens to agree with them today.
 
 import type { Change, ChangeShown } from "@/domain/change";
 import type { FigureUnit } from "@/domain/viewmodel";
@@ -39,9 +51,29 @@ export const NO_FIGURE = WITHHELD;
 
 const WHOLE = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
 const UP_TO_TWO = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
+
+/** The money formatter. Exactly two decimals, always, so a Cost column reads as one column. */
 const MONEY = new Intl.NumberFormat("en-GB", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+  style: "currency",
+  currency: "USD",
+  currencyDisplay: "narrowSymbol",
+});
+
+/**
+ * A measure-axis tick. **Whole dollars, and deliberately not compact.**
+ *
+ * Decimal-free for `chart-shapes.tsx`'s reason: a tick is serialised into the response payload
+ * and `e2e/payload.spec.ts` searches that payload for two-decimal cost literals, so `$1,650`
+ * cannot collide with a figure while `$1.65K` can. But *compact* and decimal-free together are
+ * worse than either: Recharts' ticks at 550 / 1,100 / 1,650 / 2,200 render as "$1k, $2k, $2k",
+ * two of them identical, and an axis with two ticks reading the same is unreadable. Grouped
+ * thousands are decimal-free and never collapse.
+ */
+const MONEY_TICK = new Intl.NumberFormat("en-GB", {
+  style: "currency",
+  currency: "USD",
+  currencyDisplay: "narrowSymbol",
+  maximumFractionDigits: 0,
 });
 
 /**
@@ -52,7 +84,7 @@ const MONEY = new Intl.NumberFormat("en-GB", {
  * them, and because `usd_per_task` is a domain key: as a property holding an identifier it is
  * data, where an inline function would make it a method name and a `naming-convention` error.
  */
-const money = (value: number): string => `$${MONEY.format(value)}`;
+const money = (value: number): string => MONEY.format(value);
 const counted = (value: number): string => UP_TO_TWO.format(value);
 const whole = (value: number): string => WHOLE.format(value);
 const percent = (value: number): string => `${WHOLE.format(value * 100)}%`;
@@ -70,6 +102,15 @@ const FORMATTERS: Readonly<Record<FigureUnit, (value: number) => string>> = {
 /** A figure, in its unit. `null` is the withheld em dash and never a zero. */
 export const formatFigure = (value: number | null, unit: FigureUnit): string =>
   value === null ? WITHHELD : FORMATTERS[unit](value);
+
+/**
+ * **Money, and the only place in the product it is spelled.** `null` is *withheld* or *undefined*
+ * — a figure with no Completed Job to divide by — and never a zero.
+ */
+export const usd = (value: number | null): string => formatFigure(value, "usd");
+
+/** A money axis tick, in whole dollars. See `MONEY_TICK`. */
+export const usdTick = (value: number): string => MONEY_TICK.format(value);
 
 /** The same function under the name the summary tiles reach for. */
 export const figureText = formatFigure;

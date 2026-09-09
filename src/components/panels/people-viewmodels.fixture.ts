@@ -14,15 +14,20 @@ import type { MemberProfileViewModel } from "@/data/queries";
 import type { TableRow, TableViewModelOf } from "@/domain/viewmodel";
 import { chartFixture } from "../charts/chart-viewmodels.fixture";
 
-/** R-N15's seven columns, with the four numeric ones sortable. */
+/**
+ * R-N15's seven columns, with the four numeric ones sortable and three of them carrying a unit.
+ * Transcribed from `src/data/queries/people.ts` rather than imported: what a component owes is to
+ * render the ViewModel it was handed, and a fixture that imports the thing under test would
+ * follow it wherever it went.
+ */
 export const PEOPLE_COLUMNS = [
   { key: "member", label: "Member", numeric: false, sortable: false },
   { key: "team", label: "Team", numeric: false, sortable: false },
   { key: "kind", label: "Kind", numeric: false, sortable: false },
-  { key: "completedTasks", label: "Completed Jobs", numeric: true, sortable: true },
-  { key: "sessions", label: "Sessions", numeric: true, sortable: true },
-  { key: "tokens", label: "Tokens", numeric: true, sortable: true },
-  { key: "cost", label: "Cost", numeric: true, sortable: true },
+  { key: "completedTasks", label: "Completed Jobs", numeric: true, sortable: true, unit: "count" },
+  { key: "sessions", label: "Sessions", numeric: true, sortable: true, unit: "count" },
+  { key: "tokens", label: "Tokens", numeric: true, sortable: true, unit: "tokens" },
+  { key: "cost", label: "Cost", numeric: true, sortable: true, unit: "usd" },
 ] as const;
 
 /**
@@ -33,9 +38,9 @@ export const PEOPLE_COLUMNS = [
 export const PEOPLE_TABLE: TableViewModelOf<TableRow> = {
   columns: [...PEOPLE_COLUMNS],
   rows: [
-    { key: "mem_0001", cells: ["Ada Lovelace", "Platform", "human", 42, 90, 1_240_000, 310.5] },
-    { key: "mem_0002", cells: ["Grace Hopper", "Platform", "human", 31, 70, 980_000, 220.25] },
-    { key: "mem_0003", cells: ["Alan Turing", "Data", "human", 12, 20, 310_000, null] },
+    { key: "mem_0001", cells: ["Ada Lovelace", "Platform", "Human", 42, 90, 1_240_000, 310.5] },
+    { key: "mem_0002", cells: ["Grace Hopper", "Platform", "Human", 31, 70, 980_000, 220.25] },
+    { key: "mem_0003", cells: ["Alan Turing", "Data", "Human", 12, 20, 310_000, null] },
   ],
   sort: { column: "completedTasks", direction: "desc" },
   empty: false,
@@ -45,7 +50,7 @@ export const PEOPLE_TABLE: TableViewModelOf<TableRow> = {
 /** The restricted account's table (C10): its own row, and nothing else. */
 export const RESTRICTED_TABLE: TableViewModelOf<TableRow> = {
   columns: [...PEOPLE_COLUMNS],
-  rows: [{ key: "mem_0009", cells: ["Hal Camps", "Platform", "human", 7, 15, 90_000, 41.2] }],
+  rows: [{ key: "mem_0009", cells: ["Hal Camps", "Platform", "Human", 7, 15, 90_000, 41.2] }],
   sort: { column: "completedTasks", direction: "desc" },
   empty: false,
   note: null,
@@ -63,7 +68,7 @@ export const COMPARATOR_NOTE =
 export const MEMBER_PROFILE: MemberProfileViewModel = {
   memberId: "mem_0001",
   name: "Ada Lovelace",
-  kind: "human",
+  kindLabel: "Human",
   teams: ["Platform"],
   tiles: [
     {

@@ -29,9 +29,25 @@ import type {
   TotalSpendPanel as TotalSpendViewModel,
 } from "@/data/queries";
 import type { ChartViewModel } from "@/domain/viewmodel";
-import { Figure, FigureList, count, share, usd } from "./money-figure";
+import { usd } from "./figures";
+import { Figure, FigureList, count, share } from "./money-figure";
 import { MoneyChart } from "./money-chart";
 import { PanelCard } from "./panel-card";
+
+/**
+ * **What the seat charge is a charge for**, in the arithmetic a reader can check against the
+ * figure above it (ticket 41).
+ *
+ * A **seat-month is one month held by one seat**, so the quantity billed is `seats × months`:
+ * 18 human Members over 6 months is 108 seat-months, not 6. The hint used to read
+ * "18 human Members · 6 seat-months", which put a bare month count under a seat-month label and
+ * understated the quantity by the size of the Organization. Every number here arrives on the
+ * ViewModel — `seats`, `months` and their product are all `TotalSpend`'s (R-T6); the "×" and the
+ * "=" are punctuation, not a multiplication this component performs.
+ */
+const seatHint = (panel: TotalSpendViewModel): string =>
+  `${count(panel.seats)} human Members × ${count(panel.months)} months = ` +
+  `${count(panel.seatMonths)} seat-months`;
 
 /** Copy for R-M1's `accepted` filter, in the words a reader of panel 3 needs. */
 const OUTCOME_SENTENCE: Readonly<Record<string, string>> = {
@@ -91,7 +107,7 @@ export function TotalSpendPanel(props: {
   return (
     <PanelCard
       title={panel.chart.title}
-      question="What the period cost in total, and how much of it was seats rather than sessions. A seat is charged by whole months, so this panel reads months whatever grain the page is set to."
+      question="What the period cost in total, and how much of it was seats rather than sessions. A seat is charged by whole months, so this panel reads months whatever grain the page is set to. The seat charge is one fee per seat per month — a seat-month — so it grows with the Organization as well as with the calendar."
       footnote={[props.perCapitaNote, panel.note].filter(Boolean).join(" ")}
       figures={
         <FigureList>
@@ -105,7 +121,7 @@ export function TotalSpendPanel(props: {
           <Figure
             label="Seat cost"
             value={usd(panel.seatCost)}
-            hint={`${count(panel.seats)} human Members · ${count(panel.seatMonths)} seat-months`}
+            hint={seatHint(panel)}
           />
           <Figure label="Seats as a share" value={share(panel.seatShare)} />
         </FigureList>

@@ -166,3 +166,46 @@ test.describe("T-E1 — every route renders for both accounts (A9, R-A8)", () =>
     expect(restricted, "the restricted account was shown a different set of doors").toEqual(open);
   });
 });
+
+/**
+ * **Ticket 41 — `Member.kind` reaches a reader as words, on every route.**
+ *
+ * `human` and `service_account` are a closed domain vocabulary, a fixture field and a URL value.
+ * None of those is English, and `service_account` on screen reads as a leaked column name rather
+ * than as a fact about an account. The People table printed it in its Kind column.
+ *
+ * **Asserted over `innerText`, not over the markup.** The enum is legitimately in the document as
+ * a URL: the toolbar's Member-kind filter links carry `?member_kind=service_account`, which is
+ * R-C3 working. What R-N15 is about is what a reader *reads*, and `innerText` is exactly that —
+ * it excludes attributes and `<script>` bodies, which is why the same technique carries the error
+ * sweep above.
+ *
+ * The positive control is the second assertion: the words the enum was replaced by are on the
+ * page that used to carry it, so the absence is a substitution and not an empty page.
+ */
+test.describe("R-N15 — no raw `Member.kind` enum reaches a reader (ticket 41)", () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await useSession(
+      context,
+      { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG },
+      baseURL ?? BASE,
+    );
+  });
+
+  for (const route of ROUTES) {
+    test(`${route} shows no raw kind value`, async ({ page }) => {
+      await page.goto(route);
+      const read = await page.locator("body").innerText();
+
+      expect(read).not.toContain("service_account");
+    });
+  }
+
+  test("the People page says it in words instead", async ({ page }) => {
+    await page.goto(`/${SLUG}/people`);
+    const read = await page.locator("body").innerText();
+
+    expect(read).toContain("Human");
+    expect(read).toContain("Service account");
+  });
+});

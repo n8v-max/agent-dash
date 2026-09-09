@@ -214,7 +214,10 @@ against.
 - **T-U12 — Total spend composition** (`domain/metrics/spend.ts`, R-M1, R-M5). Session Cost + Seat
   cost; seats on `human` Members only; **unavailable below monthly grain** (A25). April's whole-
   month seat charge against 19 days of sessions is asserted as correct-and-flagged, not corrected
-  (R-D2).
+  (R-D2). **The seat-month count is `seats × months`** and Seat cost is that count times the fee —
+  18 seats over 6 months is 108 seat-months and $4,212 — and a test asserts the two counts are not
+  the same number, because the panel printed the month count under the seat-month label until
+  ticket 41 (R-M5).
 - **T-U13 — Cost per completed Task** (R-M1). Non-accepted sessions sit in the numerator and not
   the denominator. A period with spend and zero Completed Tasks does not divide by zero.
 - **T-U14 — Acceptance rate is computed within a WorkType only** (R-M6, A21). A cross-WorkType
@@ -338,6 +341,25 @@ product's central interaction.
   token class volumes and its Model mix, and the four volumes sum to the row's Tokens processed
   figure. This is the only surface carrying either, so it is the only place they are assertable
   against rendered output rather than only in the domain layer.
+- **T-C9.2 — Money is one formatter, and a table column reads in its own unit** (A31, R-N15,
+  ticket 41). Unit: the money formatter renders a symbol, grouped thousands and **exactly** two
+  decimals, and `usd(x)` equals the `usd` and `usd_per_task` tile formatters because it *is* them.
+  Component: the People table's Cost cells match `/^\$[\d,]+\.\d{2}$/` and a column carrying no
+  unit renders exactly as it did. E2E: the same shape, on the served page.
+- **T-C9.3 — `Member.kind` reaches a reader as words** (A31). Component: no cell in the People
+  table contains `service_account`; the Kind column reads "Human" and "Service account". E2E: a
+  sweep of all six routes over **`innerText`**, not markup — the enum is legitimately a URL value
+  in the kind filter's `href`s (R-C3), and what R-N15 governs is what a reader reads.
+- **T-C12 — A chart inside a tile carries no furniture** (A30, R-V11). Asserted over
+  `furnitureFor`, the one expression that decides it — the same shape of claim T-C11 makes over
+  `stackIdOf`, and for the same reason: an SVG query would depend on jsdom, on a fixed dimension
+  and on Recharts' class names, three ways for the test to go quiet without the rule breaking. The
+  default arm is the control. Separately, at the panel: the acceptance multiples render five charts
+  and **no legend entry**, and each still carries its R-X1 mirror.
+- **T-C13 — `/demo/work`'s duration panel is one panel holding two charts** (R-N12 item 5, ticket
+  41). The six panel headings are unchanged — the split must not turn R-N12's five into a six —
+  the panel carries a median chart and a p95 chart, each with exactly one series and its own
+  mirror column, and both magnitudes are stated in the figure strip above them.
 - **T-C10 — "Other" is inert** (R-V6): not clickable, does not expand, and its tooltip lists what
   it holds.
 - **T-C11 — Chart-shape rules** (A12, R-V1, R-V2). Two claims, asserted differently:
@@ -519,6 +541,8 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A27 Spans are `interactive`-only and say so | T-U20, T-C1 |
 | A28 No matrix anywhere; visibility stated in words | T-E2.1 |
 | A29 A zero denominator is an absence, never a zero | T-U22, T-C1.1, T-E10 |
+| A30 A tile chart carries no axis, tick, grid or legend | T-C12 |
+| A31 One money formatter; no raw `Member.kind` enum on screen | T-C9.2, T-C9.3 |
 
 ---
 

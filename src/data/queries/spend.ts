@@ -66,6 +66,9 @@ export type TotalSpendPanel = {
   readonly total: number;
   /** Active human Members. A service account holds no seat (R-M5, R-M14). */
   readonly seats: number;
+  /** Whole months the seat fee is charged over. Never fractional (R-D2). */
+  readonly months: number;
+  /** `seats × months` — the quantity the fee is charged per. 18 humans over 6 months is 108. */
   readonly seatMonths: number;
   /** `seatCost / total` — R-D4's headline. `null` over a period that cost nothing. */
   readonly seatShare: number | null;
@@ -119,6 +122,7 @@ const NO_SPEND = {
   seatCost: 0,
   total: 0,
   seats: 0,
+  months: 0,
   seatMonths: 0,
   seatShare: null,
   partial: false,
@@ -169,6 +173,7 @@ const totalSpendPanel = (context: PageContext, divisor: number): TotalSpendPanel
     seatCost: per(spend.seatCost),
     total: per(spend.total),
     seats: spend.seats,
+    months: spend.months,
     seatMonths: spend.seatMonths,
     seatShare: spend.seatShare,
     partial: spend.partial,

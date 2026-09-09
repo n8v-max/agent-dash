@@ -405,7 +405,8 @@ describe("R-V1 — `stackable` follows the partition, not the panel", () => {
   it("never stacks a ratio, even where the grouping partitions the rows", () => {
     expect(OPEN_PAGES.spend.costPerCompletedTaskByWorkType.stackable).toBe(false);
     expect(OPEN_PAGES.spend.costPerSession.chart.stackable).toBe(false);
-    expect(OPEN_PAGES.work.duration.chart.stackable).toBe(false);
+    expect(OPEN_PAGES.work.duration.median.stackable).toBe(false);
+    expect(OPEN_PAGES.work.duration.p95.stackable).toBe(false);
   });
 
   it("never stacks Repository (R-V1), nor a Member or Organization grouping", () => {

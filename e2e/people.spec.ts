@@ -144,6 +144,39 @@ test.describe("A24 — no surface defaults to sort-by-cost (R-M15, R-N15)", () =
   });
 });
 
+/**
+ * **Ticket 41 — the Cost column is money, on the page, in the browser.**
+ *
+ * It rendered through a bare `maximumFractionDigits: 2`, so a column of costs read `310.5`,
+ * `220.25`, `41.2` — three different shapes of one quantity, on one column, one click from a
+ * summary tile reading `$310.50`. The shape is asserted here rather than a value: what a cell
+ * *says* is a unit test's claim (`figures.test.ts`), and what reaches a reader is this one's.
+ */
+test.describe("R-N15 — the Cost column reads as currency (ticket 41)", () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await useSession(context, OPEN_CLAIMS, baseURL ?? BASE);
+  });
+
+  test("every cost cell carries a symbol, grouped thousands and exactly two decimals", async ({
+    page,
+  }) => {
+    await page.goto(PEOPLE);
+    const costs = await peopleRows(page).locator("td:nth-child(7)").allTextContents();
+
+    // Non-vacuity: twenty rows, and none of them withheld for this account (R-A9).
+    expect(costs).toHaveLength(20);
+    for (const cost of costs) expect(cost).toMatch(/^\$[\d,]+\.\d{2}$/);
+  });
+
+  test("the Kind column reads as words, and never as the enum", async ({ page }) => {
+    await page.goto(PEOPLE);
+    const kinds = new Set(await peopleRows(page).locator("td:nth-child(3)").allTextContents());
+
+    // R-D3's roster: 18 `human` and 2 `service_account`, both spelled for a reader.
+    expect([...kinds].sort()).toEqual(["Human", "Service account"]);
+  });
+});
+
 test.describe("R-N16 / R-N17 — `?member=` is a surface, and the comparator is paired bars", () => {
   test.beforeEach(async ({ context, baseURL }) => {
     await useSession(context, OPEN_CLAIMS, baseURL ?? BASE);

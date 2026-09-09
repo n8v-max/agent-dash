@@ -68,7 +68,7 @@ function ProfileHeader(props: {
       <div>
         <h2 className="text-lg font-semibold tracking-tight text-foreground">{profile.name}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {profile.kind === "service_account" ? "Service account" : "Human"}
+          {profile.kindLabel}
           {profile.teams.length > 0 ? ` · ${profile.teams.join(", ")}` : ""}
         </p>
       </div>

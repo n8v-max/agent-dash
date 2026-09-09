@@ -15,6 +15,10 @@
 // **No pie chart is imported, anywhere** (R-V2). Asserted statically over the chart modules by
 // T-C11, because a rendering test cannot prove an absence.
 //
+// **R-V11 — a chart inside a tile is furniture-free.** `bare` on the shape input drops the grid,
+// both axes and the legend, and keeps the tooltip, the accessibility layer and the mirror. See
+// `ShapeInput.bare` for why, and `chart-frame.tsx` for the prop a panel sets.
+//
 // **It computes nothing** (R-T6). `chartRows` transposes the ViewModel's series into the
 // row-major shape Recharts reads; it sums nothing, sorts nothing and drops nothing. Every number
 // that reaches a mark is the one `src/domain/` put on the series.
@@ -115,18 +119,34 @@ type ShapeInput = {
   readonly shape: ChartShape;
   readonly tickFormat: (value: number) => string;
   /**
-   * The measure axis's fixed extent, when the panel is read against a scale it does not own.
+   * The measure axis's fixed extent, when a panel draws an axis it does not own the scale of.
+   * Left to itself Recharts scales each chart to its own maximum, so two charts read side by side
+   * can draw two different values at the same height — a falsehood no caption undoes.
    *
-   * R-N13's small multiples are the case: acceptance rate is comparable only *within* a WorkType,
-   * so the five charts exist to be read side by side, and side-by-side reading is only honest if
-   * they share a scale. Left to itself Recharts scales each chart to its own maximum — at month
-   * grain `deploy` at 33% drew exactly as tall as `implementation` at 67%, which is the chart
-   * asserting a falsehood the caption cannot undo.
+   * When set it arrives from the domain layer, like `stackable`: a component supplies no default
+   * and decides nothing.
    *
-   * It arrives from the domain layer (`acceptanceAxis` on the ViewModel), like `stackable` — a
-   * component supplies no default and decides nothing.
+   * **No panel sets it today, and that is a decision rather than an oversight.** It was added for
+   * R-N13's acceptance multiples; ticket 41 made those `bare`, and a chart that draws no axis has
+   * no scale to disagree about — their comparison is carried by `acceptanceAxis` through the rail
+   * instead. It is kept because the *next* pair of side-by-side charts with a drawn axis will
+   * need it, and because removing it would delete the only expression that can pin one.
    */
   readonly measureDomain?: readonly [number, number];
+  /**
+   * **R-V11 — a chart inside a tile carries no axes, no ticks, no grid and no legend.**
+   *
+   * At tile size the furniture is larger than the mark: R-N13's acceptance multiples are 144px
+   * tall, and a tick strip, a grid and a one-entry legend take most of it to restate a figure the
+   * tile already prints in 24pt above the chart. What is left is a sparkline — a shape, read for
+   * its direction, beside the number it is the shape of — which is the same reasoning R-N8 gives
+   * for the summary tile's bars carrying no axis labels.
+   *
+   * **The tooltip and the accessibility layer stay** (R-X3), and so does the R-X1 mirror: the
+   * values are not withdrawn, only the chrome. A reader who wants the numbers has them in the
+   * mirror and in the tile's own headline, which is where a tile's figures belong.
+   */
+  readonly bare?: boolean;
 };
 
 /**
@@ -146,18 +166,33 @@ const axesFor = (input: ShapeInput): readonly ReactElement[] => {
       ];
 };
 
-/** Grid, axes, tooltip and legend — identical for every shape, so no panel can vary them. */
-const furnitureFor = (input: ShapeInput): readonly ReactElement[] => [
-  <CartesianGrid
-    key="grid"
-    horizontal={input.shape !== "horizontal-bar"}
-    vertical={input.shape === "horizontal-bar"}
-    strokeDasharray="3 3"
-  />,
-  ...axesFor(input),
-  <ChartTooltip key="tooltip" content={<ChartTooltipContent />} />,
-  <ChartLegend key="legend" content={<SeriesLegend />} />,
-];
+/**
+ * Grid, axes, tooltip and legend — identical for every shape, so no panel can vary them.
+ *
+ * **`bare` drops everything but the tooltip** (R-V11). It is one branch here rather than a prop
+ * on each piece so that "a tile chart is a bare line" is a single decision, and so that the
+ * tooltip and the accessibility layer cannot be dropped with the chrome by accident.
+ *
+ * Exported for the same reason `stackIdOf` is: it is the *only* expression in the product that
+ * decides whether a chart has axes, so R-V11 is assertable over the decision rather than over
+ * Recharts' class names in jsdom.
+ */
+export const furnitureFor = (input: ShapeInput): readonly ReactElement[] => {
+  const tooltip = <ChartTooltip key="tooltip" content={<ChartTooltipContent />} />;
+  if (input.bare) return [tooltip];
+
+  return [
+    <CartesianGrid
+      key="grid"
+      horizontal={input.shape !== "horizontal-bar"}
+      vertical={input.shape === "horizontal-bar"}
+      strokeDasharray="3 3"
+    />,
+    ...axesFor(input),
+    tooltip,
+    <ChartLegend key="legend" content={<SeriesLegend />} />,
+  ];
+};
 
 const linesFor = (chart: ChartViewModel): readonly ReactElement[] =>
   chart.series.map((series) => (

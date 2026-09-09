@@ -160,6 +160,7 @@ export const spendPageFixture = (
     seatCost: 3600,
     total: 16_600,
     seats: 20,
+    months: 3,
     seatMonths: 60,
     seatShare: 0.2168,
     partial: true,

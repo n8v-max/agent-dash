@@ -33,10 +33,19 @@ import {
   STACK_ID,
   chartElementFor,
   chartRows,
+  furnitureFor,
   stackIdOf,
   type ChartShape,
 } from "./chart-shapes";
 import { chartFixture, MEMBER_SERIES } from "./chart-viewmodels.fixture";
+
+/** A Recharts component's own name, which is what its element's type is identified by. */
+const nameOf = (element: ReactElement): string => {
+  const { type } = element;
+  if (typeof type === "string") return type;
+  const named = type as { readonly displayName?: string; readonly name?: string };
+  return named.displayName ?? named.name ?? "";
+};
 
 const SIZE = { width: 640, height: 320 };
 
@@ -145,6 +154,66 @@ describe("T-C11 — the absence assertions, over the chart modules", () => {
     const uses = chartModules.flatMap(([, source]) => source.match(/stackId=\{[^}]*\}/g) ?? []);
 
     expect(uses.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * **R-V11 — a chart inside a tile is a bare line.**
+ *
+ * The failure this pins is what `/demo/work`'s acceptance multiples shipped as: five 144px charts,
+ * each carrying a tick strip, a dashed grid and a one-entry legend restating a heading two lines
+ * above them, leaving the line itself perhaps forty pixels tall.
+ *
+ * **Asserted over the element tree rather than the DOM**, for the same reason the stack rule above
+ * is asserted over `stackIdOf`: what R-V11 governs is *which marks the shape factory emits*, and
+ * an SVG query would additionally depend on jsdom, on a dimension, and on Recharts' class names —
+ * three ways for this test to go quiet without the rule being broken. The default arm is the
+ * control: everything absent below is present when `bare` is off.
+ */
+describe("R-V11 — a tile chart carries no axes, no grid and no legend", () => {
+  const CHART = chartFixture({ series: MEMBER_SERIES.slice(0, 1) });
+
+  /** The furniture `furnitureFor` puts in a chart, by Recharts component name. */
+  const marksIn = (bare: boolean): readonly string[] =>
+    furnitureFor({ chart: CHART, shape: "line", tickFormat: String, bare }).map(nameOf);
+
+  it("draws all of it by default — the panel-sized chart is unchanged", () => {
+    const drawn = marksIn(false);
+
+    expect(drawn).toContain("CartesianGrid");
+    expect(drawn).toContain("XAxis");
+    expect(drawn).toContain("YAxis");
+    expect(drawn).toContain("Legend");
+    expect(drawn).toContain("Tooltip");
+  });
+
+  it("draws none of it at tile size, and still draws the line", () => {
+    const drawn = marksIn(true);
+
+    expect(drawn).not.toContain("CartesianGrid");
+    expect(drawn).not.toContain("XAxis");
+    expect(drawn).not.toContain("YAxis");
+    expect(drawn).not.toContain("Legend");
+    // The tooltip stays: what goes is the chrome, never the values or the way into them.
+    expect(drawn).toContain("Tooltip");
+  });
+
+  it("still draws the series — `bare` reaches the furniture and not the marks", () => {
+    render(<ChartFrame chart={CHART} shape="line" dimension={SIZE} bare />);
+
+    expect(screen.getByRole("application")).toBeInTheDocument();
+    // A legend entry is furniture and is gone; the mark it described is not.
+    expect(screen.queryAllByLabelText(/legend icon/)).toEqual([]);
+    expect(chartRows(CHART)).toHaveLength(CHART.buckets.length);
+  });
+
+  /** R-X1, R-X2 and R-X3 are `ChartFrame`'s, and `bare` reaches none of them. */
+  it("keeps the mirror, the roll-up label and the accessibility layer", () => {
+    render(<ChartFrame chart={CHART} shape="line" dimension={SIZE} bare />);
+
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /grouped by/ })).toBeInTheDocument();
+    expect(screen.getByRole("application")).toBeInTheDocument();
   });
 });
 

@@ -30,9 +30,14 @@
 //
 //   * **R-D2 / A26 — a partial period is flagged, never pro-rated.** April is 19 days of
 //     sessions carrying a whole month's seat charge, so its Cost per completed Task is inflated
-//     **by construction**; the flag is what stops that reading as a finding. `seatMonths` is a
-//     count of whole months and there is nothing here that could divide it by a day count.
-//     `partial` travels from the bucket onto every reading, and is carried, never acted on.
+//     **by construction**; the flag is what stops that reading as a finding. `months` is a count
+//     of whole months and there is nothing here that could divide it by a day count. `partial`
+//     travels from the bucket onto every reading, and is carried, never acted on.
+//
+//     **A seat-month is a month held by one seat**, so the quantity the fee is charged per is
+//     `seats × months` and `TotalSpend` reports it as `seatMonths`. The period's own field is
+//     `months`: it was called `seatMonths` while holding a bare month count, and the panel that
+//     printed it read "18 human Members · 6 seat-months" over a figure that is 108 of them.
 //
 // **Cost per completed Task is the product's central claim** (`CONTEXT.md` § Metric Concepts):
 // Total Cost over a period ÷ Completed Tasks in it. A **Completed Task is a Task with at least
@@ -106,8 +111,15 @@ const SEAT_BEARING: unique symbol = Symbol("spend/seat-bearing");
 
 /** A checked run of whole months. The only input `totalSpend` accepts. */
 export type SeatBearingPeriod<Row> = SpendPeriod<Row> & {
-  /** **Whole** months charged. Never fractional: R-D2 forbids pro-rating a partial month. */
-  readonly seatMonths: number;
+  /**
+   * **Whole** months charged. Never fractional: R-D2 forbids pro-rating a partial month.
+   *
+   * It is `months`, not `seatMonths`: it counts *months*, and one seat is charged for each of
+   * them. A seat-month is a month **held by one seat**, so the seat-month count over a population
+   * is `seats × months` — 18 human Members over 6 months is 108, not 6. `TotalSpend.seatMonths`
+   * below is that product, and this field was carrying its name while holding one of its factors.
+   */
+  readonly months: number;
   readonly [SEAT_BEARING]: true;
 };
 
@@ -171,7 +183,7 @@ export function seatBearingPeriod<Row>(
     ok: true,
     period: {
       key: spanKey(keys),
-      seatMonths: new Set(keys).size,
+      months: new Set(keys).size,
       // R-E2 — one partial month makes the run partial. Flagged, never pro-rated (R-D2).
       partial: buckets.some((bucket) => bucket.partial),
       rows: buckets.flatMap((bucket) => bucket.rows),
@@ -207,11 +219,20 @@ export const seatHolders = (members: readonly MemberFacts[]): readonly MemberFac
 export type TotalSpend<Row> = SpendPeriod<Row> & {
   /** Attributed session Cost over the period. Token and machine cost, already blended. */
   readonly sessionCost: number;
-  /** `seats × fee × whole months`. Never pro-rated by elapsed days (R-D2). */
+  /** `seatMonths × fee`, i.e. `seats × months × fee`. Never pro-rated by elapsed days (R-D2). */
   readonly seatCost: number;
   readonly total: number;
   /** Active **human** Members. Service accounts hold no seat. */
   readonly seats: number;
+  /** Whole months in the period. One seat is charged for each of them. */
+  readonly months: number;
+  /**
+   * **`seats × months` — the quantity the seat fee is charged per.** One seat-month is one month
+   * held by one seat, so a population of 18 human Members over 6 months holds 108 of them, and
+   * `seatCost` is exactly `seatMonths × fee`. It is stated because the panel says it: a subtitle
+   * reading "18 human Members · 6 seat-months" put a month count under a seat-month label, which
+   * is out by the size of the Organization.
+   */
   readonly seatMonths: number;
   /**
    * `seatCost / total` — R-D4's headline, and what makes a low-usage Member legible. `null`
@@ -235,7 +256,10 @@ export function totalSpend<Row extends CostBearing>(
 ): TotalSpend<Row> {
   const cost = sessionCost(period.rows);
   const seats = seatHolders(members).length;
-  const seatCost = seats * seatFeeUsd * period.seatMonths;
+  // The seat charge, written as the quantity times the price it is charged at, so the figure and
+  // the sentence a panel writes under it come out of the same expression.
+  const seatMonths = seats * period.months;
+  const seatCost = seatMonths * seatFeeUsd;
   const total = cost + seatCost;
   return {
     key: period.key,
@@ -245,7 +269,8 @@ export function totalSpend<Row extends CostBearing>(
     seatCost,
     total,
     seats,
-    seatMonths: period.seatMonths,
+    months: period.months,
+    seatMonths,
     seatShare: ratio(seatCost, total),
   };
 }

@@ -131,8 +131,12 @@ describe("Total spend is session Cost + Seat cost (R-M1, R-M5, R-D4, T-U12)", ()
   it("charges six whole months of 18 seats across the window", () => {
     expect(WINDOW_SPEND.key).toBe("2026-04..2026-09");
     expect(WINDOW_SPEND.seats).toBe(18);
-    expect(WINDOW_SPEND.seatMonths).toBe(6);
+    expect(WINDOW_SPEND.months).toBe(6);
+    // A seat-month is one month held by one seat, so 18 seats over 6 months is 108 of them —
+    // and $4,212 is 108 × the $39 fee, not 6 × anything (ticket 41).
+    expect(WINDOW_SPEND.seatMonths).toBe(108);
     expect(WINDOW_SPEND.seatCost).toBe(4212);
+    expect(WINDOW_SPEND.seatCost).toBe(WINDOW_SPEND.seatMonths * SEAT_FEE);
   });
 
   it("adds them to the attributed session Cost, and to nothing else", () => {
@@ -210,7 +214,8 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12, T-U13
   });
 
   it("charges a whole month of seats against those 19 days", () => {
-    expect(APRIL_SPEND.seatMonths).toBe(1);
+    expect(APRIL_SPEND.months).toBe(1);
+    expect(APRIL_SPEND.seatMonths).toBe(18);
     expect(APRIL_SPEND.seatCost).toBe(702);
     // 19/30ths of $702 is $444.60. The requirement is that no such number exists here: the
     // charge against a clipped April is identical to the charge against a complete May.
@@ -304,6 +309,8 @@ describe("a seat held against near-zero usage (R-D10, T-U12, T-U13)", () => {
 
   it("costs $11.10 of sessions and $234 of seat, so 95% of her bill is the seat", () => {
     expect(HER_SPEND.seats).toBe(1);
+    expect(HER_SPEND.months).toBe(6);
+    // One seat over six months: the one population where the two counts coincide.
     expect(HER_SPEND.seatMonths).toBe(6);
     expect(HER_SPEND.seatCost).toBe(234);
     expect(HER_SPEND.sessionCost).toBeCloseTo(11.1, 2);

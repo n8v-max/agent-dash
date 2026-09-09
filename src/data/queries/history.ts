@@ -71,8 +71,10 @@ const COLUMNS = [
   { key: "executionMode", label: "Mode", numeric: false, sortable: true },
   { key: "accepted", label: "Accepted", numeric: false, sortable: true },
   { key: "duration", label: "Duration (s)", numeric: true, sortable: true },
-  { key: "tokens", label: "Tokens", numeric: true, sortable: true },
-  { key: "cost", label: "Cost", numeric: true, sortable: true },
+  // The Cost column carries its unit, so the raw rows under an aggregate read as the same kind of
+  // figure the aggregate does (ticket 41). Duration names its unit in its own label already.
+  { key: "tokens", label: "Tokens", numeric: true, sortable: true, unit: "tokens" },
+  { key: "cost", label: "Cost", numeric: true, sortable: true, unit: "usd" },
 ] as const;
 
 const grantedOver = (context: PageContext, datapoint: "tokens" | "cost", row: AgentSession) =>
