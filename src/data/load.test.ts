@@ -407,6 +407,11 @@ describe("T-U5 — hidden sessions are stripped once, at load (R-M2)", () => {
       // cost would roll up into a row the strip had already removed. It reads the field to
       // enforce the strip, which is the one other reason to read it.
       join("src", "domain", "sessions.ts"),
+      // Ticket 51 — the property generators *write* the field and never read it: every row they
+      // build carries `hidden: false`, because the population a property is stated over is the
+      // one the strip has already run on. A generator able to emit a hidden row would be handing
+      // the domain layer rows the application never sees.
+      join("src", "domain", "testing", "sessions.ts"),
       join("src", "domain", "types.ts"), // declares it
     ]);
   });
