@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Shape C — four cards</title>
+<style>
+  :root{color-scheme:light;--surface:#fcfcfb;--card:#ffffff;--border:#e6e5e1;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8985;
+    --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--gray:#c9c8c3;
+    --q100:#cde2fb;--q200:#9ec5f4;--q300:#6da7ec;--q400:#3987e5;--q500:#256abf;--q600:#184f95;--q700:#0d366b;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--surface);font-family:-apple-system,"Inter",system-ui,sans-serif;color:var(--ink);padding:40px 48px;width:1440px}
+  h1{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:0 0 12px;max-width:980px;text-wrap:balance}
+  .sub{color:var(--ink2);font-size:16px;line-height:1.5;max-width:760px;margin:0 0 32px}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 20px 16px;display:flex;flex-direction:column;min-height:330px}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:0 0 6px}
+  .claim{font-size:16px;font-weight:600;line-height:1.3;margin:0 0 14px;text-wrap:pretty}
+  .chart{flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+  .read{font-size:12.5px;color:var(--ink2);line-height:1.45;margin:12px 0 0}
+  .foot{font-size:11px;color:var(--ink3);margin-top:6px}
+  svg text{font-family:inherit}
+  .tnum{font-variant-numeric:tabular-nums}
+  .hero{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1}
+  .delta{font-size:12px;color:var(--ink2)}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink2);margin-top:8px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .grid{display:grid;grid-template-columns:86px repeat(5,1fr);gap:2px;font-size:10.5px}
+  .grid .h{color:var(--ink3);text-align:center;padding-bottom:2px;font-size:10px}
+  .grid .r{color:var(--ink2);display:flex;align-items:center;padding-right:6px;justify-content:flex-end;font-size:10.5px}
+  .cell{border-radius:4px;height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+  .cell b{font-weight:600;font-size:11.5px}
+  .cell span{font-size:9.5px;opacity:.85}
+  .cell.dark{color:#fff}
+  .cell.empty{background:var(--surface);border:1px dashed var(--border);color:var(--ink3)}
+  .under{display:flex;justify-content:space-between;align-items:center;margin-top:24px;color:var(--ink2);font-size:13.5px;max-width:1344px}
+  .btn{border:1px solid #bdbcb7;border-radius:8px;padding:10px 16px;font-weight:600;color:var(--ink);font-size:14px;background:var(--card)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .two h4{margin:0 0 4px;font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.04em;text-transform:uppercase}
+</style></head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+<h1>What your agents cost per finished Job. Where they convert, where the money leaks, and who has it figured out.</h1>
+<p class="sub">One bill, read four ways, on your organisation's own sessions. No claim that anyone delivers more than before, because no one can measure that; a unit cost you can defend, because every attempt is in it.</p>
+
+<div class="row">
+
+<!-- CARD 1: unit cost trend -->
+<section class="card">
+  <p class="eyebrow">Unit cost</p>
+  <p class="claim">Your cost per finished Job, and which way it is moving</p>
+  <div class="chart">
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+      <span class="hero tnum">$14.30</span><span class="delta">per completed Job · August</span>
+    </div>
+    <svg viewBox="0 0 280 150" width="100%" height="150" role="img" aria-label="Cost per completed Job by month: May $26.22, June $22.93, July $17.31, August $14.30">
+      <line x1="0" y1="128" x2="280" y2="128" stroke="#e6e5e1"/>
+      <!-- bars: max 26.22 -> 100px -->
+      <g fill="#2a78d6">
+        <rect x="22" y="28" width="40" height="100" rx="4"/><rect x="22" y="120" width="40" height="8"/>
+        <rect x="88" y="40.5" width="40" height="87.5" rx="4"/><rect x="88" y="120" width="40" height="8"/>
+        <rect x="154" y="62" width="40" height="66" rx="4"/><rect x="154" y="120" width="40" height="8"/>
+        <rect x="220" y="73.5" width="40" height="54.5" rx="4"/><rect x="220" y="120" width="40" height="8"/>
+      </g>
+      <g font-size="11" fill="#0b0b0b" text-anchor="middle" class="tnum">
+        <text x="42" y="21">$26.22</text><text x="108" y="33.5">$22.93</text><text x="174" y="55">$17.31</text><text x="240" y="66.5" font-weight="600">$14.30</text>
+      </g>
+      <g font-size="10.5" fill="#8a8985" text-anchor="middle">
+        <text x="42" y="144">May</text><text x="108" y="144">Jun</text><text x="174" y="144">Jul</text><text x="240" y="144">Aug</text>
+      </g>
+    </svg>
+    <p class="read"><b>−45% since May, on 2.5× the Jobs.</b> Failed attempts and idle seats are in the numerator, so the figure cannot be gamed by running more.</p>
+  </div>
+</section>
+
+<!-- CARD 2: waste split -->
+<section class="card">
+  <p class="eyebrow">Where it leaks</p>
+  <p class="claim">37 cents of every dollar landed on an attempt that was accepted</p>
+  <div class="chart">
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+      <span class="hero tnum">$9,117</span><span class="delta">Total spend · Apr–Sep</span>
+    </div>
+    <svg viewBox="0 0 280 96" width="100%" height="96" role="img" aria-label="Total spend split: accepted attempts 37%, attempts not accepted 17%, seats 46%">
+      <!-- widths: 37% 17% 46% of 276 with 2px gaps -->
+      <rect x="0" y="20" width="101" height="36" rx="4" fill="#c9c8c3"/>
+      <rect x="103" y="20" width="46" height="36" rx="4" fill="#eb6834"/>
+      <rect x="151" y="20" width="129" height="36" rx="4" fill="#1baf7a"/>
+      <g font-size="12" font-weight="600" class="tnum" text-anchor="middle">
+        <text x="50" y="42" fill="#0b0b0b">37%</text><text x="126" y="42" fill="#fff">17%</text><text x="215" y="42" fill="#fff">46%</text>
+      </g>
+      <g font-size="10.5" fill="#52514e" text-anchor="middle">
+        <text x="50" y="76">$3,335</text><text x="126" y="76">$1,571</text><text x="215" y="76">$4,212</text>
+      </g>
+    </svg>
+    <div class="legend"><span><i style="background:#c9c8c3"></i>Accepted attempts</span><span><i style="background:#eb6834"></i>Attempts not accepted</span><span><i style="background:#1baf7a"></i>Seats</span></div>
+    <p class="read"><b>The two coloured segments can be cut without cutting output.</b> 103 of 570 Tasks needed a second attempt. One seat ran three sessions in five months.</p>
+  </div>
+</section>
+
+<!-- CARD 3: heatmap -->
+<section class="card">
+  <p class="eyebrow">Where it converts</p>
+  <p class="claim">The same agents, a 7× spread by where you point them</p>
+  <div class="chart">
+    <div class="grid" role="img" aria-label="Session cost per completed Job by repository and template, with acceptance rate">
+      <div></div><div class="h">impl.</div><div class="h">bugfix</div><div class="h">refactor</div><div class="h">review</div><div class="h">deploy</div>
+      <div class="r">web-console</div>
+        <div class="cell" style="background:#b7d3f6"><b>$7</b><span>87%</span></div>
+        <div class="cell" style="background:#cde2fb"><b>$4</b><span>96%</span></div>
+        <div class="cell" style="background:#b7d3f6"><b>$6</b><span>70%</span></div>
+        <div class="cell" style="background:#cde2fb"><b>$5</b><span>100%</span></div>
+        <div class="cell" style="background:#86b6ef"><b>$13</b><span>42%</span></div>
+      <div class="r">mobile-app</div>
+        <div class="cell" style="background:#9ec5f4"><b>$12</b><span>69%</span></div>
+        <div class="cell" style="background:#9ec5f4"><b>$11</b><span>77%</span></div>
+        <div class="cell" style="background:#9ec5f4"><b>$10</b><span>55%</span></div>
+        <div class="cell" style="background:#cde2fb"><b>$5</b><span>85%</span></div>
+        <div class="cell empty">—</div>
+      <div class="r">api-gateway</div>
+        <div class="cell" style="background:#9ec5f4"><b>$11</b><span>68%</span></div>
+        <div class="cell dark" style="background:#256abf"><b>$22</b><span>74%</span></div>
+        <div class="cell" style="background:#86b6ef"><b>$12</b><span>57%</span></div>
+        <div class="cell" style="background:#9ec5f4"><b>$10</b><span>84%</span></div>
+        <div class="cell dark" style="background:#0d366b"><b>$29</b><span>32%</span></div>
+      <div class="r">ml-scoring</div>
+        <div class="cell" style="background:#86b6ef"><b>$13</b><span>59%</span></div>
+        <div class="cell" style="background:#9ec5f4"><b>$12</b><span>68%</span></div>
+        <div class="cell dark" style="background:#3987e5"><b>$18</b><span>50%</span></div>
+        <div class="cell" style="background:#b7d3f6"><b>$7</b><span>75%</span></div>
+        <div class="cell dark" style="background:#184f95"><b>$25</b><span>26%</span></div>
+      <div class="r">terraform-infra</div>
+        <div class="cell dark" style="background:#256abf"><b>$21</b><span>50%</span></div>
+        <div class="cell" style="background:#9ec5f4"><b>$12</b><span>53%</span></div>
+        <div class="cell" style="background:#6da7ec"><b>$15</b><span>38%</span></div>
+        <div class="cell" style="background:#9ec5f4"><b>$12</b><span>67%</span></div>
+        <div class="cell dark" style="background:#104281"><b>$28</b><span>20%</span></div>
+    </div>
+    <p class="foot">Session cost per completed Job · acceptance rate of attempts underneath · darker is dearer</p>
+    <p class="read"><b>Push agents where the grid is light.</b> Where it is dark, change the template or take the work back. Deploy converts one attempt in three.</p>
+  </div>
+</section>
+
+<!-- CARD 4: teams -->
+<section class="card">
+  <p class="eyebrow">Who has it figured out</p>
+  <p class="claim">Your cheapest-run team is 27% cheaper per Job. The difference is acceptance</p>
+  <div class="chart">
+    <div class="two">
+      <div><h4>Cost per completed Job</h4>
+        <svg viewBox="0 0 160 118" width="100%" height="118" role="img" aria-label="Cost per completed Job by team: Product $9.55, Platform $10.28, Data $12.87, Infrastructure $13.04">
+          <g font-size="10" fill="#52514e"><text x="0" y="14">Product</text><text x="0" y="41">Platform</text><text x="0" y="68">Data</text><text x="0" y="95">Infra</text></g>
+          <rect x="46" y="5" width="46.1" height="12" rx="3" fill="#2a78d6"/><rect x="46" y="5" width="4" height="12" fill="#2a78d6"/>
+          <rect x="46" y="32" width="49.7" height="12" rx="3" fill="#c9c8c3"/><rect x="46" y="32" width="4" height="12" fill="#c9c8c3"/>
+          <rect x="46" y="59" width="62.2" height="12" rx="3" fill="#c9c8c3"/><rect x="46" y="59" width="4" height="12" fill="#c9c8c3"/>
+          <rect x="46" y="86" width="63" height="12" rx="3" fill="#c9c8c3"/><rect x="46" y="86" width="4" height="12" fill="#c9c8c3"/>
+          <g font-size="10" fill="#0b0b0b" class="tnum"><text x="96" y="14" font-weight="600">$9.55</text><text x="100" y="41">$10.28</text><text x="112" y="68">$12.87</text><text x="113" y="95">$13.04</text></g>
+        </svg>
+      </div>
+      <div><h4>Acceptance</h4>
+        <svg viewBox="0 0 160 118" width="100%" height="118" role="img" aria-label="Acceptance rate by team: Product 71%, Platform 66%, Data 68%, Infrastructure 60%">
+          <rect x="8" y="5" width="78.1" height="12" rx="3" fill="#2a78d6"/><rect x="8" y="5" width="4" height="12" fill="#2a78d6"/>
+          <rect x="8" y="32" width="72.6" height="12" rx="3" fill="#c9c8c3"/><rect x="8" y="32" width="4" height="12" fill="#c9c8c3"/>
+          <rect x="8" y="59" width="74.8" height="12" rx="3" fill="#c9c8c3"/><rect x="8" y="59" width="4" height="12" fill="#c9c8c3"/>
+          <rect x="8" y="86" width="66" height="12" rx="3" fill="#c9c8c3"/><rect x="8" y="86" width="4" height="12" fill="#c9c8c3"/>
+          <g font-size="10" fill="#0b0b0b" class="tnum"><text x="90" y="14" font-weight="600">71%</text><text x="85" y="41">66%</text><text x="87" y="68">68%</text><text x="78" y="95">60%</text></g>
+        </svg>
+      </div>
+    </div>
+    <p class="foot">Model mix is near-identical across the four · Teams overlap: 4 of 20 Members are counted twice</p>
+    <p class="read"><b>Open the team, then the people, then what they run.</b> Every engineer sees the same comparison for themselves, against people doing the same work. Nobody is ranked.</p>
+  </div>
+</section>
+
+</div>
+
+<div class="under">
+  <span>Every session is keyed to an issue, a person, a repository and a template, and priced before it reaches this page. Open by default to everyone in the organisation; restrict by Role when you must.</span>
+  <span class="btn">Open the demo</span>
+</div>
+</body></html>

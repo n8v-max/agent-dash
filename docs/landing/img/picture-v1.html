@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>agent-dash — picture v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Direction: Editorial ledger. Display Fraunces, body Manrope. Paper surface with faint rules.
+   Ink navy for text and CTA; blue only as the data hue; orange reserved for leaks; aqua for seats. */
+:root{--paper:#f6f3ee;--paper2:#efebe3;--card:#fbfaf7;--rule:#dcd6ca;--ink:#14213d;--ink2:#4a5068;--ink3:#8a8f9e;
+  --data:#2a78d6;--leak:#eb6834;--seat:#1baf7a;--gray:#c9c8c3;
+  --q100:#cde2fb;--q150:#b7d3f6;--q200:#9ec5f4;--q250:#86b6ef;--q300:#6da7ec;--q400:#3987e5;--q500:#256abf;--q600:#184f95;--q650:#104281;--q700:#0d366b;}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;width:1440px;color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:16px;line-height:1.6;
+  background:
+   repeating-linear-gradient(to bottom, transparent 0 47px, rgba(20,33,61,.045) 47px 48px),
+   var(--paper)}
+.wrap{width:1240px;margin:0 auto}
+.serif{font-family:Fraunces,Georgia,serif;font-weight:500;letter-spacing:-.02em}
+.tnum{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+a{color:inherit;text-decoration:none}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:999px;padding:14px 26px;font-weight:600;font-size:15px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+/* header */
+header{position:sticky;top:0;background:rgba(246,243,238,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700}
+.logo i{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-style:normal;font-size:11px;font-weight:700}
+nav{display:flex;gap:28px;font-size:14px;color:var(--ink2);font-weight:500}
+header .btn{padding:9px 18px;font-size:13px}
+/* hero */
+.hero{padding:88px 0 56px;display:grid;grid-template-columns:1.35fr .9fr;gap:64px;align-items:end}
+h1{font-size:76px;line-height:1.02;margin:14px 0 18px;font-weight:500;text-wrap:balance}
+h1 em{font-style:italic;font-weight:300}
+.sub{font-family:Fraunces,Georgia,serif;font-size:27px;line-height:1.3;color:var(--ink2);margin:0 0 22px;font-weight:300;text-wrap:pretty}
+.lede{max-width:600px;color:var(--ink2);margin:0 0 30px;font-size:17px}
+.ctas{display:flex;gap:14px;align-items:center}
+.ctas small{color:var(--ink3);font-size:13px;margin-left:8px}
+.ledger{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:22px 24px 8px;box-shadow:0 20px 50px -30px rgba(20,33,61,.35)}
+.ledger .eyebrow{margin-bottom:8px}
+.ledger dl{margin:0}
+.ledger .row{display:flex;justify-content:space-between;align-items:baseline;padding:13px 0;border-top:1px dashed var(--rule)}
+.ledger .row dt{color:var(--ink2);font-size:14px}
+.ledger .row dd{margin:0;font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:500;letter-spacing:-.02em}
+.ledger .row.big dd{font-size:40px;color:var(--data)}
+/* media */
+.media{padding:40px 0 20px}
+.frame{border-radius:14px;border:1px solid var(--rule);background:#fff;box-shadow:0 40px 80px -40px rgba(20,33,61,.45), 0 0 0 8px rgba(20,33,61,.04);overflow:hidden;transform:perspective(1600px) rotateX(2deg);transform-origin:top}
+.frame img{display:block;width:100%}
+.cap{display:grid;grid-template-columns:1fr 2fr;gap:40px;margin-top:22px;color:var(--ink2);font-size:15px}
+.cap b{color:var(--ink)}
+/* section titling */
+.sec{padding:80px 0 20px}
+.sec .kicker{display:flex;gap:18px;align-items:baseline;border-top:2px solid var(--ink);padding-top:14px}
+.sec .kicker .n{font-family:Fraunces,Georgia,serif;font-size:14px;color:var(--ink3)}
+h2{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:44px;line-height:1.1;letter-spacing:-.02em;margin:10px 0 8px;max-width:820px;text-wrap:balance}
+.sec p.intro{max-width:640px;color:var(--ink2);margin:0 0 34px;font-size:17px}
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:22px 20px 18px;display:flex;flex-direction:column;min-height:420px;position:relative}
+.card .num{font-family:Fraunces,Georgia,serif;font-size:13px;color:var(--ink3);margin-bottom:8px}
+.card .claim{font-family:Fraunces,Georgia,serif;font-size:21px;line-height:1.2;font-weight:500;letter-spacing:-.01em;margin:0 0 12px;text-wrap:pretty}
+.card .math{font-size:12px;color:var(--ink3);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 10px}
+.card .chart{flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.hero-n{font-family:Fraunces,Georgia,serif;font-size:40px;font-weight:500;letter-spacing:-.02em;line-height:1}
+.delta{font-size:12px;color:var(--ink2)}
+.read{font-size:13px;color:var(--ink2);line-height:1.5;margin:12px 0 0}
+.verb{margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:8px}
+.verb::before{content:"";width:18px;height:2px;background:var(--ink)}
+.foot{font-size:11px;color:var(--ink3);margin-top:6px}
+.legend{display:flex;gap:12px;font-size:11.5px;color:var(--ink2);margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.grid{display:grid;grid-template-columns:82px repeat(5,1fr);gap:2px;font-size:10.5px}
+.grid .h{color:var(--ink3);text-align:center;padding-bottom:2px;font-size:10px}
+.grid .r{color:var(--ink2);display:flex;align-items:center;padding-right:6px;justify-content:flex-end;font-size:10.5px}
+.cell{border-radius:4px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;color:var(--ink)}
+.cell b{font-weight:600;font-size:11.5px}.cell span{font-size:9.5px;opacity:.85}.cell.dark{color:#fff}
+.cell.empty{background:var(--paper);border:1px dashed var(--rule);color:var(--ink3)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two h4{margin:0 0 4px;font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase}
+/* pull band */
+.band{margin-top:64px;background:var(--ink);color:#fff;padding:64px 0}
+.band .wrap{display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:center}
+.band .eyebrow{color:rgba(255,255,255,.55)}
+.band h3{font-family:Fraunces,Georgia,serif;font-weight:300;font-size:40px;line-height:1.15;letter-spacing:-.02em;margin:10px 0 0;font-style:italic}
+.band .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.band .col{border-top:1px solid rgba(255,255,255,.25);padding-top:14px;font-size:14px;color:rgba(255,255,255,.8)}
+.band .col b{display:block;color:#fff;font-size:15px;margin-bottom:6px}
+.band .col.me{border-top-color:#fff}
+/* evidence */
+.quotes{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:26px 26px 20px;position:relative}
+.q::before{content:"“";font-family:Fraunces,Georgia,serif;font-size:72px;line-height:0;position:absolute;top:38px;left:18px;color:var(--rule)}
+.q p{font-family:Fraunces,Georgia,serif;font-size:20px;line-height:1.35;margin:0 0 14px 18px;font-weight:300}
+.q .who{margin-left:18px;font-size:13px;color:var(--ink2)}.q .who b{color:var(--ink)}
+/* faq */
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.faq details{border-top:1px solid var(--rule);padding:16px 0}
+.faq summary{list-style:none;display:flex;justify-content:space-between;font-weight:600;font-size:16px;cursor:pointer}
+.faq summary::after{content:"+";font-family:Fraunces,Georgia,serif;font-size:22px;color:var(--ink3);line-height:1}
+.faq details[open] summary::after{content:"–"}
+.faq details p{margin:10px 0 0;color:var(--ink2);font-size:14.5px;max-width:540px}
+/* final */
+.final{margin-top:88px;background:var(--ink);color:#fff;padding:96px 0;position:relative;overflow:hidden}
+.final::after{content:"";position:absolute;inset:auto -10% -60% auto;width:900px;height:900px;border-radius:50%;border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 0 0 80px rgba(255,255,255,.03), inset 0 0 0 160px rgba(255,255,255,.02)}
+.final .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:60px;align-items:center;position:relative}
+.final h2{color:#fff;font-size:60px;max-width:700px;margin:10px 0 18px}
+.final p{color:rgba(255,255,255,.75);max-width:560px;font-size:17px;margin:0 0 30px}
+.final .btn{background:#fff;color:var(--ink);padding:18px 32px;font-size:17px}
+.accounts{display:grid;gap:12px}
+.acct{border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:16px 18px;display:flex;gap:14px;align-items:center}
+.acct i{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700}
+.acct b{display:block;font-size:15px}.acct span{font-size:13px;color:rgba(255,255,255,.7)}
+/* footer */
+footer{background:#0f182e;color:rgba(255,255,255,.75);padding:56px 0 28px;font-size:14px}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px}
+footer h5{color:#fff;margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+footer .bottom{border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:18px;display:flex;justify-content:space-between;font-size:12.5px;color:rgba(255,255,255,.5)}
+</style></head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<header><div class="wrap">
+  <a class="logo" href="/"><i>ad</i> agent-dash</a>
+  <nav><a href="#how">The four reads</a><a href="#evidence">Evidence</a><a href="#faq">Questions</a><a href="#">Method</a></nav>
+  <a class="btn" href="/sign-in">Open the demo →</a>
+</div></header>
+
+<main>
+<section class="wrap hero">
+  <div>
+    <p class="eyebrow">Organisation analytics for cloud agents</p>
+    <h1 class="serif">What your agents cost <em>per finished Job.</em></h1>
+    <p class="sub">Accountability for the agent bill: where it converts, where it leaks, and who has it figured out.</p>
+    <p class="lede">Every attempt is priced, keyed to an issue and a person, and counted only when its work was accepted. Failed attempts stay in the cost. Conservative by construction.</p>
+    <div class="ctas"><a class="btn" href="/sign-in">Open the demo →</a><a class="btn ghost" href="#">Read the method</a><small>Two seeded accounts. No password.</small></div>
+  </div>
+  <aside class="ledger">
+    <p class="eyebrow">The demo organisation · 150 days</p>
+    <dl>
+      <div class="row"><dt>Attempts run</dt><dd class="tnum">742</dd></div>
+      <div class="row"><dt>Finished Jobs</dt><dd class="tnum">424</dd></div>
+      <div class="row"><dt>Total spend</dt><dd class="tnum">$9,117</dd></div>
+      <div class="row"><dt>of it in seats</dt><dd class="tnum">46%</dd></div>
+      <div class="row big"><dt>Per finished Job, August</dt><dd class="tnum">$14.30</dd></div>
+    </dl>
+  </aside>
+</section>
+
+<section class="wrap media">
+  <div class="frame"><img src="../../img/demo-1440.png" alt="The /demo summary: four tiles — Total spend, Completed Jobs, Completed Jobs by template, Cost per completed Job"></div>
+  <div class="cap"><div><b>Four tiles, one argument.</b></div><div>What the month cost. What it produced. What kind of work that was. And the rate that joins the first two, which is the figure the total cannot give you. Each tile is the link to the page carrying its evidence.</div></div>
+</section>
+
+<section class="wrap sec" id="how">
+  <div class="kicker"><span class="n">01 — 04</span><span class="eyebrow">One bill, four reads</span></div>
+  <h2>The four questions a VP of Engineering is asked about the agent bill, answered on your own sessions.</h2>
+  <p class="intro">Each read is a decomposition of the same rows. Each ends in something you can do on Monday.</p>
+
+  <div class="cards">
+    <!-- 01 -->
+    <article class="card">
+      <p class="num">01 · Unit cost</p>
+      <h3 class="claim">Your cost per finished Job, and which way it is moving</h3>
+      <p class="math">$2,144 ÷ 150 completed Jobs · August</p>
+      <div class="chart">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><span class="hero-n tnum">$14.30</span><span class="delta">per completed Job</span></div>
+        <svg viewBox="0 0 280 150" width="100%" height="150" role="img" aria-label="Cost per completed Job by month: May $26.22, June $22.93, July $17.31, August $14.30">
+          <line x1="0" y1="128" x2="280" y2="128" stroke="#dcd6ca"/>
+          <g fill="#2a78d6"><rect x="22" y="28" width="40" height="100" rx="4"/><rect x="22" y="120" width="40" height="8"/><rect x="88" y="40.5" width="40" height="87.5" rx="4"/><rect x="88" y="120" width="40" height="8"/><rect x="154" y="62" width="40" height="66" rx="4"/><rect x="154" y="120" width="40" height="8"/><rect x="220" y="73.5" width="40" height="54.5" rx="4"/><rect x="220" y="120" width="40" height="8"/></g>
+          <g font-size="11" fill="#14213d" text-anchor="middle" class="tnum"><text x="42" y="21">$26.22</text><text x="108" y="33.5">$22.93</text><text x="174" y="55">$17.31</text><text x="240" y="66.5" font-weight="700">$14.30</text></g>
+          <g font-size="10.5" fill="#8a8f9e" text-anchor="middle"><text x="42" y="144">May</text><text x="108" y="144">Jun</text><text x="174" y="144">Jul</text><text x="240" y="144">Aug</text></g>
+        </svg>
+        <p class="read"><b>−45% since May, on 2.5× the Jobs.</b> Failed attempts and idle seats are in the numerator. Conservative by construction.</p>
+        <p class="verb">Defend it to finance</p>
+      </div>
+    </article>
+    <!-- 02 -->
+    <article class="card">
+      <p class="num">02 · Where it leaks</p>
+      <h3 class="claim">37 cents of every dollar landed on an attempt that was accepted</h3>
+      <p class="math">$3,335 accepted · $1,571 not · $4,212 seats</p>
+      <div class="chart">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><span class="hero-n tnum">$9,117</span><span class="delta">Total spend, Apr–Sep</span></div>
+        <svg viewBox="0 0 280 96" width="100%" height="96" role="img" aria-label="Total spend split: accepted attempts 37%, attempts not accepted 17%, seats 46%">
+          <rect x="0" y="20" width="101" height="36" rx="4" fill="#c9c8c3"/><rect x="103" y="20" width="46" height="36" rx="4" fill="#eb6834"/><rect x="151" y="20" width="129" height="36" rx="4" fill="#1baf7a"/>
+          <g font-size="12" font-weight="700" class="tnum" text-anchor="middle"><text x="50" y="42" fill="#14213d">37%</text><text x="126" y="42" fill="#fff">17%</text><text x="215" y="42" fill="#fff">46%</text></g>
+          <g font-size="10.5" fill="#4a5068" text-anchor="middle"><text x="50" y="76">$3,335</text><text x="126" y="76">$1,571</text><text x="215" y="76">$4,212</text></g>
+        </svg>
+        <div class="legend"><span><i style="background:#c9c8c3"></i>Accepted</span><span><i style="background:#eb6834"></i>Not accepted</span><span><i style="background:#1baf7a"></i>Seats</span></div>
+        <p class="read"><b>The two coloured segments can be cut without cutting output.</b> 103 of 570 Tasks needed a second attempt. One seat ran three sessions in five months.</p>
+        <p class="verb">Reclaim it</p>
+      </div>
+    </article>
+    <!-- 03 -->
+    <article class="card">
+      <p class="num">03 · Where it converts</p>
+      <h3 class="claim">The same agents, a 7× spread by where you point them</h3>
+      <p class="math">session cost ÷ completed Jobs, per cell</p>
+      <div class="chart">
+        <div class="grid" role="img" aria-label="Session cost per completed Job by repository and template, with acceptance rate">
+          <div></div><div class="h">impl.</div><div class="h">bugfix</div><div class="h">refactor</div><div class="h">review</div><div class="h">deploy</div>
+          <div class="r">web-console</div><div class="cell" style="background:#b7d3f6"><b>$7</b><span>87%</span></div><div class="cell" style="background:#cde2fb"><b>$4</b><span>96%</span></div><div class="cell" style="background:#b7d3f6"><b>$6</b><span>70%</span></div><div class="cell" style="background:#cde2fb"><b>$5</b><span>100%</span></div><div class="cell" style="background:#86b6ef"><b>$13</b><span>42%</span></div>
+          <div class="r">mobile-app</div><div class="cell" style="background:#9ec5f4"><b>$12</b><span>69%</span></div><div class="cell" style="background:#9ec5f4"><b>$11</b><span>77%</span></div><div class="cell" style="background:#9ec5f4"><b>$10</b><span>55%</span></div><div class="cell" style="background:#cde2fb"><b>$5</b><span>85%</span></div><div class="cell empty">—</div>
+          <div class="r">api-gateway</div><div class="cell" style="background:#9ec5f4"><b>$11</b><span>68%</span></div><div class="cell dark" style="background:#256abf"><b>$22</b><span>74%</span></div><div class="cell" style="background:#86b6ef"><b>$12</b><span>57%</span></div><div class="cell" style="background:#9ec5f4"><b>$10</b><span>84%</span></div><div class="cell dark" style="background:#0d366b"><b>$29</b><span>32%</span></div>
+          <div class="r">ml-scoring</div><div class="cell" style="background:#86b6ef"><b>$13</b><span>59%</span></div><div class="cell" style="background:#9ec5f4"><b>$12</b><span>68%</span></div><div class="cell dark" style="background:#3987e5"><b>$18</b><span>50%</span></div><div class="cell" style="background:#b7d3f6"><b>$7</b><span>75%</span></div><div class="cell dark" style="background:#184f95"><b>$25</b><span>26%</span></div>
+          <div class="r">terraform-infra</div><div class="cell dark" style="background:#256abf"><b>$21</b><span>50%</span></div><div class="cell" style="background:#9ec5f4"><b>$12</b><span>53%</span></div><div class="cell" style="background:#6da7ec"><b>$15</b><span>38%</span></div><div class="cell" style="background:#9ec5f4"><b>$12</b><span>67%</span></div><div class="cell dark" style="background:#104281"><b>$28</b><span>20%</span></div>
+        </div>
+        <p class="foot">Acceptance rate of attempts underneath · darker is dearer</p>
+        <p class="read"><b>Push agents where the grid is light.</b> Where it is dark, change the template or take the work back. Deploy converts one attempt in three.</p>
+        <p class="verb">Redirect the work</p>
+      </div>
+    </article>
+    <!-- 04 -->
+    <article class="card">
+      <p class="num">04 · Who has it figured out</p>
+      <h3 class="claim">Your cheapest-run team is 27% cheaper per Job. The difference is acceptance</h3>
+      <p class="math">Team session cost ÷ Team completed Jobs</p>
+      <div class="chart">
+        <div class="two">
+          <div><h4>Cost per completed Job</h4>
+            <svg viewBox="0 0 160 118" width="100%" height="118" role="img" aria-label="Cost per completed Job by team: Product $9.55, Platform $10.28, Data $12.87, Infrastructure $13.04">
+              <g font-size="10" fill="#4a5068"><text x="0" y="14">Product</text><text x="0" y="41">Platform</text><text x="0" y="68">Data</text><text x="0" y="95">Infra</text></g>
+              <rect x="46" y="5" width="46.1" height="12" rx="3" fill="#2a78d6"/><rect x="46" y="5" width="4" height="12" fill="#2a78d6"/>
+              <rect x="46" y="32" width="49.7" height="12" rx="3" fill="#c9c8c3"/><rect x="46" y="32" width="4" height="12" fill="#c9c8c3"/>
+              <rect x="46" y="59" width="62.2" height="12" rx="3" fill="#c9c8c3"/><rect x="46" y="59" width="4" height="12" fill="#c9c8c3"/>
+              <rect x="46" y="86" width="63" height="12" rx="3" fill="#c9c8c3"/><rect x="46" y="86" width="4" height="12" fill="#c9c8c3"/>
+              <g font-size="10" fill="#14213d" class="tnum"><text x="96" y="14" font-weight="700">$9.55</text><text x="100" y="41">$10.28</text><text x="112" y="68">$12.87</text><text x="113" y="95">$13.04</text></g>
+            </svg></div>
+          <div><h4>Acceptance</h4>
+            <svg viewBox="0 0 160 118" width="100%" height="118" role="img" aria-label="Acceptance rate by team: Product 71%, Platform 66%, Data 68%, Infrastructure 60%">
+              <rect x="8" y="5" width="78.1" height="12" rx="3" fill="#2a78d6"/><rect x="8" y="5" width="4" height="12" fill="#2a78d6"/>
+              <rect x="8" y="32" width="72.6" height="12" rx="3" fill="#c9c8c3"/><rect x="8" y="32" width="4" height="12" fill="#c9c8c3"/>
+              <rect x="8" y="59" width="74.8" height="12" rx="3" fill="#c9c8c3"/><rect x="8" y="59" width="4" height="12" fill="#c9c8c3"/>
+              <rect x="8" y="86" width="66" height="12" rx="3" fill="#c9c8c3"/><rect x="8" y="86" width="4" height="12" fill="#c9c8c3"/>
+              <g font-size="10" fill="#14213d" class="tnum"><text x="90" y="14" font-weight="700">71%</text><text x="85" y="41">66%</text><text x="87" y="68">68%</text><text x="78" y="95">60%</text></g>
+            </svg></div>
+        </div>
+        <p class="foot">Model mix is near-identical across the four · Teams overlap: 4 of 20 Members counted twice</p>
+        <p class="read"><b>Open the team, then the people, then what they run.</b> Every engineer sees the same comparison for themselves. Nobody is ranked.</p>
+        <p class="verb">Spread the practice</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="band"><div class="wrap">
+  <div><p class="eyebrow">Why here and not in your other dashboards</p>
+    <h3>The one place the cost of an attempt and whether it was accepted sit on the same row.</h3></div>
+  <div class="cols">
+    <div class="col"><b>Usage dashboards</b>see that agents ran: lines accepted, messages, tokens, a leaderboard. No outcome per attempt.</div>
+    <div class="col"><b>Delivery dashboards</b>see what shipped: cycle time, DORA, allocation. They cannot see inside an attempt, and their ROI is a calculator over inputs you supply.</div>
+    <div class="col me"><b>This dashboard</b>prices every attempt, keys it to an issue and a person, and counts it only when its work was accepted. The join is native.</div>
+  </div>
+</div></section>
+
+<section class="wrap sec" id="evidence">
+  <div class="kicker"><span class="n">Evidence</span><span class="eyebrow">Why a unit cost, and not a lift estimate</span></div>
+  <h2>The best experiments disagree with each other. Your own unit cost does not.</h2>
+  <p class="intro">Published findings from the record this product was built against. None is a customer quote, because the demo organisation is fictional.</p>
+  <div class="quotes">
+    <div class="q"><p>When developers are allowed to use AI tools, they take 19% longer to complete issues — a significant slowdown.</p><div class="who"><b>METR</b>, randomised trial, July 2025 · the 2026 follow-up declared its own design unreliable</div></div>
+    <div class="q"><p>AI doesn't fix a team; it amplifies what's already there.</p><div class="who"><b>DORA</b>, State of AI-assisted Software Development, September 2025</div></div>
+    <div class="q"><p>Per-engineer AI spend is the easy question. The harder one: what business value are you getting for it?</p><div class="who"><b>CloudZero</b>, SVP Engineering · Vantage calls per-developer spend “a numerator without a denominator”</div></div>
+    <div class="q"><p>AI-assisted PRs merge at 32.7% versus 84.5% for unassisted.</p><div class="who"><b>LinearB</b>, 2026 Engineering Benchmarks, 8.1 million pull requests</div></div>
+  </div>
+</section>
+
+<section class="wrap sec" id="faq">
+  <div class="kicker"><span class="n">Questions</span><span class="eyebrow">Asked before the demo</span></div>
+  <h2>Straight answers.</h2>
+  <div class="faq">
+    <details open><summary>Do you claim engineers deliver more with agents?</summary><p>No. Measuring that needs a baseline from before agents, and the window we observe is entirely agent-assisted. We give you your own cost per finished Job, month against month. The number you compare it with is yours.</p></details>
+    <details open><summary>Where does the cost figure come from?</summary><p>It is attributed upstream by billing, per session, against token and machine rate cards, and stored on the row. This dashboard prices nothing. Seat fees are added at monthly grain and coarser.</p></details>
+    <details open><summary>What counts as a finished Job?</summary><p>A Task with at least one accepted attempt. Each template defines its own criterion: a published pull request, a submitted review with an outcome, a commit landed on the default branch. A branch alone never counts.</p></details>
+    <details open><summary>Can I see individuals?</summary><p>By default, everyone in the organisation sees everyone by name, on the same terms. There is no leaderboard, no percentile and no ordering presented as a verdict. Roles can restrict it, and the page loses rows, not features.</p></details>
+    <details open><summary>Is this a billing page?</summary><p>No. It is not an invoice, a trace viewer, or a performance review tool. It is the unit economics of your agent work, with the waste inside it broken out.</p></details>
+    <details open><summary>How fresh is the data?</summary><p>Every page carries an as-of stamp. Session rows are immutable once the session ends, so no figure ever changes after you have read it.</p></details>
+  </div>
+</section>
+
+<section class="final"><div class="wrap">
+  <div><p class="eyebrow" style="color:rgba(255,255,255,.55)">Thirty seconds, no sign-up</p>
+    <h2 class="serif">Read your own bill per finished Job.</h2>
+    <p>Sign in as the open account and read four tiles. Switch to the restricted account and watch the People table go from twenty rows to one, with the navigation unchanged.</p>
+    <a class="btn" href="/sign-in">Open the demo →</a></div>
+  <div class="accounts">
+    <div class="acct"><i>NC</i><div><b>Nuria Castells Vidal · Open default</b><span>Every Member by name: their Jobs, their tokens, their cost.</span></div></div>
+    <div class="acct"><i>HC</i><div><b>Héctor Camps Vidal · Restricted</b><span>Yourself by name; your Team's Jobs and tokens as totals; no cost at all.</span></div></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div><div class="logo" style="color:#fff"><i>ad</i> agent-dash</div><p style="max-width:320px;margin:14px 0 0;font-size:13.5px">Organisation-level analytics for a cloud agent-execution platform. Fixture data throughout; the decisions are as much the artefact as the code.</p></div>
+  <div><h5>Product</h5><ul><li>Open the demo</li><li>Sign in</li><li>Summary · Spend · Work · People</li></ul></div>
+  <div><h5>Method</h5><ul><li>Domain glossary</li><li>Decision records</li><li>Roadmap and cuts</li><li>Security posture</li></ul></div>
+  <div><h5>Source</h5><ul><li>Repository</li><li>Positioning</li><li>Ingest and freshness</li></ul></div>
+</div><div class="wrap bottom" style="display:flex"><span>© 2026 agent-dash · built as a take-home</span><span>Privacy · Terms · Contact</span></div></footer>
+</body></html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>agent-dash — picture v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f7f5f0;--rule:#ddd8cd;--ink:#14213d;--ink2:#4a5068;--ink3:#8a8f9e;--data:#2a78d6}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;width:1440px;min-height:900px;color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:17px;line-height:1.6;background:var(--paper)}
+main{width:1120px;margin:0 auto;padding:120px 0 96px}
+.serif{font-family:Fraunces,Georgia,serif;font-weight:500;letter-spacing:-.02em}
+.tnum{font-variant-numeric:tabular-nums}
+h1{font-size:72px;line-height:1.04;margin:0 0 28px;max-width:980px;text-wrap:balance}
+h1 em{font-style:italic;font-weight:300}
+.lede{max-width:640px;color:var(--ink2);margin:0 0 40px;font-size:19px;line-height:1.55;text-wrap:pretty}
+.cta{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--ink);border-radius:999px;padding:13px 24px;font-weight:600;font-size:15px;color:var(--ink);text-decoration:none}
+.kicker{display:flex;justify-content:space-between;align-items:baseline;margin-top:96px;padding-top:14px;border-top:1px solid var(--ink);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);font-weight:600}
+.blocks{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto auto auto auto;margin-top:8px;position:relative}
+.c1{grid-column:1}.c2{grid-column:2}.c3{grid-column:3}.c4{grid-column:4}
+.band{grid-column:1/-1;position:relative;z-index:0}
+.s1{grid-row:2;background:#fbfaf7;border:1px solid var(--rule);border-bottom:0;border-radius:18px 18px 0 0}
+.s2{grid-row:3;background:#ebe7de;margin:0 -40px;border-top:1px solid rgba(20,33,61,.10);border-bottom:1px solid rgba(20,33,61,.10)}
+.s2 span{position:absolute;top:10px;right:40px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+.s3{grid-row:4;background:#ffffff;border:1px solid var(--rule);border-top:0;border-radius:0 0 18px 18px}
+.n,.hd,.fig,.rd,.verb{position:relative;z-index:1;padding-left:28px;padding-right:28px}
+.n{grid-row:1;font-family:Fraunces,Georgia,serif;font-size:13px;color:var(--ink3);margin:0;padding-top:22px;padding-bottom:14px;padding-left:0}
+.n.c2,.n.c3,.n.c4{padding-left:28px}
+.hd{grid-row:2;padding-top:26px;padding-bottom:26px}
+.fig{grid-row:3;padding-top:30px;padding-bottom:26px}
+.rd{grid-row:4;padding-top:24px;padding-bottom:26px}
+.verb{grid-row:5;margin:0;padding-top:16px;padding-left:0;font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.verb.c2,.verb.c3,.verb.c4{padding-left:28px}
+.hd:not(.c4),.rd:not(.c4){border-right:1px solid var(--rule)}
+.fig:not(.c4){border-right:1px solid rgba(20,33,61,.12)}
+.hd h2{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:22px;line-height:1.22;letter-spacing:-.01em;margin:0;text-wrap:pretty}
+.fig .v{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:44px;letter-spacing:-.02em;line-height:1;margin-top:6px}
+.fig small{display:block;font-size:12.5px;color:var(--ink2);margin-top:10px;font-weight:500;line-height:1.35}
+.rd p{font-size:14.5px;color:var(--ink2);line-height:1.5;margin:0}
+.rd p b{color:var(--ink);font-weight:600}
+.ask{margin:64px 0 0;padding-top:22px;border-top:1px solid var(--rule);max-width:720px;font-size:15.5px;color:var(--ink2);line-height:1.55}
+.ask b{color:var(--ink);font-weight:600}
+</style></head>
+<body>
+<main>
+  <h1 class="serif">What your agents do, spend and solve, <em>per finished job.</em></h1>
+  <p class="lede">Accountability for agent use: where it converts, where it leaks, and who has it figured out. Every attempt is priced, keyed to an issue and a person, and counted only when its work was accepted.</p>
+  <a class="cta" href="/sign-in">Open the demo →</a>
+
+  <div class="kicker"><span>One tool, four reads</span></div>
+  <section class="blocks" aria-label="One bill, four reads">
+    <p class="n c1">01 · Unit cost</p><p class="n c2">02 · Where it leaks</p><p class="n c3">03 · Where it converts</p><p class="n c4">04 · Where the cloud earns its keep</p>
+
+    <div class="band s1" aria-hidden="true"></div>
+    <div class="hd c1"><h2>Your cost per finished job, and which way it is moving</h2></div>
+    <div class="hd c2"><h2>81 cents of every dollar landed on an attempt that was accepted</h2></div>
+    <div class="hd c3"><h2>The same agents, a 20× spread by where you point them</h2></div>
+    <div class="hd c4"><h2>A third of agent machine time runs with nobody at the keyboard</h2></div>
+
+    <div class="band s2" aria-hidden="true"><span>Figures from the demo organisation</span></div>
+    <div class="fig c1"><div class="v tnum">$76.50</div><small>per finished job in August, up from $64.83 in May</small></div>
+    <div class="fig c2"><div class="v tnum">19%</div><small>of spend on failed attempts and idle seats</small></div>
+    <div class="fig c3"><div class="v tnum">$7 → $144</div><small>per finished job, by repository and template</small></div>
+    <div class="fig c4"><div class="v tnum">35%</div><small>of attempts run headless; a further 32% of supervised time is unattended</small></div>
+
+    <div class="band s3" aria-hidden="true"></div>
+    <div class="rd c1"><p><b>+18% since May, on 1.4× the jobs.</b> Failed attempts and idle seats are in the numerator, so waste raises the figure.</p></div>
+    <div class="rd c2"><p><b>Both can be cut without cutting output.</b> 41 of 570 tasks needed a second attempt, and one seat sat nearly idle all season.</p></div>
+    <div class="rd c3"><p><b>Push agents where the work converts.</b> Where it does not, change the template or take the work back. Deploy converts one in three.</p></div>
+    <div class="rd c4"><p><b>The cloud earns its keep when work runs while people are elsewhere.</b> Where sessions are mostly supervised, a laptop would have done.</p></div>
+
+    <p class="verb c1">Defend it to finance</p><p class="verb c2">Reclaim it</p><p class="verb c3">Redirect the work</p><p class="verb c4">Offload the right work</p>
+  </section>
+
+  <p class="ask"><b>Ask, don't dig.</b> Every figure about agent work in your organisation, from the bill to where it converts and which teams run lean, is available over MCP to whichever AI assistant your team already uses. Connect it once and ask in plain words.</p>
+</main>
+</body></html>

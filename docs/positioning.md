@@ -22,6 +22,8 @@ leaderboard.
 
 **Not:** a billing page, a trace viewer, a performance review tool.
 
+**Proposed revision, open (2026-09-10).** Ticket 59 reopens the landing's shape and the *Not a performance review tool* line; drafts under [`docs/landing/`](landing/README.md). Until the human resolves it, this page is unchanged and remains the source.
+
 ---
 
 ## Where each line is held to
