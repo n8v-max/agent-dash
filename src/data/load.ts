@@ -6,7 +6,7 @@
 // line receives typed rows; nothing above it opens a file, and nothing above it can opt back
 // into a hidden row, because no function here takes an option that would let it.
 //
-// Four invariants live here rather than downstream:
+// Five invariants live here rather than downstream:
 //
 //   * **R-M2 — hidden sessions are stripped at parse.** An AgentSession that terminated through
 //     platform or infrastructure failure is absorbed by the platform, is billed to nobody and
@@ -25,6 +25,11 @@
 //     children's cost, tokens and duration. The child rows survive on `childSessions`, keyed by
 //     the root that spawned them, because `/demo/history` shows the raw rows under every
 //     aggregate and a fan-out is exactly what a reader goes there to see.
+//   * **Every fault names the file, the row index and the field** (ticket 53, T-U26). The schema
+//     validators are handed a path and already do; the cross-row checks below are handed a flat
+//     list, so they carry a `RowSource` to say the same thing. A fault that names only a session
+//     id is a fault whose fix starts with a grep, and a loader is the one place in this
+//     application where the diagnosis has to be free — it runs before anything is rendered.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -114,28 +119,89 @@ const sessionFile = (repository: Repository, workType: WorkType): string =>
   join("sessions", `${repository.name}__${workType.key}.json`);
 
 /**
+ * **Where a row was read from — `<file>[<row index>]`.** The schema validators already name that
+ * much on a bad field, because they are handed the path; the cross-row checks below are handed a
+ * flat list and would otherwise be able to name only the row's id. A fault that names the file,
+ * the index and the field is a fault a reader can open the file at (ticket 53).
+ *
+ * Keyed by row identity rather than by session id, because the duplicate-id check is itself one
+ * of the callers: two rows sharing an id must still resolve to two different places.
+ */
+type RowSource = ReadonlyMap<AgentSession, string>;
+
+/** `<file>[<row index>].<field>` — the three parts every fault message below is built from. */
+const fieldAt = (source: RowSource, row: AgentSession, field: string): string =>
+  `${source.get(row) ?? "sessions"}.${field}`;
+
+/** Which of the two labels the file declares this row disagrees with, or `null` if neither. */
+const strayField = (
+  row: AgentSession,
+  repository: Repository,
+  workType: WorkType,
+): "repository_id" | "work_type" | null => {
+  if (row.repository_id !== repository.id) return "repository_id";
+  if (row.work_type !== workType.key) return "work_type";
+  return null;
+};
+
+/**
  * A row filed under the wrong pair would be counted under the wrong repository by every
  * surface that groups by one, and the file name is the only place the pair is declared.
  */
-const assertPair = (rows: readonly AgentSession[], repository: Repository, workType: WorkType, path: string): void => {
-  const stray = rows.find(
-    (row) => row.repository_id !== repository.id || row.work_type !== workType.key,
-  );
-  if (stray) {
+const assertPair = (
+  rows: readonly AgentSession[],
+  pair: { readonly repository: Repository; readonly workType: WorkType },
+  source: RowSource,
+): void => {
+  const { repository, workType } = pair;
+  for (const row of rows) {
+    const wrong = strayField(row, repository, workType);
+    if (wrong === null) continue;
     throw new FixtureFault(
-      `${path}: session ${stray.id} is filed under the wrong pair — it carries ` +
-        `${stray.repository_id} × ${stray.work_type}, the file declares ${repository.id} × ${workType.key}.`,
+      `${fieldAt(source, row, wrong)}: session ${row.id} is filed under the wrong pair — it ` +
+        `carries ${row.repository_id} × ${row.work_type}, the file declares ` +
+        `${repository.id} × ${workType.key}.`,
     );
   }
 };
 
-const assertUniqueIds = (rows: readonly AgentSession[]): void => {
+const assertUniqueIds = (rows: readonly AgentSession[], source: RowSource): void => {
   const seen = new Set<string>();
   for (const row of rows) {
     if (seen.has(row.id)) {
-      throw new FixtureFault(`sessions: duplicate session id ${row.id} — every row would be counted twice.`);
+      throw new FixtureFault(
+        `${fieldAt(source, row, "id")}: duplicate session id ${row.id} — ` +
+          "every row would be counted twice.",
+      );
     }
     seen.add(row.id);
+  }
+};
+
+/**
+ * **A TokenUsage names a Model, and the Model roster is a different file.** `schema.ts` can only
+ * see that `model_id` is a string; whether that string resolves is a claim across two files, so
+ * it is checked here, where both are in scope.
+ *
+ * An unresolved id is a fault rather than a dropped row because the mix panel rolls Model up to
+ * family and tier (R-M7): an id nothing declares has no family and no tier, so it would either
+ * disappear from a partition that is asserted to sum, or print a raw id where a family belongs.
+ */
+const assertKnownModels = (
+  rows: readonly AgentSession[],
+  source: RowSource,
+  modelIds: ReadonlySet<string>,
+): void => {
+  for (const row of rows) {
+    const index = row.token_usage.findIndex((usage) => !modelIds.has(usage.model_id));
+    if (index === -1) continue;
+    const usage = row.token_usage[index];
+    const field = `token_usage[${index}].model_id`;
+    throw new FixtureFault(
+      `${fieldAt(source, row, field)}: unknown model ` +
+        `${JSON.stringify(usage?.model_id)} — models.json declares the roster, and a Model it ` +
+        "does not name has no family and no tier to roll up into (R-M7).",
+    );
   }
 };
 
@@ -150,7 +216,7 @@ const byStartedAt = (left: AgentSession, right: AgentSession): number =>
  * The rules themselves are `childFaults`, in the domain layer, so the loader and the fixture
  * invariant test cannot come to different conclusions about what a valid child is.
  */
-const assertSessionTree = (rows: readonly AgentSession[]): void => {
+const assertSessionTree = (rows: readonly AgentSession[], source: RowSource): void => {
   const byId = new Map(rows.map((row) => [row.id, row]));
   for (const row of rows) {
     const parentId = row.parent_session_id;
@@ -158,9 +224,10 @@ const assertSessionTree = (rows: readonly AgentSession[]): void => {
     const faults = childFaults(row, byId.get(parentId));
     if (faults.length > 0) {
       throw new FixtureFault(
-        `sessions: child session ${row.id} names root ${parentId} — ${faults.join(", ")}. ` +
-          "A child inherits its root's Task, Member, Repository, WorkType and execution_mode, " +
-          "never carries `accepted`, and rolls up into a root that is itself visible (R-M19).",
+        `${fieldAt(source, row, "parent_session_id")}: child session ${row.id} names root ` +
+          `${parentId} — ${faults.join(", ")}. A child inherits its root's Task, Member, ` +
+          "Repository, WorkType and execution_mode, never carries `accepted`, and rolls up " +
+          "into a root that is itself visible (R-M19).",
       );
     }
   }
@@ -184,21 +251,25 @@ const readSessions = (
   reader: FixtureReader,
   repositories: readonly Repository[],
   workTypes: readonly WorkType[],
+  modelIds: ReadonlySet<string>,
 ): SessionSet => {
   const pairs = repositories.flatMap((repository) =>
     workTypes.map((workType) => ({ repository, workType })),
   );
 
   const stored: AgentSession[] = [];
-  for (const { repository, workType } of pairs) {
-    const path = sessionFile(repository, workType);
+  const source = new Map<AgentSession, string>();
+  for (const pair of pairs) {
+    const path = sessionFile(pair.repository, pair.workType);
     const rows = readFile(reader, path, arrayOf(sessionSchema));
-    assertPair(rows, repository, workType, path);
+    rows.forEach((row, index) => source.set(row, `${path}[${index}]`));
+    assertPair(rows, pair, source);
     stored.push(...rows);
   }
 
-  assertUniqueIds(stored);
-  assertSessionTree(stored);
+  assertUniqueIds(stored, source);
+  assertKnownModels(stored, source, modelIds);
+  assertSessionTree(stored, source);
   // R-M2, once and for all. Nothing downstream is offered the alternative — and a hidden root
   // takes its children with it, which `assertSessionTree` is what makes true.
   const visible = stored.filter((row) => !row.hidden);
@@ -217,6 +288,9 @@ export const readDataset = (reader: FixtureReader = readFixtureFile): Dataset =>
   const repositories = readFile(reader, "repositories.json", arrayOf(repositorySchema));
   const workTypes = readFile(reader, "work_types.json", arrayOf(workTypeSchema));
   const directory = readFile(reader, "members.json", membersFileSchema);
+  // Read before the sessions, because a session's TokenUsage names a Model and this file is
+  // where the roster is declared: the check spans the two, so both have to be in scope.
+  const models = readFile(reader, "models.json", arrayOf(modelSchema));
 
   return {
     organization: readFile(reader, "organization.json", organizationSchema),
@@ -226,9 +300,9 @@ export const readDataset = (reader: FixtureReader = readFixtureFile): Dataset =>
     githubUsers: directory.github_users,
     tasks: readFile(reader, "tasks.json", arrayOf(taskSchema)),
     workTypes,
-    models: readFile(reader, "models.json", arrayOf(modelSchema)),
+    models,
     rateCards: readFile(reader, "rate_cards.json", rateCardsSchema),
-    ...readSessions(reader, repositories, workTypes),
+    ...readSessions(reader, repositories, workTypes, new Set(models.map((model) => model.id))),
   };
 };
 

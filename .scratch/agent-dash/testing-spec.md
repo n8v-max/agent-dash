@@ -318,6 +318,52 @@ against.
   (R-M18). Over the committed fixture: median 1, p95 4, and the agent total equal to the number of
   visible rows on disk.
 
+### 3.5 The fixture contract — `src/data/load.ts` (ticket 53)
+
+Two targets, in `src/data/fixture-contract.test.ts`. They are the same claim from both ends: a
+malformed row must fail the load *diagnosably*, and the load must be the only way a row gets in.
+Either alone is weak — a loader that faults loudly proves nothing if a panel can import the JSON
+beside it, and a boundary nothing bypasses proves nothing if it accepts a negative cost.
+
+**T-U26 — A malformed row fails `load()`, naming the file, the row index and the field.** The
+message format is the assertion: every fault reads `<file>[<row index>].<field>: <why>`, read back
+as one string rather than as three `toContain`s, because three parts appearing somewhere in a
+sentence are not a location. Six cases, one per test, each built **in the test** from committed
+rows handed back through an overriding reader — nothing on disk is mutated (P3), because the
+committed files are the input to every other test in the suite.
+
+- **Negative cost** — money is corrupt, not small. Already enforced by `nonNegative` (schema).
+- **An unknown work type** — no acceptance criterion would define it. Already enforced by `oneOf`.
+- **A child naming a root that is not in the fixture** (R-M19, R-T37): the fault names
+  `parent_session_id` on the child's own row, not merely the session id.
+- **`ended_at` before `started_at`** — a negative span, which nets off against real ones in every
+  median and p95. Checked in `schema.ts`, as the one claim spanning two fields of one row;
+  timestamps must also *parse*, since an unparseable one ranks as `NaN` rather than throwing.
+- **A TokenUsage naming a model `models.json` does not declare.** Cross-file, so it is checked in
+  `load.ts`: an id nothing declares has no family and no tier to roll up into (R-M7).
+- **The sixth: a row filed under the wrong `(repository × work_type)` pair.** The file name is the
+  only place the pair is declared, so a stray row is counted under the wrong repository by every
+  surface that groups by one and reads as ordinary data everywhere else.
+
+Two further cases keep the *location* honest rather than the rule: the fault names the row that is
+wrong rather than the first row of the file, and the file the row came from rather than the pair
+the loader happened to be reading.
+
+**T-U27 — `load()` is the only entry.** Proved three ways, because "the façade cannot be reached
+with an invalid dataset" is a claim about reachability and a test that merely calls `load()` and
+watches it throw does not make it.
+
+- **Over the façade's own import graph.** The transitive imports of `src/data/queries.ts` are
+  walked, and exactly one module in that graph imports `node:fs` — `load.ts` — and none imports a
+  `.json`. The graph's size and its reaching of `load.ts` are asserted first, as the control.
+- **Over the repository.** No source file outside `src/data/**` and `src/fixtures/**` opens a file
+  or imports fixture JSON, which is the zone `eslint.config.mjs` draws, asserted independently of
+  ESLint running. Nothing but `load.ts` produces a `Dataset`, and nothing in the façade's graph
+  names `readDataset` or `readFixtureFile` — the reader-injectable doors are test-only.
+- **At runtime.** With `node:fs` serving one doctored session file, `summaryPage(viewer, params)`
+  **faults instead of answering**, for a schema fault and for a cross-row one; over the committed
+  fixture, the same call returns tiles. That is what the only-entry claim means operationally.
+
 ---
 
 ## 4. Component tests — RTL + jsdom
