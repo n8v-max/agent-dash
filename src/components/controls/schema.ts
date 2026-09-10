@@ -116,12 +116,21 @@ const later = (left: string, right: string): string => (left > right ? left : ri
 const earlier = (left: string, right: string): string => (left < right ? left : right);
 
 /**
- * **Which pages offer the whole observation window as a period** (ticket 39).
+ * **Which pages offer the whole observation window as a period** (ticket 39, ticket 63).
  *
  * `/demo` does not. It is month-locked (R-N6) and every tile on it is a month against the month
  * before, so "All data" was a period the page's own argument could not be read over: five months
- * of spend beside a change figure measured on the last of them. The other pages keep it — they
- * plot series over the range, where the whole window is the most useful default there is.
+ * of spend beside a change figure measured on the last of them.
+ *
+ * **`/demo/people` does not either** (ticket 63). Its table is one row per Member *over the
+ * period*, and a period of everything is a career total: it grows without bound as the
+ * Organization keeps working, it puts a Member who left in March beside one who joined in
+ * September, and it is the one reading on the page nobody can act on. A month is the unit the
+ * Organization is billed in (R-M5) and the unit `/demo` already reports, so the two month-locked
+ * surfaces agree on what a period is.
+ *
+ * The remaining pages keep it — they plot series over the range, where the whole window is the
+ * most useful default there is.
  *
  * A total record rather than a set, so a new page has to answer the question rather than inherit
  * an answer from whichever side of a `!==` it happens to fall on.
@@ -130,7 +139,7 @@ const OFFERS_WHOLE_WINDOW: Readonly<Record<PageKey, boolean>> = {
   summary: false,
   spend: true,
   work: true,
-  people: true,
+  people: false,
   history: true,
   projection: true,
 };
@@ -176,8 +185,9 @@ export function periodOptions(page: PageKey, bounds: PeriodRange): readonly Peri
 
 /**
  * **The period a bare route opens on** (R-C4) — the whole window, or, where a page does not offer
- * it, the newest month the window touches. That is the *current* month: the clock is clamped to
- * the window's last day (`clock.ts`), so the newest month is the month in progress.
+ * it, the newest month the window touches. That is the *current* month, in the Organization's own
+ * timezone: the clock is clamped to the window's last day (`clock.ts`), so the newest month the
+ * window touches is the month `now` falls in, and both `/demo` and `/demo/people` open on it.
  *
  * It is the first offered option in both cases, which is what keeps the default a value the
  * control can also be returned to rather than a hidden seventh state.

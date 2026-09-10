@@ -220,10 +220,11 @@ test.describe("T-E7 — /demo is four tiles and nothing else (A1, A2, A24)", () 
   });
 
   /**
-   * Ticket 39 — "All data" is dropped **on this page only**, and a URL still carrying it is a
-   * viewer's link rather than an error: the token names no period `/demo` offers, so the page
-   * default stands (R-C4, R-T26). The other pages keep the option, which is asserted beside it
-   * so that dropping it everywhere would fail here too.
+   * Ticket 39 — "All data" is dropped on the month-locked pages (this one, and `/demo/people`
+   * since ticket 63), and a URL still carrying it is a viewer's link rather than an error: the
+   * token names no period `/demo` offers, so the page default stands (R-C4, R-T26). The pages
+   * that plot a series keep the option, which is asserted beside it so that dropping it
+   * everywhere would fail here too.
    */
   test("drops a whole-window period, and opens on the current month instead", async ({ page }) => {
     for (const token of ["all", "window"]) {

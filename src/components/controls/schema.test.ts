@@ -13,6 +13,8 @@ import {
   controlsWith,
   DECLARED_CONTROLS,
   defaultControls,
+  tableControls,
+  toolbarControls,
   type ControlKey,
   type ControlSet,
   type PageKey,
@@ -216,11 +218,33 @@ describe("T-C4 — controls serialise to the query string and round-trip (A19, R
       expect(pathFor(page, ORG)).not.toContain("?");
     }
   });
+
+  it("keeps `?sort=` a parameter after the control left the toolbar (ticket 63)", () => {
+    // R-C6's third placement: the ordering is the People table's own headings, so `sort` is
+    // declared, parsed and serialised exactly as before while no widget in the bar offers it.
+    // A parameter that stopped round-tripping when its widget moved is the failure T-C14 names.
+    expect(toolbarControls("people")).not.toContain("sort");
+    expect(tableControls("people")).toEqual(["sort"]);
+
+    const sorted = parse("people", { sort: "-cost" });
+    expect(sorted.sort).toEqual({ column: "cost", direction: "desc" });
+    expect(canonicalQuery(sorted, WINDOW).toString()).toBe("sort=-cost");
+    expect(controlHref({ controls: sorted, window: WINDOW })).toBe("/demo/people?sort=-cost");
+  });
 });
 
-describe("R-N6 — `/demo` offers the fixture's months, and no 'All data' (ticket 39)", () => {
-  it("offers every month the window touches, newest first, and nothing else", () => {
-    const offered = periodOptions("summary", WINDOW);
+describe("R-N6, ticket 63 — the month-only pages offer months, and no 'All data'", () => {
+  /**
+   * The two pages whose period control is calendar months and nothing else: `/demo`, which is
+   * month-locked (R-N6, ticket 39), and `/demo/people`, whose table reports a period rather than
+   * a series and for which "All data" is a range that does not scale (ticket 63).
+   */
+  const MONTH_ONLY = ["summary", "people"] as const;
+  /** The pages that plot a series over the range and keep the whole window as their default. */
+  const WHOLE_WINDOW = ["spend", "work", "history"] as const;
+
+  it.each(MONTH_ONLY)("%s offers every month the window touches, newest first", (page) => {
+    const offered = periodOptions(page, WINDOW);
 
     expect(offered.map((option) => option.value)).toEqual([
       "2026-09",
@@ -239,38 +263,42 @@ describe("R-N6 — `/demo` offers the fixture's months, and no 'All data' (ticke
     const [whole, ...months] = periodOptions("spend", WINDOW);
 
     expect(whole.label).toBe("All data");
-    expect(periodOptions("summary", WINDOW)).toEqual(months);
+    for (const page of MONTH_ONLY) expect(periodOptions(page, WINDOW)).toEqual(months);
   });
 
-  it("opens on the current month, and the other pages open on the whole window", () => {
-    const september = periodOptions("summary", WINDOW)[0];
+  it.each(MONTH_ONLY)("%s opens on the month `now` falls in", (page) => {
+    // The clock is clamped to the window's last day (`clock.ts`), so the newest month the window
+    // touches *is* the month in progress — which is what the first offered option has to be for
+    // the page default to be the current month rather than merely the latest one.
+    const [current] = periodOptions(page, WINDOW);
 
-    expect(defaultPeriodRange("summary", WINDOW)).toEqual(september.range);
-    expect(september.range.end).toBe(WINDOW.end);
-    expect(parse("summary", {}).range).toEqual(september.range);
-
-    for (const page of ["spend", "work", "people", "history"] as const) {
-      expect(defaultPeriodRange(page, WINDOW)).toEqual(WINDOW);
-      expect(parse(page, {}).range).toEqual(WINDOW);
-    }
+    expect(current.value).toBe(NOW.slice(0, 7));
+    expect(defaultPeriodRange(page, WINDOW)).toEqual(current.range);
+    expect(current.range.end).toBe(WINDOW.end);
+    expect(parse(page, {}).range).toEqual(current.range);
   });
 
-  it("drops the whole-window token on `/demo`, and honours it everywhere else", () => {
+  it.each(WHOLE_WINDOW)("%s still opens on the whole observation window", (page) => {
+    expect(defaultPeriodRange(page, WINDOW)).toEqual(WINDOW);
+    expect(parse(page, {}).range).toEqual(WINDOW);
+  });
+
+  it.each(MONTH_ONLY)("%s drops the whole-window token; the series pages honour it", (page) => {
     // Dropped rather than 404'd: a shared URL carrying a period this page no longer offers is a
     // viewer's link, and the honest answer is the page default (R-T26, R-C4).
     for (const token of ["window", "all"]) {
-      expect(parse("summary", { period: token }).range).toEqual(defaultPeriodRange("summary", WINDOW));
+      expect(parse(page, { period: token }).range).toEqual(defaultPeriodRange(page, WINDOW));
     }
     expect(parse("spend", { period: "window" }).range).toEqual(WINDOW);
   });
 
-  it("still serialises a month the viewer chose, and omits the one it opens on (R-C4)", () => {
-    expect(canonicalQuery(parse("summary", {}), WINDOW).toString()).toBe("");
-    expect(canonicalQuery(parse("summary", { period: "2026-08" }), WINDOW).toString()).toBe(
+  it.each(MONTH_ONLY)("%s serialises a chosen month and omits the one it opens on (R-C4)", (page) => {
+    expect(canonicalQuery(parse(page, {}), WINDOW).toString()).toBe("");
+    expect(canonicalQuery(parse(page, { period: "2026-08" }), WINDOW).toString()).toBe(
       "period=2026-08",
     );
     // …and the reverse: the current month is reachable by token, and normalises to the bare route.
-    expect(canonicalQuery(parse("summary", { period: "2026-09" }), WINDOW).toString()).toBe("");
+    expect(canonicalQuery(parse(page, { period: "2026-09" }), WINDOW).toString()).toBe("");
   });
 });
 

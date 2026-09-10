@@ -343,6 +343,11 @@ rediscover which sessions were headless.
 **R-N15 — A table of Member · Team · kind · Completed Tasks · Sessions · Tokens · Cost.** Every
 numeric column sortable. **Default sort: Completed Tasks descending.**
 
+**The Sort control *is* the table's headings** (added 2026-09-10, ticket 63). Each numeric heading
+is a link that sets `?sort=`, and the sorted column carries `aria-sort`; there is no second sort
+widget in the toolbar. A menu in the bar listed every column twice and stood away from the rows it
+ordered, so a reader had two places to look and only one of them showed the current ordering.
+
 That is an ordering by output rather than by spend, and no percentile label is computed — but it
 is an ordering the product chose, and it is recorded as a decision rather than left as drift.
 
@@ -588,11 +593,28 @@ others. **No page shows a control its panels cannot use, and no page shows a gre
 | Page | Declared controls |
 |---|---|
 | `/demo` | Period (month) |
-| `/demo/spend` | Period and grain · subject (Team or Member) · Repository · WorkType · `accepted` · per-capita · Model roll-up (exact/family/tier), **scoped to the Adoption section** |
-| `/demo/work` | Period and grain · subject · Repository · WorkType · `execution_mode` · per-capita |
-| `/demo/people` | Period · Team · Member kind · sort |
+| `/demo/spend` | Period and grain, labelled **Aggregation** · subject, labelled **Per** (Organisation, Team or Member) · Repository · WorkType · `accepted` · per-capita · Model roll-up (exact/family/tier), **scoped to the Adoption section** |
+| `/demo/work` | Period and grain (**Aggregation**) · subject (**Per**) · Repository · WorkType · `execution_mode` · per-capita |
+| `/demo/people` | Period (calendar months only) · Team · Member kind |
 | `/demo/history` | Date range · Member · WorkType · Repository |
 | `/demo/projection` | — |
+
+**`grain` and `subject` are labelled Aggregation and Per** (added 2026-09-10, ticket 63). "Grain"
+and "Subject" are this program's words for them, and neither is a word an engineering manager
+reading a spend chart reaches for; the Per control's options read Organisation, Team and Member.
+The query string is unchanged — `?grain=` and `?subject=` are what they always were — so a link
+shared before the relabelling opens the same page after it (R-C3).
+
+**`/demo/people` offers calendar months and no "All data"** (added 2026-09-10, ticket 63), and
+opens on the month `now` falls in, in the Organization's timezone. Every row on that page is a
+Member's figures *over the period*: "All data" is a career total, it grows without bound as the
+Organization keeps working, and it puts a Member who left in March beside one who arrived last
+week. A month is the unit the Organization is billed in (R-M5) and the unit `/demo` already
+reports, so the two month-locked surfaces agree on what a period is. Team and Member kind stay
+filters over that month.
+
+**`sort` is still a control of `/demo/people` and is no longer in its toolbar** — its control is
+the table's own headings (R-N15, R-C6). It is declared, parsed and serialised exactly as before.
 
 **Per-capita applies to additive money panels only.** On `/demo/spend` it divides **Total spend**
 and **Cost by Repository**. It does not touch Cost per completed Task, Cost per session or the
@@ -626,8 +648,16 @@ controls a page has; this says *where on the page* each one stands.
 
 | Placement | Controls | Why |
 |---|---|---|
-| The global toolbar | period · grain · subject · Repository · template · date range · Team · Member kind · Member · sort | each narrows or orders the **population every panel on the page is read off** |
+| The global toolbar | period · grain (**Aggregation**) · subject (**Per**) · Repository · template · date range · Team · Member kind · Member | each narrows the **population every panel on the page is read off** |
 | The header of each panel that reads it | `accepted` · per-capita · Model roll-up · `execution_mode` | each changes **some** of the page's panels and not the rest |
+| The table's own headings | sort | the ordering is a property of the table, and the heading is both where a reader sees which column is ordering it and where they reach to change it |
+
+**Sort left the toolbar on 2026-09-10 (ticket 63).** The bar carried a menu listing every sortable
+column twice — "Cost high to low", "Cost low to high", and six more — beside a table whose
+headings already set `?sort=` and already carry the `aria-sort` a reader reads the ordering off.
+Two widgets for one parameter, and only one of them stood on the thing it ordered. The parameter
+did not move: `?sort=` parses, serialises and round-trips exactly as before, and the heading links
+are built by the same `controlHref` the menu used.
 
 `/demo/spend` showed nine control groups and `/demo/work` ten, in two rows at 1440px, and half of
 them changed one panel out of seven. A bar reads as a page-wide claim, and for those it was not
@@ -646,7 +676,10 @@ same rules (R-C3, R-C4). A link shared before this change and one shared after i
 link.
 
 **R-C7 — Every controlled page states its active filters in one line under the heading** (added
-2026-09-09, ticket 43), e.g. *"Week grain · by Team · mobile-app · all templates"*.
+2026-09-09, ticket 43), e.g. *"Week aggregation · per Team · mobile-app · all templates"*. The
+phrases spell the controls' own labels, so the sentence and the bar above it read as one claim;
+a chosen Team reads *"Platform team"*, because a bare name beside the other phrases does not say
+which dimension narrowed the page (ticket 63).
 
 **Every filter has a phrase, including the ones nobody set.** "all templates" appears when no
 template is chosen, because the reading a viewer needs is *what population is this figure over* —

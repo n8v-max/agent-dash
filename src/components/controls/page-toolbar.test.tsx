@@ -30,6 +30,7 @@ import {
   PAGES,
   PANEL_LOCAL_CONTROLS,
   panelLocalControls,
+  tableControls,
   toolbarControls,
   type ControlKey,
   type PageKey,
@@ -60,10 +61,6 @@ const optionsWith = (grains: ControlOptions["grains"]): ControlOptions => ({
   teams: [{ value: "team_platform", label: "Platform" }],
   members: [{ value: "mem_0001", label: "Ada Lovelace" }],
   grains,
-  sortColumns: [
-    { value: "completedTasks", label: "Completed Jobs" },
-    { value: "cost", label: "Cost" },
-  ],
 });
 
 const toolbar = (
@@ -103,16 +100,46 @@ describe("T-C6 — the toolbar renders exactly this page's global controls (R-C1
     for (const key of PANEL_LOCAL_CONTROLS) expect(shown.has(`control-${key}`)).toBe(false);
   });
 
-  it("moves four controls out of the bar and loses none of them (R-C6)", () => {
-    // The two halves are a partition of the declared set, on every page. Without this the split
-    // could drop a control from both lists and every placement assertion would still pass.
+  it("moves controls out of the bar and loses none of them (R-C6)", () => {
+    // The three placements are a partition of the declared set, on every page. Without this the
+    // split could drop a control from all three lists and every placement assertion would still
+    // pass — which is exactly how `sort` could have stopped being a parameter when ticket 63
+    // took its widget out of the bar.
     for (const page of PAGES) {
-      expect([...toolbarControls(page), ...panelLocalControls(page)].sort()).toEqual(
-        [...DECLARED_CONTROLS[page]].sort(),
-      );
+      expect(
+        [...toolbarControls(page), ...panelLocalControls(page), ...tableControls(page)].sort(),
+      ).toEqual([...DECLARED_CONTROLS[page]].sort());
     }
     expect(panelLocalControls("spend")).toEqual(["accepted", "perCapita", "modelLevel"]);
     expect(panelLocalControls("work")).toEqual(["executionMode", "perCapita"]);
+    expect(tableControls("people")).toEqual(["sort"]);
+    for (const page of PAGES.filter((candidate) => candidate !== "people")) {
+      expect(tableControls(page)).toEqual([]);
+    }
+  });
+
+  it("holds three groups on `/demo/people`: period, Team and kind (ticket 63)", () => {
+    // The bar used to carry a fourth, a Sort menu listing every column twice. The table's own
+    // headings already show the ordering and change it (R-N15), so the menu was a second control
+    // for one parameter — and the only one of the two that could disagree with what was on screen.
+    toolbar("people");
+
+    expect(rendered()).toEqual(["control-period", "control-team", "control-memberKind"]);
+    expect(screen.queryByTestId("control-sort")).toBeNull();
+  });
+
+  it("offers `/demo/people` months only, opening on the current one (ticket 63)", () => {
+    // "All data" does not scale on this page: the table is one row per Member over the period,
+    // and a period of everything is a figure nobody can act on. Months are what the Organization
+    // is billed in (R-M5) and what `/demo` already reports.
+    toolbar("people");
+    const control = within(screen.getByTestId("control-period"));
+
+    expect(control.getAllByRole("link").map((link) => link.textContent)).toEqual(
+      periodOptions("people", WINDOW).map((option) => option.label),
+    );
+    expect(control.queryByRole("link", { name: "All data" })).toBeNull();
+    expect(screen.getByTestId("control-period")).toHaveTextContent("September 2026");
   });
 
   it.each(CONTROLLED)("%s puts the period control first (R-N3)", (page) => {
@@ -158,8 +185,13 @@ describe("T-C6 — the toolbar renders exactly this page's global controls (R-C1
     for (const page of PAGES) {
       const { unmount } = toolbar(page);
       const shown = new Set(rendered());
+      // A set of strings rather than `toolbarControls(page).includes(key)`, because the sweep is
+      // over *every* control the product has and the bar's list no longer holds all of them:
+      // `sort` is declared on `/demo/people` and rendered by its table (ticket 63), so it must
+      // come out of this loop false rather than fail to typecheck against a narrower list.
+      const inBar = new Set<string>(toolbarControls(page));
       for (const key of everyControl) {
-        expect(shown.has(`control-${key}`)).toBe(toolbarControls(page).includes(key));
+        expect(shown.has(`control-${key}`)).toBe(inBar.has(key));
       }
       unmount();
     }
@@ -194,6 +226,17 @@ describe("Controls are links, and the link is the whole mechanism (R-T25)", () =
     const month = within(screen.getByTestId("control-grain")).getByRole("link", { name: "Month" });
 
     expect(month).toHaveAttribute("href", "/demo/spend?grain=month");
+  });
+
+  it("spells a filter's off state in words, and it is always reachable (ticket 63)", () => {
+    // It read "All team" — the control's own label, lowercased, with a word in front of it — and
+    // disagreed with the "all teams" R-C7's sentence prints for the same state. The link is the
+    // bare route, which is what makes a filter undoable rather than merely re-selectable.
+    toolbar("people");
+    const team = within(screen.getByTestId("control-team"));
+
+    expect(team.getByRole("link", { name: "All teams" })).toHaveAttribute("href", "/demo/people");
+    expect(team.queryByRole("link", { name: "All team" })).toBeNull();
   });
 
   it("offers a reset to the bare route once a control leaves its default (R-C4)", () => {

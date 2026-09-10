@@ -1,13 +1,15 @@
 // **R-N3 — the page toolbar.** Below the header, sticky, holding *this page's global controls*
 // and period first.
 //
-// **R-C6 — it holds the population, not the panel.** Period, grain, subject, Repository and
+// **R-C6 — it holds the population, not the panel.** Period, aggregation, per, Repository and
 // template narrow the rows every panel on the page is read off, so a bar is where they belong: a
 // bar reads as a page-wide claim, and for these five it is one. The four toggles that changed a
 // single panel — `accepted`, per-capita, Model roll-up, `execution_mode` — have moved into the
-// header of each panel that reads them (`PanelControl`). What the toolbar renders is therefore
-// `toolbarControls(page)` and not the whole declared set; both come from the same table in
-// `params.ts`, so there is no second list here to disagree with it.
+// header of each panel that reads them (`PanelControl`), and `sort` has moved onto the People
+// table's own headings, which show the ordering where it acts (R-N15, ticket 63). What the
+// toolbar renders is therefore `toolbarControls(page)` and not the whole declared set; all three
+// lists come from the same table in `params.ts`, so there is no second list here to disagree with
+// it.
 //
 // **R-N3.1 — the bar also carries the as-of stamp, right-aligned**, and that is what makes it
 // present on every `/[org]` surface including `/demo/projection`, which declares no controls at

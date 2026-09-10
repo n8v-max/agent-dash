@@ -18,7 +18,15 @@
 //
 // **R-M15 — no ordering is editorialised.** The default sort is Completed Jobs descending (A24),
 // the lede says so in words, and there is no percentile, no rank and no "top spender" anywhere on
-// the page. Every numeric column sorts, from its own heading and from the toolbar (R-N15).
+// the page. Every numeric column sorts **from its own heading, and from nowhere else** (R-N15,
+// ticket 63): the heading link is the Sort control, it stands on the column it orders, and the
+// toolbar's menu — which listed every column twice and could disagree with the arrow on screen —
+// is gone. `?sort=` is unchanged, and `sortHrefFor` below is what writes it.
+//
+// **The period is a calendar month, and the page opens on the current one** (ticket 63). "All
+// data" is not offered: a row here is a Member's figures *over the period*, and a period of
+// everything is a career total that grows without bound and puts a Member who left beside one who
+// arrived last week. Team and kind stay filters over that month.
 
 import Link from "next/link";
 import { pageRequest, type PageRequest } from "@/components/controls/request";

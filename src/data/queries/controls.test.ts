@@ -103,12 +103,15 @@ describe("controlOptions — the lists do not narrow with the selection", () => 
   });
 });
 
-describe("controlOptions — sort offers the People table's own sortable columns (R-N15)", () => {
-  it("offers exactly the columns the table marks sortable", () => {
+describe("PEOPLE_SORT_COLUMNS — what `?sort=` may name (R-N15, A24)", () => {
+  it("is exactly the columns the table marks sortable", () => {
+    // The parser validates against this list and the table's headings are built from the same
+    // columns, so a sort the URL can express is a heading a reader can see. Ticket 63 took the
+    // list off `ControlOptions`, where only the departed Sort menu ever read it.
     expect(PEOPLE_SORT_COLUMNS.map((option) => option.value)).toEqual(
       PEOPLE_COLUMNS.filter((column) => column.sortable).map((column) => column.key),
     );
-    expect(controlOptions(OPEN, paramsFor("people")).sortColumns).toEqual(PEOPLE_SORT_COLUMNS);
+    expect(Object.keys(controlOptions(OPEN, paramsFor("people")))).not.toContain("sortColumns");
   });
 
   it("offers no non-numeric column, so no surface can default to sorting by name", () => {

@@ -10,7 +10,7 @@
 // alone. A freshness claim on five of six surfaces reads as the sixth being stale.
 //
 // **R-C7's active-filter sentence is here too, and under the heading rather than in the bar.**
-// It is a reading of the page — *"Week grain · by Team · mobile-app · all templates"* — not a
+// It is a reading of the page — *"Week aggregation · per Team · mobile-app · all templates"* — not a
 // control, and it belongs with the title it qualifies. Deciding that once, here, is the same
 // argument the toolbar's placement was decided by.
 

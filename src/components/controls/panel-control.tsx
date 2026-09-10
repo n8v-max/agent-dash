@@ -20,7 +20,7 @@
 // A control reaching two panels is rendered twice, from one parameter. Two nodes, one state:
 // both read `props.controls`, so they cannot disagree, and following either writes the same URL.
 
-import type { ControlKey } from "@/data/params";
+import type { WidgetControl } from "@/data/params";
 import { ControlWidget, type ControlContext } from "./control-renderers";
 import { declaredControls } from "./schema";
 
@@ -31,7 +31,7 @@ import { declaredControls } from "./schema";
  */
 export function PanelControl(props: {
   readonly context: ControlContext;
-  readonly control: ControlKey;
+  readonly control: WidgetControl;
 }) {
   if (!declaredControls(props.context.controls.page).includes(props.control)) return null;
 

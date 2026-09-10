@@ -288,13 +288,50 @@ test.describe("T-E12 — global bar, panel-local toggles, and the nav (R-C6, R-N
   test("the page heading carries the active-filter sentence (R-C7)", async ({ page }) => {
     await page.goto(`/${SLUG}/spend`);
     await expect(page.getByTestId("active-filters")).toHaveText(
-      "Week grain · by Organization · all repositories · all templates",
+      "Week aggregation · per Organisation · all repositories · all templates",
     );
 
     await page.goto(`/${SLUG}/spend?subject=team&grain=month`);
     await expect(page.getByTestId("active-filters")).toHaveText(
-      "Month grain · by Team · all repositories · all templates",
+      "Month aggregation · per Team · all repositories · all templates",
     );
+  });
+
+  /**
+   * **Ticket 63 — the two controls read in the reader's words, and the URL is untouched.**
+   *
+   * `grain` and `subject` are this program's words for them; "Aggregation" and "Per" are the
+   * words an engineering manager reading a spend chart would use. The parameters are asserted in
+   * the same test as the labels, because a relabelling that also renamed a parameter would break
+   * every share link cut before it — which is the constraint T-C14 states and the only way this
+   * change could do damage.
+   */
+  test("Grain reads Aggregation and Subject reads Per, on the same parameters", async ({ page }) => {
+    for (const path of ["/spend", "/work"]) {
+      await page.goto(`/${SLUG}${path}`);
+      const bar = page.getByTestId("page-toolbar");
+
+      await expect(bar.getByRole("group", { name: "Aggregation" })).toHaveCount(1);
+      await expect(bar.getByRole("group", { name: "Per" })).toHaveCount(1);
+      await expect(bar.getByRole("group", { name: "Grain" })).toHaveCount(0);
+      await expect(bar.getByRole("group", { name: "Subject" })).toHaveCount(0);
+      // The Per strip offers the Member dimension's three roll-ups, in `ROLLUP_LEVELS` order —
+      // finest first — and in the product's spelling.
+      await expect(bar.getByTestId("control-subject").getByRole("link")).toHaveText([
+        "Member",
+        "Team",
+        "Organisation",
+      ]);
+    }
+
+    // The literal URLs, unchanged from before the relabelling (T-C14).
+    await page.goto(`/${SLUG}/spend`);
+    await page.getByTestId("control-grain").getByRole("link", { name: "Month" }).click();
+    await expect(page).toHaveURL(`/${SLUG}/spend?grain=month`);
+
+    await page.goto(`/${SLUG}/spend`);
+    await page.getByTestId("control-subject").getByRole("link", { name: "Team" }).click();
+    await expect(page).toHaveURL(`/${SLUG}/spend?subject=team`);
   });
 });
 
