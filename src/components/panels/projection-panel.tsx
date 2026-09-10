@@ -232,7 +232,12 @@ export function ProjectionPanel(props: {
           {view.unavailable}
         </p>
       ) : null}
-      <section aria-label="Actual spend to date" className="rounded-xl border border-border p-6">
+      {/*
+        Named for what it draws. Ticket 64 stacked the month's projected remainder on the bars,
+        so a section still called "Actual spend to date" would be a heading that contradicts half
+        of the chart under it — and it is the accessible name a screen-reader user lands on.
+      */}
+      <section aria-label="Daily session cost" className="rounded-xl border border-border p-6">
         {/*
           `ChartContainer` is `aspect-video`, which on a full-width dashboard is a chart taller
           than the fold. The child selector out-specifies it (a class plus a type beats a class)
@@ -247,10 +252,14 @@ export function ProjectionPanel(props: {
         />
         {/*
           R-M5 — the seat charge is stated beside the bars and is **never a series in them**.
-          Spreading a monthly fee across days is the invented precision R-M5 forbids, so the
-          daily series is session Cost alone and the flat monthly figure is said in words. A
-          reference line was the alternative and is the worse one here: a $468 line over bars
-          in the single dollars flattens the chart it was drawn on.
+          Spreading a monthly fee across days is the invented precision R-M5 forbids, so both
+          daily series are session Cost — what a day cost and what the method says is still to
+          come on it — and the flat monthly figure is said in words. A reference line was the
+          alternative and is the worse one here: a $468 line over bars in the single dollars
+          flattens the chart it was drawn on.
+
+          The projected bars' own sentence arrives on `view.note` beside the seat one, because
+          the query is what knows whether a forecast was drawn at all (`data/queries/projection`).
         */}
         <p
           data-testid="chart-seat-note"

@@ -39,6 +39,7 @@ import {
   bucketRows,
   civilDayIn,
   civilDaysBetween,
+  civilDaysOf,
   parseGrain,
   planPeriods,
   priorMonthStart,
@@ -425,6 +426,32 @@ describe("civil days, in the Organization's declared timezone", () => {
   it("has no count where either end is not a civil date", () => {
     expect(civilDaysBetween("September", "2026-09-08")).toBeUndefined();
     expect(civilDaysBetween("2026-09-01", "2026-02-31")).toBeUndefined();
+  });
+
+  // Ticket 64 — `metrics/projection.ts` forecasts per civil day, so it needs the calendar
+  // itself rather than a count. The days come from here for the reason `civilDayIn` does:
+  // a second answer to "what is the day after the 30th" would disagree at a month end.
+  it("enumerates every civil day of an inclusive range, in order", () => {
+    const days = civilDaysOf({ start: "2026-09-01", end: "2026-09-30" });
+
+    expect(days).toHaveLength(30);
+    expect(days?.at(0)).toBe("2026-09-01");
+    expect(days?.at(-1)).toBe("2026-09-30");
+  });
+
+  it("crosses a month boundary and gives a single-day range one day", () => {
+    expect(civilDaysOf({ start: "2026-08-30", end: "2026-09-02" })).toEqual([
+      "2026-08-30",
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-02",
+    ]);
+    expect(civilDaysOf({ start: "2026-09-08", end: "2026-09-08" })).toEqual(["2026-09-08"]);
+  });
+
+  it("has no days for a range that is not one", () => {
+    expect(civilDaysOf({ start: "2026-09-30", end: "2026-09-01" })).toBeUndefined();
+    expect(civilDaysOf({ start: "September", end: "2026-09-30" })).toBeUndefined();
   });
 });
 

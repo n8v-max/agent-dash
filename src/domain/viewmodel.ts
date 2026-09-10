@@ -91,6 +91,16 @@ export type ChartViewModel = {
   readonly overlapNote: string | null;
   /** R-V1 — domain-supplied, never a styling choice. */
   readonly stackable: boolean;
+  /**
+   * **R-V8, at series grain** — the key of the series that is a *forecast* rather than an
+   * attributed reading, or `null` where the chart holds none (ticket 64).
+   *
+   * It is a domain fact on the ViewModel for the reason `stackable` and `form` are: whether a
+   * series is measured or extrapolated is a property of how it was computed, not a fill a panel
+   * picks. Presentation is what happens to it — the lighter fill and the "estimated" marker are
+   * copy and colour, and they live in `src/components/charts/chart-config.tsx`.
+   */
+  readonly estimated: string | null;
   /** R-V9 — the panel has nothing to draw and renders "no data for this selection". */
   readonly empty: boolean;
   readonly mirror: MirrorViewModel;
@@ -109,6 +119,7 @@ export const GROUPINGS = [
   "presence_span",
   "machine_spec",
   "cost_component",
+  "projection_component",
   "repository",
   "team",
   "member",
@@ -132,6 +143,12 @@ export type Grouping = (typeof GROUPINGS)[number];
  * R-M1 makes their sum Total spend exactly, so they partition it (R-N9 panel 2). `measure` is
  * the grouping of two unlike readings on one chart — a median beside a p95, Rework beside
  * Decomposition — which partitions nothing at all.
+ *
+ * `projection_component` is `/demo/projection`'s daily chart (ticket 64): spend attributed to a
+ * day beside the remainder the method carries onto it. It partitions for the same reason
+ * `cost_component` does — the two are outside each other by construction (a day before today is
+ * owed nothing, a day after today has spent nothing) and their sum is the projected session
+ * cost exactly, which `metrics/projection.ts` makes an identity rather than an agreement.
  */
 export const STACKABLE_GROUPINGS: Readonly<Record<Grouping, boolean>> = {
   work_type: true,
@@ -140,6 +157,7 @@ export const STACKABLE_GROUPINGS: Readonly<Record<Grouping, boolean>> = {
   presence_span: true,
   machine_spec: true,
   cost_component: true,
+  projection_component: true,
   repository: false,
   team: false,
   member: false,
@@ -203,6 +221,8 @@ export type ChartInput = {
   readonly partition?: boolean;
   /** R-V3's sentence, computed with the totals by `aggregate.ts`. */
   readonly overlapNote?: string | null;
+  /** R-V8 — the group key of the forecast series, where the chart draws one (ticket 64). */
+  readonly estimated?: string;
   /** The mirror's first column header. The buckets are periods unless a panel says otherwise. */
   readonly bucketColumn?: string;
 };
@@ -328,6 +348,7 @@ export function chartViewModel(input: ChartInput): ChartViewModel {
     other: set.other === null ? null : { holds: set.other.holds },
     overlapNote: input.overlapNote ?? null,
     stackable: stackable(input),
+    estimated: input.estimated ?? null,
     empty: input.cells.length === 0,
     mirror: mirrorFrom(input, set, gridOf(input.cells)),
   };

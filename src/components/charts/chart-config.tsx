@@ -65,6 +65,31 @@ export const CHART_INTERPOLATION = "linear";
  */
 export const BUCKET_TICK_INTERVAL = "equidistantPreserveStart";
 
+/**
+ * **R-V8, in colour — a forecast series is drawn at 40% of its own palette colour** (ticket 64).
+ *
+ * `/demo/projection`'s daily chart stacks the month's remainder on the days already spent, and
+ * the two must not read as one measurement: an attributed bar is the bill and a projected one is
+ * an extrapolation, and stacking them in the same solid fill would claim the whole column was
+ * observed. A lighter fill of the *same* mark says "this part is the forecast" without the chart
+ * having to be read against its legend to know it.
+ *
+ * **No new palette variable** (R-V7): the series already took a colour by walking the palette,
+ * and this alpha is applied to whatever that was. `color-mix` with a percentage rather than a
+ * `fillOpacity` for the reason `chart-shapes.tsx`'s `softFill` gives — `0.4` in an SVG attribute
+ * is a bare decimal in the RSC payload `e2e/payload.spec.ts` searches for money in, and `40%`
+ * cannot collide with a cost figure.
+ *
+ * It lives here, beside the `ChartConfig`, so the mark and the legend swatch cannot be painted
+ * differently: both read this one expression.
+ */
+export const estimatedFill = (color: string): string =>
+  `color-mix(in oklab, ${color} 40%, transparent)`;
+
+/** R-V8 — whether this series is the chart's forecast. The fact is the ViewModel's (ticket 64). */
+export const isEstimated = (chart: ChartViewModel, series: SeriesViewModel): boolean =>
+  chart.estimated !== null && chart.estimated === series.key;
+
 /** The swatch's accessible name. `testing-spec.md` T-C3 names `/legend icon/` as its handle. */
 export const legendIconLabel = (label: string): string => `${label} legend icon`;
 
@@ -82,7 +107,8 @@ export const holdsSentence = (holds: readonly string[]): string =>
  * The geometry is integer-only on purpose: `e2e/payload.spec.ts` scans the response payload for
  * ungranted cost literals, and a decimal in an SVG attribute is a decimal in that payload.
  */
-const swatchFor = (series: SeriesViewModel) => {
+const swatchFor = (series: SeriesViewModel, estimated: boolean) => {
+  const solid = `var(${series.colorVar})`;
   const Swatch = () => (
     <svg
       viewBox="0 0 10 10"
@@ -94,7 +120,7 @@ const swatchFor = (series: SeriesViewModel) => {
         width="10"
         height="10"
         rx="3"
-        fill={`var(${series.colorVar})`}
+        fill={estimated ? estimatedFill(solid) : solid}
         stroke="var(--border)"
       />
     </svg>
@@ -130,7 +156,7 @@ export function chartConfigOf(chart: ChartViewModel): ChartConfig {
       {
         label: labelFor(series, chart.other),
         color: `var(${series.colorVar})`,
-        icon: swatchFor(series),
+        icon: swatchFor(series, isEstimated(chart, series)),
       },
     ]),
   );

@@ -47,6 +47,8 @@ export type ChartSpec = {
   /** R-V4 — what the "Other" bucket holds. Present only where the cap engaged. */
   readonly holds?: readonly string[];
   readonly stackable?: boolean;
+  /** R-V8 — the key of the forecast series, where the chart draws one (ticket 64). */
+  readonly estimated?: string;
   /** R-V12 — the domain fact a ranked chart carries. `series` unless a spec says otherwise. */
   readonly form?: ChartViewModel["form"];
   readonly overlapNote?: string | null;
@@ -142,6 +144,18 @@ const paintedSeries = (
     points: buckets.map((bucket, index) => ({ bucket: bucket.key, value: valueAt(held, index) })),
   }));
 
+/**
+ * The facts a spec states about the chart *as a whole* rather than about its series, defaulted
+ * in one place. Grouped out of `chartFixture` so that adding one — ticket 64 added `estimated` —
+ * does not push the assembly past its complexity budget.
+ */
+const annotationsOf = (spec: ChartSpec) => ({
+  other: spec.holds ? { holds: spec.holds } : null,
+  overlapNote: spec.overlapNote ?? null,
+  stackable: spec.stackable ?? false,
+  estimated: spec.estimated ?? null,
+});
+
 /** A ChartViewModel exactly as `src/domain/viewmodel.ts` would have assembled one. */
 export function chartFixture(spec: ChartSpec = {}): ChartViewModel {
   const bucketLabels = spec.buckets ?? DEFAULT_BUCKETS;
@@ -160,9 +174,7 @@ export function chartFixture(spec: ChartSpec = {}): ChartViewModel {
     form,
     buckets,
     series,
-    other: spec.holds ? { holds: spec.holds } : null,
-    overlapNote: spec.overlapNote ?? null,
-    stackable: spec.stackable ?? false,
+    ...annotationsOf(spec),
     empty: specs.length === 0,
     // R-V12 — the domain layer transposes a ranked chart's table, so a fixture of one must too.
     mirror: mirrorFor(spec, specs, buckets, form),

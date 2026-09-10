@@ -68,7 +68,12 @@ import {
 } from "recharts";
 import { ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { ChartViewModel, SeriesViewModel } from "@/domain/viewmodel";
-import { BUCKET_TICK_INTERVAL, CHART_INTERPOLATION } from "./chart-config";
+import {
+  BUCKET_TICK_INTERVAL,
+  CHART_INTERPOLATION,
+  estimatedFill,
+  isEstimated,
+} from "./chart-config";
 import { SeriesLegend } from "./series-legend";
 
 /** The five shapes the panels in `spec.md` § 3 need. There is no sixth, and no pie (R-V2). */
@@ -137,6 +142,14 @@ const colorOf = (series: SeriesViewModel): string => `var(--color-${series.key})
  */
 const softFill = (series: SeriesViewModel): string =>
   `color-mix(in oklab, ${colorOf(series)} 24%, transparent)`;
+
+/**
+ * **R-V8 — a forecast mark is drawn lighter than a measured one** (ticket 64). The alpha and the
+ * rule both come from `chart-config.tsx`, so the mark and its legend swatch cannot disagree, and
+ * *which* series is a forecast is the ViewModel's fact rather than this module's guess.
+ */
+const fillOf = (chart: ChartViewModel, series: SeriesViewModel): string =>
+  isEstimated(chart, series) ? estimatedFill(colorOf(series)) : colorOf(series);
 
 const AXIS = { tickLine: false, axisLine: false, tickMargin: 8 } as const;
 
@@ -331,7 +344,7 @@ const areasFor = (
       stackId={stackId}
       stroke={colorOf(series)}
       strokeWidth={2}
-      fill={stackId === undefined ? softFill(series) : colorOf(series)}
+      fill={stackId === undefined ? softFill(series) : fillOf(chart, series)}
       connectNulls={false}
       isAnimationActive={false}
     />
@@ -363,7 +376,7 @@ const barsFor = (input: ShapeInput, stackId: string | undefined): readonly React
       dataKey={series.key}
       name={series.label}
       stackId={stackId}
-      fill={colorOf(series)}
+      fill={fillOf(input.chart, series)}
       radius={2}
       isAnimationActive={false}
     >

@@ -278,6 +278,26 @@ export function civilDaysBetween(from: string, to: string): number | undefined {
 }
 
 /**
+ * **Every civil day of an inclusive range, in order** — `2026-09-01`..`2026-09-30` is the
+ * month's thirty days. `undefined` where the range is not one.
+ *
+ * Exported for the same reason `civilDayIn` is: `metrics/projection.ts` forecasts *per civil
+ * day* of a period, and this module owns civil-date arithmetic. Enumerating the days there
+ * would be a second implementation of "what is the day after the 30th", and the two would
+ * disagree at a month end before anyone noticed.
+ *
+ * It is not `bucketRows` at day grain: that one needs a `PeriodPlan`, carries rows, and is
+ * bounded by R-M11's two-month limit. This is the calendar alone.
+ */
+export function civilDaysOf(range: PeriodRange): readonly string[] | undefined {
+  const bounds = boundsOf(range);
+  if (!bounds) return undefined;
+  const days: string[] = [];
+  for (let day = bounds.firstDay; day <= bounds.lastDay; day += 1) days.push(civilDateOf(day));
+  return days;
+}
+
+/**
  * **The first civil day of the month before `date`'s month** — `2026-05-20` → `2026-04-01`.
  * `undefined` where `date` is not a `YYYY-MM-DD` civil date.
  *

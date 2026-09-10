@@ -11,7 +11,11 @@
 import { describe, expect, it } from "vitest";
 import {
   PROJECTION_METHOD,
+  projectDaily,
   projectPeriodSpend,
+  type DailyProjection,
+  type DailyProjectionInput,
+  type DailySpend,
   type Projection,
   type ProjectionInput,
 } from "./projection";
@@ -195,6 +199,144 @@ describe("what has no projection at all", () => {
       actual: 100,
       now: AT_10_PERCENT,
       timezone: "Mars/Olympus_Mons",
+    });
+
+    expect(result).toMatchObject({ ok: false, reason: "invalid-now" });
+  });
+});
+
+// T-U21 — the same method, one civil day at a time (ticket 64, R-N23).
+//
+// **The identity is the whole test.** Two stacked series that do not add up to the headline
+// they sit under are worse than no chart at all: a reader checking the bars against the tile
+// finds two figures and no way to tell which one the page means. So every case below asserts
+// `Σ actual + Σ projected` against `projectPeriodSpend`'s own figure, at the two ends of the
+// month and in the middle of it — and asserts the *shape* beside it, because a series that
+// summed correctly by putting the whole month on one bar would pass an identity alone.
+//
+// **R-N24 rides along unchanged**: there is no band here either, and no field to carry one.
+
+const spendOn = (from: number, to: number, each: number): readonly DailySpend[] =>
+  Array.from({ length: to - from + 1 }, (_unused, at) => ({
+    day: `2026-09-${String(from + at).padStart(2, "0")}`,
+    actual: each,
+  }));
+
+const daily = (
+  input: Partial<DailyProjectionInput> & { readonly now: string },
+): DailyProjection => {
+  const result = projectDaily({
+    period: SEPTEMBER,
+    spend: spendOn(1, 8, 100),
+    timezone: TIMEZONE,
+    ...input,
+  });
+  if (!result.ok) throw new Error(`expected a daily projection, got ${result.reason}`);
+  return result.projection;
+};
+
+const totalOf = (projection: DailyProjection): number =>
+  projection.days.reduce((running, day) => running + day.actual + day.projected, 0);
+
+describe("T-U21 — the month's remainder, spread over the days it has left (ticket 64)", () => {
+  it("draws every civil day of the period, in order, including the ones still to come", () => {
+    const projection = daily({ now: AT_10_PERCENT });
+
+    expect(projection.days).toHaveLength(30);
+    expect(projection.days[0].day).toBe("2026-09-01");
+    expect(projection.days[29].day).toBe("2026-09-30");
+    expect(projection.key).toBe("2026-09");
+  });
+
+  it("sums to the projected session cost on the first day of the month", () => {
+    // One day elapsed of thirty: the rate is that day's spend, and the month is 30 of them.
+    const projection = daily({ now: "2026-09-01T09:00:00+02:00", spend: spendOn(1, 1, 100) });
+
+    expect(projection.projected).toBeCloseTo(3_000, 6);
+    expect(totalOf(projection)).toBeCloseTo(3_000, 2);
+    // Today is spent up to its own rate, so it is owed nothing more.
+    expect(projection.days[0]).toEqual({ day: "2026-09-01", actual: 100, projected: 0 });
+    expect(projection.days[1]).toEqual({ day: "2026-09-02", actual: 0, projected: 100 });
+  });
+
+  it("sums to the projected session cost mid-month, with today only part spent", () => {
+    // 800 over eight days, of which today holds 50: the rate is 100, so today is owed 50.
+    const spend = [...spendOn(1, 7, 107.142_857_142_857_14), { day: "2026-09-08", actual: 50 }];
+    const projection = daily({ now: "2026-09-08T09:00:00+02:00", spend });
+
+    expect(projection.projected).toBeCloseTo(3_000, 6);
+    expect(totalOf(projection)).toBeCloseTo(projection.projected, 2);
+    expect(projection.days[7].actual).toBe(50);
+    expect(projection.days[7].projected).toBeCloseTo(50, 6);
+  });
+
+  it("projects nothing on any day already spent, and attributes nothing to any day to come", () => {
+    const projection = daily({ now: "2026-09-08T09:00:00+02:00" });
+    const before = projection.days.slice(0, 7);
+    const after = projection.days.slice(8);
+
+    expect(before.map((day) => day.projected)).toEqual(Array.from({ length: 7 }, () => 0));
+    expect(before.every((day) => day.actual > 0)).toBe(true);
+    expect(after.map((day) => day.actual)).toEqual(Array.from({ length: 22 }, () => 0));
+    expect(after.every((day) => day.projected > 0)).toBe(true);
+  });
+
+  it("projects nothing at all on the last day of the month — a closed month is measured", () => {
+    const projection = daily({ now: "2026-09-30T23:00:00+02:00" });
+
+    expect(projection.projected).toBeCloseTo(800, 6);
+    expect(totalOf(projection)).toBeCloseTo(800, 2);
+    expect(projection.days.every((day) => day.projected === 0)).toBe(true);
+  });
+
+  it("carries a measured zero as a zero bar, never as a missing day (R-M18)", () => {
+    // The 4th held no session. An additive measure's empty bucket is a real zero.
+    const spend = [...spendOn(1, 3, 100), ...spendOn(5, 8, 100)];
+    const projection = daily({ now: "2026-09-08T09:00:00+02:00", spend });
+
+    expect(projection.days[3]).toEqual({ day: "2026-09-04", actual: 0, projected: 0 });
+    expect(totalOf(projection)).toBeCloseTo(projection.projected, 2);
+  });
+
+  it("produces no band, interval or bound of any name here either (R-N24)", () => {
+    const projection = daily({ now: AT_10_PERCENT });
+    const forbidden = /band|confidence|interval|lower|upper|margin|stderr/i;
+    const keys = [...Object.keys(projection), ...Object.keys(projection.days[0])];
+
+    expect(keys.filter((key) => forbidden.test(key))).toEqual([]);
+    expect(Object.keys(projection).sort()).toEqual(["days", "key", "projected"]);
+  });
+});
+
+describe("a daily projection with no basis", () => {
+  it("rejects a month that has not begun — there is no rate to carry forward", () => {
+    const result = projectDaily({
+      period: SEPTEMBER,
+      spend: [],
+      now: "2026-08-20T09:00:00+02:00",
+      timezone: TIMEZONE,
+    });
+
+    expect(result).toMatchObject({ ok: false, reason: "not-started" });
+  });
+
+  it("rejects a period whose edges are not civil dates, as the period projection does", () => {
+    const result = projectDaily({
+      period: { key: "2026-09", startsOn: "September", endsOn: "2026-09-30" },
+      spend: [],
+      now: AT_10_PERCENT,
+      timezone: TIMEZONE,
+    });
+
+    expect(result).toMatchObject({ ok: false, reason: "invalid-period" });
+  });
+
+  it("rejects a `now` that is not an instant", () => {
+    const result = projectDaily({
+      period: SEPTEMBER,
+      spend: spendOn(1, 8, 100),
+      now: "yesterday",
+      timezone: TIMEZONE,
     });
 
     expect(result).toMatchObject({ ok: false, reason: "invalid-now" });

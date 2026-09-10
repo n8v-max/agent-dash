@@ -159,6 +159,7 @@ describe("R-V1 — `stackable` follows the partition, not the panel", () => {
       "machine_spec",
       "presence_span",
       "cost_component",
+      "projection_component",
     ];
     for (const grouping of stacking) {
       expect(stackable({ grouping, measure: "additive" })).toBe(true);
@@ -193,6 +194,29 @@ describe("R-V1 — `stackable` follows the partition, not the panel", () => {
     for (const grouping of GROUPINGS) {
       expect(typeof STACKABLE_GROUPINGS[grouping]).toBe("boolean");
     }
+  });
+});
+
+// R-V8 at series grain (ticket 64) — a chart may name **one** of its series a forecast, and the
+// fact travels on the ViewModel for the reason `stackable` does: whether a figure was measured
+// or extrapolated is a property of how it was computed, never a fill a panel picked.
+describe("R-V8 — the forecast series is named on the ViewModel", () => {
+  it("carries no forecast unless the query named one", () => {
+    expect(chart({ buckets: buckets("2026-04"), cells: [] }).estimated).toBeNull();
+  });
+
+  it("carries the group key the query named, unchanged", () => {
+    const view = chart({
+      grouping: "projection_component",
+      buckets: buckets("2026-04"),
+      cells: [cell("2026-04", "actual", 3), cell("2026-04", "projected", 9)],
+      estimated: "projected",
+    });
+
+    expect(view.estimated).toBe("projected");
+    // And it names a series the chart actually draws, or it names nothing a renderer can find.
+    expect(view.series.map((series) => series.key)).toContain(view.estimated);
+    expect(view.stackable).toBe(true);
   });
 });
 
