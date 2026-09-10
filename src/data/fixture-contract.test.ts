@@ -293,16 +293,25 @@ describe("T-U27 — `load()` is the only entry into the data", () => {
     expect(above.filter((path) => opensFiles(path) || importsJson(path)).map(relative)).toEqual([]);
   });
 
-  it("leaves `load.ts` the only producer of a `Dataset`", () => {
-    // A `Dataset` is only ever produced by `load.ts`. Anything else assembling one would be a
-    // population that skipped the validator while typechecking perfectly.
+  it("leaves `load.ts` the only module that builds a `Dataset` out of a file", () => {
+    // A `Dataset` enters the application through `load.ts` and nowhere else. Anything else
+    // *assembling* one would be a population that skipped the validator while typechecking
+    // perfectly.
+    //
+    // `as-of.ts` returns one too, and it is the single exception rather than a hole (ticket 62):
+    // it takes the validated dataset from `loadDataset()` and removes rows from it, so every row
+    // it hands on already came through the schema. The two claims that make that safe are
+    // asserted directly below — it opens no file, and it derives from the loader.
     const returnsDataset = /:\s*Dataset\s*=>|\)\s*:\s*Dataset\s*\{/;
     expect(returnsDataset.test(codeOf(loader))).toBe(true); // the control: it finds the two in load.ts
+    const slice = join(SOURCE_ROOT, "data", "as-of.ts");
     const producers = sourceFiles(SOURCE_ROOT)
       .filter((path) => path !== loader)
       .filter((path) => returnsDataset.test(codeOf(path)))
       .map(relative);
-    expect(producers).toEqual([]);
+    expect(producers).toEqual([relative(slice)]);
+    expect(opensFiles(slice) || importsJson(slice)).toBe(false);
+    expect(/\bloadDataset\b/.test(codeOf(slice))).toBe(true);
   });
 });
 

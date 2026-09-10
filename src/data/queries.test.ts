@@ -20,7 +20,7 @@ import { describe, expect, it } from "vitest";
 import { roleFor,
   sealViewer, membershipFromTeams, type Viewer } from "@/domain/access";
 import type { ChartViewModel } from "@/domain/viewmodel";
-import { loadDataset } from "./load";
+import { datasetAsOf } from "./as-of";
 import { controlsWith, defaultControls, type ControlSet, type PageKey } from "./params";
 import {
   historyPage,
@@ -31,11 +31,16 @@ import {
   workPage,
 } from "./queries";
 
-const data = loadDataset();
-const membership = membershipFromTeams(data.teams);
-
 /** P5 — the instant every query is run against. The committed window ends 2026-09-08. */
 const NOW = "2026-09-08T12:00:00+02:00";
+/**
+ * The population the façade itself reads: the committed fixture **cut at `now`** (ticket 62).
+ * Reading `loadDataset()` here instead would let a session the product has not observed yet into
+ * the test's own expectations, and the assertions below would then disagree with the product for
+ * the one reason this suite must never disagree with it.
+ */
+const data = datasetAsOf(NOW);
+const membership = membershipFromTeams(data.teams);
 const RANGE = { start: data.organization.window_start, end: data.organization.window_end };
 /** The two months ticket 39's rule is read at either end of: one unfinished, one whole. */
 const SEPTEMBER = { start: "2026-09-01", end: data.organization.window_end };
@@ -988,5 +993,46 @@ describe("R-N9.1 — Cost by Repository reads months whatever the page grain is"
     expect(per.costByRepository.chart.series[0]?.points[0]?.value).toBeLessThan(
       raw.costByRepository.chart.series[0]?.points[0]?.value ?? 0,
     );
+  });
+});
+
+describe("R-N23 — the projection is read off the rows its own chart draws (ticket 62)", () => {
+  const page = OPEN_PAGES.projection;
+  /** The measured series. `estimated` names the forecast (R-V8); the other one is the actual. */
+  const actual = page.chart.series.find((series) => series.key !== page.chart.estimated);
+  const sumOf = (series: typeof actual): number =>
+    (series?.points ?? []).reduce((running, point) => running + (point.value ?? 0), 0);
+
+  it("draws bars at all, over a month the fixture holds — the control", () => {
+    expect(actual).toBeDefined();
+    expect(page.chart.buckets.length).toBeGreaterThan(0);
+    expect(page.components.sessionToDate).toBeGreaterThan(0);
+  });
+
+  it("sums its actual bars to `sessionToDate`, exactly", () => {
+    // The tile's figure and the chart beside it are two readings of one population. Before the
+    // slice they could differ by a session that started inside the month and had not finished:
+    // `totalSpend` read it and the daily bars, bucketed by civil day, drew it — or did not.
+    // Now both read `datasetAsOf(now)`, so this is an identity and not a tolerance.
+    expect(sumOf(actual)).toBeCloseTo(page.components.sessionToDate, 8);
+  });
+
+  it("carries the forecast as a second series, outside the first", () => {
+    // `projectedSession` is what the method adds on top of what has been spent, so the two
+    // series are disjoint by construction — and their sum is the projected session cost.
+    const forecast = page.chart.series.find((series) => series.key === page.chart.estimated);
+
+    expect(page.chart.estimated).not.toBeNull();
+    expect(sumOf(actual) + sumOf(forecast)).toBeCloseTo(page.components.projectedSession ?? 0, 6);
+  });
+
+  it("names no day the product has not reached, in the actual series", () => {
+    // Every bar the *measured* series carries a figure on falls on or before `now`'s civil day.
+    // The days after it are drawn — a forecast month is a whole month — and hold zero actual.
+    const today = NOW.slice(0, 10);
+    const spent = (actual?.points ?? []).filter((point) => (point.value ?? 0) > 0);
+
+    expect(spent.length).toBeGreaterThan(0);
+    expect(spent.filter((point) => point.bucket > today)).toEqual([]);
   });
 });

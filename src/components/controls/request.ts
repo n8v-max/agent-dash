@@ -14,6 +14,12 @@
 // reproducible. The as-of stamp (R-N3.1) rides with them: it is the third of `clock.ts`'s answers
 // to "when", it is a property of the dataset rather than of this request's controls, and it is
 // resolved once here so six surfaces cannot print six different freshness claims.
+//
+// **One clock read, and everything else derived from it** (ticket 62). `requestNow()` is called
+// once; the window is that instant's cut of the declared window, the controls are parsed against
+// that window, the toolbar's options are read off that instant's slice of the data, and the as-of
+// stamp names the last session inside it. Reading the clock twice on one request is how a page
+// comes to hold a window that ends before the row at the top of its own table.
 
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
@@ -33,7 +39,11 @@ export type PageRequest = {
   /** The parsed, validated, coerced control set — the only thing a query is ever handed. */
   readonly controls: ControlSet;
   readonly options: ControlOptions;
-  /** The Organization's observation window, so a control can tell "default" from "chosen". */
+  /**
+   * The observation window this request reads: the Organization's declared window, cut at `now`
+   * (R-D2, ticket 62). A control tells "default" from "chosen" against it, and no control it
+   * bounds can name a day the product has no data for yet.
+   */
   readonly window: PeriodRange;
   /**
    * R-N3.1 — how fresh the rows behind this page are. `null` only for an Organization holding no
@@ -61,14 +71,15 @@ export async function pageRequest(
   // R-A7 — 404 and never 403, for an unknown slug and for another Organization's token alike.
   if (resolution.outcome === "not-found") notFound();
 
-  const bounds = observationWindow();
-  const controls = parseControls({ page, orgSlug, window: bounds, now: requestNow(), query });
+  const now = requestNow();
+  const bounds = observationWindow(now);
+  const controls = parseControls({ page, orgSlug, window: bounds, now, query });
   return {
     viewer: resolution.viewer,
     account: resolution.account,
     controls,
     options: controlOptions(resolution.viewer, controls),
     window: bounds,
-    asOf: dataAsOf(),
+    asOf: dataAsOf(now),
   };
 }

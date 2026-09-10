@@ -1,7 +1,8 @@
 // The application's three answers to "when": the wall clock, the Organization's observation
-// window, and the instant the data runs out. The first two are *inputs* to a query, and P5 makes
-// an input an argument — `src/domain/**` may not read a clock at all, and `queries.ts` takes
-// `now` on the `ControlSet`. The third is a reading of the loaded fixture and takes nothing.
+// window, and the instant the data runs out. All three are *inputs* to a query, and P5 makes an
+// input an argument — `src/domain/**` may not read a clock at all, and `queries.ts` takes `now` on
+// the `ControlSet`. This module is where the one clock read happens and where the other two are
+// derived from it.
 //
 // **`now` is the wall clock, clamped to the end of the observation window.** The committed
 // fixture carries a 150-day window ending `2026-09-08`; an unclamped clock would, the day after
@@ -14,18 +15,60 @@
 // reports the last instant it has data for. Nothing downstream can tell the difference, because
 // everything downstream takes `now` as an argument.
 //
+// **And `now` cuts the data, not just the calendar** (ticket 62). From ticket 66 the fixture runs
+// past today, so the window the product *reads* is the declared window cut at `now` (R-D2) and the
+// rows it reads are `datasetAsOf(now)`. Both are here, in one module, because a window whose end
+// and a dataset whose edge came from two different clocks is exactly the disagreement the as-of
+// stamp exists to make visible.
+//
 // Not in `params.ts`: that module is pure and is imported by `src/domain`-adjacent tests that
 // pin `now` themselves. This one is impure by definition.
 
 import { latestObservation } from "@/domain/observation";
-import type { PeriodRange } from "@/domain/periods";
+import { civilDayIn, type PeriodRange } from "@/domain/periods";
+import { datasetAsOf } from "./as-of";
 import { instantIn } from "./instant";
 import { loadDataset } from "./load";
 
-/** The Organization's declared observation window — the default period of every page (R-C4). */
-export const observationWindow = (): PeriodRange => {
+/**
+ * **The window the product reads: the Organization's declared window, cut at `now`** (R-D2,
+ * ticket 62). The default period of every page (R-C4), the bound every `?from=`/`?to=` range is
+ * clipped into, and the list `periodOptions` builds its months from — so cutting it here is what
+ * stops the period menu offering a month that has not happened and the History date inputs
+ * accepting a `max` in the future. One cut, read by all four.
+ *
+ * The end is the **civil day** `now` falls on in the Organization's timezone, because the window
+ * is stated in civil dates and R-M10 puts every boundary in that zone: a UTC day would move the
+ * cut by two hours in Europe/Madrid and drop a whole day's sessions on the far side of midnight.
+ *
+ * A `now` before the window even opens would invert the range, so the end never falls below the
+ * start. That is only reachable through the `AGENT_DASH_NOW` override, and an inverted range is a
+ * shape no caller below is built to read.
+ */
+export const observationWindow = (now: string): PeriodRange => {
   const { organization } = loadDataset();
-  return { start: organization.window_start, end: organization.window_end };
+  const today = civilDayIn(organization.timezone, now);
+  const cut = today !== undefined && today < organization.window_end ? today : organization.window_end;
+  return {
+    start: organization.window_start,
+    end: cut < organization.window_start ? organization.window_start : cut,
+  };
+};
+
+/**
+ * **A pinned `now`, for a test that needs the product to be the same product tomorrow.**
+ *
+ * Server-side only and never `NEXT_PUBLIC_`: it decides which rows exist, so a browser that could
+ * set it could ask for rows the server means to withhold. `playwright.config.ts` sets it on the
+ * `webServer` it spawns, and it is set in **no** committed production config — on Vercel the
+ * variable is absent and the wall clock stands.
+ *
+ * A value that is not an instant is ignored rather than fatal: a mistyped debugging aid should
+ * leave the product working, and the clamp below still bounds whatever survives.
+ */
+const wallClock = (): number => {
+  const pinned = Date.parse(process.env.AGENT_DASH_NOW ?? "");
+  return Number.isNaN(pinned) ? Date.now() : pinned;
 };
 
 /**
@@ -36,12 +79,15 @@ export const observationWindow = (): PeriodRange => {
  * same civil day in every zone the fixture could plausibly declare. An end-of-day ceiling in UTC
  * lands on the *following* local day in Europe/Madrid, which would silently move the projection
  * period's elapsed share.
+ *
+ * The ceiling applies to the override too. `AGENT_DASH_NOW` substitutes for the wall clock; it is
+ * not a way past the clamp, because a pinned instant outside the window would reintroduce exactly
+ * the zero-data state the clamp exists to prevent.
  */
 export const requestNow = (): string => {
   const { organization } = loadDataset();
-  const wall = Date.now();
   const ceiling = Date.parse(`${organization.window_end}T12:00:00Z`);
-  return new Date(Math.min(wall, ceiling)).toISOString();
+  return new Date(Math.min(wallClock(), ceiling)).toISOString();
 };
 
 /**
@@ -54,6 +100,13 @@ export const requestNow = (): string => {
  * for character, the top row of `/demo/history` under its default newest-first sort, which is the
  * page a reader checks it against. Printing the end instant would name a moment past the
  * observation window every other control on the page is bounded by (R-D2).
+ *
+ * **It is read off `datasetAsOf(now)`, not off the whole fixture** (ticket 62). The stamp says
+ * how fresh the rows behind the page are, so it has to be read off the rows behind the page: over
+ * the unsliced dataset it would name a session that, as of `now`, has not finished — or, once the
+ * fixture runs past today, one that has not started. That is the one claim on the toolbar a
+ * reader is invited to check against `/demo/history`, and the check is only meaningful if both
+ * sides read the same slice.
  *
  * `sessionId` and `endedAt` ride along because they are what ticket 55's ingest sketch needs — a
  * watermark is an end-of-observation and a row to resume from — and recomputing either from the
@@ -76,8 +129,8 @@ export type DataAsOf = {
   readonly label: string;
 };
 
-export const dataAsOf = (): DataAsOf | null => {
-  const { organization, sessions } = loadDataset();
+export const dataAsOf = (now: string): DataAsOf | null => {
+  const { organization, sessions } = datasetAsOf(now);
   const observation = latestObservation(sessions);
   if (!observation) return null;
 

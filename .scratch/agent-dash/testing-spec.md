@@ -444,6 +444,32 @@ a sixth series. The thresholds sit well under the rates measured when the genera
   the five-series case is a stated expectation and not an `else`. Both readings of an absent
   bucket — `0` and `null` — are generated.
 
+### 3.6 The slice (`src/data/as-of.test.ts`, ticket 62)
+
+- **T-U35 — one slice, applied once** (R-D2, R-C4, R-N3.1, A42). Two halves, and the second is
+  the one worth the file.
+
+  The rule, over the committed rows (P6) and at instants read off those rows rather than
+  invented: `datasetAsOf(now)` drops a root whose `ended_at` is after `now` **together with its
+  children**, keeps a root ending **exactly** at `now` (a session is observable at its end), hands
+  back the loaded dataset *by identity* where the cut removes nothing, memoises per `now`, and
+  faults on a `now` that is not an instant rather than guessing which rows exist. The fan-out
+  invariant `sessions.fixture.test.ts` asserts of the committed tree — a child ends before its
+  root — is re-read through the slice, which is where it does its work.
+
+  **The absence, in the shape T-C19 asserts its own.** Nothing under `src/data/queries/` and
+  nothing under `src/app/` or `src/components/` names `loadDataset`; the five modules that do are
+  an allow-list, so a sixth is a decision somebody records here; `datasetAsOf` is called in
+  exactly two places, both once-per-page; and no module outside `as-of.ts` compares `ended_at`
+  against anything. A behavioural test alone would pass against a product where one page query
+  had quietly gone back to the whole dataset, because that query's rows are not the ones under
+  test — and that query is precisely the per-query filter somebody forgot.
+
+  `clock.test.ts` carries the rest of the clock's half: the window is the declared window cut at
+  `now`'s civil day **in the Organization's timezone**, it never inverts, `AGENT_DASH_NOW`
+  substitutes for the wall clock and is clamped by the same ceiling, and the as-of stamp moves
+  back with `now` because it is read off the slice.
+
 ---
 
 ## 4. Component tests — RTL + jsdom
@@ -877,6 +903,29 @@ inside the desktop project, which keeps each width beside the requirement it bel
   48). The one surface where the session tree is visible as rows; everywhere else the fan-out is
   already inside the figures (R-M19). The row is reached through the expander's own label — which
   names its fan-out — rather than through a session id, so the test survives a regenerated fixture.
+- **T-E19 — no surface names an instant later than `now`** (A42, R-D2, R-N3.1, ticket 62). The
+  layers below each prove a piece — the slice drops an unfinished session, the window ends on
+  `now`'s civil day, the projection reads the rows its own chart draws — and none of them proves
+  that the *served document* carries no instant from the future. A page composes eleven query
+  results and a toolbar, and a row from the future is exactly the kind of thing that survives
+  every unit test and appears on the page.
+
+  So: over all six routes, every instant the document prints — matched as the one shape the
+  product's single instant formatter writes, `YYYY-MM-DD HH:MM` — is at or before `now`, with the
+  as-of stamp guaranteeing each route prints at least one. On `/demo/history` the Started cells
+  are checked directly and T-E15's identity is re-asserted under the pin, because the stamp is the
+  last session to *end* and the top row the last to *start*: cutting the rows moves both, and they
+  have to move together. The period menu offers no month past `now`'s, and the date inputs' `max`
+  is its civil day.
+
+  **The pin is what makes the claim checkable.** `playwright.config.ts` sets `AGENT_DASH_NOW` on
+  the server it spawns (`e2e/support/now.ts`), so "later than `now`" is a comparison against a
+  literal the suite knows rather than against whenever it happened to run — and every other
+  figure the suite asserts becomes a property of the product instead of a property of today. The
+  variable is server-side, is set in no committed production config, and is absent on Vercel.
+  `e2e/support/fixture.ts` restates the same cut for T-E4's search set, beside R-M2 and R-M19,
+  for the reason that file's header gives: what a test *allows* must describe the population the
+  page renders.
 
 ---
 
@@ -1001,6 +1050,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A39 The as-of stamp on every surface, matching the History top row | T-U23, T-C21, T-E15 |
 | A40 | Every route fits a 390px phone; nothing is hidden to make it fit | T-E17, T-C22 |
 | A41 | A child session rolls up into its root, is no attempt of its own, and is a row on `/demo/history` alone | T-U24, T-U25, T-U32, T-U33, T-C23, T-E18, T-F10 |
+| A42 | The product reads the data cut at `now`, sliced once, with no per-query filter | T-U35, T-U23, T-E19, T-E15 |
 
 ---
 

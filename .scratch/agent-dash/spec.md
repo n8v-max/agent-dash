@@ -213,6 +213,13 @@ It is **not viewer-scoped**: it carries no cost, no name and no count, in the sa
 observation window does, and both accounts already meet that window in `/demo/history`'s date
 bounds. R-A6 governs figures reaching a payload; this is the calendar the figures were taken over.
 
+**It is read off the rows the page reads — the dataset as of `now`** (amended 2026-09-10, ticket
+62). The stamp answers "how fresh are the rows behind this page", so it has to be read off those
+rows and not off the file behind them: over the uncut fixture it named a session that, as of
+`now`, had not finished — and, once the fixture runs past today, would name one that had not
+begun. It is the one claim on the toolbar a reader is invited to check against `/demo/history`,
+and the check means nothing unless both sides read the same slice.
+
 The header holds *who you are*; the toolbar holds *what is in the URL*. Keeping them visibly
 separate keeps the two kinds of state distinct. No sidebar: six nav items do not fill one, and the
 seven-column people table and the acceptance small multiples both want the horizontal space.
@@ -684,7 +691,11 @@ unless a viewer can filter on both.
 filters, roll-up level, subject and sort all serialise. A roll-up level changes a chart more than
 most filters do, so omitting it would break the share.
 
-**R-C4 — Omitted parameters take the page default**, so a bare route is valid and shareable.
+**R-C4 — Omitted parameters take the page default**, so a bare route is valid and shareable. The
+default period is the observation window **as R-D2 cuts it at `now`** — the whole cut window on a
+page that offers it, and otherwise the newest month that window touches, which is the month `now`
+falls in (amended 2026-09-10, ticket 62). A page never opens on, and its period control never
+offers, a month the product has no data for yet.
 
 **R-C5 — Control state does not persist across pages.** Carrying it would make `/demo/work` show a
 period the viewer set on `/demo/spend` and never sees again.
@@ -949,6 +960,23 @@ are **flagged as partial** — not withheld, not pro-rated. April matters: seat 
 month against 19 days of sessions, so its Cost per completed Task is inflated by construction, and
 the flag is what stops that being read as a finding.
 
+**The window the product reads is the declared window cut at `now`** (amended 2026-09-10, ticket
+62). The declared window is a property of the fixture and may run past today; what any surface
+may show is the part of it that has happened. So the end of the window every page reads is the
+**earlier** of `window_end` and the civil day `now` falls on in the Organization's timezone
+(R-M10), and it is that cut window which is the default period (R-C4), the list `periodOptions`
+builds its months from, the bound a free `?from=`/`?to=` range is clipped into, and the `max` on
+`/demo/history`'s date inputs. The current month is therefore partial *because it is in
+progress*, which is R-E2's third cause and the same flag April carries for its first.
+
+**And the rows are cut with it.** A session is observable at its **end** (`CONTEXT.md` § Session
+measures), so a session still running at `now` has no cost, no tokens and no outcome the platform
+could have read: it is not yet a row. The product reads the dataset **as of `now`** — every root
+whose `ended_at` is after `now` removed, and its children with it — sliced **once**, at the data
+boundary, and never by a per-query filter. A root ending exactly at `now` has just been observed
+and stays. Until the fixture is extended past today the cut removes nothing on most reads, which
+is what makes it safe to have landed before the data needed it.
+
 **R-D3 — Scale.** 4 Teams · 20 Members (18 `human`, 2 `service_account`) · 5 Repositories · 5
 WorkTypes · 7 Models across 3 vendors · ~600 Tasks · ~750 **root** AgentSessions, plus the child
 sessions R-D21 fans out from them (~1,050 rows on disk in all). The session count the product
@@ -1115,6 +1143,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A39 | Every `/[org]` surface carries the as-of stamp in its toolbar, naming the same instant, and that instant is the top row of `/demo/history` | R-N3, R-N3.1 |
 | A40 | At 390×844, `document.documentElement.scrollWidth <= 390` on all six authenticated routes, with six nav links still visible, the account switcher reduced to its avatar, and every wide table scrolling inside its own card | R-V15 |
 | A41 | A Task worked by one root and its children is neither Rework nor Decomposition, the root's cost is its own plus its children's, and a child session is a row on `/demo/history` and on no other surface | R-M19, R-N20.2, R-D21 |
+| A42 | No surface renders a session that has not finished as of `now`: the slice is taken once at the data boundary, no module under `src/data/queries/` and no page reads the uncut dataset, the period menu offers no month past `now` and the History date bounds end on its civil day | R-D2, R-C4, R-N3.1 |
 
 ---
 

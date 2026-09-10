@@ -13,11 +13,14 @@
 // whole vocabulary, and the selected value is marked by the toolbar, never removed from the list.
 //
 // Nothing here reads a clock or a cookie: `viewer` and `params` arrive as arguments (P5, R-T16).
+// The Member list is read off `datasetAsOf(params.now)` for the same reason every page query is
+// (ticket 62): a filter offering a Member whose only session has not finished yet would be a
+// control that narrows the page to nothing.
 
 import { filterRows, membershipFromTeams, type Viewer } from "@/domain/access";
 import { availableGrains, type PeriodGrain } from "@/domain/periods";
 import type { TableColumn } from "@/domain/viewmodel";
-import { loadDataset } from "../load";
+import { datasetAsOf } from "../as-of";
 import type { ControlSet } from "../params";
 import { PEOPLE_COLUMNS } from "./people";
 
@@ -66,7 +69,7 @@ export const PEOPLE_SORT_COLUMNS: readonly ControlOption[] = sortable(PEOPLE_COL
  * list is a grant-dependent figure and there is no callable form of this without one.
  */
 export function controlOptions(viewer: Viewer, params: ControlSet): ControlOptions {
-  const data = loadDataset();
+  const data = datasetAsOf(params.now);
   // `jobs` is the class every surface that names a Member reads, and R-A3.1 puts the viewer's
   // own row in it for every Role — so this list is never empty, whatever the Role grants.
   const named = filterRows(
