@@ -39,7 +39,6 @@ const OPTIONS: ControlOptions = {
   teams: [{ value: "team_platform", label: "Platform" }],
   members: [{ value: "mem_0001", label: "Ada Lovelace" }],
   grains: ["week", "month"],
-  sortColumns: [{ value: "cost", label: "Cost" }],
 };
 
 const contextFor = (page: PageKey, query: ControlQuery = {}): ControlContext => ({

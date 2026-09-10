@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by:
-Label: ready-for-agent
+Label: resolved
 
 # People: month-only period, no Sort menu; Spend/Work: "Aggregation" and "Per"
 
@@ -58,3 +58,56 @@ are the readings taken of the human's words; if the human meant something else, 
   `?sort=`; Spend toolbar reads Aggregation / Per; URLs after each change are unchanged from
   today's literals.
 - All six gates green.
+
+## Comments
+
+**2026-09-10 — built, all six gates green.**
+
+| Gate | Result |
+|---|---|
+| `pnpm lint` | pass |
+| `pnpm typecheck` | pass |
+| `pnpm test` | pass — 1423 tests, 64 files (1421 before; +2 net after the Sort menu's own cases went) |
+| `pnpm test:coverage` | pass — statements 98.4%, branches 89.26%, functions 98.99%, lines 99.53% |
+| `pnpm build` | pass |
+| `PORT=3103 pnpm e2e` | pass — 162 tests (155 before), 1.6 min wall |
+
+**What each scope item became.**
+
+1. `OFFERS_WHOLE_WINDOW.people = false`. The default is unchanged machinery: the first offered
+   option is the newest month the window touches, and the clock is clamped to the window's last
+   day, so that month is the one `now` falls in. Both comment blocks say so.
+2. `TABLE_CONTROLS = ["sort"]` beside `PANEL_LOCAL_CONTROLS`, with `tableControls(page)` and a
+   `WidgetControl = Exclude<ControlKey, TableControl>` type. `RENDERERS` and `ControlWidget` are
+   keyed on `WidgetControl`, so there is no renderer for `sort` to reach rather than a convention
+   not to reach one. The partition test is three-way. `ControlOptions.sortColumns` is gone;
+   `PEOPLE_SORT_COLUMNS` stays, because the parser still validates `?sort=` against it.
+3. Team keeps its control; its off state reads "All teams" and the sentence reads "Platform team".
+4. Kind untouched.
+5. `Grain` → `Aggregation`, `Subject` → `Per` (options Member / Team / Organisation, in
+   `ROLLUP_LEVELS` order); sentence "Week aggregation · per Organisation · …".
+6. `spec.md` R-C1, R-C6, R-C7 and R-N15 amended; `testing-spec.md` T-C6 amended.
+
+**Escalations, cheaper option taken in each case.**
+
+- **"Organisation" against "Organization" elsewhere.** The ticket asks the Per menu to read
+  Organisation, on the ground that British spelling matches the product's copy. It does not
+  match everywhere: `CONTEXT.md`'s glossary term is **Organization**, and chart titles read
+  "grouped by Organization". Rewriting those is a wider change than this ticket, and three of the
+  files that spell them belong to tickets in flight. Taken: the ticket's spelling for the control
+  and for the active-filter sentence, the existing spelling everywhere else. **Cost:** two
+  spellings coexist on `/demo/spend` — the Per strip says Organisation and the chart title above
+  it says Organization. One line of copy in a later ticket closes it either way.
+- **"All teams" was not expressible.** `filterMenu` derived its off-state option from the
+  control's own label — `All ${label.toLowerCase()}` — so it read "All team", "All repository",
+  "All kind". Team could not read "All teams" without either a special case or an explicit label.
+  Taken: an explicit `all` per filter, which also fixes the five neighbours and makes the menu
+  agree with the phrase R-C7's sentence already printed for the same state ("all templates").
+  **Cost:** five labels changed that the ticket did not name.
+- **Naming.** The ticket calls the field `sortOptions`; it is `sortColumns` in the code. Deleted
+  under its real name.
+
+**URL parity.** No parameter, key or serialisation changed. `canonicalQuery` differs only in
+which *period* it omits on `/demo/people`, which is scope item 1 itself. Every literal URL in
+`panel-control.test.tsx`, `schema.test.ts` and `e2e/controls.spec.ts` is unchanged and green, and
+the relabelling test clicks Aggregation and Per and asserts `?grain=month` and `?subject=team`.

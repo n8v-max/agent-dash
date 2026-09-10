@@ -145,6 +145,108 @@ test.describe("A24 — no surface defaults to sort-by-cost (R-M15, R-N15)", () =
 });
 
 /**
+ * **Ticket 63 — what this page's controls are, and what they are not.**
+ *
+ * Three claims, and they are one decision seen from three sides:
+ *
+ *   * the **period is calendar months**, opening on the month `now` falls in. "All data" is a
+ *     career total on a page whose every row is a Member *over the period*: it grows without
+ *     bound and puts a Member who left in March beside one who arrived last week.
+ *   * the **Sort menu is gone and the ordering is the headings**. The menu listed every sortable
+ *     column twice, in a bar, beside a table whose headings already set the same parameter and
+ *     already show which column is ordering it (R-N15) — two widgets for one parameter, only one
+ *     of which could be read off the rows in front of the viewer. `?sort=` is unchanged.
+ *   * **Team is a filter**, and what it narrows is asserted rather than assumed: both the rows
+ *     and the population behind them, which is the distinction that matters on a page where a
+ *     Member with no session in the period is still a row (R-M14's denominator).
+ */
+test.describe("R-C1, R-C6 — People's controls are Period, Team and Kind (ticket 63)", () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await useSession(context, OPEN_CLAIMS, baseURL ?? BASE);
+  });
+
+  const bar = (page: Page) => page.getByTestId("page-toolbar");
+
+  test("the toolbar holds three groups, and no Sort menu", async ({ page }) => {
+    await page.goto(PEOPLE);
+
+    await expect(bar(page).locator('[data-testid^="control-"]')).toHaveCount(3);
+    for (const key of ["period", "team", "memberKind"]) {
+      await expect(bar(page).locator(`[data-testid="control-${key}"]`)).toHaveCount(1);
+    }
+    await expect(bar(page).locator('[data-testid="control-sort"]')).toHaveCount(0);
+    await expect(bar(page)).not.toContainText("high to low");
+    // The ordering did not go with the menu: it is on the heading, where it acts.
+    await expect(page.locator("th[aria-sort]")).toHaveCount(1);
+  });
+
+  test("the period offers months only, and opens on the month `now` falls in", async ({ page }) => {
+    await page.goto(PEOPLE);
+    const period = page.getByTestId("control-period");
+    await expect(period.locator("summary")).toHaveText(/^PeriodSeptember 2026/);
+
+    await period.locator("summary").click();
+    await expect(period.getByRole("link")).toHaveText([
+      "September 2026",
+      "August 2026",
+      "July 2026",
+      "June 2026",
+      "May 2026",
+      "April 2026",
+    ]);
+
+    await period.getByRole("link", { name: "August 2026" }).click();
+    await expect(page).toHaveURL(`${PEOPLE}?period=2026-08`);
+  });
+
+  test("a URL still carrying the whole window opens on the current month instead", async ({
+    page,
+  }) => {
+    // A shared link is a viewer's, not an error: the token names no period this page offers, so
+    // the page default stands (R-C4, R-T26).
+    await page.goto(`${PEOPLE}?period=window`);
+
+    await expect(page.getByTestId("control-period").locator("summary")).toHaveText(
+      /^PeriodSeptember 2026/,
+    );
+  });
+
+  test("clicking a heading changes `?sort=` and nothing else", async ({ page }) => {
+    await page.goto(`${PEOPLE}?team=team_platform`);
+    await peopleTable(page).locator("th").filter({ hasText: "Tokens" }).getByRole("link").click();
+
+    // The heading link is a control link like any other: it carries the page's other parameters,
+    // and it writes the same `?sort=` the departed menu wrote.
+    await expect(page).toHaveURL(`${PEOPLE}?team=team_platform&sort=-tokens`);
+    await expect(page.locator("th[aria-sort]")).toContainText("Tokens");
+  });
+
+  test("Team narrows the rows and the population it reads them off", async ({ page }) => {
+    await page.goto(PEOPLE);
+    await expect(peopleRows(page)).toHaveCount(20);
+
+    await page.goto(`${PEOPLE}?team=team_platform`);
+
+    // The Platform team's six Members, and nobody else: the population is the roster narrowed by
+    // the control, not the roster with six rows highlighted.
+    await expect(peopleRows(page)).toHaveCount(6);
+    const teams = await peopleRows(page).locator("td:nth-child(2)").allTextContents();
+    for (const cell of teams) expect(cell).toContain("Platform");
+    await expect(page.getByTestId("active-filters")).toHaveText("Platform team · all kinds");
+  });
+
+  test("Kind is unchanged, and stacks with Team", async ({ page }) => {
+    await page.goto(`${PEOPLE}?member_kind=service_account`);
+    const kinds = new Set(await peopleRows(page).locator("td:nth-child(3)").allTextContents());
+
+    expect([...kinds]).toEqual(["Service account"]);
+    await expect(page.getByTestId("active-filters")).toHaveText(
+      "all teams · Service accounts only",
+    );
+  });
+});
+
+/**
  * **Ticket 41 — the Cost column is money, on the page, in the browser.**
  *
  * It rendered through a bare `maximumFractionDigits: 2`, so a column of costs read `310.5`,

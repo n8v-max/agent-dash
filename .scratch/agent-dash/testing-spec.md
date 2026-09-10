@@ -502,8 +502,13 @@ product's central interaction.
   quietly started offering a control its panels cannot use still fails here. Amended 2026-09-09: the claim used
   to read "only its declared controls", and the declared set was the whole of what a page could
   show. R-C6 split it, so both halves are asserted — the bar shows every toolbar control, in order,
-  **and** no panel-local one — and a third assertion checks the two lists are a *partition* of the
-  declared set on every page, so a control cannot be dropped from both and pass both files.
+  **and** no panel-local one — and a third assertion checks the lists are a *partition* of the
+  declared set on every page, so a control cannot be dropped from all of them and pass every file.
+  **Amended 2026-09-10 (ticket 63)**: the partition is now three-way — toolbar, panel-local and
+  the table's own headings — and `/demo/people`'s bar is asserted as exactly three groups, period
+  first, with no Sort menu and no "All data" among its periods. `sort` leaving the bar is only
+  safe if it stays a parameter, so `schema.test.ts` asserts the round trip beside it: `?sort=-cost`
+  parses, serialises and rebuilds the same href it always did.
 - **T-C6.1 — Every declared control changes something** (R-C1, C14). For each page, each declared
   control is toggled and the resulting ViewModel asserted to differ. This is the test that would
   have caught per-capita being declared for `/demo/spend` and read by nothing — T-C6 passed

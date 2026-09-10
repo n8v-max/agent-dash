@@ -12,7 +12,11 @@
 //     filter that changed the page and not the sentence fails here.
 //
 // Period and sort are asserted *absent* on purpose. The period control prints its own current
-// value in the bar; sort is an ordering rather than a narrowing.
+// value in the bar; sort is an ordering rather than a narrowing, and since ticket 63 its control
+// is the People table's own headings.
+//
+// The phrases spell the controls' own labels — **Aggregation** and **Per** since ticket 63 — so
+// the sentence and the bar above it read as one claim rather than as two vocabularies.
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -35,7 +39,6 @@ const OPTIONS: ControlOptions = {
   teams: [{ value: "team_platform", label: "Platform" }],
   members: [{ value: "mem_0001", label: "Ada Lovelace" }],
   grains: ["week", "month"],
-  sortColumns: [{ value: "cost", label: "Cost" }],
 };
 
 const contextFor = (page: PageKey, query: ControlQuery = {}): ControlContext => ({
@@ -53,12 +56,12 @@ describe("T-C15 — the active-filter sentence (R-C7)", () => {
   it("reads the spec's own example back, from the query string that produces it", () => {
     expect(
       sentence("spend", { grain: "week", subject: "team", repository: "repo_mobile_app" }),
-    ).toBe("Week grain · by Team · mobile-app · all templates");
+    ).toBe("Week aggregation · per Team · mobile-app · all templates");
   });
 
   it("names the off state of every filter nobody set", () => {
     expect(sentence("spend")).toBe(
-      "Week grain · by Organization · all repositories · all templates",
+      "Week aggregation · per Organisation · all repositories · all templates",
     );
   });
 
@@ -73,6 +76,20 @@ describe("T-C15 — the active-filter sentence (R-C7)", () => {
       "all Members",
       "all templates",
       "all repositories",
+    ]);
+  });
+
+  it("names the Team that narrowed the page, as a Team (ticket 63)", () => {
+    // A bare "Platform" reads as a Repository or a template beside the other phrases. The
+    // sentence is the one place a reader is told *which dimension* narrowed the page, so the
+    // phrase carries the dimension and the off state stays the plural the menu offers.
+    expect(activeFilterPhrases(contextFor("people", { team: "team_platform" }))).toEqual([
+      "Platform team",
+      "all kinds",
+    ]);
+    expect(activeFilterPhrases(contextFor("people", { team: "team_nowhere" }))).toEqual([
+      "all teams",
+      "all kinds",
     ]);
   });
 

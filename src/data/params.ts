@@ -37,7 +37,7 @@ import {
   type MemberKind,
   type WorkTypeKey,
 } from "@/domain/types";
-import { SORT_DIRECTIONS, type TableSort } from "@/domain/viewmodel";
+import type { TableSort } from "@/domain/viewmodel";
 
 /** The six routes of R-N1 that carry a query. `/` and `/sign-in` carry none. */
 export const PAGES = ["summary", "spend", "work", "people", "history", "projection"] as const;
@@ -94,8 +94,9 @@ export const DECLARED_CONTROLS: Readonly<Record<PageKey, readonly ControlKey[]>>
  * A control listed here is **panel-local**: it moves out of the global bar and into the header of
  * every panel that reads it, because half the controls on `/demo/spend` and `/demo/work` changed
  * one panel out of seven while standing in a bar that reads as a page-wide filter. Everything not
- * listed narrows the *population* every panel is read off — period, grain, subject, Repository,
- * template — and stays in the bar, where a page-wide claim belongs.
+ * listed here or in `TABLE_CONTROLS` below narrows the *population* every panel is read off —
+ * period, grain, subject, Repository, template — and stays in the bar, where a page-wide claim
+ * belongs.
  *
  * **It changes no parameter and no URL.** A panel-local control is the same `ControlKey`, spelled
  * the same way in the query string, serialised by the same `canonicalQuery`; only the DOM node it
@@ -114,15 +115,52 @@ export const PANEL_LOCAL_CONTROLS = [
 ] as const;
 export type PanelLocalControl = (typeof PANEL_LOCAL_CONTROLS)[number];
 
-const PANEL_LOCAL = new Set<ControlKey>(PANEL_LOCAL_CONTROLS);
+/**
+ * **R-C6's third placement: the control the table's own headings are** (ticket 63).
+ *
+ * `sort` had a menu in the bar listing every sortable column twice — "Cost high to low", "Cost
+ * low to high", and six more — beside a table whose headings are already links that set the same
+ * parameter and already show which column is ordering it (R-N15). Two widgets for one parameter,
+ * and only one of them could be read off the rows in front of the viewer.
+ *
+ * **It is still a declared control** (R-C1) and still `?sort=`: the heading links are built by
+ * the same `controlHref` the menu used, the parser still validates a column against the table's
+ * own definition (A24), and `canonicalQuery` writes the same string it always wrote. What went is
+ * the widget, not the parameter — which is the same constraint R-C6 was made under.
+ */
+export const TABLE_CONTROLS = ["sort"] as const;
+export type TableControl = (typeof TABLE_CONTROLS)[number];
 
-/** R-C6 — the controls the sticky page toolbar holds: the declared set, less the panel-local. */
-export const toolbarControls = (page: PageKey): readonly ControlKey[] =>
-  DECLARED_CONTROLS[page].filter((key) => !PANEL_LOCAL.has(key));
+/**
+ * A control that has a widget to render — everything the toolbar or a panel header can show.
+ *
+ * The exclusion is the mechanism rather than a convention: `control-renderers.tsx` is keyed on
+ * this type, so there is no renderer for `sort` to reach and no way to put one back in the bar
+ * without deciding, here, that the table's headings are no longer where the ordering lives.
+ */
+export type WidgetControl = Exclude<ControlKey, TableControl>;
+
+const PANEL_LOCAL = new Set<ControlKey>(PANEL_LOCAL_CONTROLS);
+const TABLE = new Set<ControlKey>(TABLE_CONTROLS);
+
+const isPanelLocal = (key: ControlKey): key is PanelLocalControl => PANEL_LOCAL.has(key);
+const isTable = (key: ControlKey): key is TableControl => TABLE.has(key);
+const hasWidget = (key: ControlKey): key is WidgetControl => !TABLE.has(key);
+
+/**
+ * R-C6 — the controls the sticky page toolbar holds: the declared set, less the panel-local ones
+ * and less the ones a table renders itself.
+ */
+export const toolbarControls = (page: PageKey): readonly WidgetControl[] =>
+  DECLARED_CONTROLS[page].filter(hasWidget).filter((key) => !PANEL_LOCAL.has(key));
 
 /** R-C6 — the controls that render in a panel header instead. Never in the bar. */
-export const panelLocalControls = (page: PageKey): readonly ControlKey[] =>
-  DECLARED_CONTROLS[page].filter((key) => PANEL_LOCAL.has(key));
+export const panelLocalControls = (page: PageKey): readonly PanelLocalControl[] =>
+  DECLARED_CONTROLS[page].filter(isPanelLocal);
+
+/** R-C6 — the controls the page's own table renders, as its headings. Never in the bar. */
+export const tableControls = (page: PageKey): readonly TableControl[] =>
+  DECLARED_CONTROLS[page].filter(isTable);
 
 /**
  * The closed vocabularies a URL parser validates against, in one place.
@@ -144,7 +182,6 @@ export const CONTROL_VOCABULARIES = {
   modelLevel: MODEL_LEVELS,
   executionMode: EXECUTION_MODES,
   memberKind: MEMBER_KINDS,
-  sortDirection: SORT_DIRECTIONS,
 } as const;
 
 /**

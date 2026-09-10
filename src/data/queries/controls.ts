@@ -42,8 +42,6 @@ export type ControlOptions = {
   readonly members: readonly ControlOption[];
   /** R-M11 — the grains this range can carry. Day is simply absent over a long range (R-C1). */
   readonly grains: readonly PeriodGrain[];
-  /** R-N15 — the sortable columns of `/demo/people`, read off the table's own definition. */
-  readonly sortColumns: readonly ControlOption[];
 };
 
 const sortable = (columns: readonly TableColumn[]): readonly ControlOption[] =>
@@ -51,8 +49,13 @@ const sortable = (columns: readonly TableColumn[]): readonly ControlOption[] =>
 
 /**
  * R-N15's sortable columns, derived from the People table's own definition and exported because
- * two things need them: the toolbar offers them, and the URL parser rejects a sort naming a
- * column that is not one of them (A24). Deriving them twice is how those two disagree.
+ * the URL parser rejects a sort naming a column that is not one of them (A24). Deriving that list
+ * twice is how the parser and the table disagree about what `?sort=` may say.
+ *
+ * They are **not** on `ControlOptions` any more (ticket 63). The toolbar's Sort menu was the only
+ * thing that read them there, and the ordering's control is now the table's own headings, which
+ * are built from `PEOPLE_COLUMNS` directly — so a per-request copy of the list would be a third
+ * answer to a question the table already answers.
  */
 export const PEOPLE_SORT_COLUMNS: readonly ControlOption[] = sortable(PEOPLE_COLUMNS);
 
@@ -79,6 +82,5 @@ export function controlOptions(viewer: Viewer, params: ControlSet): ControlOptio
       .filter((member) => named.has(member.id))
       .map((member) => ({ value: member.id, label: member.full_name })),
     grains: availableGrains(params.range),
-    sortColumns: PEOPLE_SORT_COLUMNS,
   };
 }
