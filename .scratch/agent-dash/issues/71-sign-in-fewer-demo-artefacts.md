@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by:
-Label: ready-for-agent
+Label: resolved
 
 # `/sign-in` reads as a real sign-in page: SSO is a fourth provider link, the demo is a fifth button
 
@@ -150,3 +150,130 @@ verify rather than assume), `e2e/payload.spec.ts`, `e2e/routes.spec.ts`, anythin
 Filed 2026-09-10 as a blocker of [ticket 70](70-model-roster-presence-and-palette.md) so it lands
 in the same wave. It is file-disjoint from all of 61–70 — it touches only the two sign-in files,
 their two test files and three docs — so it can be taken by whichever session reaches it first.
+
+---
+
+## Comments
+
+### 2026-09-10 — implemented
+
+Branch `ticket/71`, off `main` at ticket 70. All seven Scope items landed; every Done-when bullet
+is either covered by a test named below or verified by the measurement recorded here. The page is
+now a heading, a sentence, five pills in one column, and a `Back` link — and nothing on it
+describes it.
+
+**`/sign-in`, 1440 and 390, light and dark:**
+
+![Sign in, 1440, light](../../../docs/img/sign-in-1440-light.png)
+
+![Sign in, 1440, dark](../../../docs/img/sign-in-1440-dark.png)
+
+![Sign in, 390, light](../../../docs/img/sign-in-390-light.png)
+
+![Sign in, 390, dark](../../../docs/img/sign-in-390-dark.png)
+
+#### Six gates, all green
+
+| Gate | Result | Counts |
+|---|---|---|
+| `pnpm lint` | pass | clean, no warnings |
+| `pnpm typecheck` | pass | — |
+| `pnpm test` | pass | **1,542** tests in 65 files (1,544 before, **−2**: the two tests this ticket deletes) |
+| `pnpm test:coverage` | pass | statements 98.30% · branches 89.45% · functions 99.03% · lines 99.47% |
+| `pnpm build` | pass | 10 routes; `/sign-in` prints `○ (Static)` |
+| `PORT=3111 pnpm e2e` | pass | **187** tests, both projects (`chromium` + `mobile-chromium`), unchanged · **1m 36s** wall |
+
+#### Done-when, measured
+
+- **Five pills in one column, both widths.** Measured from the rendered page: at 1440 the five
+  controls are all `x=464, width=512`, at `y` 237 / 296 / 355 / 414 / 544; at 390 all five are
+  `x=24, width=342`, at `y` 213 / 272 / 331 / 390 / 519. One column, one width, at every
+  breakpoint; the larger gap before the fifth is the divider.
+- **No horizontal scroll at 390.** `document.documentElement.scrollWidth === 390`. Also asserted
+  by `mobile.spec.ts` T-E17 ("`/sign-in` does not scroll sideways"), which passes untouched.
+- **The forbidden-word regex passes.** The page's whole text is the heading, one sentence, five
+  labels, "or" and "Back"; none of `faster|productiv|velocity|ship more|10x` occurs.
+- **`Continue with SSO` opens the tenant in a new tab and leaves `/sign-in` in place.** Driven in
+  a real browser: the click emits a popup at `https://zencoder.okta.com/`, the opener stays at
+  `/sign-in`, and `window.opener === null` in the popup (the `rel="noopener"` doing its job).
+- **`/sign-in` is still prerendered static.** `pnpm build` prints `○ /sign-in`, which also keeps
+  `docs/security.md` § 3's claim ("only `/`, `/sign-in` and `/_not-found` are prerendered") true.
+- **The must-not-change check.** `grep -rn "Sign in to the demo account" e2e src` returns the same
+  four hits as before — `e2e/enforcement.spec.ts:83`, `:98`, `page.tsx:100`, `page.test.tsx:25` —
+  and all four resolve. `enforcement.spec.ts`, `mobile.spec.ts`, `payload.spec.ts`,
+  `routes.spec.ts`, `src/domain/**` and `src/data/**` are untouched.
+
+#### Already done when this ticket was picked up
+
+§ What exists today was filed before ticket 61 landed and is stale in three places:
+
+1. **The header-switcher sentence was already gone.** *"Switch to the restricted contractor view
+   from the header on any page."* had already been deleted by ticket 61. § What is deliberately
+   lost therefore describes a loss that had already happened; nothing in this ticket removed it.
+2. **The card no longer hardcoded a name.** It read `openDefault.fullName` from the fixture, not
+   "Nuria". The sentence went anyway, as Scope item 4 requires.
+3. **`docs/security.md` had three of its four sign-in citations already corrected.** Only the § 1
+   one still carried the pre-ticket-60 path, as `src/app/sign-in/page.tsx:77`; the other three
+   (§ 2 CSRF, § 2 forced-session, § 6 "No real identity") had already been moved to
+   `src/app/(public)/sign-in/page.tsx` **and had their line numbers dropped**. So "re-resolve the
+   line numbers at all four" resolved to one edit: the § 1 citation is now
+   `src/app/(public)/sign-in/page.tsx:94`, the `<form>` line. The three line-number-free citations
+   were re-checked against the file and still land on true statements; adding line numbers back to
+   them would only manufacture three more things to go stale. The two neighbouring citations in
+   the same paragraphs (`src/data/viewer.ts:57`, `src/app/api/session/route.ts:62`) were re-checked
+   and still resolve.
+
+#### Escalations and choices
+
+- **A test the ticket did not list had to go.** § Tests says the `member_id` test and the
+  restricted-account-absent test are untouched and names one deletion (the disabled-SSO test).
+  But ticket 61 added a seventh test — *"names that account from the fixture rather than from a
+  literal"* — which asserts the string `You will be {fullName},`, and Scope item 4 deletes that
+  sentence. The cheaper option is to delete the test with the sentence rather than invent a new
+  visible use of `fullName` to keep it alive; the fixture-over-literal principle it guarded now
+  has nothing on this page to guard, because the page names nobody. Cost: `signInAccounts()`'s
+  `fullName` is no longer exercised from `/sign-in` — it still is from the header
+  (`account-switcher`), which is where the name is rendered now. Unit tests therefore go 8 → 6 in
+  this file (−1 SSO, −1 fixture-name), and the suite 1,544 → 1,542.
+- **`docs/security.md` § 1 said "both seeded accounts are offered".** That is false since ticket
+  61 and the citation this ticket re-resolves points straight at the form that offers exactly
+  one — leaving it would have made the fixed citation contradict its own sentence. Three words
+  changed to "the one offered account is handed to any anonymous visitor"; the argument around it
+  (the dataset is not the asset; the access model is) is untouched, as § Docs requires. The
+  paragraph was re-wrapped to the file's 99-column measure. Cost: one line of § Docs' "do not
+  touch the arguments around them" read narrowly rather than literally.
+- **Two components were renamed.** `ProviderRow` → `ProviderPills` and `DemoCard` → `DemoForm`.
+  Neither is a rename the ticket asked for, but a function called `Row` that renders a column and
+  one called `Card` with no card left in it are exactly the stale prose this ticket exists to
+  delete. Cost: two identifiers in § What exists today no longer grep.
+- **`PILL` now carries geometry only.** The demo button inverts the pill's colours, and
+  `border-(--landing-rule)` versus `border-(--landing-ink)` in one class string is a specificity
+  race Tailwind resolves by stylesheet order, not by the order they are written — a hard bug to
+  see and an easy one to ship. Colour is set at each of the two uses instead. The geometry the
+  ticket names (radius, padding, text size) is shared and identical across all five pills; the
+  demo button's old `px-6 py-[13px] text-[15px]` is now the pills' `px-4 py-3 text-[14px]`.
+- **The Okta ring, checked optically at 18px.** Rendered with the ticket's numbers (`r=7`,
+  `stroke-width=4`, `fill="none"`). Its ink area is ≈176 square units against the GitHub mark's
+  ≈340, so it does not read heavier — it reads slightly *smaller* than Google and GitHub, whose
+  paths fill the 24-unit box while the ring's outer diameter is 18. That is the safe side of the
+  constraint the ticket states, so the numbers were left as specified rather than grown to match.
+- **No new e2e test for the SSO click.** § Tests says "counts and strings only, no new scope", so
+  the Done-when bullet about the new tab was verified by driving a browser once (recorded above)
+  rather than by adding a spec. `smoke.spec.ts` keeps the structural claim: the pill is an
+  `a[target="_blank"][rel~=noopener]` pointing at `zencoder.okta.com`.
+
+#### Files changed
+
+- `src/app/(public)/sign-in/page.tsx` — `SsoBlock` and `SMALL_CAPS` deleted; `PROVIDERS` gains
+  SSO; one stacked column; the form reduced to a hidden input and a button, named by `aria-label`;
+  the divider moved above it; the file header rewritten to describe five pills rather than a card.
+- `src/app/(public)/sign-in/provider-glyphs.tsx` — `OktaGlyph`, and the header comment now says
+  three filled paths and one stroked ring.
+- `src/app/(public)/sign-in/page.test.tsx` — four provider rows, five links, the form by
+  `aria-label`; two tests deleted.
+- `e2e/smoke.spec.ts` — the ticket-60 sign-in test: 5 links, 4 `_blank`, the Okta host in the
+  loop, the two disabled-SSO assertions gone, `main form` and `main button[type=submit]` still 1.
+- `.scratch/agent-dash/spec.md` — § 3's `/sign-in` row, and R-A4's third dated amendment.
+- `docs/security.md` — the § 1 citation.
+- `docs/img/sign-in-{1440,390}-{light,dark}.png` — new.
+

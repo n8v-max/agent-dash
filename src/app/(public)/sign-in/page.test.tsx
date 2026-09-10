@@ -7,7 +7,7 @@ import SignInPage from "./page";
 // The form's `method` and `action` are asserted end to end instead of here: T-E3 clicks the
 // button and checks where the browser lands, which is the claim — a matching attribute pair
 // that the server rejects would still pass a DOM assertion.
-describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
+describe("SignInPage — one demo action (R-A4 as amended, ticket 71)", () => {
   it("heads the page 'Sign in', inside a main landmark", () => {
     render(<SignInPage />);
 
@@ -15,9 +15,10 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Sign in");
   });
 
-  it("holds one named form — the demo card — whose one submit signs in to the demo account", () => {
+  it("holds one named form — the demo action — whose one submit signs in to the demo account", () => {
     // The form is the page's only <form>; that count is asserted end to end in smoke.spec.ts,
-    // where an unnamed form is countable. Here the form is reached by its landmark name.
+    // where an unnamed form is countable. Here the form is reached by its landmark name, which
+    // is an `aria-label` (ticket 71): the page shows no visible label to name it with.
     render(<SignInPage />);
 
     expect(screen.getByRole("form", { name: /demo account/i })).toBeInTheDocument();
@@ -35,23 +36,14 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
     );
   });
 
-  it("names that account from the fixture rather than from a literal (ticket 61)", () => {
-    // The card used to hardcode "Nuria Castells". Reseeding the Organization would have
-    // left the page confidently naming somebody who no longer exists.
-    const [openDefault] = signInAccounts();
-    render(<SignInPage />);
-
-    expect(openDefault?.fullName).toBeTruthy();
-    expect(screen.getByText(new RegExp(`You will be ${openDefault?.fullName ?? ""},`))).toBeInTheDocument();
-  });
-
-  it("links the three provider pills to the real sign-in pages, in a new window", () => {
+  it("links the four provider pills to the real sign-in pages, in a new window", () => {
     render(<SignInPage />);
 
     const expected = [
       ["Continue with Google", "https://accounts.google.com/"],
       ["Continue with Apple", "https://appleid.apple.com/sign-in"],
       ["Continue with GitHub", "https://github.com/login"],
+      ["Continue with SSO", "https://zencoder.okta.com/"],
     ] as const;
 
     for (const [name, href] of expected) {
@@ -60,16 +52,6 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
     }
-  });
-
-  it("offers SSO as a disabled button, and says it is not connected", () => {
-    render(<SignInPage />);
-
-    const sso = screen.getByRole("button", { name: "Continue with SSO" });
-
-    expect(sso).toBeDisabled();
-    expect(sso).toHaveAttribute("type", "button");
-    expect(screen.getByText("Single sign-on is not connected in the demo.")).toBeInTheDocument();
   });
 
   it("does not offer the restricted account, and no longer points anywhere that does", () => {
@@ -84,12 +66,12 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
     expect(screen.getByRole("main").textContent).not.toMatch(/restricted|contractor|switch/i);
   });
 
-  it("offers four links: the three providers, and Back to the landing", () => {
+  it("offers five links: the four providers, and Back to the landing", () => {
     render(<SignInPage />);
 
     const links = screen.getAllByRole("link");
 
-    expect(links).toHaveLength(4);
+    expect(links).toHaveLength(5);
     expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/");
   });
 });

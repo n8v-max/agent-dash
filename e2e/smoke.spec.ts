@@ -35,10 +35,12 @@ test("the four reads carry the demo-figure band label and the four verbs, in ord
   );
 });
 
-test("/sign-in is a mock provider page with one demo action (ticket 60)", async ({ page }) => {
+test("/sign-in is a mock provider page with one demo action (tickets 60, 71)", async ({ page }) => {
   // Structure, not styling: the shape a visitor with no JavaScript needs. One plain form — the
-  // demo card, posting to `/api/session` — with the page's one submit; three provider pills that
-  // are links to the real provider sign-in pages in a new window; and a way back to `/`. The
+  // demo action, posting to `/api/session` — with the page's one submit; four provider pills that
+  // are links to the real provider sign-in pages in a new window, SSO among them; and a way back
+  // to `/`. Ticket 71 turned the SSO block into the fourth of those links, so the link counts
+  // moved and the action counts did not: the page gained a place to go, not a thing to do. The
   // button *label* is asserted where it matters, in enforcement.spec.ts, which clicks it and
   // checks where the browser lands.
   const response = await page.goto("/sign-in");
@@ -49,16 +51,17 @@ test("/sign-in is a mock provider page with one demo action (ticket 60)", async 
   await expect(page.locator("main button[type=submit]")).toHaveCount(1);
 
   const links = page.getByRole("link");
-  await expect(links).toHaveCount(4);
-  await expect(page.locator('a[target="_blank"]')).toHaveCount(3);
-  for (const host of ["accounts.google.com", "appleid.apple.com", "github.com"]) {
+  await expect(links).toHaveCount(5);
+  await expect(page.locator('a[target="_blank"]')).toHaveCount(4);
+  for (const host of [
+    "accounts.google.com",
+    "appleid.apple.com",
+    "github.com",
+    "zencoder.okta.com",
+  ]) {
     const pill = page.locator(`a[href*="${host}"]`);
     await expect(pill).toHaveAttribute("target", "_blank");
     await expect(pill).toHaveAttribute("rel", /noopener/);
   }
   await expect(page.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/");
-
-  const sso = page.getByRole("button", { name: "Continue with SSO" });
-  await expect(sso).toHaveAttribute("type", "button");
-  await expect(sso).toBeDisabled();
 });

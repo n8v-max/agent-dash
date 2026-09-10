@@ -1,54 +1,68 @@
 // `/sign-in` — the landing's second screen, as a mock provider page with one demo action
-// (R-A4 as amended by ticket 60).
+// (R-A4 as amended by tickets 60, 61 and 71).
 //
-// **Three provider pills, an SSO input, and one working control.** The provider pills are
-// anchors to the real provider sign-in pages, opened in a new window; nothing is exchanged with
-// the provider and the link is the whole integration. The SSO block is disabled and says so.
-// The demo card holds the page's only <form>: the same plain `<form method="post">` to
-// `POST /api/session` as before — no client component, no JavaScript, no fetch — signing in as
-// the **first** account `signInAccounts()` returns, which is R-A4's open default.
+// **Five pills in one column.** Four of them are places: anchors to Google, Apple, GitHub and an
+// SSO tenant, opened in a new window. Nothing is exchanged with any of them — the link is the
+// whole integration. The fifth, under a hairline, is the only control on the page that does
+// anything, and it is filled ink because a sign-in page marks its primary action.
 //
-// **The restricted account is not on this page, and is no longer anywhere else either**
-// (ticket 61). `signInAccounts()` now returns the open default alone, so this page offers what
-// the endpoint will mint and nothing more; the header switcher stopped offering the contractor
-// at the same time. The preset, its grants and the tests that mint it directly are untouched —
-// restriction is demonstrable under test, not through the UI.
+// **Why the four are anchors and the fifth is a form.** An anchor cannot POST without the
+// JavaScript this page refuses to ship, and a provider page is a place rather than an action; so
+// the fifth pill is the page's only <form>, a plain `<form method="post">` to `POST /api/session`
+// — no client component, no fetch — signing in as the **first** account `signInAccounts()`
+// returns, which is R-A4's open default. Each element is the one that does its job natively, and
+// the smoke test counts them by kind: five links, one form, one submit.
 //
-// **Why the pills are anchors and the demo action is a button.** An anchor cannot POST without
-// JavaScript; a provider page is a place, not an action. Each element is the one that does its
-// job natively, and the smoke test counts them by kind: four links, one form, one submit.
+// **The restricted account is not on this page, and is not anywhere else either** (ticket 61).
+// `signInAccounts()` returns the open default alone, so this page offers what the endpoint will
+// mint and nothing more; the header switcher stopped offering the contractor at the same time.
+// The preset, its grants and the tests that mint it directly are untouched — restriction is
+// demonstrable under test, not through the UI.
+//
+// Nothing here explains itself: no label, no card, no sentence about what the demo is (ticket
+// 71). A real sign-in page describes neither its providers nor its button, and this one now
+// reads as one.
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { signInAccounts } from "@/data/accounts";
-import { AppleGlyph, GitHubGlyph, GoogleGlyph } from "./provider-glyphs";
+import { AppleGlyph, GitHubGlyph, GoogleGlyph, OktaGlyph } from "./provider-glyphs";
 
 export const metadata: Metadata = {
   title: "Sign in",
 };
 
+// `zencoder.okta.com` is a placeholder tenant. The label stays generic.
 const PROVIDERS: readonly { label: string; href: string; glyph: ReactNode }[] = [
   { label: "Continue with Google", href: "https://accounts.google.com/", glyph: <GoogleGlyph /> },
   { label: "Continue with Apple", href: "https://appleid.apple.com/sign-in", glyph: <AppleGlyph /> },
   { label: "Continue with GitHub", href: "https://github.com/login", glyph: <GitHubGlyph /> },
+  { label: "Continue with SSO", href: "https://zencoder.okta.com/", glyph: <OktaGlyph /> },
 ];
 
+/**
+ * Geometry only — radius, padding, type — so the five pills are one shape. Colour is set at
+ * each use, because the demo button inverts it and a `border-*` utility that loses a
+ * specificity race is a hard bug to see.
+ */
 const PILL =
-  "inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-(--landing-rule) px-4 py-3 text-[14px] font-semibold text-(--landing-ink) transition-colors";
+  "inline-flex w-full items-center justify-center gap-2.5 rounded-full px-4 py-3 text-[14px] font-semibold";
 
-const SMALL_CAPS = "text-[11px] font-semibold uppercase tracking-[0.12em]";
-
-function ProviderRow() {
+/**
+ * One column at every breakpoint. Four pills at their natural width do not fit a 560px row, and
+ * the side-by-side arrangement was only ever possible because there were three.
+ */
+function ProviderPills() {
   return (
-    <ul className="m-0 flex list-none flex-col gap-3 p-0 sm:flex-row">
+    <ul className="m-0 flex list-none flex-col gap-3 p-0">
       {PROVIDERS.map((provider) => (
-        <li key={provider.href} className="min-w-0 flex-1">
+        <li key={provider.href} className="min-w-0">
           <a
             href={provider.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${PILL} bg-(--landing-claims) no-underline hover:border-(--landing-ink)`}
+            className={`${PILL} border border-(--landing-rule) bg-(--landing-claims) text-(--landing-ink) no-underline transition-colors hover:border-(--landing-ink)`}
           >
             {provider.glyph}
             <span>{provider.label}</span>
@@ -69,59 +83,19 @@ function Divider() {
   );
 }
 
-function SsoBlock() {
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor="sso-email" className={`${SMALL_CAPS} text-(--landing-ink-3)`}>
-        Work email
-      </label>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
-          id="sso-email"
-          type="email"
-          placeholder="you@company.com"
-          disabled
-          className="min-w-0 flex-1 rounded-full border border-(--landing-rule) bg-(--landing-claims) px-4 py-3 text-[14px] text-(--landing-ink) placeholder:text-(--landing-ink-3) disabled:opacity-60"
-        />
-        <button
-          type="button"
-          disabled
-          title="Not connected in the demo"
-          className={`${PILL} sm:w-auto disabled:cursor-not-allowed disabled:opacity-60`}
-        >
-          Continue with SSO
-        </button>
-      </div>
-      <p className="m-0 text-[12.5px] text-(--landing-ink-2)">
-        Single sign-on is not connected in the demo.
-      </p>
-    </div>
-  );
-}
-
 /**
- * The name is read from the offered account rather than written here: the fixture names the
- * Member, and a literal would go stale the first time it is reseeded (ticket 61).
+ * The page's only form, and its only two children: the id being claimed, and the button that
+ * claims it. It is named by `aria-label` rather than by a heading — the name exists for the
+ * accessibility tree and for the test that reaches it there, not for the page, which says
+ * nothing about itself.
  */
-function DemoCard(props: { readonly memberId: string; readonly fullName: string }) {
+function DemoForm(props: { readonly memberId: string }) {
   return (
-    <form
-      method="post"
-      action="/api/session"
-      aria-labelledby="demo-account"
-      className="flex flex-col gap-4 rounded-[18px] border border-(--landing-rule) bg-(--landing-claims) p-6"
-    >
+    <form method="post" action="/api/session" aria-label="Demo account">
       <input type="hidden" name="member_id" value={props.memberId} />
-      <p id="demo-account" className={`m-0 ${SMALL_CAPS} text-(--landing-ink-3)`}>
-        Demo account
-      </p>
-      <p className="m-0 text-pretty text-[15px] leading-[1.55] text-(--landing-ink-2)">
-        You will be {props.fullName}, the open default: every Member by name, their jobs, their
-        tokens, their cost.
-      </p>
       <button
         type="submit"
-        className="w-full rounded-full border border-(--landing-ink) bg-(--landing-ink) px-6 py-[13px] text-[15px] font-semibold text-(--landing-paper) transition-opacity hover:opacity-90"
+        className={`${PILL} border border-(--landing-ink) bg-(--landing-ink) text-(--landing-paper) transition-opacity hover:opacity-90`}
       >
         Sign in to the demo account
       </button>
@@ -130,8 +104,8 @@ function DemoCard(props: { readonly memberId: string; readonly fullName: string 
 }
 
 export default function SignInPage() {
-  // R-A4 as amended: one offered account, the open default. Read, not hardcoded, so the id and
-  // the name both stay the fixture's.
+  // R-A4 as amended: one offered account, the open default. Read, not hardcoded, so the id stays
+  // the fixture's.
   const [openDefault] = signInAccounts();
   if (!openDefault) throw new Error("R-A3: no seeded account to sign in as.");
 
@@ -143,10 +117,9 @@ export default function SignInPage() {
         Use your organisation&apos;s identity, or step straight into the demo.
       </p>
 
-      <ProviderRow />
+      <ProviderPills />
       <Divider />
-      <SsoBlock />
-      <DemoCard memberId={openDefault.memberId} fullName={openDefault.fullName} />
+      <DemoForm memberId={openDefault.memberId} />
 
       <Link
         href="/"

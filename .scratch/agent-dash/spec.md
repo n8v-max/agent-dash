@@ -102,7 +102,9 @@ switcher (R-A5).* **Amended again 2026-09-10, ticket 61: the product offers one 
 one action, and nothing else anywhere.** The restricted contractor is offered on no surface —
 not on `/sign-in`, not in the header — and `POST /api/session` mints only for the offered list,
 so its id returns 400. The preset, its grants and its seated Member are unchanged; it is
-demonstrable only under test, from a token minted directly off the fixture.
+demonstrable only under test, from a token minted directly off the fixture. *Amended
+2026-09-10, ticket 71: the SSO control is a fourth provider link, and the demo action is a bare
+form button rather than a described card.*
 
 **R-A5 — The header account switcher re-issues the token and reloads in place**, keeping the
 viewer on the current URL. The difference must read as *the same page with fewer rows*.
@@ -156,7 +158,7 @@ vary *inside* a page, in the query string. They never appear in a path.
 | Route | Renders | Period control |
 |---|---|---|
 | `/` | Landing: positioning line, one link to sign-in | — |
-| `/sign-in` | Two "continue as" buttons, and a link back to `/` | — |
+| `/sign-in` | Four identity links (three providers and SSO), one "sign in to the demo account" button, and a link back to `/` | — |
 | `/demo` | Org root — the summary. Four tiles, nothing else | Month |
 | `/demo/spend` | What we spend, and what we get for it | Day, week, month |
 | `/demo/work` | Whether the agents are working | Day, week, month |
