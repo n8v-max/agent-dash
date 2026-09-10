@@ -28,6 +28,7 @@
 // two thresholds are not the same number.
 
 import { check, percent } from "./check.mts";
+import { isCpuHeavy } from "./predicates.mts";
 import { priceMachineAllocation, priceSession, priceTokenUsage } from "./pricing.mts";
 import { sum } from "./rng.mts";
 import { dayOfRow } from "./rows.mts";
@@ -40,6 +41,7 @@ import {
   weekOfDay,
 } from "./schedule.mts";
 import { WEEKLY_SPEND_BAND, WEEKLY_SPEND_SHAPE, WINDOW_DAYS } from "./targets.mts";
+import { usagesRaisedToFloor } from "./tokens.mts";
 import { isRoot } from "./tree.mts";
 import type { AgentSession, TokenClass } from "./types.mts";
 
@@ -90,13 +92,24 @@ const moneyOf = (rows: readonly AgentSession[]) => ({
   tokens: sum(rows.map((row) => sum(row.token_usage.map(priceTokenUsage)))),
 });
 
+/**
+ * One row's token draw, scaled and re-priced — and then held to R-D23's floor.
+ *
+ * The floor is re-applied here because a scale below one can take a session that drew 80K under
+ * 75K, and R-D23 is a claim about the fixture rather than about the order two repairs ran in.
+ * It reaches exactly the rows the draw floored: an **attempt** that is not one of R-D11's
+ * token-light rows. A child is not an attempt — it holds a fraction of its root's draw by
+ * construction (R-D21) — and a CPU-heavy row is the named exception.
+ */
 const rescale = (row: AgentSession, scale: number): void => {
-  row.token_usage = row.token_usage.map((usage) => ({
+  const floored = isRoot(row) && !isCpuHeavy(row);
+  const scaled = row.token_usage.map((usage) => ({
     model_id: usage.model_id,
     ...(Object.fromEntries(
       CLASSES.map((name) => [name, Math.max(0, Math.round(usage[name] * scale))]),
     ) as Record<TokenClass, number>),
   }));
+  row.token_usage = floored ? usagesRaisedToFloor(scaled) : scaled;
   row.cost = priceSession(row.token_usage, row.machine_spec, row.machine_allocation_duration_s);
 };
 

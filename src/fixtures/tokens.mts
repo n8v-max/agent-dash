@@ -10,6 +10,12 @@
 // Drawing alone drifts by a percentage point or two, and the invariant lives inside that
 // drift. Assigning by size would hit the target exactly but would correlate Model with
 // session size — a finding the fixture would be inventing.
+//
+// **R-D23 fixes the level, the floor and the spread** (ticket 68). The session total is drawn
+// log-normal at `TOKEN_SESSION_MEDIAN` and σ = `TOKEN_SIGMA`, multiplied by the drawing
+// Member's *appetite* — its R-D4 activity multiplier, times a heavy-tail factor if it is one of
+// the four leaders — and then held to `TOKEN_FLOOR` after the class split. None of that touches
+// which Model a parcel lands on, so R-D16 and R-D17 are the same claims over a bigger spread.
 
 import { models } from "./catalog.mts";
 import { chance, largestRemainder, logNormal, pickWeighted, shuffled, sum, type Rng } from "./rng.mts";
@@ -18,6 +24,7 @@ import {
   MODEL_WEIGHT_WITHIN_TIER,
   MULTI_MODEL_SHARE,
   TIER_TOKEN_SHARE,
+  TOKEN_FLOOR,
   TOKEN_MEDIAN,
   TOKEN_SIGMA,
 } from "./targets.mts";
@@ -30,7 +37,12 @@ const REPAIR_PASSES = 600;
 // R-D11 — CPU-heavy, token-light sessions burn machine time and almost no tokens.
 const CPU_HEAVY_TOKEN_SCALE = 0.004;
 
-export type SessionTokenInput = { month_key: string; cpu_heavy: boolean };
+/**
+ * What a session brings to its own token draw. `appetite` is R-D23's per-Member multiplier —
+ * the same activity multiplier R-D4's schedule drew, times the heavy-tail factor a leader
+ * carries — so a busy Member's sessions are bigger as well as more numerous.
+ */
+export type SessionTokenInput = { month_key: string; cpu_heavy: boolean; appetite: number };
 
 type Parcel = {
   session: number;
@@ -66,15 +78,70 @@ const modelTargets = (monthKey: string): Record<string, number> => {
   return Object.fromEntries(entries);
 };
 
+/**
+ * **R-D23's floor, applied after the class split.** A session that drew fewer than
+ * `TOKEN_FLOOR` tokens across its four classes is raised to exactly the floor, keeping the
+ * proportions it drew: the requirement is about the *session*, so a per-class floor would both
+ * miss it (four small classes still sum below 75K) and distort the mix (R-D16 reads class and
+ * tier shares off these counts).
+ *
+ * Largest-remainder rather than a multiply-and-round, so the raised counts sum to the floor
+ * exactly and the four classes stay whole and disjoint (T-F3).
+ */
+export const raisedToFloor = (counts: Record<string, number>): Record<string, number> => {
+  const drawn = CLASSES.map((name) => counts[name]);
+  const total = sum(drawn);
+  if (total >= TOKEN_FLOOR) return counts;
+  const weights = total > 0 ? drawn : CLASSES.map((name) => TOKEN_MEDIAN[name]);
+  const raised = largestRemainder(weights, TOKEN_FLOOR);
+  return Object.fromEntries(CLASSES.map((name, at) => [name, raised[at]]));
+};
+
+/** Every token a session drew, across its Models — the quantity R-D23's floor is stated over. */
+export const sessionTokens = (usages: readonly TokenUsage[]): number =>
+  sum(usages.flatMap((usage) => CLASSES.map((name) => usage[name])));
+
+/**
+ * The same floor, applied to a session's **written** rows rather than to its draw.
+ *
+ * `curve.mts` scales a week's token draws to pull its spend onto R-D4's curve, and a scale below
+ * one could take a session that drew 80K under the floor. Raising it back keeps R-D23 a property
+ * of the fixture rather than of the order two repairs happen to run in; the proportions across
+ * Models and classes are the ones the row already had, so no share this directory asserts moves.
+ */
+export const usagesRaisedToFloor = (usages: readonly TokenUsage[]): TokenUsage[] => {
+  const cells = usages.flatMap((usage) => CLASSES.map((name) => usage[name]));
+  const total = sum(cells);
+  if (total >= TOKEN_FLOOR || total === 0) return usages.map((usage) => ({ ...usage }));
+  const raised = largestRemainder(cells, TOKEN_FLOOR);
+  return usages.map((usage, index) => ({
+    model_id: usage.model_id,
+    ...(Object.fromEntries(
+      CLASSES.map((name, at) => [name, raised[index * CLASSES.length + at]]),
+    ) as Record<(typeof CLASSES)[number], number>),
+  }));
+};
+
 // A CPU-heavy row's token count is drawn tightly rather than from the session-wide spread:
 // the requirement is "almost no tokens", and a long right tail on that draw would put some
 // of these rows back among ordinary sessions, where nothing could tell them apart again.
-const sessionClassTotals = (rng: Rng, cpuHeavy: boolean): Record<string, number> => {
+//
+// **Neither R-D23's appetite nor its floor reaches these rows** (R-D11). They are the named
+// exception: multiplying a leader's appetite into one would push it over
+// `CPU_HEAVY_TOKEN_CEILING` and out of the population that requirement counts, and flooring it
+// at 75K would delete "token-light" outright.
+const sessionClassTotals = (
+  rng: Rng,
+  cpuHeavy: boolean,
+  appetite: number,
+): Record<string, number> => {
   const spread = cpuHeavy ? 0.3 : TOKEN_SIGMA;
-  const scale = logNormal(rng, 1, spread) * (cpuHeavy ? CPU_HEAVY_TOKEN_SCALE : 1);
-  return Object.fromEntries(
+  const scale =
+    logNormal(rng, 1, spread) * (cpuHeavy ? CPU_HEAVY_TOKEN_SCALE : appetite);
+  const drawn = Object.fromEntries(
     CLASSES.map((name) => [name, Math.round(TOKEN_MEDIAN[name] * scale * logNormal(rng, 1, 0.3))]),
   );
+  return cpuHeavy ? drawn : raisedToFloor(drawn);
 };
 
 // R-D15 — 40% of sessions span two or more Models. Drawn as a set rather than a coin per
@@ -109,7 +176,7 @@ const drawModel = (rng: Rng, monthKey: string, used: ReadonlySet<string>): strin
 const parcelsFor = (rng: Rng, sessions: readonly SessionTokenInput[]): Parcel[] => {
   const multi = multiModelSessions(rng, sessions);
   return sessions.flatMap((session, index) => {
-    const totals = sessionClassTotals(rng, session.cpu_heavy);
+    const totals = sessionClassTotals(rng, session.cpu_heavy, session.appetite);
     const weights = parcelWeights(rng, multi.has(index));
     const split = Object.fromEntries(
       CLASSES.map((name) => [name, largestRemainder(weights, totals[name])]),

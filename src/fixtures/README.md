@@ -93,6 +93,47 @@ authored strings and several hundred phrases: 2,959 distinct titles over 3,626 T
 worn more than seven times against about forty before. `assertTitles` makes that a checked
 property rather than an impression.
 
+## Tokens: a floor, an appetite, and four leaders (R-D23, ticket 68)
+
+`tokens.mts` draws one log-normal total per session — **median 1.1M, σ 1.1** — splits it into the
+four disjoint classes by an authored mix (cache read 87.5%, cache write 7%, uncached input 3.5%,
+output 2%), parcels those across Models and repairs to the month's Model targets. Three things
+ticket 68 added sit on top of that draw.
+
+**The floor is 75,000 tokens and it is applied to the session total, after the class split.** A
+per-class floor would both miss the requirement — four small classes still sum below 75K — and
+distort R-D16's class and tier shares. R-D11's ~20 CPU-heavy rows are the one exception, named in
+the requirement: they are on `compute` for hours and draw a few thousand tokens, and a floor over
+them would delete the thing they exist to show. `curve.mts` re-applies the floor after the weekly
+repair, because a repair scale below one could otherwise take an 80K session under it — R-D23 is
+a property of the fixture, not of the order two repairs ran in.
+
+**A child is not floored, because a child is not an attempt.** It holds 12–30% of its root's
+draw by construction (R-D21), so flooring one would either raise the root's floor to 625K — which
+would delete a quarter of the session distribution — or break the fraction that keeps R-D16's
+shares where `tokens.mts` put them. The floor is asserted over **roots**, hidden ones included.
+
+**A Member's activity multiplies its token appetite.** The same multiplier R-D4's schedule draws
+for session *count* is handed to the token draw, so a busy Member runs more sessions and bigger
+ones; `generateSlots` returns it for exactly that reason. Four Members — `mem_ivazquez`,
+`mem_dnavarro`, `mem_mpena`, `mem_aruiz` — carry a heavy-tail factor of ×7, ×6, ×10 and ×12 on
+top. They are named rather than drawn so the ranking is stable across a regeneration, and the
+factors differ because a tail of four identical Members reads as a bug.
+
+The result is what `/demo/people` sorted by Tokens is for: **59.5B tokens over the window, a 2.0M
+median attempt and a 31.1M p95, a median human Member-month of ~110M, and a busiest Member-month
+of 2.2–3.3B — about thirty times the median one.** The four months lying wholly inside the window
+read 99M / 76M / 133M / 111M at the median.
+
+**One band is wider than the ticket asked for, and here is the arithmetic.** Ticket 68 asked for
+80–130M in *each* full month — a range of 1.63×. The realised per-month medians span 1.75×, and
+both causes are structural: R-D4's ramp takes the median human from 51 sessions in May to 78 in
+August, and the appetite spread opens a gap in the middle of an 18-point sample exactly where its
+median sits, so the month-to-month swing is larger than the ramp alone. No level of
+`TOKEN_SESSION_MEDIAN` fits 1.75× inside 1.63×. So the ticket's band is asserted over the
+**pooled** 70 Member-months of those four months, where a median is a statistic, and each month's
+own median is held to ±45% of 100M.
+
 ## The GitHub → Member join (R-D20)
 
 The join is **authored, not modelled**. It is applied by `people.mts` when the fixture is built,
@@ -136,8 +177,8 @@ the generator uses it and is rendered nowhere (R-N11). The roster and the token 
 R-D16's headline is **derived, never hardcoded**: the generator computes the token spend share per
 tier from the card and the tokens it actually emitted, and asserts the invariant — *the `frontier`
 tier carries more token spend than any other tier while holding the smallest token share*. On the
-committed data that comes out at **frontier 49.8% of token spend on 14.3% of tokens** (balanced
-44.3%, fast 5.8%). Ticket 16's "~56%" was computed against a card ADR-0007 replaced.
+committed data that comes out at **frontier 50.2% of token spend on 14.9% of tokens** (balanced
+43.9%, fast 5.9%). Ticket 16's "~56%" was computed against a card ADR-0007 replaced.
 
 ## How the shape is hit
 
@@ -178,13 +219,22 @@ ticket 66, scaled ×3: a nightly runner has no workday.
 peer's — which is what keeps R-D10's own "fewer than 5 sessions" true of the data.
 
 **Weekly session cost follows `WEEKLY_SPEND_SHAPE`**, a logistic in dollars sharing the volume
-curve's midpoint and steepness: ~$1,900 per full week in April to a ~$2,650 plateau. `curve.mts`
+curve's midpoint and steepness: ~$2,050 per full week in April to a ~$2,860 plateau. `curve.mts`
 spreads it over a week's own days, so the six-day closing bucket — which still holds five workdays
 — is targeted at 97% of a full week rather than at six sevenths of one. A week that drifts past
 three quarters of its band has that week's **token draws** scaled until it lands on the curve; a
-week inside it is left exactly as drawn, which is where the fluctuation comes from. Two of the
-twenty-four weeks are repaired on the committed data, and the worst surviving departure is 19.5%
+week inside it is left exactly as drawn, which is where the fluctuation comes from. Three of the
+twenty-four weeks are repaired on the committed data, and the worst surviving departure is 29.1%
 against a ±40% band.
+
+**The level moved with ticket 68's token scale, and only the level.** R-D23 re-shaped the token
+draw — a 1.1M median session against 2.9M, a Member's activity multiplying its appetite, and four
+Members carrying a heavy-tail factor — which put ~17% more tokens and ~$6,150 more spend into the
+same weeks. The curve was re-fitted to what the fixture actually draws (2,050 / 2,860 against
+1,900 / 2,650), because a level ~30% under the draw would have had the repair pulling two weeks in
+three back onto the curve and R-D23's Member-months would then be a property of `curve.mts`
+rather than of the draw. Its *shape* is untouched: the same midpoint, the same steepness, the same
+1.39 ratio, the same ±40% / ±20% bands.
 
 **The curve is shallower than the volume curve — 1.39 against λ's 2.03 — and R-D17 is the whole
 of the difference.** The frontier tier's token share falls from 25% to 10% across the window
@@ -212,11 +262,11 @@ Both are reported rather than resolved, and no spec was edited.
 - **The seat-cost finding was demoted, not preserved** (ticket 66). It used to be the sharpest
   figure in the product at ~46% of Total spend, and the fixture was held at ~750 attempts so that
   it would be. R-D4 now asks for one to nine sessions per human Member per workday, and the
-  committed data carries **$53,104.47 of session spend against $4,212.00 of seat cost — 7.3% of
+  committed data carries **$59,257.83 of session spend against $4,212.00 of seat cost — 6.6% of
   Total spend**, asserted as a *ceiling* of 25% rather than as a band. The median session cost is
-  $3.58 and the p95 $22.37; no band is asserted over either, because ticket 66 deleted the
-  authored one with the fixture that produced it and ticket 68 sets the distribution next. (The
-  session bill fell ~$2,200 under ticket 67 and nothing was retuned to make it: an implementation
-  runs 1.7× an ordinary session and there are fewer of them.)
+  $3.02 and the p95 $26.62; no band is asserted over either, because ticket 66 deleted the
+  authored one with the fixture that produced it and ticket 68 — which set the token and cost
+  distribution — did not author a new one: R-D23 states the distribution in *tokens*, and the
+  money is the rate card applied to it.
   *(Ticket 10's median ~$3.20 / p95 ~$35 pair was withdrawn in the spec on 2026-09-09 and its
   governing paragraph struck on 2026-09-10; nothing here now contradicts it.)*

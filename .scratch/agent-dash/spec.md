@@ -1165,6 +1165,40 @@ criterion was met (see R-N15) — so the Incomplete population is now carried by
 never left `deploy`. And R-D8's two labels are read over non-review sessions, or every reviewed
 Task would be a Decomposition.
 
+**R-D23 — Token scale: ~100M tokens per Member-month, leaders in the billions, and no session
+under 75,000 tokens** (added 2026-09-10, ticket 68).
+
+A session draws a log-normal total with a **median of 1.1M tokens and σ = 1.1**, split into the
+four disjoint classes by the mix ticket 10 authored — cache read dominant at 87.5%, then cache
+write 7%, uncached input 3.5%, output 2%. **No session processes fewer than 75,000 tokens**; the
+floor is applied to the session total after the class split, and R-D11's ~20 CPU-heavy,
+token-light rows are the one exception, because being under it is what they exist to show.
+
+**A Member's activity multiplies its token appetite as well as its session count** (R-D4), so a
+busy Member runs more sessions *and* bigger ones, and **four Members carry a heavy-tail factor of
+×6 to ×12** on top. The consequence is the finding `/demo/people` sorted by Tokens exists to
+show: the busiest human Member-month is an order of magnitude above the median one — about 30×
+on the committed data — and the leaders run **1–3.3B tokens in a month** while the median
+Member-month is ~110M.
+
+On the committed data: **59.5B tokens** over the window, a **2.0M median** session and a 31.1M
+p95, and the four months lying wholly inside the window read **99M / 76M / 133M / 111M** at the
+median human Member-month against **2.2B / 2.9B / 3.1B / 3.3B** at the busiest.
+
+**The ticket's 80–130M band is asserted over the pooled Member-months, not over each month's
+own median.** A single month's median is one figure over eighteen Members, and two structural
+things move it further than 1.63× — R-D4's own ramp, which takes the median human from 51
+sessions in May to 78 in August, and the gap the appetite spread opens in the middle of an
+18-point sample. The generator asserts 80–130M over the 70 pooled Member-months of the four full
+months, ±45% of 100M over each month's own median, and a billion-token Member-month in each of
+the last three. See ticket 68's `## Comments` for the arithmetic.
+
+**Cost follows and is not priced differently.** Session spend is **$59,258** against $4,212 of
+seats — **6.6%** of Total spend, inside R-D4's 25% ceiling — at a **$3.02 median** session cost
+and a **$26.62 p95**. `WEEKLY_SPEND_SHAPE`'s *level* moves with the token scale and its shape and
+bands do not: $2,050 per full week at the open to a $2,860 plateau, the same 1.39 ratio against
+λ's 2.03, and the same ±40% / ±20% band, with 3 of the 24 weeks repaired onto the curve.
+
 **R-D20 — The GitHub → Member join is authored, not modelled.** The match rule is documented in
 the fixture README so a reader can see the join, but **no GitHub user fails to match**. An
 unmatched user is a real product problem that none of the six surfaces would show.
