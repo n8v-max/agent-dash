@@ -476,11 +476,15 @@ arithmetic that actually decides what the product claims.
 
 ## 10. Performance
 
-**R-T36 — No pagination, virtualisation, streaming or memoisation beyond React's defaults.** 150
-days at session grain across 20 Members is ~750 rows — comfortably tractable server-side per
-request. Ticket 10 closed the performance envelope and found the live constraint to be the opposite
-one: **too few rows per bucket**, which is why R-M11 restricts day grain rather than why anything
-needs optimising.
+**R-T36 — No pagination, virtualisation, streaming or memoisation beyond React's defaults.** 167
+days at session grain across 20 Members is ~10,900 rows — still tractable server-side per request:
+`readDataset()` takes 75 ms and the whole of `/demo/spend` resolves in 217 ms p95 (measured
+2026-09-10, ticket 66; both are linear in the row count and neither has a knee). Ticket 10 closed
+the performance envelope on ~750 rows and found the live constraint to be the opposite one: **too
+few rows per bucket**, which is why R-M11 restricts day grain rather than why anything needs
+optimising. Ticket 66's volume settled that constraint and did not create the other one;
+[ADR-0009](../../docs/adr/0009-scale.md) supersedes this rule at volume and now carries the
+re-measured budget.
 
 `/demo/history` paginates client-side at 50 for readability, not for performance.
 

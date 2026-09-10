@@ -121,10 +121,10 @@ describe("the committed fixture is not empty of what the cap needs (P6, R-D3)", 
     const april = MONTHS[0];
 
     expect(perBucketTopLabels(april)).toEqual([
-      "Equilibrio Nightly Runner",
-      "Irene Vázquez",
-      "Rubén Marín Cano",
+      "Silvia Roldán Nieto",
+      "Héctor Camps",
       "Diego Navarro Prieto",
+      "Pablo Herrera",
     ]);
     expect(perBucketTopLabels(april)).not.toEqual(
       BY_MEMBER.series.slice(0, NAMED_SERIES_CAP).map((series) => series.label),
@@ -137,9 +137,9 @@ describe("T-U11 / A13 — the cap engages on 20 Members and not on 5 Repositorie
     expect(BY_MEMBER.series).toHaveLength(SERIES_LIMIT);
     expect(BY_MEMBER.series.map((series) => series.label)).toEqual([
       "Héctor Camps",
-      "Equilibrio Nightly Runner",
       "Silvia Roldán Nieto",
-      "Equilibrio Deploy Bot",
+      "Irene Vázquez",
+      "Diego Navarro Prieto",
       "Other",
     ]);
     expect(BY_MEMBER.series.map((series) => series.inert)).toEqual([
@@ -153,7 +153,7 @@ describe("T-U11 / A13 — the cap engages on 20 Members and not on 5 Repositorie
 
   it("lists the 16 Members the bucket holds, ranked, starting with the fifth largest", () => {
     expect(BY_MEMBER.other?.holds).toHaveLength(members.length - NAMED_SERIES_CAP);
-    expect(BY_MEMBER.other?.holds[0]).toBe("Irene Vázquez");
+    expect(BY_MEMBER.other?.holds[0]).toBe("Pablo Herrera");
     expect(BY_MEMBER.other?.holds).not.toContain("Héctor Camps");
   });
 
@@ -190,18 +190,20 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
   });
 
   it("keeps April's own leaders out of the legend, and the whole range's leaders in it", () => {
-    // Irene Vázquez and Rubén Marín lead April and are still inside "Other" there; Héctor Camps
-    // and Silvia Roldán are outside April's top four and are still named series in it.
+    // Pablo Herrera is April's fourth-largest Member and is still inside "Other" in April's
+    // column; Irene Vázquez is outside April's top four and is a named series in it anyway.
+    // That disagreement is the whole of R-V5: the legend is the range's ranking, not the
+    // bucket's, and it does not re-sort itself as the reader moves along the axis.
     const april = valuesIn(BY_MEMBER, "2026-04");
     const labels = BY_MEMBER.series.map((series) => series.label);
 
-    expect(labels).not.toContain("Irene Vázquez");
-    expect(labels).not.toContain("Rubén Marín Cano");
-    expect(april).toEqual([0, 4, 0, 0, 27]);
-    // Héctor Camps and Silvia Roldán ran nothing at all in April and keep their series anyway,
-    // which is the identity a per-bucket ranking would have taken away.
+    expect(labels).not.toContain("Pablo Herrera");
+    expect(labels).toContain("Irene Vázquez");
+    expect(april).toEqual([70, 74, 44, 49, 393]);
+    // April's own largest is the *second* series here, and the first outranks it over the
+    // range — the ordering a per-bucket ranking would have swapped.
     expect(labels[0]).toBe("Héctor Camps");
-    expect(april[0]).toBe(0);
+    expect(april[1]).toBeGreaterThan(april[0]);
   });
 
   it("loses nothing to the cap: the five series sum to the month's whole session count", () => {
@@ -211,25 +213,31 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
       valuesIn(BY_MEMBER, key).reduce((running, value) => running + value, 0),
     );
 
-    expect(monthly).toEqual([31, 100, 111, 189, 247, 64]);
+    expect(monthly).toEqual([630, 1013, 1198, 1654, 1706, 1560]);
     expect(monthly.reduce((running, value) => running + value, 0)).toBe(sessions.length);
   });
 
-  it("ranks by the chart's own measure: cost names a different four than session count", () => {
+  it("ranks by the chart's own measure: cost orders the four differently from session count", () => {
     const byCost = byMember(cost);
 
     expect(byCost.series.map((series) => series.label)).toEqual([
       "Héctor Camps",
-      "Pablo Herrera",
-      "Equilibrio Nightly Runner",
-      // Fourth by cost and nowhere near the top four by session count — she leads April on
-      // volume and is inside "Other" on the count chart above. The two orders disagree, which
-      // is the whole claim (R-V5).
+      "Silvia Roldán Nieto",
+      // Third by cost and fourth by session count, and the two Members either side of that swap
+      // are the claim: the ranking is a function of the measure the chart draws, so the same
+      // four Members do not arrive in the same order.
+      "Diego Navarro Prieto",
       "Irene Vázquez",
       "Other",
     ]);
     expect(byCost.series.map((series) => series.label)).not.toEqual(
       BY_MEMBER.series.map((series) => series.label),
+    );
+    // The *set* coincides at this volume and the *order* does not, which is a weaker fixture
+    // coincidence than a stronger claim: asserted as an order so that a build ranking by the
+    // wrong measure still fails here.
+    expect(new Set(byCost.series.map((series) => series.label))).toEqual(
+      new Set(BY_MEMBER.series.map((series) => series.label)),
     );
   });
 

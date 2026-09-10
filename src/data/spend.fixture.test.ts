@@ -8,15 +8,16 @@
 //
 // The two claims this file exists to hold against real data:
 //
-//   * **R-D4 — seat cost is ~48% of Total spend.** $4,212 of seats against $4,523.63 of
-//     attributed session Cost across the six months of the window. That is the sharpest finding
-//     in the product and the reason the fixture is deliberately low-volume; a figure computed
-//     off a consumption-only model cannot see it at all.
+//   * **R-D4 — seat cost is a minor share of Total spend** (rewritten, ticket 66). $4,212 of
+//     seats against $55,293.74 of attributed session Cost across the six months of the window —
+//     **7.1%**. It was ~46% until this ticket, on a fixture kept low-volume so that it would be;
+//     the volume is now what the requirement asks for and the seat line is a small one. What the
+//     figure still shows is that a consumption-only model cannot see it at all.
 //
 //   * **R-D10 — one `human` Member holds a seat with fewer than 5 sessions.** Noelia Gallego
-//     Ruano ran **3** sessions across 150 days, costing $11.10, and holds $234 of seat. Her
-//     Cost per completed Task is six times the Organization's. The sharpest finding in the
-//     product needs a person to point at, and this is the assertion that she is still there.
+//     ran **3** sessions across 167 days, costing $5.47, and holds $234 of seat. Her Cost per
+//     completed Task is eighteen times the Organization's. The finding needs a person to point
+//     at, and this is the assertion that she is still there.
 //
 // April is asserted **correct-and-flagged, not corrected** (R-D2, A26): 19 days of sessions
 // carrying a whole $702 month of seats, and the flag on the bucket is what stops the resulting
@@ -107,7 +108,7 @@ describe("the committed fixture is not empty of what these figures need (P6)", (
   });
 
   it("carries an attributed cost on every visible session, and no hidden one (R-M4, R-M2)", () => {
-    expect(sessions).toHaveLength(742);
+    expect(sessions).toHaveLength(7761);
     expect(sessions.every((session) => Number.isFinite(session.cost) && session.cost > 0)).toBe(true);
     expect(sessions.some((session) => session.hidden)).toBe(false);
   });
@@ -140,17 +141,21 @@ describe("Total spend is session Cost + Seat cost (R-M1, R-M5, R-D4, T-U12)", ()
   });
 
   it("adds them to the attributed session Cost, and to nothing else", () => {
-    expect(WINDOW_SPEND.sessionCost).toBeCloseTo(4905.39, 2);
+    expect(WINDOW_SPEND.sessionCost).toBeCloseTo(55_293.74, 2);
     expect(WINDOW_SPEND.sessionCost).toBeCloseTo(sessionCost(sessions), 10);
-    expect(WINDOW_SPEND.total).toBeCloseTo(9117.39, 2);
+    expect(WINDOW_SPEND.total).toBeCloseTo(59_505.74, 2);
   });
 
-  it("makes seats ~48% of what the Organization actually pays (R-D4)", () => {
-    // The headline the fixture is shaped to produce, and the reason it is low-volume: a
-    // consumption-only model sees $4,905 of spend and misses nearly half the bill. The
-    // multi-agent fan-out moved it from 48.2% to 46.2% — children are real session spend, and
-    // they are the one thing that dilutes a seat charge (R-D21, ADR-0008).
-    expect(WINDOW_SPEND.seatShare).toBeCloseTo(0.462, 4);
+  it("makes seats a minor but real share of what the Organization actually pays (R-D4)", () => {
+    // **Rewritten by ticket 66, which demoted this finding rather than preserving it.** The
+    // fixture used to be held at ~750 attempts so that seats came out at ~46% of Total spend;
+    // it now runs at the volume R-D4 asks for and they come out at 7.1%. The claim that
+    // survives is the one that never depended on the magnitude: a consumption-only model reads
+    // $55,294 and is $4,212 short, because a seat is not a session and nothing in the session
+    // stream can imply one.
+    expect(WINDOW_SPEND.seatShare).toBeCloseTo(0.0708, 4);
+    expect(WINDOW_SPEND.seatShare).toBeLessThan(0.25);
+    expect(WINDOW_SPEND.total - WINDOW_SPEND.sessionCost).toBe(WINDOW_SPEND.seatCost);
   });
 
   it("would read 20 seats if `kind` were ignored, so the exclusion is doing work", () => {
@@ -224,21 +229,24 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12, T-U13
     expect(APRIL_SPEND.seatCost).toBe(spendOver([MAY]).seatCost);
   });
 
-  it("holds 31 sessions costing $284.16, so the seat charge is most of April's bill", () => {
-    expect(APRIL.rows).toHaveLength(31);
-    expect(APRIL_SPEND.sessionCost).toBeCloseTo(284.16, 2);
-    expect(APRIL_SPEND.total).toBeCloseTo(986.16, 2);
-    expect(APRIL_SPEND.seatShare).toBeCloseTo(0.7119, 3);
+  it("holds 630 sessions costing $5,537.11, and April still carries the whole seat month", () => {
+    expect(APRIL.rows).toHaveLength(630);
+    expect(APRIL_SPEND.sessionCost).toBeCloseTo(5537.11, 2);
+    expect(APRIL_SPEND.total).toBeCloseTo(6239.11, 2);
+    // 11.3% against the window's 7.1%: April's seat share is the *highest* of the six months,
+    // because the month is whole and the sessions in it are 19 days of a ramp at its lowest.
+    expect(APRIL_SPEND.seatShare).toBeCloseTo(0.1125, 3);
+    expect(APRIL_SPEND.seatShare ?? 0).toBeGreaterThan(spendOver(MONTHS).seatShare ?? 1);
   });
 
   it("inflates April's Cost per completed Task by construction, and reports it flagged", () => {
     const april = totalSpendPerCompletedTask(APRIL_SPEND);
     const may = totalSpendPerCompletedTask(spendOver([MAY]));
 
-    expect(april.completedTasks).toBe(15);
-    expect(figure(april)).toBeCloseTo(65.74, 2);
-    expect(figure(may)).toBeCloseTo(26.22, 2);
-    // Inflated, flagged, and left alone. A pro-rated April would read ~$48 and would hide the
+    expect(april.completedTasks).toBe(356);
+    expect(figure(april)).toBeCloseTo(17.53, 2);
+    expect(figure(may)).toBeCloseTo(15.15, 2);
+    // Inflated, flagged, and left alone. A pro-rated April would read ~$16 and would hide the
     // very artefact R-D2 wants a reader to see the flag next to.
     expect(figure(april)).toBeGreaterThan(figure(may));
     expect(april.partial).toBe(true);
@@ -246,28 +254,28 @@ describe("April is correct-and-flagged, never pro-rated (R-D2, A26, T-U12, T-U13
   });
 
   it("is the seat charge that does it: on session Cost alone April is the cheaper month", () => {
-    expect(figure(costPerCompletedTask(APRIL))).toBeCloseTo(18.94, 2);
-    expect(figure(costPerCompletedTask(MAY))).toBeCloseTo(14.52, 2);
+    expect(figure(costPerCompletedTask(APRIL))).toBeCloseTo(15.55, 2);
+    expect(figure(costPerCompletedTask(MAY))).toBeCloseTo(13.96, 2);
     expect(figure(totalSpendPerCompletedTask(APRIL_SPEND)) - figure(costPerCompletedTask(APRIL)))
-      .toBeCloseTo(702 / 15, 6);
+      .toBeCloseTo(702 / 356, 6);
   });
 });
 
 describe("waste sits in the numerator and not the denominator (R-M1, T-U13)", () => {
   const APRIL = monthAt("2026-04");
 
-  it("counts 15 Completed Tasks out of 28 Tasks attempted in April", () => {
+  it("counts 356 Completed Tasks out of 473 Tasks attempted in April", () => {
     const attempted = new Set(APRIL.rows.map((row) => row.task_key));
 
-    expect(attempted.size).toBe(28);
-    expect(completedTaskKeys(APRIL.rows)).toHaveLength(15);
+    expect(attempted.size).toBe(473);
+    expect(completedTaskKeys(APRIL.rows)).toHaveLength(356);
   });
 
   it("keeps every session's cost in the numerator, accepted or not", () => {
     const accepted = costPerSession(APRIL, "accepted");
     const rejected = costPerSession(APRIL, "not-accepted");
 
-    expect(accepted.sessions + rejected.sessions).toBe(31);
+    expect(accepted.sessions + rejected.sessions).toBe(630);
     expect(costPerCompletedTask(APRIL).cost).toBeCloseTo(accepted.cost + rejected.cost, 10);
     // The denominator ignores the rejected half entirely, which is what raises the figure.
     expect(rejected.cost).toBeGreaterThan(0);
@@ -276,8 +284,8 @@ describe("waste sits in the numerator and not the denominator (R-M1, T-U13)", ()
   it("reads a lower figure across the window than in any month, as adoption ramps (R-D4)", () => {
     const window = totalSpendPerCompletedTask(spendOver(MONTHS));
 
-    expect(window.completedTasks).toBe(424);
-    expect(figure(window)).toBeCloseTo(21.5, 2);
+    expect(window.completedTasks).toBe(4432);
+    expect(figure(window)).toBeCloseTo(13.43, 2);
   });
 
   it("counts a Task once even where its sessions span work types (R-D8, R-D14)", () => {
@@ -302,30 +310,30 @@ describe("a seat held against near-zero usage (R-D10, T-U12, T-U13)", () => {
   const HER_MONTHS = monthsOf(ROWS);
   const HER_SPEND = totalSpend(seatBearing(HER_MONTHS), HER, SEAT_FEE);
 
-  it("is a human holding a seat, with fewer than 5 sessions across 150 days", () => {
+  it("is a human holding a seat, with fewer than 5 sessions across 167 days", () => {
     expect(HER).toHaveLength(1);
     expect(HER[0]).toMatchObject({ kind: "human", seat_active: true, full_name: "Noelia Gallego" });
     expect(ROWS).toHaveLength(3);
     expect(ROWS.length).toBeLessThan(5);
   });
 
-  it("costs $11.10 of sessions and $234 of seat, so 95% of her bill is the seat", () => {
+  it("costs $5.47 of sessions and $234 of seat, so 98% of her bill is the seat", () => {
     expect(HER_SPEND.seats).toBe(1);
     expect(HER_SPEND.months).toBe(6);
     // One seat over six months: the one population where the two counts coincide.
     expect(HER_SPEND.seatMonths).toBe(6);
     expect(HER_SPEND.seatCost).toBe(234);
-    expect(HER_SPEND.sessionCost).toBeCloseTo(11.1, 2);
-    expect(HER_SPEND.seatShare).toBeCloseTo(0.9547, 4);
+    expect(HER_SPEND.sessionCost).toBeCloseTo(5.47, 2);
+    expect(HER_SPEND.seatShare).toBeCloseTo(0.9772, 4);
   });
 
-  it("is the highest cost per unit of work in the Organization, by six times", () => {
+  it("is the highest cost per unit of work in the Organization, by seventeen times", () => {
     const hers = totalSpendPerCompletedTask(HER_SPEND);
     const org = totalSpendPerCompletedTask(spendOver(MONTHS));
 
-    expect(hers.completedTasks).toBe(2);
-    expect(figure(hers)).toBeCloseTo(122.55, 2);
-    expect(figure(hers) / figure(org)).toBeGreaterThan(5);
+    expect(hers.completedTasks).toBe(1);
+    expect(figure(hers)).toBeCloseTo(239.47, 2);
+    expect(figure(hers) / figure(org)).toBeGreaterThan(15);
   });
 
   it("is invisible to a consumption-only reading, which is the point of R-D10", () => {
@@ -333,22 +341,22 @@ describe("a seat held against near-zero usage (R-D10, T-U12, T-U13)", () => {
     // Only Total spend can see her, and only at monthly grain and coarser (R-M5).
     const consumption = costPerCompletedTask({ key: "window", partial: true, rows: ROWS });
 
-    expect(figure(consumption)).toBeCloseTo(5.55, 2);
+    expect(figure(consumption)).toBeCloseTo(5.47, 2);
     expect(figure(consumption)).toBeLessThan(figure(totalSpendPerCompletedTask(spendOver(MONTHS))));
   });
 
   it("holds a month with real spend and no Completed Task, which yields no figure at all", () => {
-    // April: one session, on `equilibrio/mobile-app#197`, rejected. She retried the same Task in
-    // July and it landed — so April is $8.23 plus a whole $39 seat against nothing delivered.
-    const april = HER_MONTHS.find((bucket) => bucket.key === "2026-04");
-    if (!april) throw new Error("no April bucket");
-    const reading = totalSpendPerCompletedTask(totalSpend(seatBearing([april]), HER, SEAT_FEE));
+    // May: one session, rejected. So May is $1.49 of session Cost plus a whole $39 seat against
+    // nothing delivered — a whole finished month whose figure is an absence rather than a zero.
+    const may = HER_MONTHS.find((bucket) => bucket.key === "2026-05");
+    if (!may) throw new Error("no May bucket");
+    const reading = totalSpendPerCompletedTask(totalSpend(seatBearing([may]), HER, SEAT_FEE));
 
-    expect(april.rows).toHaveLength(1);
+    expect(may.rows).toHaveLength(1);
     expect(reading.completedTasks).toBe(0);
     expect(reading.defined).toBe(false);
-    expect(reading.cost).toBeCloseTo(47.23, 2);
+    expect(reading.cost).toBeCloseTo(40.49, 2);
     expect("value" in reading).toBe(false);
-    expect(reading.partial).toBe(true);
+    expect(reading.partial).toBe(false);
   });
 });

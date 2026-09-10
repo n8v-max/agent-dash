@@ -243,8 +243,8 @@ monthly grain, and a tile that silently changes metric with the period is the fa
 unaccepted-spend tile was cut to avoid.
 
 `quarter` is dropped. It reached ticket 07 without ever entering the glossary — `CONTEXT.md`
-§ Period semantics defines Period as day, week or month — and over the 150-day fixture window it
-yields exactly two buckets, **both partial**, so every quarter figure on the surface that owns the
+§ Period semantics defines Period as day, week or month — and over the fixture window it yields
+exactly two buckets, **both partial**, so every quarter figure on the surface that owns the
 ten-second read would carry an incompleteness flag. See § 11 C7.
 
 **The picker offers the Organization's months and nothing else, and opens on the current one**
@@ -955,10 +955,15 @@ These are the requirements the *data* must satisfy for the product's claims to b
 names, English Team names, GitHub logins that do not trivially match full names, so the identity
 join is visibly doing work.
 
-**R-D2 — Window: 12 Apr – 8 Sep 2026 inclusive, 150 days.** April and September are partial and
-are **flagged as partial** — not withheld, not pro-rated. April matters: seat cost is a whole
-month against 19 days of sessions, so its Cost per completed Task is inflated by construction, and
-the flag is what stops that being read as a finding.
+**R-D2 — Window: 12 Apr – 25 Sep 2026 inclusive, 167 days** (amended 2026-09-10, ticket 66; it
+was 12 Apr – 8 Sep, 150 days). April and September are partial and are **flagged as partial** —
+not withheld, not pro-rated. April matters: seat cost is a whole month against 19 days of
+sessions, so its Cost per completed Task is inflated by construction, and the flag is what stops
+that being read as a finding.
+
+**The declared window now runs past today, which is the point of it.** Ticket 62 landed the cut
+described below before the data needed it; ticket 66 extended the data past it, so the cut is now
+load-bearing on every read rather than a no-op waiting for one.
 
 **The window the product reads is the declared window cut at `now`** (amended 2026-09-10, ticket
 62). The declared window is a property of the fixture and may run past today; what any surface
@@ -978,20 +983,39 @@ and stays. Until the fixture is extended past today the cut removes nothing on m
 is what makes it safe to have landed before the data needed it.
 
 **R-D3 — Scale.** 4 Teams · 20 Members (18 `human`, 2 `service_account`) · 5 Repositories · 5
-WorkTypes · 7 Models across 3 vendors · ~600 Tasks · ~750 **root** AgentSessions, plus the child
-sessions R-D21 fans out from them (~1,050 rows on disk in all). The session count the product
-reports is the root count (R-M19).
+WorkTypes · 7 Models across 3 vendors · ~6,000 Tasks · ~7,800 **root** AgentSessions, plus the
+child sessions R-D21 fans out from them (~10,900 rows on disk in all). The session count the
+product reports is the root count (R-M19). Amended 2026-09-10 by ticket 66, which raised the
+volume by an order of magnitude; the committed figures are 5,970 Tasks, 7,761 visible roots,
+2,960 visible children and 158 hidden roots — 10,879 rows across the 25 session files.
 
-**R-D4 — Volume is an adoption ramp**: median 0 sessions per Member per week in April rising to 2
-in August; max 3 rising to 8. Low volume is deliberate — it is what makes seat cost (~$4,212
-against ~$4,500 of session spend, ~48% of Total spend) the sharpest finding in the product. A
-high-volume fixture would have buried it.
+**R-D4 — Volume is one to nine root sessions per `human` Member per workday, ramping from
+April** (rewritten 2026-09-10, ticket 66). On a workday a Member runs at least one and at most
+nine; a weekend day runs about 15% of a workday's rate and is usually empty. The rate rises along
+a logistic from ~2.5 sessions per Member-workday in April to ~5 in September, flattening across
+August — 2,043 (Member × workday) pairs on the committed data, every one of them inside the
+range. R-D10's seat holder is carved out of the result afterwards and is the one exception.
 
-**R-D4 governs where it collides with a session-cost distribution.** Ticket 10 also specified a
-median session cost of ~$3.20 with p95 ~$35. Both cannot hold: the ramp fixes the session count, and
-those totals then fix the mean, leaving no distribution that reaches that median and that p95. The
-ramp wins, because the seat-cost finding above rests on it and the percentiles support no claim the
-product makes. Recorded 2026-09-09; the percentile figures are withdrawn, not deferred.
+**Weekly session spend is a smooth function of time.** A logistic in dollars sharing the volume
+curve's midpoint and steepness, from ~$1,900 per full week in April to a ~$2,650 plateau in
+August–September; a week whose first day falls before 1 July sits within ±40% of that curve, and
+a week from 1 July within ±20%. The curve is *shallower* than the volume curve — 1.39 against
+2.03 — because R-D17's falling frontier share makes the average priced token cheaper as the
+sessions get more numerous. There is no separate price ramp: costs are more modest initially by
+construction of the volume ramp and of R-D17, and by nothing else.
+
+**The seat fee is a minor share of Total spend**, and it is now stated as a ceiling: seats are
+**at most 25%** of Total spend, and on the committed data **7.1%** — $4,212 of seats against
+$55,293.74 of session cost. It was ~46% until this ticket, against a fixture deliberately held at
+~750 attempts so that it would be, and the volume the product's own claims need is worth more
+than the size of that number. What survives is the part that never depended on the magnitude: a
+consumption-only model cannot see the seat line at all, because a seat is not a session and
+nothing in the session stream implies one.
+
+*(The paragraph that governed a collision with ticket 10's session-cost distribution — median
+~$3.20, p95 ~$35 — is **struck**, 2026-09-10. It resolved a contradiction between the old
+low-volume ramp and those percentiles; the ramp it defended no longer exists, and ticket 68 sets
+the token and cost distribution from here.)*
 
 **R-D5 — Timezone edge cases are seeded on purpose.** Sessions fall in the first two hours after
 local midnight — 00:00–02:00 Europe/Madrid — so they land on the *previous* UTC day. Without them
@@ -1026,7 +1050,7 @@ query it becomes an A21 failure.
 **R-D8 — Rework 18% of Tasks; Decomposition 12%.**
 
 **R-D9 — Incomplete Tasks present in all four age buckets.** 91+ days is reachable inside a
-150-day window, so the oldest bucket is not empty by construction.
+167-day window, so the oldest bucket is not empty by construction.
 
 **R-D10 — One `human` Member holds a seat with fewer than 5 sessions** across the whole window.
 The sharpest finding in the product needs a person to point at.
@@ -1075,9 +1099,10 @@ A child is **small in both dimensions at once**: it holds a fraction of its root
 allocation and draws the same fraction of its root's tokens, per Model. Two constraints fix that
 sizing and both are asserted by the generator. R-D6's and R-D8's rates are unchanged and must
 still hit — they do, exactly, because the fan-out is drawn from finished rows and moves no root.
-And R-D4's seat share is a ratio with session spend in its denominator, so a fan-out that cost
-what a root costs would dilute the sharpest finding in the product out of its band; the committed
-figure is **46.2%**, down from 48.2% before the children existed.
+A child is sized for realism: a sub-agent is handed one slice of its root's work. *(Until ticket
+66 the sizing was argued from R-D4's seat share, which a fan-out costing what a root costs would
+have diluted out of an authored band. R-D4 no longer has that band, and the argument is
+withdrawn with it; the numbers are unchanged.)*
 
 **R-D20 — The GitHub → Member join is authored, not modelled.** The match rule is documented in
 the fixture README so a reader can see the join, but **no GitHub user fails to match**. An
@@ -1219,7 +1244,7 @@ not a decision about `access`.
 **C7 — `quarter` as a period.** Ticket 07 gives `/demo` a month/quarter control. `CONTEXT.md`
 § Period semantics defines Period as **day, week or month**, and `quarter` appears in no ADR, no
 other ticket, and nothing in the technical or testing specs implements or tests a quarter bucket.
-**Resolved in favour of the glossary**: `/demo` is month-only (R-N6). Over the 150-day window
+**Resolved in favour of the glossary**: `/demo` is month-only (R-N6). Over the fixture window
 quarter yields two buckets, both partial, so the option was degenerate as well as undefined.
 
 **C8 — Stacking.** Ticket 07 specifies the fourth tile as a *stacked area* and the human-presence

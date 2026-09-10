@@ -17,7 +17,7 @@ import { joinGithubUser, normaliseName } from "./join.mts";
 import { githubUsers, members } from "./people.mts";
 import { crossesUtcDay, startsLateEvening } from "./predicates.mts";
 import { madridOffsetMinutes } from "./schedule.mts";
-import { modelMixLines, totalSpendLines, trendLines } from "./spend.mts";
+import { modelMixLines, totalSpendLines, trendLines, weeklySpendLines } from "./spend.mts";
 import {
   CHILD_EDGE_SECONDS,
   CHILD_ROOT_SHARE,
@@ -94,7 +94,16 @@ const assertClock = (rows: readonly AgentSession[]): string[] => {
   let crossing = 0;
   for (const row of rows) {
     const started = Date.parse(row.started_at);
-    check(started >= startMs && started <= endMs, `R-D2: ${row.id} starts outside the window`);
+    // **The end of the window bounds an attempt, not every row.** A root that opens at 23:40 on
+    // the last day runs into the small hours of the next one — `ended_at` has always been free
+    // to pass `window_end` — and a child spawned inside that root's window inherits the same
+    // freedom. What R-D2 fixes is which days the platform launched work on, so the ceiling is
+    // asserted on roots, and `assertTree` below is what holds a child inside its own root.
+    check(started >= startMs, `R-D2: ${row.id} starts before the window`);
+    check(
+      !isRoot(row) || started <= endMs,
+      `R-D2: root ${row.id} starts after the window closes`,
+    );
     check(
       madridOffsetMinutes(started) === MADRID_OFFSET_MINUTES,
       `R-D5: ${row.id} does not sit at Madrid's +02:00 — a DST transition is inside the window`,
@@ -242,5 +251,6 @@ export const assertFixture = (fixture: {
     ...modelMixLines(roots),
     ...trendLines(roots),
     ...totalSpendLines(roots),
+    ...weeklySpendLines(roots),
   ].join("\n");
 };

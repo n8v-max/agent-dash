@@ -63,8 +63,8 @@ const UNGRANTED_NAMES = ungrantedNames(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 
 /**
- * The floor the residual cost set must clear. Measured on the committed fixture: **612**
- * candidate ungranted literals, **384** after subtracting every figure the viewer's granted rows
+ * The floor the residual cost set must clear. Measured on the committed fixture: **1,653**
+ * candidate ungranted literals, **604** after subtracting every figure the viewer's granted rows
  * can produce. The classes subtracted, each measured against a real failure:
  *
  *   * the viewer's own session costs and the totals its rows aggregate to (sums);
@@ -77,12 +77,18 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
  *     fixture. Counts over counts, so they are subtracted over the **Team** as well as over the
  *     viewer's own rows: R-A3 grants `team` over `jobs`, so that is the population `/demo/work`
  *     genuinely computes them across, and a count can never be a cost;
+ *   * the **projection** (ticket 66): `/demo/projection` extrapolates the viewer's own spend —
+ *     a daily rate carried forward, today's remainder, and the month-end figures those imply.
+ *     None of them is a sum and none is a quotient at a reported key, so the two classes above
+ *     cannot see them; the literal that exposed the gap was `15.5`, today's remainder, which is
+ *     also some other Member's session cost;
  *   * the published token rate card (R-N11), which is nobody's datapoint.
  *
- * **Both sides grew with ticket 48's multi-agent fixture**, and grew together: a root's cost is
- * now its whole tree's (R-M19) and `/demo/history` additionally prints each child's own cost, so
- * there are more candidate literals *and* more legitimate ones. 384 of 612 is still nearly two
- * thirds of the ungranted money range.
+ * **Both sides grew with ticket 66's volume, and the residual share fell.** Ten times the rows
+ * put ten times the money into the same narrow range, so a far larger fraction of it is
+ * reachable as some legitimate reading of the viewer's own work: 604 of 1,653, where ticket 48
+ * measured 384 of 612. The set is bigger in absolute terms and thinner in proportion, and it is
+ * the absolute size the search depends on.
  *
  * **300 is the line below which this stops being a search of the money range.** If a fixture or
  * a subtraction change ever drops the set under it, the cost assertion has become theatre and
@@ -91,29 +97,31 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COST_FLOOR = 300;
 
 /**
- * `24.39` is `ses_0032`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
- * over — and it is the literal ticket 29's falsification probe leaked to prove T-E4 can fail.
- * It must survive the subtraction, or the probe would no longer fire and neither would a leak.
+ * `28.04` is `ses_5160`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
+ * over — and it plays the part `24.39` played before ticket 66 regenerated the fixture: the
+ * literal ticket 29's falsification probe leaked to prove T-E4 can fail. It must survive the
+ * subtraction, or the probe would no longer fire and neither would a leak.
  */
-const KNOWN_UNGRANTED_LITERAL = "24.39";
+const KNOWN_UNGRANTED_LITERAL = "28.04";
 
 /**
- * `7.31` is another Member's session cost — `ses_0079`'s, once its two sub-agents roll into it
- * (R-M19) — **and** the viewer's own 2026-07-20 total. It is the same kind of false positive
- * ticket 31 measured on `/demo/spend`, and it is the defect this file exists to fix: value
- * identity is not fact identity. (It reads `7.31` rather than ticket 31's `13.04` because
- * ticket 48 regenerated the fixture; the property it is named for is the same one.)
+ * `24.87` is another Member's session cost **and** the viewer's own total for `api-gateway` on
+ * 21 April 2026 — one cell of an R-X1 mirror. It is the same kind of false positive ticket 31
+ * measured on `/demo/spend`, and it is the defect this file exists to fix: value identity is
+ * not fact identity. (It reads `24.87` rather than ticket 48's `7.31` because ticket 66
+ * regenerated the fixture; the property it is named for is the same one.)
  */
-const OWN_AGGREGATE_COLLISION = "7.31";
+const OWN_AGGREGATE_COLLISION = "24.87";
 
 /**
- * `0.7` is the viewer's own acceptance rate for `implementation` work in August 2026 — 7 of its
- * own 10 sessions — and it is also some other Member's session cost. It is one of the three
- * literals `/demo/work` failed on, on a page whose ViewModel carries **no cost field at all**.
- * A *sum* subtraction cannot see it; only the quotient subtraction can. It is named here so
- * that a future change reverting the quotient half fails on a value, not just on a set size.
+ * `0.8` is the viewer's own acceptance rate on 13 April 2026 — 4 of its own 5 sessions — and it
+ * is also some other Member's session cost of `$0.80`. It is the kind of literal `/demo/work`
+ * failed on, on a page whose ViewModel carries **no cost field at all**. Measured: it is
+ * produced by no sum and by no money quotient of the viewer's own rows, so *only* the count
+ * quotients remove it. It is named here so that a future change reverting the quotient half
+ * fails on a value, not just on a set size.
  */
-const OWN_QUOTIENT_COLLISION = "0.7";
+const OWN_QUOTIENT_COLLISION = "0.8";
 
 /**
  * **The scanner itself, before anything is asserted with it** (ticket 69).

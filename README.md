@@ -25,8 +25,9 @@ Three levers move the figure, and each has a surface behind it:
 - **Rework** — a Task that needed three attempts cost three times its price. Measurable only because
   Task and AgentSession are different things, which is why the domain model separates them.
 - **Seats** — a seat held against near-zero usage is the most expensive unit of work in the org.
-  Seat cost is **46.2%** of Total spend on the committed fixture; a consumption-only model cannot
-  see it at all.
+  One Member holds a $234 seat against $5.47 of sessions, which no consumption-only model can see:
+  a seat is not a session and nothing in the session stream implies one. Seats are **7.1%** of
+  Total spend on the committed fixture — a minor line, and a line a spend report has to carry.
 
 **The default is open.** Individual spend is visible to everyone in the Organization, symmetric,
 sortable, with no leaderboard and no minimum-population floor
@@ -123,15 +124,18 @@ only. Fixture JSON and `node:fs` are restricted to `src/data/**` and `src/fixtur
 can bypass the schema validation at the boundary. Hidden sessions — the ~2% the platform absorbs —
 are stripped once, at parse, so nothing downstream can forget to.
 
-**The fixture generator is committed, seeded, and so is its output** (`src/fixtures/`). ~600 Tasks
-and ~750 root AgentSessions plus their sub-agent children over a 150-day window closing 2026-09-08,
-across 20 Members, 4 overlapping Teams, 5 Repositories, 5 WorkTypes and 7 Models from 3 vendors.
+**The fixture generator is committed, seeded, and so is its output** (`src/fixtures/`). 5,970
+Tasks and 7,761 root AgentSessions plus their sub-agent children — 10,879 rows on disk — over a
+167-day window closing 2026-09-25, across 20 Members, 4 overlapping Teams, 5 Repositories, 5
+WorkTypes and 7 Models from 3 vendors. **The window runs past today on purpose**, and the
+application cuts the dataset at `now` once, at the data boundary.
 Datasets are shaped by where they would really come from — one file per `(repository × work_type)`
 for platform events, GitHub field names for the mocked GitHub API — and the generator asserts its
 own distributions as it writes. **No two Members share a first name or a surname**, and half of
 them carry one surname to the other half's two, so a name in a legend identifies a person and no
-surface may assume a three-word shape. Volume is deliberately low: a busy fixture would bury the
-seat-cost finding. Tests read the committed output and never run the generator, and CI regenerates from the
+surface may assume a three-word shape. On a workday each human Member runs one to nine sessions,
+rising along a logistic from April, and weekly spend follows the same curve inside an authored
+band. Tests read the committed output and never run the generator, and CI regenerates from the
 seed and diffs, so the data the tests pass against is the data the app ships.
 
 **Six gates, all required.** `lint`, `typecheck`, `test`, `test:coverage`, `build`, `e2e` — all six

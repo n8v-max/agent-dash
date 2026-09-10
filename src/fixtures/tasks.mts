@@ -54,15 +54,35 @@ export const quotaFor = (sessionCount: number): TaskQuota => {
 // Multi-session Tasks are spread over Members in proportion to how much each Member ran,
 // then repaired against capacity: a Member cannot hold more multi-session slots than they
 // have sessions. The low-usage seat holder (R-D10) is the one this bites on.
-const distribute = (
-  counts: readonly number[],
-  quota: TaskQuota,
-): { threes: number[]; twos: number[] } => {
+//
+// Round-robin in volume order, **skipping a Member with no room left**. A plain `i % length` was
+// correct while the whole fixture held sixteen three-session Tasks and every Member could absorb
+// one; at ticket 66's volume it is over a hundred, and it would hand R-D10's three-session seat
+// holder seven of them — a negative remainder that `cut` below would silently turn into Tasks
+// with no sessions at all.
+const spreadThrees = (counts: readonly number[], wanted: number): number[] => {
   const threes = counts.map(() => 0);
   const byVolume = counts
     .map((count, index) => ({ count, index }))
     .sort((a, b) => b.count - a.count || a.index - b.index);
-  for (let i = 0; i < quota.both; i += 1) threes[byVolume[i % byVolume.length].index] += 1;
+  for (let placed = 0; placed < wanted; ) {
+    const before = placed;
+    for (const { index } of byVolume) {
+      if (placed >= wanted) break;
+      if (counts[index] - 3 * (threes[index] + 1) < 0) continue;
+      threes[index] += 1;
+      placed += 1;
+    }
+    if (placed === before) throw new Error("R-D8: no Member has room for a three-session Task");
+  }
+  return threes;
+};
+
+const distribute = (
+  counts: readonly number[],
+  quota: TaskQuota,
+): { threes: number[]; twos: number[] } => {
+  const threes = spreadThrees(counts, quota.both);
   const twos = largestRemainder(
     counts.map((count) => Math.max(count, 0.001)),
     quota.reworkOnly + quota.decompositionOnly,
@@ -80,10 +100,12 @@ const distribute = (
 };
 
 const cut = (rng: Rng, slots: readonly Slot[], threes: number, twos: number): Slot[][] => {
+  const singles = slots.length - 3 * threes - 2 * twos;
+  if (singles < 0) throw new Error("R-D8: a Member's multi-session Tasks exceed their sessions");
   const sizes = shuffled(rng, [
     ...Array.from({ length: threes }, () => 3),
     ...Array.from({ length: twos }, () => 2),
-    ...Array.from({ length: slots.length - 3 * threes - 2 * twos }, () => 1),
+    ...Array.from({ length: singles }, () => 1),
   ]);
   const groups: Slot[][] = [];
   let cursor = 0;
@@ -119,15 +141,19 @@ export const planTasks = (
   );
   // Which of the two-session Tasks are Rework and which are Decomposition is drawn globally,
   // so the two rates hold over the Organization rather than per Member.
+  //
+  // Chosen by **group identity**, not by the first slot's timestamp. At nine sessions per Member
+  // per workday two groups can open on the same second, and a timestamp key would then label
+  // both of them Rework — moving R-D8's two rates apart by however many collisions the draw
+  // happened to produce. The old volume had none and the new one has a handful.
   const twoSession = shuffled(
     rng,
     groups.filter((entry) => entry.group.length === 2),
   );
-  const reworkIds = new Set(
-    twoSession.slice(0, quota.reworkOnly).map((entry) => entry.group[0].started_at_ms),
-  );
-  const tasks = groups.map(({ member_id: memberId, group }) => {
-    const shape = shapeOf(group, reworkIds.has(group[0].started_at_ms) ? 1 : 0);
+  const rework = new Set(twoSession.slice(0, quota.reworkOnly));
+  const tasks = groups.map((entry) => {
+    const { member_id: memberId, group } = entry;
+    const shape = shapeOf(group, rework.has(entry) ? 1 : 0);
     return {
       member_id: memberId,
       shape,

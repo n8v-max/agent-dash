@@ -9,6 +9,7 @@
 import { fileURLToPath } from "node:url";
 import { planCells } from "./allocation.mts";
 import { spawnChildren } from "./children.mts";
+import { repairWeeklySpend } from "./curve.mts";
 import { assignCells } from "./assign.mts";
 import { assertFixture } from "./invariants.mts";
 import { mintTasks } from "./issues.mts";
@@ -39,7 +40,12 @@ const main = (): void => {
   const sessions = [...roots, ...spawnChildren(rng, roots)].sort(
     (a, b) => Date.parse(a.started_at) - Date.parse(b.started_at) || a.id.localeCompare(b.id),
   );
-  const report = assertFixture({ sessions, tasks });
+  // R-D4 — weekly session spend follows `WEEKLY_SPEND_SHAPE`. Last, after the fan-out, because a
+  // child's cost is real session spend and a repair that ran before it existed would be a repair
+  // toward a total the fixture does not have. It draws no random numbers, so it cannot move
+  // anything above it.
+  const curve = repairWeeklySpend(sessions);
+  const report = [curve.join("\n"), assertFixture({ sessions, tasks })].join("\n");
   const directory = outputDirectory(process.argv.slice(2));
   const files = writeFixture(directory, { sessions, tasks });
   process.stdout.write(`${report}\nwrote ${files} files to ${directory}\n`);

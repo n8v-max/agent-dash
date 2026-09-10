@@ -55,9 +55,9 @@ const countIn = (key: IncompleteAgeBucketKey): number => {
 };
 
 describe("the committed fixture carries what these metrics need (P6)", () => {
-  it("holds 742 sessions across 570 Tasks — the population every figure below divides", () => {
-    expect(sessions).toHaveLength(742);
-    expect(TASKS).toHaveLength(570);
+  it("holds 7,761 sessions across 5,970 Tasks — the population every figure below divides", () => {
+    expect(sessions).toHaveLength(7761);
+    expect(TASKS).toHaveLength(5970);
     expect(TASKS.reduce((running, task) => running + task.sessions, 0)).toBe(sessions.length);
   });
 
@@ -83,7 +83,7 @@ describe("T-U14 — acceptance rate by WorkType on the shipped rows (R-D6, A21)"
     const byType = acceptanceRateByWorkType(sessions);
     const denominators = WORK_TYPE_KEYS.map((key) => byType[key].sessions);
 
-    expect(denominators).toEqual([236, 142, 156, 95, 113]);
+    expect(denominators).toEqual([2472, 1482, 1648, 956, 1203]);
     // The five denominators partition the session population — no session is counted twice and
     // none is counted nowhere, because every session declares exactly one WorkType.
     expect(denominators.reduce((running, held) => running + held, 0)).toBe(sessions.length);
@@ -111,9 +111,9 @@ describe("T-U14 — acceptance rate by WorkType on the shipped rows (R-D6, A21)"
 
 describe("T-U15 — Rework and Decomposition on the shipped rows (R-D8)", () => {
   it("reproduces R-D8: Rework 18% of Tasks, Decomposition 12%", () => {
-    expect(reworkRate(TASKS)).toMatchObject({ tasks: 570, count: 103 });
+    expect(reworkRate(TASKS)).toMatchObject({ tasks: 5970, count: 1075 });
     expect(reworkRate(TASKS).rate).toBeCloseTo(0.18, 2);
-    expect(decompositionRate(TASKS)).toMatchObject({ tasks: 570, count: 69 });
+    expect(decompositionRate(TASKS)).toMatchObject({ tasks: 5970, count: 716 });
     expect(decompositionRate(TASKS).rate).toBeCloseTo(0.12, 2);
   });
 
@@ -125,22 +125,23 @@ describe("T-U15 — Rework and Decomposition on the shipped rows (R-D8)", () => 
     }
 
     expect([...combinations].toSorted()).toEqual([
-      ["--", 410],
-      ["-D", 57],
-      ["R-", 91],
-      ["RD", 12],
+      ["--", 4308],
+      ["-D", 587],
+      ["R-", 946],
+      ["RD", 129],
     ]);
-    // 103 + 69 = 172 labels over 160 labelled Tasks: the 12 both-Tasks are counted in each rate.
-    expect(reworkRate(TASKS).count + decompositionRate(TASKS).count).toBe(172);
+    // 1,075 + 716 = 1,791 labels over 1,662 labelled Tasks: the 129 both-Tasks are counted in
+    // each rate.
+    expect(reworkRate(TASKS).count + decompositionRate(TASKS).count).toBe(1791);
   });
 
-  it("names a Task exhibiting both — implementation failed, then review and bugfix accepted", () => {
-    const both = factsOn("equilibrio/api-gateway#632");
+  it("names a Task exhibiting both — implementation failed, then refactor and implementation accepted", () => {
+    const both = factsOn("equilibrio/api-gateway#1211");
 
     expect(sessionsOn(both.task_key).map((session) => `${session.work_type}:${session.accepted}`)).toEqual([
       "implementation:false",
-      "review:true",
-      "bugfix:true",
+      "refactor:true",
+      "implementation:true",
     ]);
     expect(both).toMatchObject({
       sessions: 3,
@@ -151,7 +152,7 @@ describe("T-U15 — Rework and Decomposition on the shipped rows (R-D8)", () => 
     });
   });
 
-  it("counts the cross-WorkType follow-up on 80 Tasks — the clause ticket 05 dropped", () => {
+  it("counts the cross-WorkType follow-up on 804 Tasks — the clause ticket 05 dropped", () => {
     // Every Task whose Rework label comes from a failed session followed by a session of a
     // *different* WorkType. Under the strict same-type reading these would not be Rework, and
     // the rate would fall below R-D8's 18%. The consequence is accepted, not a bug.
@@ -164,19 +165,19 @@ describe("T-U15 — Rework and Decomposition on the shipped rows (R-D8)", () => 
       );
     });
 
-    expect(crossType).toHaveLength(80);
+    expect(crossType).toHaveLength(804);
     expect(crossType.every((task) => task.rework)).toBe(true);
-    expect(crossType.map((task) => task.task_key)).toContain("equilibrio/api-gateway#632");
+    expect(crossType.map((task) => task.task_key)).toContain("equilibrio/api-gateway#1211");
   });
 });
 
 describe("T-U16 — Incomplete Task age buckets on the shipped rows (R-D9)", () => {
   it("fills all four buckets, so T-U16 cannot pass vacuously (P6, R-D9)", () => {
-    expect(AGES.buckets.map((bucket) => bucket.count)).toEqual([14, 32, 66, 34]);
+    expect(AGES.buckets.map((bucket) => bucket.count)).toEqual([96, 282, 623, 537]);
     for (const bucket of AGES.buckets) {
       expect(bucket.count).toBeGreaterThan(0);
     }
-    // 91+ is reachable inside the 150-day window, so the oldest bucket is not empty by
+    // 91+ is reachable inside the 167-day window, so the oldest bucket is not empty by
     // construction — which is exactly what R-D9 was seeded to guarantee.
     expect(countIn("91+")).toBeGreaterThan(0);
     expect(Math.max(...AGES.tasks.map((task) => task.ageDays))).toBeGreaterThan(91);
@@ -186,7 +187,7 @@ describe("T-U16 — Incomplete Task age buckets on the shipped rows (R-D9)", () 
     const incomplete = TASKS.filter((task) => !task.completed);
 
     expect(AGES.total).toBe(incomplete.length);
-    expect(AGES.total).toBe(146);
+    expect(AGES.total).toBe(1538);
     expect(AGES.buckets.reduce((running, bucket) => running + bucket.count, 0)).toBe(AGES.total);
     expect(AGES.tasks.every((task) => factsOn(task.task_key).accepted === 0)).toBe(true);
   });
@@ -198,10 +199,10 @@ describe("T-U16 — Incomplete Task age buckets on the shipped rows (R-D9)", () 
   });
 
   it("ages a Task whose last session ran past the end of the window at 0", () => {
-    // `equilibrio/mobile-app#558` ends at 01:15 on 9 September, Europe/Madrid — after the last
-    // instant of the window. It is not a fault and does not reject the report: its last activity
-    // is as recent as the injected clock allows, so it ages 0.
-    const aged = AGES.tasks.find((task) => task.task_key === "equilibrio/mobile-app#558");
+    // `equilibrio/mobile-app#3958` ends after the last instant of the window — a session that
+    // opened late on 25 September and ran into the 26th. It is not a fault and does not reject
+    // the report: its last activity is as recent as the injected clock allows, so it ages 0.
+    const aged = AGES.tasks.find((task) => task.task_key === "equilibrio/mobile-app#3958");
 
     expect(aged).toMatchObject({ ageDays: 0, bucket: "0-7" });
     expect(Date.parse(aged?.lastSessionEndedAt ?? "")).toBeGreaterThan(Date.parse(NOW));
@@ -230,7 +231,7 @@ describe("T-U16 — Incomplete Task age buckets on the shipped rows (R-D9)", () 
     const ninetyDaysOn = incompleteTaskAges(TASKS, "2026-12-07T23:59:59+01:00");
 
     expect(ninetyDaysOn.total).toBe(AGES.total);
-    expect(ninetyDaysOn.buckets.map((bucket) => bucket.count)).toEqual([0, 0, 5, 141]);
+    expect(ninetyDaysOn.buckets.map((bucket) => bucket.count)).toEqual([0, 0, 225, 1313]);
   });
 });
 
