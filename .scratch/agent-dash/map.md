@@ -514,3 +514,10 @@ contradicted its own derived columns and had been propagated into two specs as a
   Model roster settled at seven models over three vendors. No new reasoning; the status line was
   simply stale. → [ticket 08](issues/08-dimension-taxonomies.md) § Closed.
 
+
+- **Wave 3 filed** (2026-09-10, human review of the live site): tickets 61–70 in
+  [handover-afk-wave-3.md](handover-afk-wave-3.md). Four decisions taken by the human on filing:
+  the contractor account is no longer *offered* but its Role and direct-mint tests stay; volume
+  becomes one to nine roots per human Member per workday and R-D4's seat-cost finding is demoted;
+  the cost projection stacks on the Projection page's daily chart; R-V7 is amended so the Model
+  mix panel alone carries a ten-colour palette.
