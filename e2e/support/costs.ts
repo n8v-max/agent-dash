@@ -141,16 +141,24 @@ const inSessionOrder = (left: SessionRow, right: SessionRow): number =>
 const isCompleted = (sessions: readonly SessionRow[]): boolean =>
   sessions.some((session) => session.accepted);
 
-/** Rework — a non-accepted session with another session after it, of any WorkType. */
+/**
+ * **Both labels read a Task's non-review sessions** (R-D8 as amended by ticket 67). Every Job
+ * that was built is reviewed (R-D22), so a review sits on every Task that had work on it; the
+ * page computes both labels with reviews excluded, and this module has to subtract the figures
+ * the page actually produces or a real on-page rate would read as a leak.
+ */
+const built = (sessions: readonly SessionRow[]): SessionRow[] =>
+  sessions.filter((session) => session.work_type !== "review");
+
+/** Rework — a non-accepted session with another session after it, of any other WorkType. */
 const isRework = (sessions: readonly SessionRow[]): boolean =>
-  [...sessions]
-    .sort(inSessionOrder)
+  built([...sessions].sort(inSessionOrder))
     .slice(0, -1)
     .some((session) => !session.accepted);
 
 /** Decomposition — a second *accepted* session: work deliberately split, not work repeated. */
 const isDecomposition = (sessions: readonly SessionRow[]): boolean =>
-  sessions.filter((session) => session.accepted).length > 1;
+  built(sessions).filter((session) => session.accepted).length > 1;
 
 const countOf = (
   tasks: ReadonlyMap<string, SessionRow[]>,

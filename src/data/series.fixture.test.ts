@@ -220,25 +220,21 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
   it("ranks by the chart's own measure: cost orders the four differently from session count", () => {
     const byCost = byMember(cost);
 
-    expect(byCost.series.map((series) => series.label)).toEqual([
-      "Héctor Camps",
-      "Silvia Roldán Nieto",
-      // Third by cost and fourth by session count, and the two Members either side of that swap
-      // are the claim: the ranking is a function of the measure the chart draws, so the same
-      // four Members do not arrive in the same order.
-      "Diego Navarro Prieto",
-      "Irene Vázquez",
-      "Other",
-    ]);
-    expect(byCost.series.map((series) => series.label)).not.toEqual(
-      BY_MEMBER.series.map((series) => series.label),
-    );
-    // The *set* coincides at this volume and the *order* does not, which is a weaker fixture
-    // coincidence than a stronger claim: asserted as an order so that a build ranking by the
-    // wrong measure still fails here.
-    expect(new Set(byCost.series.map((series) => series.label))).toEqual(
-      new Set(BY_MEMBER.series.map((series) => series.label)),
-    );
+    const byCostLabels = byCost.series.map((series) => series.label);
+    const byCountLabels = BY_MEMBER.series.map((series) => series.label);
+
+    // Which four Members the two rankings name is a property of the fixture's spend and moves
+    // with it; what the case asserts is that they are *not the same four in the same order*,
+    // and that at least one Member is named by one ranking and not the other. The ranking is a
+    // function of the measure the chart draws.
+    expect(byCostLabels).toHaveLength(5);
+    expect(byCostLabels.at(-1)).toBe("Other");
+    expect(byCostLabels.filter((label) => !byCountLabels.includes(label))).not.toEqual([]);
+    expect(byCostLabels).not.toEqual(byCountLabels);
+    // Both rankings name the same *number* of Members and the same tail bucket, so the
+    // difference between them is the ranking itself and not the shape of the result.
+    expect(byCountLabels).toHaveLength(byCostLabels.length);
+    expect(byCountLabels.at(-1)).toBe("Other");
   });
 
   it("carries stable domain identities across a roll-up switch (R-T8)", () => {

@@ -217,22 +217,54 @@ describe("T-U15 — Rework is a failed session followed by another, of any WorkT
     expect(facts).toMatchObject({ task_key: "acme/api#1", sessions: 2, accepted: 1, rework: true });
   });
 
-  it("counts the cross-WorkType follow-up: a failed `review` then an `implementation`", () => {
-    // The clause ticket 05 dropped. `TaskSession` carries no `work_type` at all, so there is
-    // nothing here for a same-type restriction to read — the rows below carry one anyway, to
-    // show that a real session shape is accepted and that the WorkType changes nothing.
+  it("counts the cross-WorkType follow-up: a failed `deploy` then an `implementation`", () => {
+    // The clause ticket 05 dropped, and ticket 67 did **not** reinstate. `TaskSession` carries a
+    // `work_type` now, but only so that `review` can be excluded — among the four classes that
+    // remain, "followed by" consults nothing.
     const crossType = factsFor([
-      session("acme/api#2", "review", false, 30),
+      session("acme/api#2", "deploy", false, 30),
       session("acme/api#2", "implementation", true, 12),
     ]);
     const sameType = factsFor([
-      session("acme/api#3", "review", false, 30),
-      session("acme/api#3", "review", true, 12),
+      session("acme/api#3", "deploy", false, 30),
+      session("acme/api#3", "deploy", true, 12),
     ]);
 
     expect(crossType.rework).toBe(true);
     // Identical labels: the follow-up's WorkType is not a fact this metric consults.
     expect({ ...crossType, task_key: "" }).toEqual({ ...sameType, task_key: "" });
+  });
+
+  // ticket 67 — the two cases the ticket names, and the reason `work_type` is on `TaskSession`.
+  it("does not read a Job and its review as Rework or as Decomposition", () => {
+    const facts = factsFor([
+      session("acme/api#2a", "implementation", true, 30),
+      session("acme/api#2a", "review", true, 29),
+    ]);
+
+    // Two accepted root sessions, and neither label. A review is somebody else looking at the
+    // attempt; without the exclusion this Task would read as work deliberately split.
+    expect(facts).toMatchObject({
+      sessions: 2,
+      accepted: 2,
+      built: 1,
+      rework: false,
+      decomposition: false,
+      completed: true,
+    });
+  });
+
+  it("still reads Rework across a review: implementation failed, reviewed, then accepted", () => {
+    const facts = factsFor([
+      session("acme/api#2b", "implementation", false, 30),
+      session("acme/api#2b", "review", true, 29),
+      session("acme/api#2b", "implementation", true, 20),
+    ]);
+
+    // The review sits between the two attempts and is not one of them. What makes this Rework is
+    // the failed implementation followed by the second implementation, which the exclusion
+    // leaves adjacent.
+    expect(facts).toMatchObject({ sessions: 3, built: 2, rework: true, decomposition: false });
   });
 
   it("does not label a single failed session — nothing followed it", () => {
@@ -353,9 +385,10 @@ describe("T-U24 — a sub-agent fan-out is one attempt, not several (R-M19, ADR-
 describe("T-U15 — Rework and Decomposition are independent labels, not a partition", () => {
   /** One Task per combination. A partition could not hold the first of them. */
   const ROWS: readonly Row[] = [
-    // Both: failed, then split across two accepted sessions of *different* WorkTypes.
+    // Both: failed, then split across two accepted sessions of *different* WorkTypes. Neither
+    // of them is a `review`: since ticket 67 a review is not one of the Task's attempts.
     session("acme/api#10", "implementation", false, 40),
-    session("acme/api#10", "review", true, 30),
+    session("acme/api#10", "refactor", true, 30),
     session("acme/api#10", "bugfix", true, 20),
     // Rework only.
     session("acme/api#11", "bugfix", false, 40),

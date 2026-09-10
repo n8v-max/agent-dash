@@ -7,11 +7,12 @@
 // has a denominator of attempts rather than of agents — an acceptance rate over stored rows would
 // divide by sessions that carry no outcome and could never be accepted.
 
-import { REPO_NAMES, WORK_TYPE_KEYS } from "./allocation.mts";
-import { atLeast, check, near } from "./check.mts";
+import { REPO_NAMES, REVIEWED_WORK_TYPE_KEYS, WORK_TYPE_KEYS } from "./allocation.mts";
+import { atLeast, check, near, percent } from "./check.mts";
 import { repositories } from "./catalog.mts";
 import { members, OPEN_ACCOUNT_MEMBER_ID, RESTRICTED_ACCOUNT_MEMBER_ID } from "./people.mts";
 import { isCpuHeavy } from "./predicates.mts";
+import { median } from "./rng.mts";
 import { dayOfRow } from "./rows.mts";
 import { isWorkday, monthKeyOfDay } from "./schedule.mts";
 import {
@@ -24,10 +25,12 @@ import {
   LOW_USAGE_MEMBER_ID,
   LOW_USAGE_SESSIONS,
   MULTI_MODEL_SHARE,
+  REVIEW_DELAY_SECONDS,
   REWORK_RATE,
   WINDOW_DAYS,
+  WORK_MIX,
 } from "./targets.mts";
-import type { AgentSession } from "./types.mts";
+import type { AgentSession, WorkTypeKey } from "./types.mts";
 
 const AGE_BUCKET_EDGES = [8, 31, 91];
 const repositoryName = new Map(repositories.map((repository) => [repository.id, repository.name]));
@@ -63,12 +66,28 @@ const byTask = (rows: readonly AgentSession[]): Map<string, AgentSession[]> => {
   return grouped;
 };
 
-// Rework — a non-accepted session followed by another session, of any WorkType.
-// Decomposition — more than one accepted session. Independent labels, not a partition.
+/**
+ * **Rework and Decomposition read a Task's non-review sessions** (R-D8 as amended by ticket 67,
+ * `CONTEXT.md` § Work). Every Job that was built is reviewed (R-D22), so on the whole session
+ * list every reviewed Task holds two accepted sessions and would read as a Decomposition — the
+ * label would stop meaning "work deliberately split" and start meaning "work that was reviewed".
+ * A review is not a second attempt at the Task; it is somebody else looking at the first.
+ *
+ * Completed and Incomplete are **not** narrowed the same way, and deliberately: a Completed Task
+ * is a Task with an accepted root session, and an accepted review is one.
+ */
+const nonReview = (rows: readonly AgentSession[]): AgentSession[] =>
+  rows.filter((row) => row.work_type !== "review");
+
 export const taskLines = (roots: readonly AgentSession[]): string[] => {
   const tasks = [...byTask(roots).values()];
-  const rework = tasks.filter((rows) => rows.slice(0, -1).some((row) => !row.accepted));
-  const decomposition = tasks.filter((rows) => rows.filter((row) => row.accepted).length > 1);
+  const built = tasks.map(nonReview);
+  check(
+    built.every((rows) => rows.length > 0),
+    "R-D8: a Task holds nothing but reviews, so it has no arrangement to label",
+  );
+  const rework = built.filter((rows) => rows.slice(0, -1).some((row) => !row.accepted));
+  const decomposition = built.filter((rows) => rows.filter((row) => row.accepted).length > 1);
   const incomplete = tasks.filter((rows) => rows.every((row) => !row.accepted));
   const ages = incomplete.map((rows) => WINDOW_DAYS - 1 - dayOfRow(rows[rows.length - 1]));
   const buckets = [0, ...AGE_BUCKET_EDGES].map(
@@ -81,8 +100,13 @@ export const taskLines = (roots: readonly AgentSession[]): string[] => {
     `R-D9: an incomplete-Task age bucket is empty (${buckets.join("/")})`,
   );
   return [
-    near("R-D8 rework rate", rework.length / tasks.length, REWORK_RATE, 0.005),
-    near("R-D8 decomposition rate", decomposition.length / tasks.length, DECOMPOSITION_RATE, 0.005),
+    near("R-D8 rework rate (non-review sessions)", rework.length / tasks.length, REWORK_RATE, 0.005),
+    near(
+      "R-D8 decomposition rate (non-review sessions)",
+      decomposition.length / tasks.length,
+      DECOMPOSITION_RATE,
+      0.005,
+    ),
     `R-D9 incomplete Tasks by age bucket 0-7/8-30/31-90/91+ ${buckets.join(" / ")}`,
     `R-D3 Tasks ${tasks.length}`,
   ];
@@ -195,5 +219,90 @@ export const rampLines = (roots: readonly AgentSession[]): string[] => {
   return [
     `R-D4 ${workdayCounts.length} (human Member × workday) pairs, ${inRange.length} of them 1–${DAILY_VOLUME.cap} sessions · max ${Math.max(...workdayCounts)}`,
     `R-D4 sessions per human workday: April ${april.toFixed(2)} → September ${september.toFixed(2)} · ${weekend.length} weekend Member-days`,
+  ];
+};
+
+/**
+ * **R-D22 — the review linkage, measured over the rows that were written.** Four claims, and the
+ * generator throws on each of them rather than reporting a number nobody re-reads:
+ *
+ *   * every `implementation`, `refactor` and `bugfix` session's Task carries at least one review;
+ *   * reviews number at least 1.22× that population — some Jobs are reviewed twice;
+ *   * refactors run at 17% of implementations and bug fixes at 29%, both within 2% *of the ratio*
+ *     rather than of the population, which is the reading that stays meaningful at any volume;
+ *   * **no reviewer reviews their own Job**, and every review sits inside the band behind it.
+ *
+ * The share reviewed by a team mate is reported and not asserted: R-D22 asks for one *where one
+ * exists*, and the matcher takes any other human where the Team has nobody free.
+ */
+export const reviewLines = (roots: readonly AgentSession[]): string[] => {
+  const reviews = roots.filter((row) => row.work_type === "review");
+  const built = roots.filter((row) => REVIEWED_WORK_TYPE_KEYS.includes(row.work_type));
+  const byKey = byTask(roots);
+  const unreviewed = built.filter(
+    (row) => !(byKey.get(row.task_key) ?? []).some((peer) => peer.work_type === "review"),
+  );
+  check(
+    unreviewed.length === 0,
+    `R-D22: ${unreviewed.length} Jobs were built and never reviewed (${unreviewed[0]?.task_key})`,
+  );
+  const wanted = WORK_MIX.reviewsPerReviewedSession * built.length;
+  check(
+    reviews.length >= wanted,
+    `R-D22: ${reviews.length} reviews against ${built.length} Jobs is below ${wanted.toFixed(0)}`,
+  );
+  const countOf = (key: WorkTypeKey): number =>
+    roots.filter((row) => row.work_type === key).length;
+  const implementations = countOf("implementation");
+  const teams = new Map(members.map((member) => [member.id, new Set(member.team_ids)]));
+  let sameTeam = 0;
+  let late = 0;
+  const delays: number[] = [];
+  for (const review of reviews) {
+    const peers = (byKey.get(review.task_key) ?? []).filter((row) =>
+      REVIEWED_WORK_TYPE_KEYS.includes(row.work_type),
+    );
+    check(
+      peers.every((peer) => peer.member_id !== review.member_id),
+      `R-D22: ${review.id} reviews ${review.task_key}, which its own author ran`,
+    );
+    const gaps = peers
+      .map((peer) => Date.parse(review.started_at) - Date.parse(peer.ended_at))
+      .filter((gap) => gap >= REVIEW_DELAY_SECONDS.min * 1000);
+    check(gaps.length > 0, `R-D22: ${review.id} does not follow a Job on ${review.task_key}`);
+    const gap = Math.min(...gaps);
+    check(
+      gap <= REVIEW_DELAY_SECONDS.max * 1000,
+      `R-D22: ${review.id} runs ${(gap / 86_400_000).toFixed(1)} days after the Job it reviews`,
+    );
+    delays.push(gap);
+    if (gap > 3 * 86_400_000) late += 1;
+    const mine = teams.get(review.member_id) ?? new Set<string>();
+    if (peers.some((peer) => [...(teams.get(peer.member_id) ?? [])].some((id) => mine.has(id)))) {
+      sameTeam += 1;
+    }
+  }
+  const twice = [...byKey.values()].filter(
+    (rows) => rows.filter((row) => row.work_type === "review").length > 1,
+  );
+  return [
+    near(
+      "R-D22 refactors per implementation",
+      countOf("refactor") / implementations,
+      WORK_MIX.refactorPerImplementation,
+      0.02 * WORK_MIX.refactorPerImplementation,
+    ),
+    near(
+      "R-D22 bug fixes per implementation",
+      countOf("bugfix") / implementations,
+      WORK_MIX.bugfixPerImplementation,
+      0.02 * WORK_MIX.bugfixPerImplementation,
+    ),
+    `R-D22 ${reviews.length} reviews over ${built.length} Jobs built — ${(
+      reviews.length / built.length
+    ).toFixed(3)}× · ${twice.length} Tasks reviewed twice`,
+    `R-D22 reviewer on the author's Team ${percent(sameTeam / reviews.length)} · median delay ${(
+      median(delays) / 3_600_000
+    ).toFixed(1)} h · ${late} reviews past three days`,
   ];
 };

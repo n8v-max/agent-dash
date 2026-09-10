@@ -365,6 +365,16 @@ rediscover which sessions were headless.
 **R-N15 — A table of Member · Team · kind · Completed Tasks · Sessions · Tokens · Cost.** Every
 numeric column sortable. **Default sort: Completed Tasks descending.**
 
+**A reviewer's accepted review is a completed Job on their row** (added 2026-09-10, ticket 67).
+A Completed Task is a Task with an accepted root session (`CONTEXT.md` § Work) and a review is a
+root session; since R-D22 every implementation, refactor and bug fix is reviewed by somebody
+else, so a Member's Completed Tasks now include the Jobs they reviewed as well as the ones they
+built. That is the present semantics of `completedTaskKeys` and it is left as it is: acceptance
+is a property of a *session*, the review's criterion is *a submitted review with an outcome*, and
+narrowing the column to Jobs a Member built would need a second, per-Member definition of
+"completed" that nothing else in the model has. The lede's copy is unchanged — it names the
+column, not what it counts.
+
 **The Sort control *is* the table's headings** (added 2026-09-10, ticket 63). Each numeric heading
 is a link that sets `?sort=`, and the sorted column carries `aria-sort`; there is no second sort
 widget in the toolbar. A menu in the bar listed every column twice and stood away from the rows it
@@ -983,11 +993,13 @@ and stays. Until the fixture is extended past today the cut removes nothing on m
 is what makes it safe to have landed before the data needed it.
 
 **R-D3 — Scale.** 4 Teams · 20 Members (18 `human`, 2 `service_account`) · 5 Repositories · 5
-WorkTypes · 7 Models across 3 vendors · ~6,000 Tasks · ~7,800 **root** AgentSessions, plus the
+WorkTypes · 7 Models across 3 vendors · ~3,600 Tasks · ~7,800 **root** AgentSessions, plus the
 child sessions R-D21 fans out from them (~10,900 rows on disk in all). The session count the
 product reports is the root count (R-M19). Amended 2026-09-10 by ticket 66, which raised the
-volume by an order of magnitude; the committed figures are 5,970 Tasks, 7,761 visible roots,
-2,960 visible children and 158 hidden roots — 10,879 rows across the 25 session files.
+volume by an order of magnitude, and again the same day by ticket 67, which put the reviews on
+the Tasks they review instead of on Tasks of their own — the session count did not move, and the
+Task count fell with it. The committed figures are **3,626 Tasks, 7,761 visible roots, 2,935
+visible children and 158 hidden roots — 10,854 rows across the 25 session files**.
 
 **R-D4 — Volume is one to nine root sessions per `human` Member per workday, ramping from
 April** (rewritten 2026-09-10, ticket 66). On a workday a Member runs at least one and at most
@@ -1042,12 +1054,30 @@ a constraint neither rule stated and the generator therefore had to satisfy impl
 stated: the fixture must produce a single grand total consistent with both lists, and T-F4 asserts
 it over raw JSON.
 
+**And that constraint is what fixes the size of the `deploy` population** (added 2026-09-10,
+ticket 67). The Repository marginal is 0.6633 and cannot be moved far — 0.78 is the highest rate
+on R-D7's list, so even a fixture that ran nothing but `web-console` could not reach 0.75. R-D22
+makes `review`, at 0.86, two fifths of every session; something at the bottom of R-D6 has to grow
+with it or the WorkType marginal lands at 0.75 and no table exists. `deploy`, at 0.34, is that
+something, and the level at which the two marginals meet is 1.96 deploys per implementation —
+which is why `deploy` is 29% of the committed sessions and `implementation` 22%. Nothing else in
+either list moved. See the ticket 67 comments for the two rejected alternatives.
+
 **R-D7 is a cross-WorkType acceptance figure by construction**, which is the one figure R-M6 and
 A21 forbid the product to state. That is not a contradiction: it is a *fixture* property, verified
 over raw JSON and never computed through a metric or rendered on a surface. If it ever reaches a
 query it becomes an A21 failure.
 
-**R-D8 — Rework 18% of Tasks; Decomposition 12%.**
+**R-D8 — Rework 18% of Tasks; Decomposition 12%**, both measured over a Task's **non-review**
+sessions (amended 2026-09-10, ticket 67). The rates are unchanged; the population they are read
+over is narrowed, because R-D22 puts a review on every Task that had work built on it and an
+accepted Job with its accepted review is two accepted root sessions. Without the narrowing every
+reviewed Task would be a Decomposition — over half the fixture — and the label would have stopped
+meaning "work deliberately split". The same exclusion applies to Rework, so the second attempt at
+a Task is still the session that follows the failed one and not the review that found the
+problem. `CONTEXT.md` § Work carries the definitions; `src/domain/metrics/efficacy.ts` is where
+they are computed, and `TaskSession` carries `work_type` for this and for nothing else. Completed
+and Incomplete are **not** narrowed: an accepted review is an accepted root session.
 
 **R-D9 — Incomplete Tasks present in all four age buckets.** 91+ days is reachable inside a
 167-day window, so the oldest bucket is not empty by construction.
@@ -1103,6 +1133,37 @@ A child is sized for realism: a sub-agent is handed one slice of its root's work
 66 the sizing was argued from R-D4's seat share, which a fan-out costing what a root costs would
 have diluted out of an authored band. R-D4 no longer has that band, and the argument is
 withdrawn with it; the numbers are unchanged.)*
+
+**R-D22 — Every Job that was built is reviewed, on its own Task, by somebody else** (added
+2026-09-10, ticket 67).
+
+The session mix follows three ratios stated against `implementation`: **refactors at 17% of
+implementations, bug fixes at 29%, and reviews at 122% of the three of them together** — every
+`implementation`, `refactor` and `bugfix` session reviewed at least once, and 22% of them twice.
+`deploy` is the fourth and is not authored as a ratio: it is the term that reconciles R-D6 against
+R-D7 (see the note under R-D7 above). On the committed data that is **1,710 implementations · 495
+bug fixes · 291 refactors · 3,047 reviews · 2,218 deploys** across 7,761 visible roots.
+
+A review is **generated from the session it reviews**, and four properties make the linkage real
+rather than statistical:
+
+- it carries the **same `task_key`** and the same Repository, so it appears on `/demo/history`
+  under the Job it reviewed rather than under a Job of its own;
+- it starts **between ten minutes and four days after the reviewed session ends**. Three days was
+  asked for and does not fit a five-day working week: a Job finished on a Friday morning has,
+  inside three days, only Friday's remaining slots and a weekend running at 15% of a workday's
+  rate. Most reviews land inside a day; the generator reports the distribution;
+- it is run by a **different `human` Member**, on the author's own Team where one is free — over
+  90% of them on the committed data, and never the author;
+- it **takes a slot off R-D4's schedule** rather than being appended to it. A review is a session
+  somebody ran, so the one-to-nine per human Member per workday is what it was; what changed is
+  what those sessions are.
+
+Two consequences are recorded rather than corrected. A Task whose implementation failed and whose
+review was submitted is a **Completed Task** — acceptance is per session and the review's
+criterion was met (see R-N15) — so the Incomplete population is now carried by the Tasks that
+never left `deploy`. And R-D8's two labels are read over non-review sessions, or every reviewed
+Task would be a Decomposition.
 
 **R-D20 — The GitHub → Member join is authored, not modelled.** The match rule is documented in
 the fixture README so a reader can see the join, but **no GitHub user fails to match**. An

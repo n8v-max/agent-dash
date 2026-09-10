@@ -220,14 +220,27 @@ describe("T-F4 — the required distributions", () => {
     }
   });
 
-  it("carries R-D8 rework at 18% and decomposition at 12% of Tasks", () => {
-    const grouped = groupByTask(roots);
+  it("carries R-D8 rework at 18% and decomposition at 12%, over non-review sessions", () => {
+    // **Non-review**, since ticket 67 (R-D8, `CONTEXT.md` § Work). Every Job that was built is
+    // reviewed (R-D22), so counting a review as one of the Task's attempts would make almost
+    // every reviewed Task a Decomposition — see the counterfactual below.
+    const grouped = groupByTask(roots).map((rows) =>
+      rows.filter((row) => row.work_type !== "review"),
+    );
     const rework = grouped.filter((rows) => rows.slice(0, -1).some((row) => !row.accepted));
     const decomposition = grouped.filter(
       (rows) => rows.filter((row) => row.accepted).length > 1,
     );
+    expect(grouped.every((rows) => rows.length > 0)).toBe(true);
     expect(rework.length / grouped.length).toBeCloseTo(0.18, 2);
     expect(decomposition.length / grouped.length).toBeCloseTo(0.12, 2);
+  });
+
+  it("would lose both labels to the reviews if they were counted as attempts", () => {
+    const grouped = groupByTask(roots);
+    const naive = grouped.filter((rows) => rows.filter((row) => row.accepted).length > 1);
+
+    expect(naive.length / grouped.length).toBeGreaterThan(0.4);
   });
 
   it("fills all four R-D9 incomplete-Task age buckets, including 91+", () => {
@@ -336,6 +349,74 @@ describe("T-F4 — the required distributions", () => {
     expect(shareIn("2026-04")).toBeCloseTo(0.25, 1);
     expect(shareIn("2026-08")).toBeCloseTo(0.1, 1);
     expect(shareIn("2026-04")).toBeGreaterThan(shareIn("2026-08") + 0.1);
+  });
+});
+
+// R-D22 — the review linkage, re-derived from the committed JSON rather than trusted from the
+// generator (P3 / R-T20). Four facts, and they are the four the generator asserts as it writes.
+describe("T-F11 — every Job that was built is reviewed, by somebody else (R-D22)", () => {
+  const BUILT: readonly WorkTypeKey[] = ["implementation", "bugfix", "refactor"];
+  const built = roots.filter((row) => BUILT.includes(row.work_type));
+  const reviews = roots.filter((row) => row.work_type === "review");
+  const rowsByTask = new Map<string, AgentSession[]>();
+  for (const row of roots) rowsByTask.set(row.task_key, [...(rowsByTask.get(row.task_key) ?? []), row]);
+
+  it("puts at least one review on the Task of every implementation, bug fix and refactor", () => {
+    const unreviewed = built.filter(
+      (row) =>
+        !(rowsByTask.get(row.task_key) ?? []).some((peer) => peer.work_type === "review"),
+    );
+
+    expect(built.length).toBeGreaterThan(0);
+    expect(unreviewed).toEqual([]);
+  });
+
+  it("runs 122% as many reviews as Jobs built — some Jobs are reviewed twice", () => {
+    expect(reviews.length).toBeGreaterThanOrEqual(Math.ceil(1.22 * built.length));
+    const twice = [...rowsByTask.values()].filter(
+      (rows) => rows.filter((row) => row.work_type === "review").length > 1,
+    );
+
+    expect(twice.length).toBeGreaterThan(0);
+  });
+
+  it("holds refactors at 17% of implementations and bug fixes at 29%, within 2%", () => {
+    const countOf = (key: WorkTypeKey): number =>
+      roots.filter((row) => row.work_type === key).length;
+    const implementations = countOf("implementation");
+
+    expect(countOf("refactor") / implementations).toBeCloseTo(0.17, 2);
+    expect(countOf("bugfix") / implementations).toBeCloseTo(0.29, 2);
+  });
+
+  it("never lets a Member review their own Job, and always runs the review afterwards", () => {
+    const TEN_MINUTES = 10 * 60_000;
+    const FOUR_DAYS = 4 * 86_400_000;
+    for (const review of reviews) {
+      const peers = (rowsByTask.get(review.task_key) ?? []).filter((row) =>
+        BUILT.includes(row.work_type),
+      );
+      expect(peers.length).toBeGreaterThan(0);
+      expect(peers.some((peer) => peer.member_id === review.member_id)).toBe(false);
+      const gaps = peers
+        .map((peer) => Date.parse(review.started_at) - Date.parse(peer.ended_at))
+        .filter((gap) => gap >= TEN_MINUTES);
+      expect(gaps.length).toBeGreaterThan(0);
+      expect(Math.min(...gaps)).toBeLessThanOrEqual(FOUR_DAYS);
+    }
+  });
+
+  it("hands most reviews to somebody on the author's own Team", () => {
+    const teamsOf = (id: string): ReadonlySet<string> =>
+      new Set(memberById.get(id)?.team_ids ?? []);
+    const sameTeam = reviews.filter((review) => {
+      const mine = teamsOf(review.member_id);
+      return (rowsByTask.get(review.task_key) ?? [])
+        .filter((row) => BUILT.includes(row.work_type))
+        .some((peer) => [...teamsOf(peer.member_id)].some((team) => mine.has(team)));
+    });
+
+    expect(sameTeam.length / reviews.length).toBeGreaterThan(0.8);
   });
 });
 

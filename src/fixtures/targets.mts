@@ -53,15 +53,93 @@ export const REPOSITORY_SHARE: Record<string, number> = {
   "terraform-infra": 0.1,
 };
 
-export const WORK_TYPE_SHARE: Record<WorkTypeKey, number> = {
-  implementation: 0.3,
-  bugfix: 0.2,
-  refactor: 0.18,
-  review: 0.12,
-  deploy: 0.2,
+// R-D22 — **the work mix is three ratios and one closing term, not five authored percentages**
+// (ticket 67). The human gave the mix relative to implementation: a refactor for every six
+// implementations, a bug fix for every three and a half, and *every* implementation, refactor and
+// bug fix reviewed — 122% of them, because some Jobs are reviewed twice. Writing five percentages
+// would have made those ratios something a reader has to divide out, and something a later edit
+// can silently break; written this way, the ratios are the fixed point and the percentages fall
+// out of `workTypeShareFrom` below.
+//
+// **`deployPerImplementation` is the free variable, and it closes R-D6 against R-D7.** Deploy is
+// the one work type the human did not mention, and R-D6 and R-D7 are two marginals of one table
+// (spec § 8): they agree only if `sum(share_w · rate_w)` equals `sum(share_r · rate_r)`. The
+// Repository marginal is 0.6633 and cannot be moved far — 0.78 is the highest rate on the list,
+// so even a fixture that ran nothing but `web-console` could not reach 0.75. A population that is
+// 39% `review` at 0.86 pushes the WorkType marginal up to 0.75 unless something at the bottom of
+// R-D6 grows with it, and `deploy` at 0.34 is that something. 1.9552 is the value at which the
+// two marginals meet; it is solved once, here, and asserted by `allocation.mts`, which is left
+// only a rounding residual to absorb.
+//
+// The ticket assumed deploy would keep its *realised* 0.48 ratio to implementation. It cannot:
+// at 0.48 the marginals disagree by 8.6 points of acceptance, which no transfer under any
+// plausible limit closes and which no other authored number in this file can absorb. See the
+// ticket's `## Comments` for the two rejected alternatives (widening the transfer until `review`
+// collapses, and re-authoring R-D7's five rates upward).
+export const WORK_MIX = {
+  /** R-D22 — refactors run at 17% of implementations. */
+  refactorPerImplementation: 0.17,
+  /** R-D22 — bug fixes at 29% of implementations. */
+  bugfixPerImplementation: 0.29,
+  /** R-D22 — reviews at 122% of the implementation + refactor + bugfix population. */
+  reviewsPerReviewedSession: 1.22,
+  /** Not authored by the human: the term that makes R-D6 and R-D7 reconcile. */
+  deployPerImplementation: 1.9552,
 };
 
+export type WorkMix = typeof WORK_MIX;
+
+/** The reviewed population per implementation: an implementation, its refactors and its fixes. */
+export const reviewedPerImplementation = (mix: WorkMix): number =>
+  1 + mix.refactorPerImplementation + mix.bugfixPerImplementation;
+
+export const workTypeShareFrom = (mix: WorkMix): Record<WorkTypeKey, number> => {
+  const weights: Record<WorkTypeKey, number> = {
+    implementation: 1,
+    refactor: mix.refactorPerImplementation,
+    bugfix: mix.bugfixPerImplementation,
+    review: mix.reviewsPerReviewedSession * reviewedPerImplementation(mix),
+    deploy: mix.deployPerImplementation,
+  };
+  const total = Object.values(weights).reduce((running, weight) => running + weight, 0);
+  return Object.fromEntries(
+    Object.entries(weights).map(([key, weight]) => [key, weight / total]),
+  ) as Record<WorkTypeKey, number>;
+};
+
+export const WORK_TYPE_SHARE = workTypeShareFrom(WORK_MIX);
+
+// **Re-checked at ticket 67's volume and left where it was.** The transfer used to carry the
+// whole disagreement between the two acceptance marginals, and at a 39% review population it
+// could not: closing 8.6 points of acceptance by moving share out of `review` would have taken
+// the review count below the 1.22 the ticket exists to establish. The *level* of `deploy` now
+// carries it (see `WORK_MIX` above) and the transfer carries only what rounding and R-D19's one
+// empty pair leave behind, which is smaller than it ever was. The limit therefore did not need
+// widening — it needed the thing it was protecting to stop being load-bearing.
 export const SHARE_TRANSFER_LIMIT = 0.01;
+
+// R-D22 — a review runs **after the session it reviews**, by somebody else.
+//
+// **The ceiling is four days, and the ticket asked for three.** Three does not fit a five-day
+// working week: a Job that finishes on a Friday morning has, inside three days, only Friday's
+// remaining slots and a weekend that runs at 15% of a workday's rate (R-D4) — and every other
+// Friday Job is competing for the same handful. The matcher fails on the committed schedule at
+// anything under 80 hours. Four days is the first round number above that, and it is what the
+// requirement means in practice anyway: work finished on Friday is reviewed on Monday. The
+// realised distribution is reported by the generator, and most reviews land inside a day.
+export const REVIEW_DELAY_SECONDS = { min: 10 * 60, max: 4 * 86_400 };
+
+// The two ends of the window a review slot may be drawn from. A review is a real session run by
+// a real Member, so it takes a slot off the schedule rather than being appended to it — which is
+// what keeps R-D4's one-to-nine per human workday exactly what `schedule.mts` drew.
+//
+// **The head is two days because the first of them is a Sunday.** Nothing has been built yet to
+// review, and a review slot with no Job behind it is a slot the matcher has to leave unused —
+// which, since supply and demand are equal by construction, is a Job somewhere else that goes
+// unreviewed. **The tail is one day** for the mirror reason: the latest Job built has to have
+// somewhere to be reviewed from, so the window's last day holds reviews and nothing else.
+export const REVIEW_HEAD_HOURS = 48;
+export const REVIEW_TAIL_HOURS = 24;
 
 // R-D19 — the one authored empty pair. Mobile releases ship through the app stores, not
 // through the platform's deploy template, so `mobile-app__deploy.json` holds []. Its

@@ -2,21 +2,34 @@
 // Task shape left free. The cell table (allocation.mts) fixes how many sessions each pair
 // holds and how many of them were accepted; this drains it exactly, so R-D6 and R-D7 hold
 // by construction rather than by sampling and hoping.
+//
+// **It drains four columns, not five** (R-D22, ticket 67). A `review` is not chosen for a slot:
+// it is generated from the session it reviews and inherits that session's Repository and Task
+// (`reviews.mts`), so the review column is drained there and this module never sees it. What
+// arrives here is the non-review population `tasks.mts` planned, and the pool it drains is the
+// plan with the review column left out.
 
-import { REPO_NAMES, WORK_TYPE_KEYS, type CellPlan } from "./allocation.mts";
+import {
+  NON_REVIEW_WORK_TYPE_KEYS,
+  REPO_NAMES,
+  type CellPlan,
+  type NonReviewWorkTypeKey,
+} from "./allocation.mts";
 import { repositoryWeight, workTypeWeight } from "./affinity.mts";
 import { pickWeighted, type Rng } from "./rng.mts";
 import type { Slot } from "./schedule.mts";
 import type { PlannedTask, TaskShape } from "./tasks.mts";
-import type { Member, WorkTypeKey } from "./types.mts";
+import type { Member } from "./types.mts";
+
+const KEYS = NON_REVIEW_WORK_TYPE_KEYS;
 
 type Cell = { accepted: number; failed: number };
-type Pool = Record<string, Record<WorkTypeKey, Cell>>;
+type Pool = Record<string, Record<NonReviewWorkTypeKey, Cell>>;
 
 export type AssignedSession = {
   slot: Slot;
   accepted: boolean;
-  work_type: WorkTypeKey;
+  work_type: NonReviewWorkTypeKey;
 };
 
 export type AssignedTask = {
@@ -31,16 +44,16 @@ const poolFrom = (plan: CellPlan): Pool =>
     REPO_NAMES.map((repo) => [
       repo,
       Object.fromEntries(
-        WORK_TYPE_KEYS.map((key) => [
+        KEYS.map((key) => [
           key,
           { accepted: plan.accepted[repo][key], failed: plan.counts[repo][key] - plan.accepted[repo][key] },
         ]),
-      ) as Record<WorkTypeKey, Cell>,
+      ) as Record<NonReviewWorkTypeKey, Cell>,
     ]),
   );
 
-const roomIn = (row: Record<WorkTypeKey, Cell>): Cell =>
-  WORK_TYPE_KEYS.reduce(
+const roomIn = (row: Record<NonReviewWorkTypeKey, Cell>): Cell =>
+  KEYS.reduce(
     (total, key) => ({
       accepted: total.accepted + row[key].accepted,
       failed: total.failed + row[key].failed,
@@ -76,14 +89,14 @@ const chooseRepository = (rng: Rng, member: Member, pool: Pool, task: PlannedTas
 const chooseWorkType = (
   rng: Rng,
   member: Member,
-  row: Record<WorkTypeKey, Cell>,
+  row: Record<NonReviewWorkTypeKey, Cell>,
   accepted: boolean | null,
-): WorkTypeKey => {
-  const room = (key: WorkTypeKey) => {
+): NonReviewWorkTypeKey => {
+  const room = (key: NonReviewWorkTypeKey) => {
     if (accepted === null) return row[key].accepted + row[key].failed;
     return accepted ? row[key].accepted : row[key].failed;
   };
-  const candidates = WORK_TYPE_KEYS.filter((key) => room(key) > 0);
+  const candidates = KEYS.filter((key) => room(key) > 0);
   if (candidates.length === 0) throw new Error("no WorkType left with the required outcome");
   return pickWeighted(
     rng,

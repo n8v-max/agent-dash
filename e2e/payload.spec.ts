@@ -86,9 +86,10 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
  *
  * **Both sides grew with ticket 66's volume, and the residual share fell.** Ten times the rows
  * put ten times the money into the same narrow range, so a far larger fraction of it is
- * reachable as some legitimate reading of the viewer's own work: 604 of 1,653, where ticket 48
- * measured 384 of 612. The set is bigger in absolute terms and thinner in proportion, and it is
- * the absolute size the search depends on.
+ * reachable as some legitimate reading of the viewer's own work: **568** of the candidates after
+ * ticket 67 regenerated the fixture, 604 before it, where ticket 48 measured 384 of 612. The set
+ * is bigger in absolute terms and thinner in proportion, and it is the absolute size the search
+ * depends on.
  *
  * **300 is the line below which this stops being a search of the money range.** If a fixture or
  * a subtraction change ever drops the set under it, the cost assertion has become theatre and
@@ -97,25 +98,26 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COST_FLOOR = 300;
 
 /**
- * `28.04` is `ses_5160`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
- * over — and it plays the part `24.39` played before ticket 66 regenerated the fixture: the
- * literal ticket 29's falsification probe leaked to prove T-E4 can fail. It must survive the
- * subtraction, or the probe would no longer fire and neither would a leak.
+ * `23.20` is `ses_3364`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
+ * over — and it plays the part `28.04` played before ticket 67 regenerated the fixture, and
+ * `24.39` before ticket 66: the literal ticket 29's falsification probe leaked to prove T-E4 can
+ * fail. It must survive the subtraction, or the probe would no longer fire and neither would a
+ * leak.
  */
-const KNOWN_UNGRANTED_LITERAL = "28.04";
+const KNOWN_UNGRANTED_LITERAL = "23.20";
 
 /**
- * `24.87` is another Member's session cost **and** the viewer's own total for `api-gateway` on
- * 21 April 2026 — one cell of an R-X1 mirror. It is the same kind of false positive ticket 31
- * measured on `/demo/spend`, and it is the defect this file exists to fix: value identity is
- * not fact identity. (It reads `24.87` rather than ticket 48's `7.31` because ticket 66
- * regenerated the fixture; the property it is named for is the same one.)
+ * `9.16` is another Member's session cost (`ses_1821`) **and** the viewer's own accepted-session
+ * total for 27 August 2026 — one cell of an R-X1 mirror. It is the same kind of false positive
+ * ticket 31 measured on `/demo/spend`, and it is the defect this file exists to fix: value
+ * identity is not fact identity. (It reads `9.16` rather than ticket 66's `24.87` because
+ * ticket 67 regenerated the fixture; the property it is named for is the same one.)
  */
-const OWN_AGGREGATE_COLLISION = "24.87";
+const OWN_AGGREGATE_COLLISION = "9.16";
 
 /**
- * `0.8` is the viewer's own acceptance rate on 13 April 2026 — 4 of its own 5 sessions — and it
- * is also some other Member's session cost of `$0.80`. It is the kind of literal `/demo/work`
+ * `0.8` is the viewer's own acceptance rate on its `bugfix` Jobs in week 24 of 2026 — and it is
+ * also some other Member's session cost of `$0.80` (`ses_10054`). It is the kind of literal `/demo/work`
  * failed on, on a page whose ViewModel carries **no cost field at all**. Measured: it is
  * produced by no sum and by no money quotient of the viewer's own rows, so *only* the count
  * quotients remove it. It is named here so that a future change reverting the quotient half
