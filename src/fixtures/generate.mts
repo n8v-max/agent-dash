@@ -7,15 +7,16 @@
 // every stage in a fixed order, so the same seed produces byte-identical files.
 
 import { fileURLToPath } from "node:url";
-import { planCells } from "./allocation.mts";
+import { planCells, plannedCount } from "./allocation.mts";
 import { spawnChildren } from "./children.mts";
 import { repairWeeklySpend } from "./curve.mts";
 import { assignCells } from "./assign.mts";
 import { assertFixture } from "./invariants.mts";
 import { mintTasks } from "./issues.mts";
 import { members } from "./people.mts";
+import { linkReviews, reviewableRows, splitSlots } from "./reviews.mts";
 import { mulberry32 } from "./rng.mts";
-import { buildSessions } from "./rows.mts";
+import { buildReviewSessions, buildWorkSessions, identify } from "./rows.mts";
 import { generateSlots } from "./schedule.mts";
 import { SEED } from "./targets.mts";
 import { writeFixture } from "./write.mts";
@@ -30,11 +31,24 @@ const outputDirectory = (argv: readonly string[]): string => {
 const main = (): void => {
   const rng = mulberry32(SEED);
   const slots = generateSlots(rng, members);
-  const { tasks: plannedTasks } = planTasks(rng, members, slots);
   const plan = planCells(slots.length);
+  // R-D22 — a review is a session somebody ran, so it takes a slot off the schedule rather than
+  // being appended to it. The split is deterministic and draws no random numbers, so everything
+  // below it sits where it sat before reviews were linked.
+  const split = splitSlots(slots, members, plannedCount(plan, "review"));
+  const { tasks: plannedTasks } = planTasks(rng, members, split.work);
   const assigned = assignCells(rng, members, plannedTasks, plan);
   const tasks = mintTasks(rng, assigned);
-  const roots = buildSessions(rng, members, assigned, tasks);
+  const built = buildWorkSessions(rng, { members, assigned, tasks, visibleRoots: slots.length });
+  // R-D22 — the reviews are generated **from** finished rows, because the band the ticket states
+  // runs from the reviewed session's *end*, which is not known until its duration is drawn.
+  const links = linkReviews(rng, {
+    members,
+    reviewed: reviewableRows(built.visible),
+    slots: split.review,
+    plan,
+  });
+  const roots = identify([...built.visible, ...buildReviewSessions(rng, members, links), ...built.hidden]);
   // R-D21 — the fan-out is drawn last, from finished rows, so every root keeps the id, the
   // timestamps and the figures it had before children existed (ADR-0008).
   const sessions = [...roots, ...spawnChildren(rng, roots)].sort(

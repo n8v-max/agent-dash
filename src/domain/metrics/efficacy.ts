@@ -34,14 +34,22 @@
 //     `TaskSession` carries `parent_session_id` so that it can — the alternative, trusting the
 //     caller to have folded them, is a rule enforced nowhere.
 //
-//   * **Rework is WorkType-blind, because its input carries no WorkType at all.** R-M1 and
-//     `CONTEXT.md` define it as a **non-accepted session followed by another session on the same
-//     Task, of any WorkType**; the same-WorkType clause was dropped by ticket 05, since a failed
-//     `review` followed by an `implementation` is still a second attempt at the same Task. That
-//     is not enforced by a comment here: `TaskSession` has no `work_type` field, so the dropped
-//     clause has nothing to read and cannot be reintroduced without changing the type every
-//     caller passes. The consequence — the rate runs higher than the strict reading gives — is
-//     the accepted reading, not a bug.
+//   * **Rework and Decomposition read a Task's NON-REVIEW sessions** (R-D8 as amended by ticket
+//     67, `CONTEXT.md` § Work). Every implementation, refactor and bug fix is now reviewed on its
+//     own Task (R-D22), so over the whole session list a reviewed Job would show two accepted
+//     sessions and *every reviewed Task* would be a Decomposition — the label would have stopped
+//     meaning "work deliberately split" and started meaning "work that was reviewed". A review is
+//     somebody else looking at the attempt, not a second attempt at it.
+//
+//     `TaskSession` therefore carries `work_type`, and it carries it for exactly one purpose:
+//     naming the class that is excluded. It is **not** a way back to the same-WorkType clause
+//     ticket 05 dropped — among the four classes that remain, "followed by" is still blind, and a
+//     failed `implementation` followed by a `refactor` is still Rework. The two claims are
+//     independent and T-U15 asserts both.
+//
+//     `completed` is deliberately *not* narrowed the same way: a Completed Task is a Task with an
+//     accepted root session (`CONTEXT.md` § Work) and an accepted review is one, which is what
+//     makes a reviewer's accepted review a completed Job for them on `/demo/people` (R-N15).
 //
 //   * **Rework and Decomposition are independent labels, not a partition.** They are two
 //     booleans on `TaskFacts`, never one enum: a long Task can be repeated *and* split, and the
@@ -155,12 +163,14 @@ export function acceptanceRateByWorkType(
 
 /**
  * The minimum a Task-grain label needs from a session. `AgentSession` satisfies it structurally.
- *
- * **There is no `work_type` here, and that is the point** — Rework is a non-accepted session
- * followed by another session *of any WorkType*, so the computation below is given nothing to
- * narrow on. Restoring the dropped same-type clause would mean changing this type first.
  */
 export type TaskSession = {
+  /**
+   * **Present to name the one class that is excluded, and for nothing else** (R-D8, ticket 67).
+   * Rework and Decomposition are read over a Task's non-review sessions; among the four that
+   * remain, "followed by" consults no WorkType at all.
+   */
+  readonly work_type: WorkTypeKey;
   /** `owner/repo#number` — externally keyed, never absent and never synthetic. */
   readonly task_key: string;
   /**
@@ -183,9 +193,15 @@ export type TaskFacts = {
   readonly task_key: string;
   readonly sessions: number;
   readonly accepted: number;
-  /** A non-accepted session with another session after it — of any WorkType. */
+  /**
+   * The Task's **non-review** sessions — the Jobs that were built on it. This is the population
+   * Rework and Decomposition are read over, and it is reported so that the two labels can be
+   * checked against the thing they were measured on.
+   */
+  readonly built: number;
+  /** A non-accepted **non-review** session with another one after it — of any other WorkType. */
   readonly rework: boolean;
-  /** More than one **accepted** session: work deliberately split, not work repeated. */
+  /** More than one accepted **non-review** session: work deliberately split, not repeated. */
   readonly decomposition: boolean;
   /** At least one accepted session — a Completed Task. An Incomplete Task is its complement. */
   readonly completed: boolean;
@@ -227,20 +243,26 @@ const lastEndOf = (sessions: readonly TaskSession[]): string => {
 /**
  * One Task's labels, from its own sessions.
  *
- * **Rework** is "any session but the last one failed" — which is exactly *a non-accepted session
- * followed by another session*, with no WorkType consulted on either side. **Decomposition** is
- * a second *accepted* session. The two are computed from the same ordered list and neither
- * excludes the other.
+ * **Rework** is "any *built* session but the last one failed" — which is exactly *a non-accepted
+ * session followed by another*, over the Task's non-review sessions and with no WorkType
+ * consulted among them. **Decomposition** is a second accepted one. The two are computed from
+ * the same ordered list and neither excludes the other.
+ *
+ * **`completed` and the age clock read every session**, review included: an accepted review is
+ * an accepted root session, and a Task nobody has touched since a review was submitted is not
+ * older than the review.
  */
 const factsFor = (taskKey: string, sessions: readonly TaskSession[]): TaskFacts => {
   const ordered = [...sessions].sort(inSessionOrder);
+  const built = ordered.filter((session) => session.work_type !== "review");
   const accepted = ordered.filter((session) => session.accepted).length;
   return {
     task_key: taskKey,
     sessions: ordered.length,
     accepted,
-    rework: ordered.slice(0, -1).some((session) => !session.accepted),
-    decomposition: accepted > 1,
+    built: built.length,
+    rework: built.slice(0, -1).some((session) => !session.accepted),
+    decomposition: built.filter((session) => session.accepted).length > 1,
     completed: accepted > 0,
     lastSessionEndedAt: lastEndOf(ordered),
   };

@@ -11,6 +11,7 @@ import {
   edgeCaseLines,
   populationLines,
   rampLines,
+  reviewLines,
   taskLines,
 } from "./distributions.mts";
 import { joinGithubUser, normaliseName } from "./join.mts";
@@ -246,6 +247,7 @@ export const assertFixture = (fixture: {
     ...rampLines(roots),
     ...acceptanceLines(roots),
     ...taskLines(roots),
+    ...reviewLines(roots),
     ...edgeCaseLines(fixture.sessions.filter(isRoot), roots),
     ...populationLines(roots),
     ...modelMixLines(roots),

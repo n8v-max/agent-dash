@@ -170,10 +170,21 @@ round: **choosing a datapoint conditions which WorkTypes are offered**, so an in
 selection cannot be expressed in the first place.
 
 **Rework** — A Task on which a **non-accepted root session** was followed by **another root
-session** — of any WorkType. The follow-up need not attempt the same class of work: a failed
-`review` session followed by an `implementation` session is still a second attempt at the same
-Task. The distinction between Task and AgentSession exists so that Rework is *measurable* at all —
-three retries of one Task and three first-time-successful Tasks are otherwise indistinguishable.
+session**, read over the Task's **non-review** sessions. The follow-up need not attempt the same
+class of work: a failed `implementation` followed by a `refactor` is still a second attempt at the
+same Task. The distinction between Task and AgentSession exists so that Rework is *measurable* at
+all — three retries of one Task and three first-time-successful Tasks are otherwise
+indistinguishable.
+
+**Reviews are excluded from the arrangement, and that is what keeps the label about repetition.**
+Every implementation, refactor and bug fix is reviewed on its own Task, by somebody else — so a
+`review` sits on *every* Task that had work built on it. Counting one would make the label a
+statement about review coverage rather than about repeated attempts: a failed Job followed by the
+review that found the problem would read as a second attempt, when the second attempt has not
+happened yet. Excluding them leaves the two attempts adjacent, so `[implementation failed, review,
+implementation accepted]` is Rework for the reason it should be. *(This narrows the reading ticket
+05 established, which had a failed `review` followed by an `implementation` as the worked example.
+The cross-WorkType clause survives among the four classes that remain; only `review` is out.)*
 
 **It counts attempts, so it counts roots.** A Child session is one agent working *the same*
 attempt and carries no acceptance of its own; counting it would read every sub-agent fan-out as a
@@ -189,17 +200,33 @@ both work still in flight and work someone gave up on, and the platform cannot t
 because it does not own the external Task's lifecycle. Age since the last session is reported
 instead, and the reader draws their own conclusion.
 
-**Decomposition** — A Task with more than one **accepted root session**: work deliberately split,
-not work repeated. A fan-out inside one attempt is not a split — nobody decided to divide the Task
-when an agent spawned a helper — which is the same reason Rework counts roots. Rework and Decomposition are independent labels on a Task rather than a
-partition; a long Task can exhibit both. Separating them is what makes multi-session Tasks
-interpretable — the raw count alone cannot tell a retry from a split.
+**Decomposition** — A Task with more than one accepted **non-review root session**: work
+deliberately split, not work repeated. A fan-out inside one attempt is not a split — nobody
+decided to divide the Task when an agent spawned a helper — which is the same reason Rework counts
+roots, and **a review is not a split either**, for the same reason it is not a second attempt.
+Without that exclusion the label would be worthless rather than merely wrong: an accepted Job and
+its accepted review are two accepted root sessions, so *every reviewed Task* would be a
+Decomposition. Rework and Decomposition are independent labels on a Task rather than a partition;
+a long Task can exhibit both. Separating them is what makes multi-session Tasks interpretable —
+the raw count alone cannot tell a retry from a split.
+
+**Completed and Incomplete are not narrowed the same way.** A Completed Task has an accepted root
+session and an accepted review is one, so a Job whose implementation failed and whose review was
+submitted is Completed — and the reviewer's accepted review is a completed Job on their own row.
+That is the model's own consequence, not an oversight: acceptance is per session and the review's
+criterion (*a submitted review with an outcome*) was met. The two Task-grain *labels* are about
+the shape of the attempts; the two Task-grain *states* are about whether anything was accepted.
 
 **WorkType** — The class of work a session is launched to do. **UI alias: "template".** It is
 one dimension, not two: the agent configuration *is* the work type, so choosing "bugfix" both
 declares intent and bootstraps the session — loading the appropriate skills and prefixing the
 first prompt with framing such as *"implementing acme/api-gateway#412"*. Every AgentSession references
 exactly one WorkType.
+
+**A `review` session is generated from the session it reviews.** It carries that session's Task
+and Repository, runs after it, and is run by a different human Member — so it is not a Job of its
+own, and the three WorkTypes that accept on a published pull request (`implementation`, `bugfix`,
+`refactor`) each carry one. Every other WorkType is declared at launch by the Member starting it.
 
 The vocabulary is **global and flat**: `implementation`, `refactor`, `bugfix`, `review`, `deploy`.
 `research` was cut: with every artefact on GitHub it could produce nothing but a comment, and a

@@ -962,6 +962,20 @@ claims rest on — a fixture that quietly loses the 91+ day bucket makes T-U16 p
   every child is nested inside its root's window — started after it, ended before it. The fan-out
   leans toward `implementation` and `headless`, asserted as a share against the root population
   rather than as a count, so the lean is a property of the draw and not of the fixture's size.
+- **T-F11 — The review linkage** (R-D22, ticket 67). Over the raw JSON: every `implementation`,
+  `bugfix` and `refactor` root's `task_key` carries at least one `review` root; reviews number at
+  least 1.22× that population and some Tasks carry two; refactors run at 17% of implementations
+  and bug fixes at 29%; **no review is run by a Member who ran a reviewed session on that Task**,
+  every review starts between ten minutes and four days after one of them ended, and over 80% of
+  them are run by somebody on the author's own Team. Re-derived from the committed files, never
+  from the generator (P3).
+
+**Literal counts in the fixture tests are the ones the *schedule* fixes, and no others** (ticket
+67). The visible root count, April's session count, the twenty Members and the $4,212 of seats
+are authored or structural and stay written down. Everything a WorkType mix can move — Task
+counts, child counts, order statistics, money totals, per-bucket tallies — is re-derived from the
+rows in the test that reads it. A literal that a fixture change re-types is a literal that has
+stopped checking anything.
 
 ---
 
@@ -1051,6 +1065,7 @@ Every criterion in `spec.md` § 10 has an owning test. No criterion is unowned.
 | A40 | Every route fits a 390px phone; nothing is hidden to make it fit | T-E17, T-C22 |
 | A41 | A child session rolls up into its root, is no attempt of its own, and is a row on `/demo/history` alone | T-U24, T-U25, T-U32, T-U33, T-C23, T-E18, T-F10 |
 | A42 | The product reads the data cut at `now`, sliced once, with no per-query filter | T-U35, T-U23, T-E19, T-E15 |
+| A43 | Every Job that was built is reviewed on its own Task, by somebody else, and a review is neither Rework nor Decomposition | T-U15, T-F11 |
 
 ---
 

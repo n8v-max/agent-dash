@@ -31,8 +31,8 @@ The platform is multi-agent, so ~20% of visible roots spawn one to four **child 
 weighted toward `implementation` and `headless`. A child inherits its root's Task, Member,
 Repository, WorkType and `execution_mode`, carries no `accepted`, and runs inside its root's
 window. The application folds a child's cost, tokens and duration into its root at parse (R-M19),
-so **session count means root count**: 7,761 attempts, 2,960 children, 158 hidden roots, 10,879
-rows on disk.
+so **session count means root count**: 7,761 attempts, 2,935 children, 158 hidden roots, 10,854
+rows on disk, across 3,626 Tasks.
 
 **`children.mts` runs last, and changes no root.** Everything upstream of it — the schedule, the
 Task shapes, the cell assignment, the model draw, the hidden rows — runs exactly as it did before
@@ -51,6 +51,47 @@ should always have been: a sub-agent is handed one slice of its root's work.)*
 
 Every distribution in `distributions.mts` and every money figure in `spend.mts` is asserted over
 **roots carrying their children** (`tree.mts`), because that is the population the product reads.
+
+## Every Job is reviewed, by somebody else (R-D22, ticket 67)
+
+`reviews.mts`. The mix is three ratios against `implementation` — refactors 17%, bug fixes 29%,
+reviews 122% of the three together — and a fourth term, `deploy`, which is not a taste call: it
+is the level at which R-D6's WorkType marginal meets R-D7's Repository one. A population that is
+two fifths `review` at 0.86 pushes the org-wide acceptance rate to 0.75, and R-D7's five rates
+average 0.663 and top out at 0.78, so nothing on that side could have absorbed it. `deploy` at
+0.34 is the only thing in R-D6 low enough to. 1.9552 deploys per implementation is where the two
+meet; `WORK_MIX` in `targets.mts` carries the derivation, and `SHARE_TRANSFER_LIMIT` — re-checked
+at this volume and left at 0.01 — now absorbs only the rounding.
+
+**A review takes a slot off the schedule; it is not appended to one.** R-D4 draws one to nine
+root sessions per human Member per workday and the volume ramp, the weekly spend curve and the
+whole cell allocation are properties of exactly those slots. So `splitSlots` decides which of the
+slots already drawn are reviews — evenly interleaved by rank, none in the first two days, nothing
+else in the last one — and the review keeps that slot's Member and instant. R-D4's 2,043
+(Member × workday) pairs are byte-for-byte what ticket 66 left.
+
+The matcher is therefore a matcher and not a draw. Pass one hands every Job the earliest legal
+slot behind it, preferring a team mate; pass two reads the leftover slots backwards for a Job in
+a Repository that still owes a second review. **The band is ten minutes to four days**, not the
+three the ticket asked for: a Job finished on a Friday morning has, inside three days, only
+Friday's remaining slots and a weekend at 15% of a workday, and the matcher fails below 80 hours
+on this schedule. The committed data runs a median delay of about 16 hours, 90% of reviews by a
+team mate, and none by the author.
+
+Two consequences are reported rather than corrected, and both are the model's own. A Task whose
+implementation failed and whose review was submitted is a **Completed Task**, so the fixture no
+longer holds a Member-month with spend and nothing delivered; the Incomplete population is now
+carried by the Tasks that never left `deploy`, and R-D9's four age buckets are filled from there.
+And `web-console` saturates: it has to average 0.78 while carrying a `deploy` column at 0.34, so
+its other cells sit against their own counts. No cell is unanimous — `allocation.mts` caps every
+one at its count less one — but `web-console` × `review` reads 99.9% and × `implementation` 99.2%.
+
+**Task titles compose** (`issues.mts`), which is ticket 66's hand-over. A title is a verb, a
+subject, and either an aspect (`the export dialog's empty state`) or, for a deploy, a destination
+(`to the canary fleet`). Sixteen subjects and sixteen aspects per Repository are thirty-two
+authored strings and several hundred phrases: 2,959 distinct titles over 3,626 Tasks, and no title
+worn more than seven times against about forty before. `assertTitles` makes that a checked
+property rather than an impression.
 
 ## The GitHub → Member join (R-D20)
 
@@ -112,7 +153,8 @@ quietly lost one of them.
   session of their targets.
 - **Rework and Decomposition** are *arrangements*, not fields: a Task is Rework if a non-accepted
   session was followed by another, Decomposition if more than one session was accepted. They are
-  independent labels, so the overlap is the product of the two rates.
+  independent labels, so the overlap is the product of the two rates. Both are read over the
+  Task's **non-review** sessions — see "Every Job is reviewed" below.
 - **Model mix.** Models are drawn against each month's targets and then repaired by moving whole
   parcels between models until the realised shares match. A size-ordered assignment would hit the
   targets exactly but would correlate model with session size — a finding the fixture would be
@@ -170,9 +212,11 @@ Both are reported rather than resolved, and no spec was edited.
 - **The seat-cost finding was demoted, not preserved** (ticket 66). It used to be the sharpest
   figure in the product at ~46% of Total spend, and the fixture was held at ~750 attempts so that
   it would be. R-D4 now asks for one to nine sessions per human Member per workday, and the
-  committed data carries **$55,293.74 of session spend against $4,212.00 of seat cost — 7.1% of
+  committed data carries **$53,104.47 of session spend against $4,212.00 of seat cost — 7.3% of
   Total spend**, asserted as a *ceiling* of 25% rather than as a band. The median session cost is
-  $3.62 and the p95 $24.04; no band is asserted over either, because ticket 66 deleted the
-  authored one with the fixture that produced it and ticket 68 sets the distribution next.
+  $3.58 and the p95 $22.37; no band is asserted over either, because ticket 66 deleted the
+  authored one with the fixture that produced it and ticket 68 sets the distribution next. (The
+  session bill fell ~$2,200 under ticket 67 and nothing was retuned to make it: an implementation
+  runs 1.7× an ordinary session and there are fewer of them.)
   *(Ticket 10's median ~$3.20 / p95 ~$35 pair was withdrawn in the spec on 2026-09-09 and its
   governing paragraph struck on 2026-09-10; nothing here now contradicts it.)*

@@ -7,6 +7,15 @@ Amended: 2026-09-10 ([ticket 66](../../.scratch/agent-dash/issues/66-fixture-win
 decision is unchanged; three of its numbers moved enough to be worth reading, and they are called
 out where they sit.
 
+**The measurements below are a dated reading of ticket 66's dataset and are not re-taken here.**
+[Ticket 67](../../.scratch/agent-dash/issues/67-fixture-work-mix-and-reviews.md) regenerated the
+fixture the same day — 10,854 rows, 2,935 children, **3,626 Tasks**, the root count unchanged at
+7,761 — by putting each review on the Task it reviews instead of on a Task of its own. That moves
+one collapse ratio and no argument: the Task-day fact grain gets *denser* relative to attempts,
+which is the direction this ADR already reasons in. Re-measuring a performance record to move a
+ratio from 1.187 to about 1.9 would restate the same conclusion at the cost of implying the
+timings below were taken on rows they were not.
+
 Decided in [ticket 54](../../.scratch/agent-dash/issues/54-scale-adr.md), which asks for the
 decision and forbids the code. **Nothing in the repository changes on account of it.** It extends
 [ADR-0006](0006-computation-rendering-seam-is-a-viewmodel.md) — the seam it describes is the one
