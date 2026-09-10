@@ -1,7 +1,7 @@
 Type: implementation
-Status: ready-for-agent
+Status: resolved
 Blocked by: 61
-Label: ready-for-agent
+Label: resolved
 
 # Every query reads the data to now: one slice, applied once, for every surface
 
@@ -66,3 +66,81 @@ Decided by the human, 2026-09-10.
 
 Runs before the fixture is extended (ticket 66); until then the slice is a no-op in production
 and exercised by tests with a pinned `now`. Keep `src/domain/**` clock-free (P5).
+
+
+## Comments
+
+### Resolution — 2026-09-10
+
+Implemented in `src/data/as-of.ts` (`datasetAsOf(now)`), applied in `queries/context.ts`
+(`pageContext`) and `queries/controls.ts` (`controlOptions`), with `clock.ts` reading the same
+slice for the as-of stamp and cutting the window at `now`'s civil day.
+
+Scope, item by item:
+
+1. **One slice.** `src/data/as-of.ts` — the fixture with every root whose `ended_at` is after
+   `now` removed, its children going with it. A root ending exactly at `now` stays. Where the cut
+   removes nothing the loaded `Dataset` is returned **by identity**, so today's production read is
+   free and the "no-op until ticket 66" claim is a test rather than a comment. Memoised per `now`,
+   bounded at four entries.
+2. **Applied once.** `pageContext` and `controlOptions` are the only callers under `queries/`;
+   `T-U35` in `src/data/as-of.test.ts` asserts the absences in the shape T-C19 uses — nothing
+   under `src/data/queries/`, `src/app/` or `src/components/` names `loadDataset`, the five
+   modules that do are an allow-list, `datasetAsOf` is named in exactly two places, and no module
+   outside `as-of.ts` compares `ended_at` against anything. `T-U27`'s "one producer of a
+   `Dataset`" claim was amended in the same commit: `as-of.ts` returns one too, and the two
+   properties that make that safe (it opens no file, it derives from `loadDataset`) are asserted
+   directly.
+3. **The clock.** `requestNow()` is unchanged except for `AGENT_DASH_NOW`, which substitutes for
+   the wall clock and is clamped by the same midday-UTC ceiling. An unparseable value is ignored.
+   `playwright.config.ts` pins it on the spawned `webServer` (`e2e/support/now.ts`); documented,
+   commented-out, in `.env.example`. Set nowhere else, and absent on Vercel.
+4. **Window end.** `observationWindow(now)` returns `min(window_end, civil day of now in the
+   Organization's timezone)`, never inverting. `periodOptions`, `defaultPeriodRange`, the
+   `?from=`/`?to=` clip and the History date inputs' `max` all already read that window, so the
+   single change reaches all four with no new call sites. R-D2's partial flag needed no change:
+   `periods.ts`'s `isPartial` already flags a bucket `nowDay < endExclusive`.
+5. **As-of stamp.** `dataAsOf(now)` reads `datasetAsOf(now).sessions`.
+6. **Projection identity.** Added to `queries.test.ts`: the actual series' bars sum to
+   `components.sessionToDate`, actual + forecast sums to `projectedSession`, and no bar carrying
+   a figure in the measured series falls after `now`'s civil day.
+
+Spec amended in this commit: **R-D2** (the window the product reads is the declared window cut at
+`now`, and the rows are cut with it), **R-C4** (the default period is that cut window), **R-N3.1**
+(the stamp is read off the slice), and a new **A42**. `testing-spec.md` gained § 3.6 (**T-U35**),
+**T-E19**, and the A42 row.
+
+### Escalations
+
+- **Memoisation is keyed on the exact `now`, not on the floored minute.** The ticket asked for
+  minute granularity; flooring the *cut* would silently discard up to 59 seconds of rows and would
+  break "keeps a root ending exactly at `now`", and flooring only the *key* would make the slice
+  depend on which caller warmed the cache within that minute. A page's queries all share one `now`
+  string (one `requestNow()` per request, carried on `ControlSet`), so the sharing the ticket asks
+  for is delivered either way. Cost: two requests one second apart each build a slice — one filter
+  over 742 rows. The cache is bounded at four entries so a long-lived dev server cannot grow.
+- **The slice is not quite a no-op in production today, and that is the point.** With the clamp at
+  midday UTC on 2026-09-08, seven of 742 roots end after `now` — including `ses_0757`, which ran
+  until 01:15 the next morning and was the session the as-of stamp named. Cutting them is exactly
+  scope item 5's defect being fixed, so the Notes' "no-op" is approximately rather than exactly
+  true, and no requirement was relaxed to make it so.
+- **`e2e/support/fixture.ts` restates the cut.** T-E4 builds its cost search set off the fixture
+  JSON deliberately, so with the page reading fewer rows a *legitimate* own figure fell outside
+  the allow-list and `/demo/projection` reported a false leak (`13.04`). The cut is restated
+  there beside R-M2 and R-M19, for the reason that file's header already gives: what a test
+  allows must describe the population the page renders. The claim is unchanged.
+- **The pinned e2e instant is `2026-09-08T12:00:00Z`** — exactly where `clock.ts`'s clamp already
+  lands the wall clock today, so pinning changed nothing the suite reads. A pleasanter mid-window
+  instant would have rewritten every period default, month list and count in the suite for no
+  gain; after ticket 66 this pin is what keeps them stable while the fixture runs past today.
+
+### Gates — 2026-09-10, all six green
+
+| Gate | Result | Detail |
+|---|---|---|
+| `pnpm lint` | pass | no errors, no warnings |
+| `pnpm typecheck` | pass | `next typegen && tsc --noEmit` clean |
+| `pnpm test` | pass | 1508 tests, 65 files (was 1504 / 64) |
+| `pnpm test:coverage` | pass | statements 98.29% · branches 89.40% · functions 99.02% · lines 99.47% |
+| `pnpm build` | pass | Turbopack, 10 routes, compiled in ~2.7s |
+| `PORT=3102 pnpm e2e` | pass | 179 passed (was 171), **48.0s** wall |

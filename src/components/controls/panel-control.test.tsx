@@ -28,8 +28,8 @@ import type { ControlContext } from "./control-renderers";
 import { PanelControl } from "./panel-control";
 import { controlHref, parseControls, type ControlQuery } from "./schema";
 
-const WINDOW = observationWindow();
 const NOW = "2026-09-08T12:00:00+02:00";
+const WINDOW = observationWindow(NOW);
 /** T-C0 / R-T29 — fixed numbers, never `initialDimension`. */
 const SIZE = { width: 640, height: 320 };
 

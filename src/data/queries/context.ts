@@ -12,7 +12,10 @@
 // Filtering once "for the page" would have to pick one class and would either leak cost or hide
 // tokens. Three filtered views, each computed once, each `filterRows` before any aggregation.
 //
-// Nothing here reads a clock: `now` arrives on the params (P5).
+// Nothing here reads a clock: `now` arrives on the params (P5) — and it decides the population
+// as well as the buckets. `datasetAsOf(params.now)` is the rows the platform has actually
+// observed by then (ticket 62); this module never calls `loadDataset`, and neither does anything
+// else under `queries/`, which `src/data/as-of.test.ts` asserts as an absence over the source.
 
 import {
   filterRows,
@@ -35,7 +38,8 @@ import {
 import type { AgentSession, Member } from "@/domain/types";
 import type { BucketViewModel } from "@/domain/viewmodel";
 import { instantIn } from "../instant";
-import { loadDataset, type Dataset } from "../load";
+import { datasetAsOf } from "../as-of";
+import type { Dataset } from "../load";
 import type { ControlSet } from "../params";
 
 /** The three classes a panel reads. `access` gates the matrix and reads no rows (R-A10). */
@@ -239,7 +243,9 @@ const labelsFor = (data: Dataset, identifiedNames: ReadonlySet<string>): Labels 
  * permission filter, bucket — once, for the whole page.
  */
 export function pageContext(viewer: Viewer, params: ControlSet): PageContext {
-  const data = loadDataset();
+  // The slice, taken once for the page: every panel below is a projection of these rows, so no
+  // two of them can disagree about whether a session has happened yet.
+  const data = datasetAsOf(params.now);
   const membership = membershipFromTeams(data.teams);
   const kindOf = new Map(data.members.map((member) => [member.id, member.kind]));
   const selected = selectorFor(params, membership, kindOf);

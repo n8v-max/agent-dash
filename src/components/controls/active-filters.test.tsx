@@ -27,8 +27,8 @@ import { ActiveFilters, activeFilterPhrases } from "./active-filters";
 import type { ControlContext } from "./control-renderers";
 import { parseControls, type ControlQuery } from "./schema";
 
-const WINDOW = observationWindow();
 const NOW = "2026-09-08T12:00:00+02:00";
+const WINDOW = observationWindow(NOW);
 
 const OPTIONS: ControlOptions = {
   repositories: [

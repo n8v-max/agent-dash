@@ -30,6 +30,12 @@
 //     list, so they carry a `RowSource` to say the same thing. A fault that names only a session
 //     id is a fault whose fix starts with a grep, and a loader is the one place in this
 //     application where the diagnosis has to be free — it runs before anything is rendered.
+//
+// **The second cut is next door, in `as-of.ts`** (ticket 62). `loadDataset()` is the whole
+// committed fixture and takes no clock, because what is *on disk* does not depend on when it is
+// read. What the product may *show* does: a session that has not finished as of `now` is not yet
+// a row, so `datasetAsOf(now)` narrows this dataset once, at this boundary, for the same reason
+// the hidden strip is here — and every query reads that, not this.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";

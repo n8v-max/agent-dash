@@ -39,15 +39,15 @@ import type { ControlOptions } from "@/data/queries";
 import { AS_OF_PREFIX, PageToolbar, asOfText } from "./page-toolbar";
 import { parseControls, periodOptions, type ControlQuery } from "./schema";
 
-const WINDOW = observationWindow();
 const NOW = "2026-09-08T12:00:00+02:00";
+const WINDOW = observationWindow(NOW);
 
 /**
  * R-N3.1's stamp, read off the committed fixture rather than invented (P6). It is a data-layer
  * value and takes no viewer, so a component test may hold it — what it *is* is asserted in
  * `src/data/clock.test.ts`, over the same rows the product serves.
  */
-const AS_OF = dataAsOf();
+const AS_OF = dataAsOf(NOW);
 
 const optionsWith = (grains: ControlOptions["grains"]): ControlOptions => ({
   repositories: [

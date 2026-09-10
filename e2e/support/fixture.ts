@@ -16,9 +16,16 @@
 //     search set built from stored rows would look for figures the page never prints and would
 //     miss the ones it does. This is the roll-up as arithmetic over two fields, and it is the
 //     smallest restatement that keeps the set describing the same population the page renders.
+//   * **R-D2 as ticket 62 cuts it** — a session that had not *finished* by `now` is not a row
+//     yet, exactly as `src/data/as-of.ts` cuts it, and a root that goes takes its children with
+//     it. `now` here is the instant `playwright.config.ts` pins the server to (`./now`), so both
+//     sides read the same population. Without this the allow-list would be built over rows the
+//     page cannot render, its subtraction would name figures nobody prints, and a *legitimate*
+//     own figure would be left in the search set — which is a false leak, not a stricter test.
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { PINNED_NOW } from "./now";
 
 /**
  * The fields of a raw fixture session row this suite reads. Deliberately the JSON shape and not
@@ -66,16 +73,37 @@ export const orgTimezone = (): string =>
 /** Cents, so a folded cost is the whole number of them the product's own fold produces. */
 const CENTS = 100;
 
+/** The pinned instant, as milliseconds. `Date.parse` is arithmetic, not a clock read. */
+const OBSERVED_TO = Date.parse(PINNED_NOW);
+
+/**
+ * Every stored row the product can have observed by `now`: hidden rows gone (R-M2), unfinished
+ * roots gone with their children (R-D2 as ticket 62 cuts it).
+ *
+ * The children are cut by their **root's** end and not by their own, because that is the rule the
+ * slice applies — a fan-out belongs to the attempt, and half a tree is not a row the product
+ * would ever render.
+ */
+const observedRows = (): readonly SessionRow[] => {
+  const visible = readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
+    .filter((name) => name.endsWith(".json"))
+    .flatMap((name) => readFixture<readonly SessionRow[]>("sessions", name))
+    .filter((row) => !row.hidden);
+  const observed = new Set(
+    visible
+      .filter((row) => row.parent_session_id === null && Date.parse(row.ended_at) <= OBSERVED_TO)
+      .map((row) => row.id),
+  );
+  return visible.filter((row) => observed.has(row.parent_session_id ?? row.id));
+};
+
 /**
  * Every session the product can render as a row: hidden rows gone (R-M2) and every child folded
  * into its root (R-M19). Read straight off disk: `load.ts` is the application's door to the
  * fixture, and this is not the application.
  */
 export const visibleSessions = (): readonly SessionRow[] => {
-  const visible = readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
-    .filter((name) => name.endsWith(".json"))
-    .flatMap((name) => readFixture<readonly SessionRow[]>("sessions", name))
-    .filter((row) => !row.hidden);
+  const visible = observedRows();
 
   const spawned = new Map<string, number>();
   for (const row of visible) {
@@ -98,10 +126,7 @@ export const visibleSessions = (): readonly SessionRow[] => {
  * account for them on both sides: granted where they are the viewer's own, ungranted otherwise.
  */
 export const visibleChildSessions = (): readonly SessionRow[] =>
-  readdirSync(join(FIXTURE_DIRECTORY, "sessions"))
-    .filter((name) => name.endsWith(".json"))
-    .flatMap((name) => readFixture<readonly SessionRow[]>("sessions", name))
-    .filter((row) => !row.hidden && row.parent_session_id !== null);
+  observedRows().filter((row) => row.parent_session_id !== null);
 
 // --- The published token rate card (R-N11) ----------------------------------------------------
 //

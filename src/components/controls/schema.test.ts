@@ -31,9 +31,10 @@ import {
   type ControlQuery,
 } from "./schema";
 
-const WINDOW = observationWindow();
 /** P5 — pinned, and never serialised: `now` is an argument, not a control. */
 const NOW = "2026-09-08T12:00:00+02:00";
+/** The declared window, cut at `now` (ticket 62). Inside it, that is the window as declared. */
+const WINDOW = observationWindow(NOW);
 const ORG = "demo";
 
 const parse = (page: PageKey, query: ControlQuery): ControlSet =>
