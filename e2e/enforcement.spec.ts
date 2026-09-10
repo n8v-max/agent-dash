@@ -69,18 +69,19 @@ test.describe("T-E3 — the authoritative boundary", () => {
 });
 
 test.describe("R-A4 / R-T13 — issuing a session", () => {
-  test("continuing as an account sets an httpOnly session cookie and lands on its org", async ({
+  // Ticket 60: `/sign-in` offers one action, for the open default. The restricted account is
+  // reached from the header switcher (R-A5), which routes.spec.ts and mobile.spec.ts exercise;
+  // where a test only needs to *be* the contractor it installs the token with `useSession`.
+  test("signing in to the demo account sets an httpOnly session cookie and lands on its org", async ({
     page,
     context,
   }) => {
     await context.clearCookies();
     await page.goto("/sign-in");
 
-    await page
-      .getByRole("button", { name: `Continue as ${RESTRICTED_ACCOUNT.fullName}` })
-      .click();
+    await page.getByRole("button", { name: "Sign in to the demo account" }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/${RESTRICTED_ACCOUNT.orgSlug}$`));
+    await expect(page).toHaveURL(new RegExp(`/${OPEN_ACCOUNT.orgSlug}$`));
     const [cookie] = await context.cookies();
     expect(cookie?.httpOnly).toBe(true);
     expect(cookie?.sameSite).toBe("Lax");
@@ -93,7 +94,7 @@ test.describe("R-A4 / R-T13 — issuing a session", () => {
   }) => {
     await context.clearCookies();
     await page.goto("/sign-in");
-    await page.getByRole("button", { name: `Continue as ${OPEN_ACCOUNT.fullName}` }).click();
+    await page.getByRole("button", { name: "Sign in to the demo account" }).click();
     await expect(page).toHaveURL(new RegExp(`/${OPEN_ACCOUNT.orgSlug}$`));
 
     const cleared = await page.request.delete("/api/session");

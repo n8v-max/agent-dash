@@ -11,6 +11,15 @@ fires on.
 
 ## Next
 
+**An MCP surface over the query façade.** Every ViewModel the pages render — Total spend and its
+split, Cost per completed Job, the Repository × template grid, the unattended share, the Team and
+Member tables — exposed as read-only tools, so any assistant a team already uses can ask for cost
+per finished job, the leak split, where the work converts and how much of it ran headless, in
+plain words. Cheap for the same reason CSV export is: the seam is a data structure (ADR-0006), and
+the rows already exist one layer down; the tool layer is a serialisation of the façade, gated by
+the same Viewer the pages are. **The landing already promises it** — *Ask, don't dig* on `/`
+(ticket 60) — which is why it is first.
+
 **BYOK splits Total spend** — deferred as a decision record, `docs/adr/0010-byok.md`. Under BYOK the
 token cost lands on the customer's vendor invoice and the platform bills seats and machine time, so
 Total spend — the only figure representing what the Organization actually pays — hides most of the

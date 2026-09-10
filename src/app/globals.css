@@ -139,3 +139,28 @@
     @apply font-sans;
     }
 }
+/* Ticket 60 — the landing's tokens, scoped to the two public routes (`src/app/(public)/**`).
+   Paper and navy ink in light; the same relationships on a slate surface under `.dark`. One set
+   of variables, two sets of values — not a second design. The layout that consumes them lives in
+   `src/app/(public)/landing.css`. */
+.landing {
+    --landing-paper: #f7f5f0;
+    --landing-claims: #fbfaf7;
+    --landing-figures: #ebe7de;
+    --landing-readings: #ffffff;
+    --landing-rule: #ddd8cd;
+    --landing-ink: #14213d;
+    --landing-ink-2: #4a5068;
+    --landing-ink-3: #8a8f9e;
+}
+
+.dark .landing {
+    --landing-paper: #151a27;
+    --landing-claims: #1a2030;
+    --landing-figures: #0f1420;
+    --landing-readings: #1e2434;
+    --landing-rule: #2b3245;
+    --landing-ink: #f3f1ec;
+    --landing-ink-2: #c3c2b7;
+    --landing-ink-3: #8a8f9e;
+}

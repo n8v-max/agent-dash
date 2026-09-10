@@ -1,7 +1,7 @@
 Type: implementation
-Status: needs-triage
+Status: resolved
 Blocked by:
-Label: ready-for-agent
+Label: resolved
 
 # Landing v2 — slogan, paragraph, four reads; sign-in as a mock provider page
 

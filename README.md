@@ -6,7 +6,7 @@ the artefact as the code, so most of what follows points at where one is written
 
 ## 1. The claim, and the claim it refuses
 
-**Agent spend, measured per finished task. Not per token, not per seat.**
+**What your agents do, spend and solve, per finished job.**
 
 Every agent platform tells you what you spent; none tells you what you got for it. This dashboard
 joins the two. **Cost per completed Task** — attempts that produced nothing sit in the numerator and
@@ -45,7 +45,7 @@ The positioning in full, with what each line is held to:
 ## 2. Live, and the thirty-second path
 
 **<https://agent-use-dash.vercel.app>** — public, no deployment protection. Two seeded accounts, no
-password; `/sign-in` offers both to anyone.
+password; `/sign-in` signs anyone in to the first, and the header switcher reaches the second.
 
 | Account | Role | Sees |
 |---|---|---|
@@ -54,7 +54,7 @@ password; `/sign-in` offers both to anyone.
 
 Walk it:
 
-1. **Continue as Nuria Castells Vidal.** You land on `/demo` — four tiles and nothing below them.
+1. **Sign in to the demo account.** You are Nuria Castells Vidal, and you land on `/demo` — four tiles and nothing below them.
    September 2026 is the current month and it is unfinished, so every tile carries a **Partial
    month** flag where its change figure would be, and the page says why in a sentence.
 2. **Read them left to right; they are one argument in sequence.** What the month cost —

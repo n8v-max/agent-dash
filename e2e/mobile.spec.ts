@@ -100,6 +100,29 @@ test.describe("T-E17 — every surface fits a 390px phone (A40, R-V15)", () => {
 });
 
 /**
+ * The two public routes (ticket 60). No session: a visitor meets these signed out. The landing's
+ * figure band bleeds to the viewport edge on a phone, which is exactly the kind of negative
+ * margin that pushes `<html>` wider than the screen when it is one pixel off.
+ */
+test.describe("T-E17 — the landing and sign-in fit a 390px phone (ticket 60)", () => {
+  for (const route of ["/", "/sign-in"]) {
+    test(`${route} does not scroll sideways`, async ({ context, page }) => {
+      await context.clearCookies();
+      await page.goto(route);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+      const report = await overflowReport(page);
+
+      expect(
+        report.scrollWidth,
+        `${route} overflows by ${report.scrollWidth - PHONE_WIDTH}px. ` +
+          `Widest elements: ${report.widest.join(" · ") || "none"}`,
+      ).toBeLessThanOrEqual(PHONE_WIDTH);
+    });
+  }
+});
+
+/**
  * The rest of R-V15, stated as structure rather than as pixels. Each of these is a *mechanism*
  * the scroll-width sweep above depends on, and each fails silently in a way the sweep would not
  * catch: a nav that fits because two items vanished passes the sweep and breaks R-A8.
