@@ -13,7 +13,7 @@ import {
   rampLines,
   taskLines,
 } from "./distributions.mts";
-import { joinGithubUser } from "./join.mts";
+import { joinGithubUser, normaliseName } from "./join.mts";
 import { githubUsers, members } from "./people.mts";
 import { crossesUtcDay, startsLateEvening } from "./predicates.mts";
 import { madridOffsetMinutes } from "./schedule.mts";
@@ -27,7 +27,7 @@ import {
   WINDOW_START_DAY,
 } from "./targets.mts";
 import { agentCounts, INHERITED_LABELS, isRoot, rootsOf } from "./tree.mts";
-import type { AgentSession, Task } from "./types.mts";
+import type { AgentSession, Member, Task } from "./types.mts";
 
 const TASK_KEY = /^[a-z0-9-]+\/[a-z0-9-]+#\d+$/u;
 
@@ -142,11 +142,65 @@ const assertJoin = (): string[] => {
     full_name: member.full_name,
     email: member.email,
   }));
+  let byName = 0;
   for (const user of githubUsers) {
     const outcome = joinGithubUser(user, candidates);
     check(outcome.matched, `R-D20: GitHub user ${user.login} matched no Member`);
+    if (outcome.rule === "full_name") byName += 1;
   }
-  return [`R-D20 ${githubUsers.length} GitHub users, all joined to a Member`];
+  // Rule 2 is the half of the join a reader cannot check by eye, so it has to carry rows. Four
+  // users publish no email at all; two more publish a `users.noreply` address, which names an
+  // account and not a person. If a name edit ever made all six matchable by email, the fallback
+  // would still be documented and never taken.
+  check(byName >= 4, `R-D20: only ${byName} GitHub users reach a Member by name; rule 2 is idle`);
+  return [
+    `R-D20 ${githubUsers.length} GitHub users, all joined to a Member (${byName} by name alone)`,
+  ];
+};
+
+// R-D1 as sharpened by ticket 65 — the humans read as different people. First names are pairwise
+// distinct and no surname token repeats in either position, compared with accents folded away:
+// a reader scanning a legend does not spell-check diacritics, and neither does R-D20's rule 2.
+//
+// The two service accounts are excluded deliberately. They share the Organization's name in
+// first position because that is what they are — Equilibrio's robots — and they are not two
+// people a reader has to tell apart.
+const assertNames = (): string[] => {
+  const humans = members.filter((member) => member.kind === "human");
+  const tokensOf = (member: Member): string[] => normaliseName(member.full_name).split(" ");
+  const firstNames = humans.map((member) => tokensOf(member)[0] as string);
+  const surnames = humans.flatMap((member) => tokensOf(member).slice(1));
+  for (const [position, tokens] of [
+    ["first name", firstNames],
+    ["surname", surnames],
+  ] as const) {
+    const seen = new Set<string>();
+    for (const token of tokens) {
+      check(!seen.has(token), `R-D1: two Members share the ${position} "${token}"`);
+      seen.add(token);
+    }
+  }
+  const oneSurname = humans.filter((member) => tokensOf(member).length === 2);
+  const twoSurnames = humans.filter((member) => tokensOf(member).length === 3);
+  check(
+    oneSurname.length >= 8 && twoSurnames.length >= 8,
+    `R-D1: ${oneSurname.length} humans carry one surname and ${twoSurnames.length} carry two; ` +
+      "the roster is meant to hold both forms so no surface may assume three words",
+  );
+  check(
+    oneSurname.length + twoSurnames.length === humans.length,
+    "R-D1: a human's name is one or two surnames, and nothing else",
+  );
+  const accented = humans.filter((member) => member.full_name.normalize("NFD") !== member.full_name);
+  check(
+    accented.length >= 6,
+    `R-D1: only ${accented.length} names carry an accent, so R-D20's fold does no work`,
+  );
+  return [
+    `R-D1 ${humans.length} humans, ${firstNames.length} distinct first names and ` +
+      `${surnames.length} distinct surnames · ${oneSurname.length} one-surname, ` +
+      `${twoSurnames.length} two-surname, ${accented.length} accented`,
+  ];
 };
 
 const assertScale = (): string[] => {
@@ -179,6 +233,7 @@ export const assertFixture = (fixture: {
     ...assertClock(fixture.sessions),
     ...assertMatrix(fixture.sessions),
     ...assertJoin(),
+    ...assertNames(),
     ...rampLines(roots),
     ...acceptanceLines(roots),
     ...taskLines(roots),

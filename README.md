@@ -50,8 +50,8 @@ you are and links back to `/sign-in`; it does not switch accounts.
 
 | Account | Role | Sees | Offered? |
 |---|---|---|---|
-| **Nuria Castells Vidal** | Open default | *"Every Member of the Organization by name — their jobs, their tokens, their cost."* | Yes — the one demo action |
-| **Héctor Camps Vidal** | Restricted (contractor) | *"Yourself by name; your Team's jobs and tokens as totals only, and no cost at all."* | **No — demonstrable only under test** |
+| **Nuria Castells** | Open default | *"Every Member of the Organization by name — their jobs, their tokens, their cost."* | Yes — the one demo action |
+| **Héctor Camps** | Restricted (contractor) | *"Yourself by name; your Team's jobs and tokens as totals only, and no cost at all."* | **No — demonstrable only under test** |
 
 **The restricted account is seated, not offered** (ticket 61). Its Role and grants are shipped and
 unchanged, and it is the account the payload tests act as — but nothing in the product mints a
@@ -61,7 +61,7 @@ token directly from the fixture.
 
 Walk it:
 
-1. **Sign in to the demo account.** You are Nuria Castells Vidal, and you land on `/demo` — four tiles and nothing below them.
+1. **Sign in to the demo account.** You are Nuria Castells, and you land on `/demo` — four tiles and nothing below them.
    September 2026 is the current month and it is unfinished, so every tile carries a **Partial
    month** flag where its change figure would be, and the page says why in a sentence.
 2. **Read them left to right; they are one argument in sequence.** What the month cost —
@@ -128,8 +128,10 @@ and ~750 root AgentSessions plus their sub-agent children over a 150-day window 
 across 20 Members, 4 overlapping Teams, 5 Repositories, 5 WorkTypes and 7 Models from 3 vendors.
 Datasets are shaped by where they would really come from — one file per `(repository × work_type)`
 for platform events, GitHub field names for the mocked GitHub API — and the generator asserts its
-own distributions as it writes. Volume is deliberately low: a busy fixture would bury the seat-cost
-finding. Tests read the committed output and never run the generator, and CI regenerates from the
+own distributions as it writes. **No two Members share a first name or a surname**, and half of
+them carry one surname to the other half's two, so a name in a legend identifies a person and no
+surface may assume a three-word shape. Volume is deliberately low: a busy fixture would bury the
+seat-cost finding. Tests read the committed output and never run the generator, and CI regenerates from the
 seed and diffs, so the data the tests pass against is the data the app ships.
 
 **Six gates, all required.** `lint`, `typecheck`, `test`, `test:coverage`, `build`, `e2e` — all six

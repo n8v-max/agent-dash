@@ -4,6 +4,17 @@
 // R-D1 — Spanish Member names, English Team names, and GitHub logins that do not trivially
 // match the full names, so the identity join is visibly doing work rather than being an
 // equality check on a string the reader can see is the same string.
+//
+// **The eighteen humans read as eighteen different people** (ticket 65). No two share a first
+// name, and no surname token repeats in either position — the table used to hold two Vidals and
+// a Roldán on both sides of the surname pair, which made a legend or a ranked table ask the
+// reader which one this was. Nine carry one surname and nine keep the Spanish two-surname form,
+// so a surface that assumed a fixed three-word shape is caught here rather than in a screenshot.
+// Accents stay on twelve of them, because R-D20's rule 2 folds accents away and a roster without
+// any would let that fold pass as a no-op. `invariants.mts` asserts all of it.
+//
+// Member ids, directory email locals and GitHub logins are *not* re-derived from these names:
+// they identify rows that sessions already point at, and a name is a label, not a key.
 
 import { joinGithubUser } from "./join.mts";
 import { organization } from "./catalog.mts";
@@ -26,24 +37,24 @@ type PersonRow = readonly [
 const N = null;
 
 const PEOPLE: readonly PersonRow[] = [
-  ["mem_ncastells", "Nuria Castells Vidal", "nuria.castells", "human", "member", ["platform"], 8140221, "ncv-dev", "Nuria Castells Vidal", "nuria.castells@equilibrio.io"],
+  ["mem_ncastells", "Nuria Castells", "nuria.castells", "human", "member", ["platform"], 8140221, "ncv-dev", "Nuria Castells", "nuria.castells@equilibrio.io"],
   ["mem_aruiz", "Álvaro Ruiz Ortega", "alvaro.ruiz", "human", "member", ["platform"], 8140237, "aruizo", "ALVARO RUIZ ORTEGA", N],
-  ["mem_mpena", "Marta Peña Serrano", "marta.pena", "human", "member", ["platform", "product"], 8140248, "mps-code", "Marta Peña Serrano", "marta.pena@equilibrio.io"],
+  ["mem_mpena", "Marta Peña", "marta.pena", "human", "member", ["platform", "product"], 8140248, "mps-code", "Marta Peña", "marta.pena@equilibrio.io"],
   ["mem_jdominguez", "Javier Domínguez Lara", "javier.dominguez", "human", "member", ["platform"], 8140259, "jdlara", "Javier Dominguez Lara", "8140259+jdlara@users.noreply.github.com"],
   ["mem_lbermejo", "Lucía Bermejo Ferrer", "lucia.bermejo", "human", "member", ["product"], 8140266, "lubermejo", "Lucía Bermejo Ferrer", "lucia.bermejo@equilibrio.io"],
   ["mem_sibanez", "Sergio Ibáñez Molina", "sergio.ibanez", "human", "member", ["platform", "infrastructure"], 8140274, "sibz", "Sergio Ibanez Molina", N],
-  ["mem_ccruz", "Carmen Cruz Delgado", "carmen.cruz", "human", "member", ["product"], 8140283, "ccruzd", "Carmen Cruz Delgado", "carmen.cruz@equilibrio.io"],
-  ["mem_pherrera", "Pablo Herrera Gil", "pablo.herrera", "human", "member", ["product"], 8140291, "phgil", "Pablo Herrera Gil", "pablo.herrera@equilibrio.io"],
-  ["mem_esaez", "Elena Sáez Roldán", "elena.saez", "human", "member", ["product", "data"], 8140305, "esaez-r", "Elena Saez Roldan", "8140305+esaez-r@users.noreply.github.com"],
+  ["mem_ccruz", "Carmen Cruz", "carmen.cruz", "human", "member", ["product"], 8140283, "ccruzd", "Carmen Cruz", "carmen.cruz@equilibrio.io"],
+  ["mem_pherrera", "Pablo Herrera", "pablo.herrera", "human", "member", ["product"], 8140291, "phgil", "Pablo Herrera", "pablo.herrera@equilibrio.io"],
+  ["mem_esaez", "Elena Sáez", "elena.saez", "human", "member", ["product", "data"], 8140305, "esaez-r", "Elena Saez", "8140305+esaez-r@users.noreply.github.com"],
   ["mem_dnavarro", "Diego Navarro Prieto", "diego.navarro", "human", "member", ["platform"], 8140318, "dnp-code", "Diego Navarro Prieto", "diego.navarro@equilibrio.io"],
-  ["mem_ivazquez", "Irene Vázquez Soto", "irene.vazquez", "human", "member", ["data"], 8140327, "ivsoto", "Irene Vázquez Soto", "irene.vazquez@equilibrio.io"],
+  ["mem_ivazquez", "Irene Vázquez", "irene.vazquez", "human", "member", ["data"], 8140327, "ivsoto", "Irene Vázquez", "irene.vazquez@equilibrio.io"],
   ["mem_rmarin", "Rubén Marín Cano", "ruben.marin", "human", "member", ["data"], 8140336, "rmarinc", "Ruben Marin Cano", N],
   ["mem_blorenzo", "Beatriz Lorenzo Pardo", "beatriz.lorenzo", "human", "member", ["data"], 8140344, "blpardo", "Beatriz Lorenzo Pardo", "beatriz.lorenzo@equilibrio.io"],
   ["mem_aquintana", "Andrés Quintana Rey", "andres.quintana", "human", "member", ["data", "infrastructure"], 8140352, "aqrey", "Andrés Quintana Rey", "andres.quintana@equilibrio.io"],
   ["mem_sroldan", "Silvia Roldán Nieto", "silvia.roldan", "human", "member", ["infrastructure"], 8140361, "sroldann", "Silvia Roldán Nieto", "silvia.roldan@equilibrio.io"],
-  ["mem_tferran", "Tomás Ferrán Blasco", "tomas.ferran", "human", "member", ["infrastructure"], 8140379, "tfb-ops", "Tomas Ferran Blasco", N],
-  ["mem_ngallego", "Noelia Gallego Ruano", "noelia.gallego", "human", "member", ["product"], 8140388, "ngruano", "Noelia Gallego Ruano", "noelia.gallego@equilibrio.io"],
-  ["mem_hcamps", "Héctor Camps Vidal", "hector.camps", "human", "contractor", ["data"], 8140396, "hcv-contract", "Héctor Camps Vidal", "hector.camps@equilibrio.io"],
+  ["mem_tferran", "Tomás Ferrán", "tomas.ferran", "human", "member", ["infrastructure"], 8140379, "tfb-ops", "Tomas Ferran", N],
+  ["mem_ngallego", "Noelia Gallego", "noelia.gallego", "human", "member", ["product"], 8140388, "ngruano", "Noelia Gallego", "noelia.gallego@equilibrio.io"],
+  ["mem_hcamps", "Héctor Camps", "hector.camps", "human", "contractor", ["data"], 8140396, "hcv-contract", "Héctor Camps", "hector.camps@equilibrio.io"],
   ["mem_deploybot", "Equilibrio Deploy Bot", "deploy-bot", "service_account", "automation", ["infrastructure"], 8140402, "equilibrio-deploy-bot", "Equilibrio Deploy Bot", "deploy-bot@equilibrio.io"],
   ["mem_nightlybot", "Equilibrio Nightly Runner", "nightly-runner", "service_account", "automation", ["infrastructure"], 8140417, "equilibrio-nightly", "Equilibrio Nightly Runner", "nightly-runner@equilibrio.io"],
 ];

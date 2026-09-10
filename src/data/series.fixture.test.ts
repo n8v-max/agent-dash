@@ -122,7 +122,7 @@ describe("the committed fixture is not empty of what the cap needs (P6, R-D3)", 
 
     expect(perBucketTopLabels(april)).toEqual([
       "Equilibrio Nightly Runner",
-      "Irene Vázquez Soto",
+      "Irene Vázquez",
       "Rubén Marín Cano",
       "Diego Navarro Prieto",
     ]);
@@ -136,7 +136,7 @@ describe("T-U11 / A13 — the cap engages on 20 Members and not on 5 Repositorie
   it("renders 20 Members as the four largest plus Other", () => {
     expect(BY_MEMBER.series).toHaveLength(SERIES_LIMIT);
     expect(BY_MEMBER.series.map((series) => series.label)).toEqual([
-      "Héctor Camps Vidal",
+      "Héctor Camps",
       "Equilibrio Nightly Runner",
       "Silvia Roldán Nieto",
       "Equilibrio Deploy Bot",
@@ -153,8 +153,8 @@ describe("T-U11 / A13 — the cap engages on 20 Members and not on 5 Repositorie
 
   it("lists the 16 Members the bucket holds, ranked, starting with the fifth largest", () => {
     expect(BY_MEMBER.other?.holds).toHaveLength(members.length - NAMED_SERIES_CAP);
-    expect(BY_MEMBER.other?.holds[0]).toBe("Irene Vázquez Soto");
-    expect(BY_MEMBER.other?.holds).not.toContain("Héctor Camps Vidal");
+    expect(BY_MEMBER.other?.holds[0]).toBe("Irene Vázquez");
+    expect(BY_MEMBER.other?.holds).not.toContain("Héctor Camps");
   });
 
   it("renders 5 Repositories as five series and no Other bucket", () => {
@@ -195,12 +195,12 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
     const april = valuesIn(BY_MEMBER, "2026-04");
     const labels = BY_MEMBER.series.map((series) => series.label);
 
-    expect(labels).not.toContain("Irene Vázquez Soto");
+    expect(labels).not.toContain("Irene Vázquez");
     expect(labels).not.toContain("Rubén Marín Cano");
     expect(april).toEqual([0, 4, 0, 0, 27]);
     // Héctor Camps and Silvia Roldán ran nothing at all in April and keep their series anyway,
     // which is the identity a per-bucket ranking would have taken away.
-    expect(labels[0]).toBe("Héctor Camps Vidal");
+    expect(labels[0]).toBe("Héctor Camps");
     expect(april[0]).toBe(0);
   });
 
@@ -219,13 +219,13 @@ describe("T-U11 / A14 — one whole-range ranking, identical in every bucket (R-
     const byCost = byMember(cost);
 
     expect(byCost.series.map((series) => series.label)).toEqual([
-      "Héctor Camps Vidal",
-      "Pablo Herrera Gil",
+      "Héctor Camps",
+      "Pablo Herrera",
       "Equilibrio Nightly Runner",
       // Fourth by cost and nowhere near the top four by session count — she leads April on
       // volume and is inside "Other" on the count chart above. The two orders disagree, which
       // is the whole claim (R-V5).
-      "Irene Vázquez Soto",
+      "Irene Vázquez",
       "Other",
     ]);
     expect(byCost.series.map((series) => series.label)).not.toEqual(

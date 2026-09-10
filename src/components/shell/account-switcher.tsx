@@ -29,9 +29,11 @@ import type { Account } from "@/data/accounts";
 import { cn } from "@/lib/utils";
 
 /**
- * The avatar's two letters: the initials of the first and last name-parts — "Nuria Castells
- * Vidal" → "NV". A one-word name has no second initial, so it lends its first two letters
- * rather than rendering a lonely glyph in a circle sized for two.
+ * The avatar's two letters: the initials of the first and last name-parts — "Diego Navarro
+ * Prieto" → "DP", "Nuria Castells" → "NC". Half the roster carries one surname and half two
+ * (ticket 65), so first-and-last is the only rule that reads correctly for both. A one-word
+ * name has no second initial, so it lends its first two letters rather than rendering a lonely
+ * glyph in a circle sized for two.
  */
 const initialsOf = (fullName: string): string => {
   const parts = fullName.split(" ").filter((part) => part.length > 0);

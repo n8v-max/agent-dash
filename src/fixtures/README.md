@@ -62,10 +62,21 @@ re-applied by the invariant test over the committed JSON (T-F8), and it lives in
 2. **Full name, normalised.** Accents stripped, case folded, punctuation dropped, internal
    whitespace collapsed. `ALVARO RUIZ ORTEGA` and `Álvaro Ruiz Ortega` are the same person.
 
-Four of the twenty users publish no usable email and are carried by rule 2, so the fallback is
-exercised rather than decorative. **No GitHub user fails to match**, and the generator throws if
+Four of the twenty users publish no email at all and two more publish only a `users.noreply`
+address, so **six are carried by rule 2** and the fallback is exercised rather than decorative;
+the generator asserts that at least four are, so a name edit cannot quietly retire it. **No GitHub user fails to match**, and the generator throws if
 one does. An unmatched user is a real product problem that none of the six surfaces would show, so
 modelling it would add an unreachable state to every aggregation.
+
+**No two Members share a first name, and no surname token repeats in either position** (ticket
+65), compared with accents folded away — a name in a legend or a ranked table names one person.
+Nine of the eighteen humans carry one surname and nine keep the Spanish two-surname form, so no
+surface may assume a three-word name; twelve names keep their accents, which is what stops rule 2's
+fold below from being a no-op on the committed data. `invariants.mts` asserts all of it, and the
+committed JSON is checked again by `invariants.test.ts`.
+
+Member ids, directory email locals and GitHub logins are **not** re-derived from the names: they
+identify rows the sessions already point at, so a rename moves labels and nothing else.
 
 Logins deliberately do not read off the full names (`hcv-contract`, `mps-code`, `sibz`), so the
 join is visibly doing work rather than being an equality check on a string the reader can see is

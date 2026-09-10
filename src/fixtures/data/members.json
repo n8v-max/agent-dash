@@ -3,7 +3,7 @@
     {
       "id": 8140221,
       "login": "ncv-dev",
-      "full_name": "Nuria Castells Vidal",
+      "full_name": "Nuria Castells",
       "email": "nuria.castells@equilibrio.io"
     },
     {
@@ -15,7 +15,7 @@
     {
       "id": 8140248,
       "login": "mps-code",
-      "full_name": "Marta Peña Serrano",
+      "full_name": "Marta Peña",
       "email": "marta.pena@equilibrio.io"
     },
     {
@@ -39,19 +39,19 @@
     {
       "id": 8140283,
       "login": "ccruzd",
-      "full_name": "Carmen Cruz Delgado",
+      "full_name": "Carmen Cruz",
       "email": "carmen.cruz@equilibrio.io"
     },
     {
       "id": 8140291,
       "login": "phgil",
-      "full_name": "Pablo Herrera Gil",
+      "full_name": "Pablo Herrera",
       "email": "pablo.herrera@equilibrio.io"
     },
     {
       "id": 8140305,
       "login": "esaez-r",
-      "full_name": "Elena Saez Roldan",
+      "full_name": "Elena Saez",
       "email": "8140305+esaez-r@users.noreply.github.com"
     },
     {
@@ -63,7 +63,7 @@
     {
       "id": 8140327,
       "login": "ivsoto",
-      "full_name": "Irene Vázquez Soto",
+      "full_name": "Irene Vázquez",
       "email": "irene.vazquez@equilibrio.io"
     },
     {
@@ -93,19 +93,19 @@
     {
       "id": 8140379,
       "login": "tfb-ops",
-      "full_name": "Tomas Ferran Blasco",
+      "full_name": "Tomas Ferran",
       "email": null
     },
     {
       "id": 8140388,
       "login": "ngruano",
-      "full_name": "Noelia Gallego Ruano",
+      "full_name": "Noelia Gallego",
       "email": "noelia.gallego@equilibrio.io"
     },
     {
       "id": 8140396,
       "login": "hcv-contract",
-      "full_name": "Héctor Camps Vidal",
+      "full_name": "Héctor Camps",
       "email": "hector.camps@equilibrio.io"
     },
     {
@@ -126,7 +126,7 @@
       "id": "mem_ncastells",
       "github_id": 8140221,
       "github_login": "ncv-dev",
-      "full_name": "Nuria Castells Vidal",
+      "full_name": "Nuria Castells",
       "email": "nuria.castells@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -150,7 +150,7 @@
       "id": "mem_mpena",
       "github_id": 8140248,
       "github_login": "mps-code",
-      "full_name": "Marta Peña Serrano",
+      "full_name": "Marta Peña",
       "email": "marta.pena@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -200,7 +200,7 @@
       "id": "mem_ccruz",
       "github_id": 8140283,
       "github_login": "ccruzd",
-      "full_name": "Carmen Cruz Delgado",
+      "full_name": "Carmen Cruz",
       "email": "carmen.cruz@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -212,7 +212,7 @@
       "id": "mem_pherrera",
       "github_id": 8140291,
       "github_login": "phgil",
-      "full_name": "Pablo Herrera Gil",
+      "full_name": "Pablo Herrera",
       "email": "pablo.herrera@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -224,7 +224,7 @@
       "id": "mem_esaez",
       "github_id": 8140305,
       "github_login": "esaez-r",
-      "full_name": "Elena Sáez Roldán",
+      "full_name": "Elena Sáez",
       "email": "elena.saez@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -249,7 +249,7 @@
       "id": "mem_ivazquez",
       "github_id": 8140327,
       "github_login": "ivsoto",
-      "full_name": "Irene Vázquez Soto",
+      "full_name": "Irene Vázquez",
       "email": "irene.vazquez@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -310,7 +310,7 @@
       "id": "mem_tferran",
       "github_id": 8140379,
       "github_login": "tfb-ops",
-      "full_name": "Tomás Ferrán Blasco",
+      "full_name": "Tomás Ferrán",
       "email": "tomas.ferran@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -322,7 +322,7 @@
       "id": "mem_ngallego",
       "github_id": 8140388,
       "github_login": "ngruano",
-      "full_name": "Noelia Gallego Ruano",
+      "full_name": "Noelia Gallego",
       "email": "noelia.gallego@equilibrio.io",
       "kind": "human",
       "team_ids": [
@@ -334,7 +334,7 @@
       "id": "mem_hcamps",
       "github_id": 8140396,
       "github_login": "hcv-contract",
-      "full_name": "Héctor Camps Vidal",
+      "full_name": "Héctor Camps",
       "email": "hector.camps@equilibrio.io",
       "kind": "human",
       "team_ids": [
