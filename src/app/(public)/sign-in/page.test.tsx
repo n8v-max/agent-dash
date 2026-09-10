@@ -36,7 +36,7 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
   });
 
   it("names that account from the fixture rather than from a literal (ticket 61)", () => {
-    // The card used to hardcode "Nuria Castells Vidal". Reseeding the Organization would have
+    // The card used to hardcode "Nuria Castells". Reseeding the Organization would have
     // left the page confidently naming somebody who no longer exists.
     const [openDefault] = signInAccounts();
     render(<SignInPage />);

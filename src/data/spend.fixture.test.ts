@@ -304,7 +304,7 @@ describe("a seat held against near-zero usage (R-D10, T-U12, T-U13)", () => {
 
   it("is a human holding a seat, with fewer than 5 sessions across 150 days", () => {
     expect(HER).toHaveLength(1);
-    expect(HER[0]).toMatchObject({ kind: "human", seat_active: true, full_name: "Noelia Gallego Ruano" });
+    expect(HER[0]).toMatchObject({ kind: "human", seat_active: true, full_name: "Noelia Gallego" });
     expect(ROWS).toHaveLength(3);
     expect(ROWS.length).toBeLessThan(5);
   });

@@ -24,7 +24,7 @@ const ALPHA: Account = {
   memberId: "mem_here",
   orgSlug: "alpha",
   orgName: "Alpha S.L.",
-  fullName: "Héctor Camps Vidal",
+  fullName: "Héctor Camps",
   roleName: "Open default",
 };
 
@@ -34,7 +34,7 @@ describe("the menu — who you are, where you are, one way on", () => {
   it("names the acting Member and their Organization, and nothing about their Role", () => {
     render(<AccountSwitcher account={ALPHA} />);
 
-    expect(menu().getByText("Héctor Camps Vidal")).toBeInTheDocument();
+    expect(menu().getByText("Héctor Camps")).toBeInTheDocument();
     expect(menu().getByText("Alpha S.L.")).toBeInTheDocument();
     // The Role name is on the Account and is deliberately not rendered: R-A5 as amended drops
     // the mechanics, and the Role was the label the mechanics needed.
@@ -74,14 +74,14 @@ describe("the menu — who you are, where you are, one way on", () => {
   });
 
   it("names the acting Member and nobody else (T-E4's line, at this layer)", () => {
-    render(<AccountSwitcher account={{ ...ALPHA, fullName: "Nuria Castells Vidal" }} />);
+    render(<AccountSwitcher account={{ ...ALPHA, fullName: "Nuria Castells" }} />);
 
     const rendered = screen.getByTestId("switch-account").textContent ?? "";
 
-    expect(rendered).toContain("Nuria Castells Vidal");
+    expect(rendered).toContain("Nuria Castells");
     // Everything the menu says, spelled out: two facts and one action. A second person's name
     // could only arrive by adding text, so the whole string is the assertion.
-    expect(rendered).toBe("Nuria Castells Vidal" + "Alpha S.L." + "Add another account");
+    expect(rendered).toBe("Nuria Castells" + "Alpha S.L." + "Add another account");
   });
 });
 
@@ -91,14 +91,23 @@ describe("the trigger — an avatar and a name", () => {
 
     const trigger = within(screen.getByTestId("account-switcher"));
 
-    expect(screen.getByTestId("viewer")).toHaveTextContent("Héctor Camps Vidal");
+    expect(screen.getByTestId("viewer")).toHaveTextContent("Héctor Camps");
     expect(trigger.queryByText("Open default")).toBeNull();
   });
 
   it("reduces a multi-part name to the initials of its first and last parts", () => {
     render(<AccountSwitcher account={ALPHA} />);
 
-    expect(screen.getByTestId("account-switcher").textContent).toContain("HV");
+    expect(screen.getByTestId("account-switcher").textContent).toContain("HC");
+  });
+
+  it("takes the last part, not the second — half the roster carries two surnames", () => {
+    // Ticket 65 seeds nine one-surname and nine two-surname humans, so "first and second" and
+    // "first and last" agree on half the Members and disagree on the other half. A three-part
+    // name is the only case that tells the two rules apart.
+    render(<AccountSwitcher account={{ ...ALPHA, fullName: "Diego Navarro Prieto" }} />);
+
+    expect(screen.getByTestId("account-switcher").textContent).toContain("DP");
   });
 
   it("falls back to the first two letters when a name has one part", () => {

@@ -501,3 +501,83 @@ describe("T-F8 — the GitHub join", () => {
     for (const row of allSessions) expect(memberById.has(row.member_id)).toBe(true);
   });
 });
+
+// Ticket 65 — the twenty Members read as twenty different people at a glance.
+//
+// Over the committed directory, not the generator (P3 / R-T20). The comparison strips accents
+// and case, so "Sáez" and "Saez" are one token: a reader scanning a legend does not spell-check
+// diacritics, and neither does the join (R-D20, rule 2).
+//
+// **Service accounts are excluded on purpose.** "Equilibrio Deploy Bot" and "Equilibrio Nightly
+// Runner" share the Organization's own name in first position because that is what they are —
+// the Organization's robots, not two people who happen to be related. The rule is about the 18
+// humans a reader has to tell apart.
+const nameTokens = (fullName: string): readonly string[] =>
+  fullName
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .split(" ")
+    .filter((part) => part.length > 0);
+
+const hasAccent = (fullName: string): boolean => fullName.normalize("NFD") !== fullName;
+
+describe("R-D1 — no two Members share a first name or a surname", () => {
+  const humans = directory.members.filter((member) => member.kind === "human");
+
+  it("seeds 18 humans, every one of them named", () => {
+    expect(humans).toHaveLength(18);
+    for (const member of humans) expect(nameTokens(member.full_name).length).toBeGreaterThan(1);
+  });
+
+  it("gives every human a first name nobody else has", () => {
+    const firstNames = humans.map((member) => nameTokens(member.full_name)[0]);
+
+    expect(new Set(firstNames).size).toBe(firstNames.length);
+  });
+
+  it("repeats no surname token, in either position", () => {
+    // Both positions in one bag: the collisions this replaced were "Nuria Castells **Vidal**" /
+    // "Héctor Camps **Vidal**" and "Elena Sáez **Roldán**" / "**Roldán** Nieto", and the second
+    // pair only reads as a collision if a first surname and a second surname are compared.
+    const surnames = humans.flatMap((member) => nameTokens(member.full_name).slice(1));
+
+    expect(surnames).not.toHaveLength(0);
+    expect(new Set(surnames).size).toBe(surnames.length);
+  });
+
+  it("gives at least 8 humans one surname and at least 8 the Spanish two-surname form", () => {
+    const twoWord = humans.filter((member) => nameTokens(member.full_name).length === 2);
+    const twoSurname = humans.filter((member) => nameTokens(member.full_name).length === 3);
+
+    expect(twoWord.length).toBeGreaterThanOrEqual(8);
+    expect(twoSurname.length).toBeGreaterThanOrEqual(8);
+    expect(twoWord.length + twoSurname.length).toBe(humans.length);
+  });
+
+  it("keeps accents on several names, so the join's normalisation still does work", () => {
+    // R-D20 rule 2 folds accents away. If no seeded name carried one, the fold would be a
+    // no-op on the committed data and T-F8 would pass against a normaliser that did nothing.
+    expect(humans.filter((member) => hasAccent(member.full_name)).length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("carries four GitHub users that only the name rule can match (R-D20)", () => {
+    const candidates = directory.members.map((member) => ({
+      id: member.id,
+      full_name: member.full_name,
+      email: member.email,
+    }));
+    const byName = directory.github_users.filter(
+      (user) => joinGithubUser(user, candidates).rule === "full_name",
+    );
+
+    expect(byName.length).toBeGreaterThanOrEqual(4);
+    // …and each of them is matched on a spelling that differs from the Member's own, so the
+    // normalisation is load-bearing rather than an equality check dressed up.
+    for (const user of byName) {
+      const member = directory.members.find((candidate) => candidate.github_id === user.id);
+      expect(member).toBeDefined();
+      expect(user.email === null || user.email.endsWith("users.noreply.github.com")).toBe(true);
+    }
+  });
+});
