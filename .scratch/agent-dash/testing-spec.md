@@ -219,6 +219,14 @@ against.
   name ascending, and the set is **identical in every bucket** (A14). A test constructs a dataset
   where per-bucket ranking would differ from whole-range ranking, and asserts the whole-range
   answer — this is the bug R-V5 exists to prevent.
+
+  **The cap is the palette's length** (added 2026-09-10, ticket 70). One input of ten series is
+  run through `capSeries` twice: with the Model mix palette it emits **ten distinct `colorVar`s
+  and no "Other"**, and with the shared palette it still emits five and an "Other" holding six.
+  Eleven series against the ten-colour palette still folds into "Other", so the amendment lifts
+  the ceiling and does not remove it. `paletteFor` — the one expression that decides which
+  palette a grouping takes — is covered over the whole closed `Grouping` union, so a grouping
+  added without a palette is a type error rather than a silent fallback to five.
 - **T-U12 — Total spend composition** (`domain/metrics/spend.ts`, R-M1, R-M5). Session Cost + Seat
   cost; seats on `human` Members only; **unavailable below monthly grain** (A25). April's whole-
   month seat charge against 19 days of sessions is asserted as correct-and-flagged, not corrected
@@ -238,9 +246,14 @@ against.
   **91+** — with "now" injected (P5). **Boundaries are half-open and a Task aged exactly 90 days
   falls in one bucket only**; the earlier `90+` wording double-covered day 90 in all three sources
   and is the off-by-one this test exists to prevent.
-- **T-U17 — Model mix at three roll-up levels** (R-M7). Exact → family → tier is a true partition
-  and sums. **No per-session metric can be grouped by or filtered on Model** (A22) — asserted as an
-  absence: no query function accepts a Model argument.
+- **T-U17 — Model mix at three roll-up levels** (R-M7). Every level is a true partition of the
+  same tokens and all three sum to one total. **`family` and `tier` are two roll-ups of exact and
+  not a chain** (amended 2026-09-10, ticket 70): `OpenAI GPT-5` holds a `fast` model and a
+  `balanced` one, so a tier is summed from its **Models**, and a test asserts exactly that — plus
+  that the roster holds exactly one straddling family, so the case stays real rather than
+  hypothetical. Counts come from the committed `models.json` and are never typed out. **No
+  per-session metric can be grouped by or filtered on Model** (A22) — asserted as an absence: no
+  query function accepts a Model argument.
 - **T-U18 — Tokens processed** (R-M9). The four disjoint classes summed. Disjointness is what makes
   the sum safe, and a test asserts the classes do not overlap in the fixture.
 - **T-U19 — Session duration** (R-M1). Median and p95, on a right-skewed distribution. The mean is
@@ -762,7 +775,8 @@ inside the desktop project, which keeps each width beside the requirement it bel
   between the access model working and the access model being theatre.
 
   **The scan is over *bare* decimals, and it excludes two things that only look like one**: a
-  decimal inside an identifier (`gemini-3.1-pro`'s `3.1`) and a decimal a compact token unit sits
+  decimal inside an identifier (`gemini-3.1-pro`'s `3.1`, and `gpt-5.2`'s `5.2` since ticket 70)
+  and a decimal a compact token unit sits
   on (`1.3M`, `9.8K`, `2.1B` — ticket 69, R-N15). A token volume is not a price, and the unit
   letter says so on the wire as plainly as on screen; without the second exclusion the Tokens
   column would fail this test on every page carrying one, because `1.3` is a real session cost in
@@ -932,6 +946,21 @@ inside the desktop project, which keeps each width beside the requirement it bel
   for the reason that file's header gives: what a test *allows* must describe the population the
   page renders.
 
+- **T-E20 — the Model mix draws the whole roster, as a share over time** (R-V7 as amended, R-D17,
+  ticket 70). Three layers below prove pieces and none proves the whole: `series.ts` makes a
+  palette a cap, `viewmodel.ts` decides which palette a `model` grouping takes, `adoption.ts`
+  decides the measure. Only a running page shows that **ten Models arrive in the legend** — that
+  the amended cap survived the query, the RSC boundary, the panel's named shape and Recharts —
+  and that no "Other" is folded out of a roster the reader is choosing between.
+
+  The legend is read through the swatches' accessible names (`chart-config.tsx`'s
+  `legendIconLabel`), and asserted at all three roll-up levels against counts derived from the
+  committed `models.json` — ten, eight, three — never typed out. The chart is asserted to hold
+  **no bar mark at all**, which is the geometry the ticket replaced. The figures come off the
+  R-X1 mirror (P2): at month grain `claude-haiku-4-5` reads **at or below 12%** in the last
+  column and at least ten points higher in the first, and `claude-fable-5-1` reads a measured
+  **0** in April and above 5% at the close — R-D17's two halves, on the served page.
+
 ---
 
 ## 6. Fixture invariant tests
@@ -952,6 +981,11 @@ claims rest on — a fixture that quietly loses the 91+ day bucket makes T-U16 p
   (R-D12), the interactive service account and headless humans (R-D13), the multi-Team Members and
   the cross-Team Repository (R-D14), 40% multi-Model sessions (R-D15), the frontier share trend
   (R-D17).
+
+  **R-D17 is asserted in the direction ticket 70 gave it**: the frontier tier's share **rises**
+  every month and by at least ten points across the window, and `claude-haiku-4-5` fades by at
+  least ten points and ends at or below 12%. The frontier set is read off `models.json` rather
+  than named, so a roster edit that moved a model between tiers fails here.
 - **T-F5 — Both accounts have real sessions** and their views differ (R-D18).
 - **T-F6 — Timezone edge rows exist** — sessions between 22:00 and 24:00 Europe/Madrid (R-D5).
   Without this, T-U1's sharpest case has no data.

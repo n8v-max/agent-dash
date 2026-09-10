@@ -11,14 +11,17 @@
 import { describe, expect, it } from "vitest";
 import {
   GROUPINGS,
+  PALETTE_BY_GROUPING,
   STACKABLE_GROUPINGS,
   chartViewModel,
+  paletteFor,
   stackable,
   tableViewModel,
   type Cell,
   type ChartInput,
   type Grouping,
 } from "./viewmodel";
+import { CHART_COLOR_VARS, MODEL_MIX_COLOR_VARS } from "./series";
 
 const buckets = (...keys: readonly string[]) =>
   keys.map((key) => ({ key, label: key, partial: false }));
@@ -518,5 +521,44 @@ describe("R-V12 — `form` is a domain fact, and a ranked chart's table is one r
     });
 
     expect(view.mirror.rows).toEqual([["ada", 10, null]]);
+  });
+});
+
+/**
+ * **R-V7's amendment lives in one lookup** (ticket 70). `paletteFor` is the whole seam: the cap
+ * follows the palette (`series.ts`), the palette follows the grouping, and a panel has nothing
+ * to pass. Asserting it here rather than inside `series.ts` is the point of the split — that
+ * module knows what a palette is and nothing about what a Model is.
+ */
+describe("paletteFor — which palette a grouping's chart is painted from (R-V7)", () => {
+  it("gives the Model mix its own ten, and every other grouping the shared five", () => {
+    expect(paletteFor("model")).toBe(MODEL_MIX_COLOR_VARS);
+    for (const grouping of GROUPINGS.filter((candidate) => candidate !== "model")) {
+      expect(paletteFor(grouping)).toBe(CHART_COLOR_VARS);
+    }
+  });
+
+  it("covers every grouping, so a new one cannot fall back to five by omission", () => {
+    expect(Object.keys(PALETTE_BY_GROUPING).sort()).toEqual([...GROUPINGS].sort());
+  });
+
+  it("carries the palette through to the chart, and with it the cap", () => {
+    const twelve = Array.from({ length: 12 }, (_unused, index) => `m${index}`);
+    const cells = twelve.flatMap((group, index) => [
+      cell("2026-04", group, 120 - index),
+      cell("2026-05", group, 120 - index),
+    ]);
+
+    const mix = chart({ grouping: "model", cells });
+    const members = chart({ grouping: "member", cells });
+
+    // Nine named plus "Other" fills the ten; four named plus "Other" fills the five. One
+    // `chartViewModel`, one set of cells, two caps — and the cap is the palette's length in
+    // both cases, never a number written down beside it.
+    expect(mix.series).toHaveLength(MODEL_MIX_COLOR_VARS.length);
+    expect(mix.series.map((series) => series.colorVar)).toEqual([...MODEL_MIX_COLOR_VARS]);
+    expect(mix.other?.holds).toHaveLength(twelve.length - (MODEL_MIX_COLOR_VARS.length - 1));
+    expect(members.series).toHaveLength(CHART_COLOR_VARS.length);
+    expect(members.other?.holds).toHaveLength(twelve.length - (CHART_COLOR_VARS.length - 1));
   });
 });

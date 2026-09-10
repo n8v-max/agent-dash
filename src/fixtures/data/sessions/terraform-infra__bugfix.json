@@ -13,7 +13,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 38,
-    "cost": 1.09,
+    "cost": 0.83,
     "interactive_duration_s": 1298,
     "idle_duration_s": 1664,
     "afk_duration_s": 3757,
@@ -26,7 +26,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-haiku-4-5",
         "uncached_input": 36794,
         "cache_read": 619940,
         "cache_write": 67197,
@@ -83,7 +83,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 1.75,
+    "cost": 1.56,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 9351,
@@ -96,7 +96,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-haiku-4-5",
         "uncached_input": 28749,
         "cache_read": 895359,
         "cache_write": 50644,
@@ -110,7 +110,7 @@
         "output": 10442
       },
       {
-        "model_id": "claude-haiku-4-5",
+        "model_id": "gpt-5.2",
         "uncached_input": 11499,
         "cache_read": 358144,
         "cache_write": 20258,
@@ -216,7 +216,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 4.42,
+    "cost": 4.28,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 12415,
@@ -229,7 +229,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-haiku-4-5",
         "uncached_input": 9502,
         "cache_read": 477620,
         "cache_write": 34078,
@@ -251,7 +251,7 @@
     "accepted": false,
     "hidden": true,
     "prompt_count": 2,
-    "cost": 4.64,
+    "cost": 4.7,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 18233,
@@ -264,14 +264,21 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
-        "uncached_input": 2013,
-        "cache_read": 72991,
-        "cache_write": 4133,
-        "output": 784
+        "model_id": "claude-fable-5-1",
+        "uncached_input": 1258,
+        "cache_read": 45619,
+        "cache_write": 2583,
+        "output": 490
       },
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 755,
+        "cache_read": 27372,
+        "cache_write": 1550,
+        "output": 294
+      },
+      {
+        "model_id": "claude-sonnet-5",
         "uncached_input": 503,
         "cache_read": 18248,
         "cache_write": 1033,
@@ -293,7 +300,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 7,
-    "cost": 1.37,
+    "cost": 1.34,
     "interactive_duration_s": 5308,
     "idle_duration_s": 1035,
     "afk_duration_s": 4414,
@@ -313,7 +320,7 @@
         "output": 19611
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "gpt-5.2",
         "uncached_input": 12907,
         "cache_read": 318996,
         "cache_write": 19635,
@@ -335,7 +342,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 0.24,
+    "cost": 0.23,
     "interactive_duration_s": 917,
     "idle_duration_s": 179,
     "afk_duration_s": 762,
@@ -350,7 +357,7 @@
         "output": 3387
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "gpt-5.2",
         "uncached_input": 2229,
         "cache_read": 55099,
         "cache_write": 3391,
@@ -387,7 +394,7 @@
         "output": 2649
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "gpt-5.2",
         "uncached_input": 1743,
         "cache_read": 43088,
         "cache_write": 2652,
@@ -409,7 +416,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 0.17,
+    "cost": 0.16,
     "interactive_duration_s": 642,
     "idle_duration_s": 125,
     "afk_duration_s": 535,
@@ -424,7 +431,7 @@
         "output": 2374
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "gpt-5.2",
         "uncached_input": 1562,
         "cache_read": 38610,
         "cache_write": 2377,
@@ -461,7 +468,7 @@
         "output": 3597
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "gpt-5.2",
         "uncached_input": 2367,
         "cache_read": 58509,
         "cache_write": 3601,
@@ -483,7 +490,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 1.38,
+    "cost": 1.33,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 3485,
@@ -503,7 +510,7 @@
         "output": 3266
       },
       {
-        "model_id": "claude-opus-5",
+        "model_id": "claude-sonnet-4-6",
         "uncached_input": 1860,
         "cache_read": 56901,
         "cache_write": 7353,
@@ -525,7 +532,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 21.78,
+    "cost": 13.84,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 6538,
@@ -538,18 +545,18 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
-        "uncached_input": 266220,
-        "cache_read": 7609192,
-        "cache_write": 614918,
-        "output": 171744
+        "model_id": "claude-sonnet-4-6",
+        "uncached_input": 205360,
+        "cache_read": 5869673,
+        "cache_write": 474343,
+        "output": 132482
       },
       {
-        "model_id": "gpt-6-astra",
-        "uncached_input": 143349,
-        "cache_read": 4097257,
-        "cache_write": 331110,
-        "output": 92478
+        "model_id": "claude-opus-5",
+        "uncached_input": 110578,
+        "cache_read": 3160593,
+        "cache_write": 255416,
+        "output": 71337
       }
     ]
   },
@@ -567,7 +574,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 6.22,
+    "cost": 6.75,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 16095,
@@ -580,18 +587,18 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
-        "uncached_input": 89462,
-        "cache_read": 2014354,
-        "cache_write": 201034,
-        "output": 64536
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 110920,
+        "cache_read": 2497511,
+        "cache_write": 249254,
+        "output": 80015
       },
       {
         "model_id": "claude-haiku-4-5",
-        "uncached_input": 48172,
-        "cache_read": 1084652,
-        "cache_write": 108249,
-        "output": 34750
+        "uncached_input": 59726,
+        "cache_read": 1344813,
+        "cache_write": 134213,
+        "output": 43085
       }
     ]
   },
@@ -609,7 +616,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 30,
-    "cost": 0.66,
+    "cost": 0.67,
     "interactive_duration_s": 1076,
     "idle_duration_s": 2013,
     "afk_duration_s": 1891,
@@ -623,10 +630,10 @@
     "token_usage": [
       {
         "model_id": "gpt-5-nano",
-        "uncached_input": 68184,
-        "cache_read": 1842144,
-        "cache_write": 257376,
-        "output": 25083
+        "uncached_input": 84538,
+        "cache_read": 2283995,
+        "cache_write": 319110,
+        "output": 31099
       }
     ]
   },
@@ -644,7 +651,7 @@
     "accepted": false,
     "hidden": true,
     "prompt_count": 13,
-    "cost": 4.01,
+    "cost": 2.65,
     "interactive_duration_s": 1138,
     "idle_duration_s": 2627,
     "afk_duration_s": 1360,
@@ -657,11 +664,11 @@
     },
     "token_usage": [
       {
-        "model_id": "gpt-6-astra",
-        "uncached_input": 64589,
-        "cache_read": 594888,
-        "cache_write": 92876,
-        "output": 23571
+        "model_id": "claude-opus-5",
+        "uncached_input": 80081,
+        "cache_read": 737576,
+        "cache_write": 115153,
+        "output": 29225
       }
     ]
   },
@@ -693,10 +700,10 @@
     "token_usage": [
       {
         "model_id": "gpt-5-nano",
-        "uncached_input": 46204,
-        "cache_read": 948577,
-        "cache_write": 90251,
-        "output": 21414
+        "uncached_input": 57286,
+        "cache_read": 1176100,
+        "cache_write": 111898,
+        "output": 26550
       }
     ]
   },
@@ -727,11 +734,11 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 99,
-        "cache_read": 1732,
-        "cache_write": 150,
-        "output": 50
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 123,
+        "cache_read": 2148,
+        "cache_write": 186,
+        "output": 62
       }
     ]
   },
@@ -757,11 +764,11 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 21,
-        "cache_read": 369,
-        "cache_write": 32,
-        "output": 10
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 26,
+        "cache_read": 457,
+        "cache_write": 40,
+        "output": 13
       }
     ]
   },
@@ -779,7 +786,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 5.76,
+    "cost": 5.85,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 16139,
@@ -793,10 +800,10 @@
     "token_usage": [
       {
         "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 105853,
-        "cache_read": 6178501,
-        "cache_write": 172130,
-        "output": 64224
+        "uncached_input": 131242,
+        "cache_read": 7660458,
+        "cache_write": 213416,
+        "output": 79629
       }
     ]
   },
@@ -814,7 +821,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 1.75,
+    "cost": 1.84,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 6215,
@@ -827,7 +834,7 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
+        "model_id": "claude-sonnet-4-6",
         "uncached_input": 6966,
         "cache_read": 346935,
         "cache_write": 14009,
@@ -849,7 +856,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 0.23,
+    "cost": 0.25,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 835,
@@ -857,7 +864,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
+        "model_id": "claude-sonnet-4-6",
         "uncached_input": 936,
         "cache_read": 46612,
         "cache_write": 1882,
@@ -879,7 +886,7 @@
     "accepted": false,
     "hidden": true,
     "prompt_count": 6,
-    "cost": 0.7,
+    "cost": 1.03,
     "interactive_duration_s": 2652,
     "idle_duration_s": 1120,
     "afk_duration_s": 2052,
@@ -892,14 +899,14 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-opus-5",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 2430,
         "cache_read": 80229,
         "cache_write": 9947,
         "output": 2523
       },
       {
-        "model_id": "claude-sonnet-5",
+        "model_id": "gpt-6-astra",
         "uncached_input": 1309,
         "cache_read": 43200,
         "cache_write": 5356,
@@ -921,7 +928,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 6.5,
+    "cost": 6.52,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 19496,
@@ -934,7 +941,7 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
+        "model_id": "gpt-6-astra",
         "uncached_input": 197,
         "cache_read": 5015,
         "cache_write": 410,
@@ -969,7 +976,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 274383,
         "cache_read": 5284303,
         "cache_write": 306831,
@@ -999,7 +1006,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 76445,
         "cache_read": 1472248,
         "cache_write": 85486,
@@ -1029,7 +1036,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 76445,
         "cache_read": 1472248,
         "cache_write": 85486,
@@ -1059,7 +1066,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 39648,
         "cache_read": 763566,
         "cache_write": 44336,
@@ -1089,7 +1096,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 53247,
         "cache_read": 1025471,
         "cache_write": 59544,
@@ -1111,7 +1118,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 1.75,
+    "cost": 1.79,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 20432,
@@ -1131,14 +1138,14 @@
         "output": 1164
       },
       {
-        "model_id": "claude-sonnet-5",
+        "model_id": "claude-opus-5",
         "uncached_input": 1056,
         "cache_read": 34845,
         "cache_write": 4349,
         "output": 698
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 704,
         "cache_read": 23230,
         "cache_write": 2899,
@@ -1222,7 +1229,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 88703,
         "cache_read": 4724939,
         "cache_write": 341799,
@@ -1264,7 +1271,7 @@
         "output": 215465
       },
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 327232,
         "cache_read": 6092516,
         "cache_write": 676998,
@@ -1299,7 +1306,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 24604,
         "cache_read": 1014300,
         "cache_write": 40519,
@@ -1334,7 +1341,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 115200,
         "cache_read": 3612399,
         "cache_write": 229910,
@@ -1364,7 +1371,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 17658,
         "cache_read": 553725,
         "cache_write": 35242,
@@ -1394,7 +1401,7 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 23605,
         "cache_read": 740184,
         "cache_write": 47109,
@@ -1416,7 +1423,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 5.51,
+    "cost": 5.77,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 11653,
@@ -1436,7 +1443,7 @@
         "output": 40992
       },
       {
-        "model_id": "claude-haiku-4-5",
+        "model_id": "gpt-5.2",
         "uncached_input": 36413,
         "cache_read": 1255174,
         "cache_write": 58415,
@@ -1458,7 +1465,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 1.07,
+    "cost": 2.03,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 5197,
@@ -1471,7 +1478,7 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
+        "model_id": "claude-opus-5",
         "uncached_input": 27914,
         "cache_read": 1038527,
         "cache_write": 45351,
@@ -1506,7 +1513,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
+        "model_id": "claude-sonnet-5",
         "uncached_input": 104223,
         "cache_read": 2517642,
         "cache_write": 308134,
@@ -1563,7 +1570,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 12,
-    "cost": 0.52,
+    "cost": 0.84,
     "interactive_duration_s": 1387,
     "idle_duration_s": 1267,
     "afk_duration_s": 2027,
@@ -1576,7 +1583,7 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.5-flash-lite",
+        "model_id": "claude-haiku-4-5",
         "uncached_input": 22777,
         "cache_read": 1126905,
         "cache_write": 151304,
@@ -1598,7 +1605,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 26,
-    "cost": 57.65,
+    "cost": 66.32,
     "interactive_duration_s": 2849,
     "idle_duration_s": 1143,
     "afk_duration_s": 2960,
@@ -1611,14 +1618,14 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-haiku-4-5",
+        "model_id": "gemini-3.1-pro-preview",
         "uncached_input": 832122,
         "cache_read": 20114262,
         "cache_write": 1622641,
         "output": 759082
       },
       {
-        "model_id": "gpt-6-astra",
+        "model_id": "claude-fable-5-1",
         "uncached_input": 448066,
         "cache_read": 10830757,
         "cache_write": 873730,
@@ -1640,7 +1647,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 3.11,
+    "cost": 10.99,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 5962,
@@ -1653,11 +1660,11 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
-        "uncached_input": 94972,
-        "cache_read": 3311337,
-        "cache_write": 249605,
-        "output": 113500
+        "model_id": "gpt-6-astra",
+        "uncached_input": 76308,
+        "cache_read": 2660589,
+        "cache_write": 200552,
+        "output": 91195
       }
     ]
   },
@@ -1675,7 +1682,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 1.74,
+    "cost": 2.56,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 4169,
@@ -1688,25 +1695,25 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
-        "uncached_input": 9151,
-        "cache_read": 425955,
-        "cache_write": 15310,
-        "output": 5158
+        "model_id": "gpt-5.2",
+        "uncached_input": 12957,
+        "cache_read": 603117,
+        "cache_write": 21678,
+        "output": 7303
+      },
+      {
+        "model_id": "gpt-6-astra",
+        "uncached_input": 7773,
+        "cache_read": 361870,
+        "cache_write": 13007,
+        "output": 4382
       },
       {
         "model_id": "claude-sonnet-5",
-        "uncached_input": 5490,
-        "cache_read": 255573,
-        "cache_write": 9186,
-        "output": 3095
-      },
-      {
-        "model_id": "claude-haiku-4-5",
-        "uncached_input": 3660,
-        "cache_read": 170382,
-        "cache_write": 6124,
-        "output": 2063
+        "uncached_input": 5182,
+        "cache_read": 241247,
+        "cache_write": 8671,
+        "output": 2921
       }
     ]
   },
@@ -1724,7 +1731,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 18,
-    "cost": 3.15,
+    "cost": 3.22,
     "interactive_duration_s": 4083,
     "idle_duration_s": 1235,
     "afk_duration_s": 3637,
@@ -1737,18 +1744,18 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
-        "uncached_input": 13415,
-        "cache_read": 211485,
-        "cache_write": 22910,
-        "output": 3743
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 18995,
+        "cache_read": 299445,
+        "cache_write": 32439,
+        "output": 5300
       },
       {
         "model_id": "gpt-5-nano",
-        "uncached_input": 7223,
-        "cache_read": 113876,
-        "cache_write": 12336,
-        "output": 2015
+        "uncached_input": 10227,
+        "cache_read": 161239,
+        "cache_write": 17467,
+        "output": 2853
       }
     ]
   },
@@ -1766,7 +1773,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 17,
-    "cost": 2.01,
+    "cost": 2.5,
     "interactive_duration_s": 3690,
     "idle_duration_s": 1297,
     "afk_duration_s": 4937,
@@ -1780,10 +1787,10 @@
     "token_usage": [
       {
         "model_id": "claude-sonnet-5",
-        "uncached_input": 67613,
-        "cache_read": 1900297,
-        "cache_write": 168249,
-        "output": 24329
+        "uncached_input": 95734,
+        "cache_read": 2690662,
+        "cache_write": 238227,
+        "output": 34448
       }
     ]
   },
@@ -1801,7 +1808,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 15,
-    "cost": 2.38,
+    "cost": 3.08,
     "interactive_duration_s": 4224,
     "idle_duration_s": 1593,
     "afk_duration_s": 2559,
@@ -1815,10 +1822,10 @@
     "token_usage": [
       {
         "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 909794,
-        "cache_read": 15026437,
-        "cache_write": 1165658,
-        "output": 346026
+        "uncached_input": 1288193,
+        "cache_read": 21276183,
+        "cache_write": 1650475,
+        "output": 489944
       }
     ]
   },
@@ -1836,7 +1843,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 3.98,
+    "cost": 4.29,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 7611,
@@ -1850,10 +1857,10 @@
     "token_usage": [
       {
         "model_id": "claude-sonnet-5",
-        "uncached_input": 82629,
-        "cache_read": 1207167,
-        "cache_write": 212583,
-        "output": 50236
+        "uncached_input": 100831,
+        "cache_read": 1473097,
+        "cache_write": 259414,
+        "output": 61303
       }
     ]
   },
@@ -1871,7 +1878,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 16,
-    "cost": 2.02,
+    "cost": 2.89,
     "interactive_duration_s": 1559,
     "idle_duration_s": 2071,
     "afk_duration_s": 3300,
@@ -1884,11 +1891,11 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 98262,
-        "cache_read": 2949340,
-        "cache_write": 179690,
-        "output": 66233
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 119909,
+        "cache_read": 3599058,
+        "cache_write": 219275,
+        "output": 80824
       }
     ]
   },
@@ -1906,7 +1913,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 12,
-    "cost": 3.48,
+    "cost": 3.55,
     "interactive_duration_s": 2224,
     "idle_duration_s": 1438,
     "afk_duration_s": 5877,
@@ -1920,10 +1927,10 @@
     "token_usage": [
       {
         "model_id": "claude-sonnet-5",
-        "uncached_input": 17624,
-        "cache_read": 382590,
-        "cache_write": 40939,
-        "output": 8685
+        "uncached_input": 21506,
+        "cache_read": 466872,
+        "cache_write": 49957,
+        "output": 10598
       }
     ]
   },
@@ -1941,7 +1948,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 5.77,
+    "cost": 11.99,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 6583,
@@ -1954,11 +1961,11 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-opus-5",
-        "uncached_input": 60973,
-        "cache_read": 1970356,
-        "cache_write": 239270,
-        "output": 31672
+        "model_id": "claude-fable-5-1",
+        "uncached_input": 83449,
+        "cache_read": 2696679,
+        "cache_write": 327471,
+        "output": 43347
       }
     ]
   },
@@ -1976,7 +1983,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 1.37,
+    "cost": 2.84,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 1559,
@@ -1984,11 +1991,11 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "claude-opus-5",
-        "uncached_input": 14440,
-        "cache_read": 466624,
-        "cache_write": 56664,
-        "output": 7501
+        "model_id": "claude-fable-5-1",
+        "uncached_input": 19763,
+        "cache_read": 638633,
+        "cache_write": 77552,
+        "output": 10266
       }
     ]
   },
@@ -2006,7 +2013,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 1.2,
+    "cost": 2.5,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 1372,
@@ -2014,11 +2021,11 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "claude-opus-5",
-        "uncached_input": 12708,
-        "cache_read": 410653,
-        "cache_write": 49868,
-        "output": 6601
+        "model_id": "claude-fable-5-1",
+        "uncached_input": 17392,
+        "cache_read": 562030,
+        "cache_write": 68250,
+        "output": 9034
       }
     ]
   },
@@ -2036,7 +2043,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 5.34,
+    "cost": 26.61,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 3805,
@@ -2049,25 +2056,25 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-sonnet-5",
-        "uncached_input": 210895,
-        "cache_read": 5208831,
-        "cache_write": 415096,
-        "output": 104664
+        "model_id": "claude-fable-5-1",
+        "uncached_input": 288636,
+        "cache_read": 7128939,
+        "cache_write": 568111,
+        "output": 143246
       },
       {
         "model_id": "gpt-5-nano",
-        "uncached_input": 126537,
-        "cache_read": 3125298,
-        "cache_write": 249057,
-        "output": 62798
+        "uncached_input": 173182,
+        "cache_read": 4277363,
+        "cache_write": 340866,
+        "output": 85947
       },
       {
-        "model_id": "gemini-3.1-pro-preview",
-        "uncached_input": 84358,
-        "cache_read": 2083532,
-        "cache_write": 166038,
-        "output": 41865
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 115455,
+        "cache_read": 2851575,
+        "cache_write": 227244,
+        "output": 57298
       }
     ]
   },
@@ -2085,7 +2092,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 17,
-    "cost": 2.11,
+    "cost": 2.25,
     "interactive_duration_s": 1511,
     "idle_duration_s": 1962,
     "afk_duration_s": 2740,
@@ -2098,11 +2105,11 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 9843,
-        "cache_read": 402168,
-        "cache_write": 33173,
-        "output": 7656
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 13471,
+        "cache_read": 550417,
+        "cache_write": 45402,
+        "output": 10478
       }
     ]
   },
@@ -2120,7 +2127,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 1,
-    "cost": 6.92,
+    "cost": 16.07,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 4949,
@@ -2133,11 +2140,11 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-haiku-4-5",
-        "uncached_input": 718559,
-        "cache_read": 15977524,
-        "cache_write": 1219912,
-        "output": 285401
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 983438,
+        "cache_read": 21867247,
+        "cache_write": 1669603,
+        "output": 390607
       }
     ]
   },
@@ -2155,7 +2162,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 1.8,
+    "cost": 4.18,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 1287,
@@ -2163,11 +2170,11 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "claude-haiku-4-5",
-        "uncached_input": 186863,
-        "cache_read": 4154995,
-        "cache_write": 317241,
-        "output": 74219
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 255746,
+        "cache_read": 5686633,
+        "cache_write": 434184,
+        "output": 101578
       }
     ]
   },
@@ -2185,7 +2192,7 @@
     "accepted": false,
     "hidden": false,
     "prompt_count": 0,
-    "cost": 1.39,
+    "cost": 3.23,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 995,
@@ -2193,11 +2200,11 @@
     "artefacts": {},
     "token_usage": [
       {
-        "model_id": "claude-haiku-4-5",
-        "uncached_input": 144467,
-        "cache_read": 3212293,
-        "cache_write": 245264,
-        "output": 57380
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 197721,
+        "cache_read": 4396426,
+        "cache_write": 335675,
+        "output": 78532
       }
     ]
   },
@@ -2215,7 +2222,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 7.1,
+    "cost": 7.21,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 20382,
@@ -2228,11 +2235,11 @@
     },
     "token_usage": [
       {
-        "model_id": "gemini-3.1-pro-preview",
-        "uncached_input": 19242,
-        "cache_read": 393968,
-        "cache_write": 29119,
-        "output": 11576
+        "model_id": "claude-sonnet-5",
+        "uncached_input": 26335,
+        "cache_read": 539194,
+        "cache_write": 39853,
+        "output": 15843
       }
     ]
   },
@@ -2250,7 +2257,7 @@
     "accepted": true,
     "hidden": false,
     "prompt_count": 2,
-    "cost": 1.21,
+    "cost": 2.31,
     "interactive_duration_s": 0,
     "idle_duration_s": 0,
     "afk_duration_s": 2706,
@@ -2263,25 +2270,25 @@
     },
     "token_usage": [
       {
-        "model_id": "claude-haiku-4-5",
-        "uncached_input": 38214,
-        "cache_read": 1543933,
-        "cache_write": 90674,
-        "output": 23383
+        "model_id": "gemini-3.1-pro-preview",
+        "uncached_input": 52301,
+        "cache_read": 2113066,
+        "cache_write": 124099,
+        "output": 32003
       },
       {
         "model_id": "claude-sonnet-5",
-        "uncached_input": 22928,
-        "cache_read": 926360,
-        "cache_write": 54405,
-        "output": 14030
+        "uncached_input": 31380,
+        "cache_read": 1267840,
+        "cache_write": 74460,
+        "output": 19202
       },
       {
-        "model_id": "gemini-3.5-flash-lite",
-        "uncached_input": 15285,
-        "cache_read": 617574,
-        "cache_write": 36270,
-        "output": 9353
+        "model_id": "claude-haiku-4-5",
+        "uncached_input": 20920,
+        "cache_read": 845227,
+        "cache_write": 49640,
+        "output": 12801
       }
     ]
   }

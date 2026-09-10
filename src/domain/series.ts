@@ -24,18 +24,26 @@
 // carries the labels the tooltip lists. **Filtering is how a viewer reaches beyond the top four;
 // the cap itself never lifts**, so there is no parameter here that widens or disables it.
 //
-// **R-V7 / R-T30 — the five-colour palette is never extended, and nothing *can* request a sixth
-// colour.** Three things make that true by construction rather than by convention:
+// **R-V7 / R-T30 — a palette is never extended, and nothing *can* request a colour past its
+// end.** Three things make that true by construction rather than by convention:
 //
-//   1. `ChartColorVar` is a closed union of exactly the five theme variables that exist in
-//      `globals.css`. There is no expression in the program that names a sixth, so the silent
-//      transparent-series failure has no way to be written.
-//   2. The cap is **derived from the palette** (`SERIES_LIMIT = CHART_COLOR_VARS.length`), so
-//      the ceiling and the colours cannot drift apart. Four named series plus "Other" fills
-//      `--chart-1..5` exactly.
+//   1. `ChartColorVar` is a closed union of exactly the theme variables that exist in
+//      `globals.css`. There is no expression in the program that names one they do not define,
+//      so the silent transparent-series failure has no way to be written.
+//   2. The cap is **derived from the palette** — `SERIES_LIMIT = CHART_COLOR_VARS.length` for
+//      the comparison charts, and `capSeries` takes `palette.length` for whichever palette it
+//      was handed — so the ceiling and the colours cannot drift apart. Four named series plus
+//      "Other" fills `--chart-1..5` exactly; ten Models fill `--model-1..10` exactly.
 //   3. Colours are assigned by iterating the **palette**, not the series. A series that had no
 //      colour to take could not be emitted, so `colorVar` is non-optional on the way out and
 //      needs no fallback — and a fallback is what a transparent series is made of.
+//
+// **R-V7 was amended on 2026-09-10 (ticket 70) for one panel and one reason.** The five-colour
+// palette is never extended *for comparison charts*; the Model mix panel, whose series set is a
+// **closed roster** of ten authored Models rather than an open dimension, carries its own
+// ten-colour palette and is capped at that roster, so nothing is folded into "Other" at any
+// roll-up level. The rule the amendment keeps is the one that mattered: a chart's colours and
+// its cap are one decision, and no code path generates a hue.
 //
 // **R-T8 — `key` is a domain-supplied stable identity, never an array index.** Keys come from
 // the dimension (a Member id, a repository id, a model family) and are unchanged by capping, so
@@ -47,7 +55,7 @@
  * The chart palette, in assignment order — the five variables `globals.css` defines and the
  * only five that exist. `--chart-6` is not absent by omission; R-V7 says it is never defined.
  */
-export const CHART_COLOR_VARS = [
+const COMPARISON_PALETTE = [
   "--chart-1",
   "--chart-2",
   "--chart-3",
@@ -55,12 +63,62 @@ export const CHART_COLOR_VARS = [
   "--chart-5",
 ] as const;
 
-/** A theme colour a series may take. A closed union: there is no sixth to name (R-V7). */
-export type ChartColorVar = (typeof CHART_COLOR_VARS)[number];
+/**
+ * **The Model mix panel's own palette** (R-V7 as amended, ticket 70). Ten variables,
+ * `globals.css` defines exactly ten, and the roster it is capped at holds exactly ten Models.
+ *
+ * It exists because the Model mix is not a comparison chart. Every other chart in the product
+ * groups on an **open** dimension — twenty Members today and forty next quarter, five
+ * Repositories that a team can add a sixth to — where the cap is what keeps the chart readable
+ * and "top four plus Other" is the reading. The Model roster is **closed**: it is ten rows of
+ * authored data (ADR-0011), the reader is choosing between exactly those ten, and folding six
+ * of them into "Other" deletes the whole finding — which model a team moved off, and onto what.
+ *
+ * The values are vendor-hued as a *set* — five warm steps for Anthropic's five models, three
+ * cool for OpenAI's three, two greens for Google's two — so ten colours are reachable without
+ * inventing hues or running a generator over OKLCH, which is the failure R-V7 was written
+ * against. **The slot order is not the vendor order**, and deliberately: colours are assigned by
+ * walking the palette (see `paint`), so adjacent slots are adjacent *legend entries*, and the
+ * order below is the one that maximises the separation between them. It was derived by the
+ * documented method rather than by eye — `scripts/validate_palette.js` from the `dataviz` skill,
+ * run against both themes; the results are recorded beside the values in `globals.css`.
+ */
+const MODEL_MIX_PALETTE = [
+  "--model-1",
+  "--model-2",
+  "--model-3",
+  "--model-4",
+  "--model-5",
+  "--model-6",
+  "--model-7",
+  "--model-8",
+  "--model-9",
+  "--model-10",
+] as const;
 
 /**
- * **Five.** The most series a chart renders, and the point above which the cap engages — at
- * five it does not. Derived from the palette so the ceiling cannot drift from the colours.
+ * A theme colour a series may take. A closed union of the two palettes that exist: there is no
+ * `--chart-6` and no `--model-11` to name (R-V7).
+ */
+export type ChartColorVar =
+  | (typeof COMPARISON_PALETTE)[number]
+  | (typeof MODEL_MIX_PALETTE)[number];
+
+/** A palette, in assignment order. The cap is its length; nothing else decides the ceiling. */
+export type ChartPalette = readonly ChartColorVar[];
+
+/**
+ * The two palettes, typed as palettes rather than as their own tuples. The literal tuples above
+ * are what makes `ChartColorVar` closed; these are what a caller walks, and typing them alike is
+ * what lets one function paint from either.
+ */
+export const CHART_COLOR_VARS: ChartPalette = COMPARISON_PALETTE;
+export const MODEL_MIX_COLOR_VARS: ChartPalette = MODEL_MIX_PALETTE;
+
+/**
+ * **Five.** The most series a comparison chart renders, and the point above which the cap
+ * engages — at five it does not. Derived from the palette so the ceiling cannot drift from the
+ * colours; `capSeries` derives the same figure from whichever palette it was handed.
  */
 export const SERIES_LIMIT = CHART_COLOR_VARS.length;
 
@@ -158,6 +216,18 @@ export type SeriesInput<Row> = {
    * `MeasureKind`, which `viewmodel.ts` already holds as a domain fact (R-V1's third conjunct).
    */
   readonly absent?: number | null;
+  /**
+   * **The palette this chart is painted from, and therefore the cap it is held to** (R-V7 as
+   * amended, ticket 70). Omitted is the five-colour comparison palette, which is every chart in
+   * the product but one.
+   *
+   * It is a parameter rather than a branch inside this module for the reason `absent` is: which
+   * palette a chart carries follows its *grouping*, which is a domain fact the caller already
+   * holds — `viewmodel.ts`'s `paletteFor` is the single expression that decides it, exactly as
+   * `STACKABLE_GROUPINGS` is the single expression that decides R-V1. Nothing here knows what a
+   * Model is.
+   */
+  readonly palette?: ChartPalette;
 };
 
 /** A whole-range total plus the per-bucket values behind it. Mutable only inside this module. */
@@ -250,8 +320,9 @@ const otherTally = (
 const paint = (
   ranked: readonly Tally[],
   buckets: readonly { readonly key: string }[],
+  palette: ChartPalette,
 ): readonly Series[] =>
-  CHART_COLOR_VARS.flatMap((colorVar, index) => {
+  palette.flatMap((colorVar, index) => {
     const held = ranked.at(index);
     if (!held) return [];
     return [
@@ -279,15 +350,23 @@ export function capSeries<Row>(input: SeriesInput<Row>): SeriesSet {
   // would collapse the very reading this parameter exists to express. Only *omitting*
   // `absent` takes the additive default.
   const absent = input.absent === undefined ? 0 : input.absent;
+  const palette = input.palette ?? CHART_COLOR_VARS;
+  // The cap is the palette's length, wherever the palette came from — the ceiling and the
+  // colours cannot drift apart, which is the whole of R-V7's second clause.
+  const limit = palette.length;
   const ranked = [...tally(input, absent)].sort(byWholeRangeMeasure);
-  if (ranked.length <= SERIES_LIMIT) {
-    return { series: paint(ranked, input.buckets), other: null };
+  if (ranked.length <= limit) {
+    return { series: paint(ranked, input.buckets, palette), other: null };
   }
 
-  const kept = ranked.slice(0, NAMED_SERIES_CAP);
-  const swept = ranked.slice(NAMED_SERIES_CAP);
+  const kept = ranked.slice(0, limit - 1);
+  const swept = ranked.slice(limit - 1);
   return {
-    series: paint([...kept, otherTally(swept, input.buckets.length, absent)], input.buckets),
+    series: paint(
+      [...kept, otherTally(swept, input.buckets.length, absent)],
+      input.buckets,
+      palette,
+    ),
     // R-V6 — what the tooltip lists, in the same ranked order the chart itself is in. The keys
     // ride along in that order because the mirror re-adds the same tail out of the grid (R-T7).
     other: { holds: swept.map((held) => held.label), keys: swept.map((held) => held.key) },

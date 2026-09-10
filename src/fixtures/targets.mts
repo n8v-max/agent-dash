@@ -2,7 +2,7 @@
 // nothing here is a taste call. The generator asserts against these (R-T23), so a drift
 // between a target and the emitted data fails the run rather than the reader.
 
-import type { MachineSpec, ModelTier, WorkTypeKey } from "./types.mts";
+import type { MachineSpec, WorkTypeKey } from "./types.mts";
 
 // One seed for the whole fixture. Changing it rewrites every file, which is why the
 // committed output is diffed in CI (R-T21 / T-F9).
@@ -234,36 +234,110 @@ export const CPU_HEAVY_REPOSITORIES = ["terraform-infra", "api-gateway"] as cons
 export const LOW_USAGE_MEMBER_ID = "mem_ngallego";
 export const LOW_USAGE_SESSIONS = 3;
 
-// R-D16 — token share by tier. R-D17 — the frontier share falls month by month. The monthly
-// targets are volume-weighted to land the whole-window frontier share on 15%.
-export const TIER_TOKEN_SHARE: Record<ModelTier, number> = {
-  balanced: 0.55,
-  fast: 0.3,
-  frontier: 0.15,
+// R-D16 / R-D17 — **the Model roster's presence, month by month** (rewritten, ticket 70).
+//
+// Until this ticket the fixture authored a *tier* share (55/30/15) and a monthly *frontier*
+// share that fell from 25% to 10%, and the models inside a tier were split by a fixed weight.
+// That is backwards for a roster that now spans two versions of three lines (ADR-0011): what a
+// team actually moves between is **model families**, and a tier share is a consequence of which
+// families it was reaching for. So the family table below is the authored thing and
+// `TIER_TOKEN_SHARE` is gone — `tokens.mts` derives the tier shares from this table and the
+// roster, and `spend.mts` asserts R-D16's invariant over what the generator actually emitted.
+//
+// The stories the table tells, and they are the whole of R-D17:
+//
+//   * **Claude Haiku fades**, 28 points in April to 10 in September. That is the optimisation
+//     story now — the cheap model stops being the default as the balanced ones get good enough.
+//   * **Claude Sonnet takes over from itself**: the family holds ~30 points throughout while
+//     `claude-sonnet-4-6` hands over to `claude-sonnet-5`, 70:30 in April to 5:95 in September.
+//   * **Fable and Astra arrive late**, which is why the frontier tier *rises* across the window
+//     rather than falling: 0 → 13 and 6 → 13 points respectively.
+//   * **Gemini sits on the side** at a flat 10 points, 60:40 Pro to Flash-Lite.
+//
+// **The rows are authored in points and normalised**, because three of the six sum to 99 rather
+// than 100 as the human wrote them. Normalising moves no family by more than 0.3 of a point —
+// well inside the ±2 the generator asserts against the authored figures — and it keeps the
+// authored numbers legible as the numbers that were authored. See ticket 70's `## Comments`.
+export const WINDOW_MONTHS = [
+  "2026-04",
+  "2026-05",
+  "2026-06",
+  "2026-07",
+  "2026-08",
+  "2026-09",
+] as const;
+
+export const MODEL_FAMILIES = [
+  "Claude Haiku",
+  "Claude Sonnet",
+  "Claude Opus",
+  "Claude Fable",
+  "OpenAI GPT-5",
+  "OpenAI GPT-6 Astra",
+  "Gemini Pro",
+  "Gemini Flash-Lite",
+] as const;
+export type ModelFamily = (typeof MODEL_FAMILIES)[number];
+
+/** As the human authored it: share of a month's tokens, in points, Apr … Sep. */
+export const FAMILY_SHARE_POINTS: Readonly<Record<ModelFamily, readonly number[]>> = {
+  "Claude Haiku": [28, 26, 22, 16, 12, 10],
+  "Claude Sonnet": [24, 26, 28, 30, 30, 30],
+  "Claude Opus": [6, 6, 6, 5, 5, 5],
+  "Claude Fable": [0, 0, 2, 6, 10, 13],
+  "OpenAI GPT-5": [26, 25, 24, 22, 20, 18],
+  "OpenAI GPT-6 Astra": [6, 7, 8, 10, 12, 13],
+  // 10 points of Gemini every month, 60:40 Pro to Flash-Lite — two families, so the split is
+  // the two rows rather than a weight inside one.
+  "Gemini Pro": [6, 6, 6, 6, 6, 6],
+  "Gemini Flash-Lite": [4, 4, 4, 4, 4, 4],
 };
 
-export const FRONTIER_SHARE_BY_MONTH: Record<string, number> = {
-  "2026-04": 0.25,
-  "2026-05": 0.22,
-  "2026-06": 0.18,
-  "2026-07": 0.14,
-  "2026-08": 0.1,
-  "2026-09": 0.1,
+/** The same table as month → family → share, normalised so each month sums to exactly 1. */
+export const FAMILY_SHARE_BY_MONTH: Readonly<
+  Record<string, Readonly<Record<ModelFamily, number>>>
+> = Object.fromEntries(
+  WINDOW_MONTHS.map((month, index) => {
+    const points = MODEL_FAMILIES.map((family) => FAMILY_SHARE_POINTS[family][index]);
+    const total = points.reduce((running, point) => running + point, 0);
+    return [
+      month,
+      Object.fromEntries(
+        MODEL_FAMILIES.map((family, at) => [family, points[at] / total]),
+      ) as Record<ModelFamily, number>,
+    ];
+  }),
+);
+
+// **Within `Claude Sonnet`, the handover** (R-D17). 4.6's share of the family, month by month:
+// 70:30 in April to 5:95 in September, in even steps. This is the one within-family split the
+// human authored, and it is the reason the family level and the exact level tell two different
+// stories — the family is flat at ~30 points while the two models inside it cross over.
+export const SONNET_4_6_WITHIN_FAMILY = [0.7, 0.57, 0.44, 0.31, 0.18, 0.05];
+
+// **Within `OpenAI GPT-5`, a flat half each.** Not authored by the human — the ticket gives the
+// family a share and names no split — so this is the cheapest thing that is not a claim: the
+// family's tokens divide evenly between `gpt-5-nano` and `gpt-5.2`, which puts one of them in
+// `fast` and one in `balanced` at equal weight and adds no story nobody asked for. Recorded as
+// an escalation in ticket 70's `## Comments`.
+export const GPT_5_NANO_WITHIN_FAMILY = 0.5;
+
+// R-D16 — the whole-window vendor split the family table has to land on. Asserted ±3 points.
+export const VENDOR_TOKEN_SHARE: Record<string, number> = {
+  Anthropic: 0.6,
+  OpenAI: 0.3,
+  Google: 0.1,
 };
 
-// Within-tier model weights. Frontier leans on `gpt-6-astra` because it is the model a team
-// reaches for when it reaches past `balanced` at all — and that lean is what makes the
-// derived invariant (frontier carries the most spend on the smallest token share) true of
-// this card rather than of a hoped-for one. The generator derives the share and asserts it.
-export const MODEL_WEIGHT_WITHIN_TIER: Record<string, number> = {
-  "gpt-6-astra": 0.7,
-  "claude-opus-5": 0.3,
-  "claude-sonnet-5": 0.58,
-  "gemini-3.1-pro-preview": 0.42,
-  "claude-haiku-4-5": 0.35,
-  "gemini-3.5-flash-lite": 0.4,
-  "gpt-5-nano": 0.25,
-};
+/** ±2 points on a family's monthly share, ±3 on a vendor's whole-window one. */
+export const FAMILY_SHARE_TOLERANCE = 0.02;
+export const VENDOR_SHARE_TOLERANCE = 0.03;
+
+// R-D16's derived invariant, as a band rather than as a target: the frontier tier — `claude-
+// opus-5`, `claude-fable-5-1` and `gpt-6-astra` — holds the smallest token share of the three
+// tiers and still carries the largest token spend. The band is what the family table implies,
+// stated so that a table edit that quietly deleted the rise fails the run.
+export const FRONTIER_TOKEN_SHARE_BAND = { min: 0.1, max: 0.33 };
 
 // R-D15 — 40% of sessions span two or more Models.
 export const MULTI_MODEL_SHARE = 0.4;
@@ -377,22 +451,37 @@ export const MACHINE_SPEC_BIAS: Record<string, Partial<Record<MachineSpec, numbe
 export const SEAT_SHARE_CEILING = 0.25;
 
 // R-D4 — **weekly session spend as a smooth function of time.** A logistic in dollars per full
-// week, sharing `DAILY_VOLUME`'s midpoint and steepness because it *is* `DAILY_VOLUME`, priced:
-// spend per attempt is flat and the ramp is the volume ramp, so there is no separate price ramp
-// anywhere in this directory. `startUsd` and `plateauUsd` are per **full** week; `curve.mts`
-// spreads them over a week's own days, which is what keeps the six-day closing bucket honest.
+// week. `startUsd` and `plateauUsd` are per **full** week; `curve.mts` spreads them over a
+// week's own days, which is what keeps the six-day closing bucket honest.
+//
+// **The curve is now *steeper* than the volume curve, and R-D17 is still the whole of the
+// difference** (re-fitted, ticket 70). It used to be shallower — 1.39 against λ's 2.03 — because
+// the frontier tier's token share *fell* across the window against a 200× price spread, so the
+// average priced token got cheaper as the sessions got more numerous. R-D17 now runs the other
+// way: `claude-fable-5-1` arrives in June, `gpt-6-astra` grows through the summer and
+// `claude-haiku-4-5` fades, which takes the average priced token from ~0.68¢ per thousand in
+// April to ~1.21¢ in September. Volume ×2.03 and price ×1.78 give ×3.1, and that is what the
+// two figures below are. **There is still no separate price ramp anywhere in this directory** —
+// the price ramp *is* the Model mix, which is the point R-D17 exists to make.
+//
+// **Its midpoint and steepness are its own now, and they have to be.** Volume flattens across
+// August (λ's midpoint 0.5, steepness 9); the mix keeps getting dearer to the last week of the
+// window. Their product still rises where volume has stopped, so a logistic sharing λ's
+// midpoint could not follow it — it is fitted at 0.65 / 6.5 against what the fixture draws, and
+// three of the twenty-four weeks are repaired onto it, which is exactly where ticket 66 left the
+// count.
 //
 // **The level is the fixture's own and not an arbitrary one.** Machine allocation is priced from
 // the compute card and cannot be moved by a token draw, so it is a floor under every week:
 // ~$1.95 of machine time per attempt, which is ~$460 in an April week before a single token is
-// counted. The two figures below sit above that floor with room for a real token bill, and their
-// *ratio* — 2.03 — is λ's own, which is what "more modest initially by construction of the ramp"
-// means arithmetically. See the ticket 66 comments for the derivation.
+// counted. Both figures sit well above that floor.
 export const WEEKLY_SPEND_SHAPE = {
-  startUsd: 2_050,
-  plateauUsd: 2_860,
-  midpoint: DAILY_VOLUME.midpoint,
-  steepness: DAILY_VOLUME.steepness,
+  startUsd: 1_600,
+  plateauUsd: 5_700,
+  /** Later than λ's, because the Model mix keeps getting dearer after volume has flattened. */
+  midpoint: 0.65,
+  /** Shallower than λ's, for the same reason: the rise runs to the end of the window. */
+  steepness: 6.5,
 };
 
 // The tolerance around that curve. Wide while adoption is noisy and the weekly population is

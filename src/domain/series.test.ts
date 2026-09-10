@@ -20,6 +20,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CHART_COLOR_VARS,
+  MODEL_MIX_COLOR_VARS,
   NAMED_SERIES_CAP,
   OTHER_SERIES_KEY,
   SERIES_LIMIT,
@@ -515,5 +516,95 @@ describe("R-M18 — `absent` says what a bucket with no row reads as", () => {
     const other = series.find((held) => held.key === OTHER_SERIES_KEY);
 
     expect(other?.points.map((point) => point.value)).toEqual([30, 5, null]);
+  });
+});
+
+/**
+ * **R-V7 as amended, ticket 70 — the Model mix panel's ten-colour palette.**
+ *
+ * The amendment is for **one panel and one reason**: its series set is a closed roster of ten
+ * authored Models rather than an open dimension, so "top four plus Other" would fold six of the
+ * ten things the reader is choosing between into one grey line. What the amendment does *not*
+ * do is loosen the rule — the cap is still the palette's length, the colours are still assigned
+ * by walking the palette, and the palette is still a closed list of variables `globals.css`
+ * defines. These tests hold both halves: ten with the mix palette, and five with the shared one,
+ * from the same `capSeries` and the same input.
+ */
+describe("the Model mix palette is ten, and nothing else moved (R-V7, ticket 70)", () => {
+  const rosterOf = (size: number): SeriesInput<Row> =>
+    inputOf(
+      chartOf([
+        [
+          "2026-08",
+          Object.fromEntries(
+            Array.from({ length: size }, (_unused, index) => [`m${index}`, 1000 - index]),
+          ),
+        ],
+        [
+          "2026-09",
+          Object.fromEntries(
+            Array.from({ length: size }, (_unused, index) => [`m${index}`, 500 + index]),
+          ),
+        ],
+      ]),
+    );
+
+  it("defines exactly ten colours, none of them shared with the comparison palette", () => {
+    expect(MODEL_MIX_COLOR_VARS).toEqual([
+      "--model-1",
+      "--model-2",
+      "--model-3",
+      "--model-4",
+      "--model-5",
+      "--model-6",
+      "--model-7",
+      "--model-8",
+      "--model-9",
+      "--model-10",
+    ]);
+    expect(
+      MODEL_MIX_COLOR_VARS.filter((colorVar) => CHART_COLOR_VARS.includes(colorVar)),
+    ).toEqual([]);
+  });
+
+  it("paints ten Models in ten distinct colours and folds none of them into Other", () => {
+    const set = capSeries({ ...rosterOf(10), palette: MODEL_MIX_COLOR_VARS });
+
+    expect(set.series).toHaveLength(10);
+    expect(set.other).toBeNull();
+    expect(set.series.map((series) => series.colorVar)).toEqual([...MODEL_MIX_COLOR_VARS]);
+    expect(new Set(set.series.map((series) => series.colorVar)).size).toBe(10);
+    expect(set.series.some((series) => series.inert)).toBe(false);
+  });
+
+  it("caps the very same input at five when it is handed the shared palette", () => {
+    const set = capSeries(rosterOf(10));
+
+    expect(set.series).toHaveLength(SERIES_LIMIT);
+    expect(set.series.at(-1)?.key).toBe(OTHER_SERIES_KEY);
+    expect(set.other?.holds).toHaveLength(10 - NAMED_SERIES_CAP);
+    expect(set.series.map((series) => series.colorVar)).toEqual([...CHART_COLOR_VARS]);
+  });
+
+  it("still caps at its own length: an eleventh series folds into Other (R-V4)", () => {
+    const set = capSeries({ ...rosterOf(11), palette: MODEL_MIX_COLOR_VARS });
+
+    expect(set.series).toHaveLength(MODEL_MIX_COLOR_VARS.length);
+    expect(set.series.at(-1)?.key).toBe(OTHER_SERIES_KEY);
+    expect(set.series.at(-1)?.inert).toBe(true);
+    expect(set.other?.holds).toHaveLength(2);
+  });
+
+  it("keeps R-V5's whole-range ranking, whichever palette it was handed", () => {
+    const ranked = capSeries({ ...rosterOf(10), palette: MODEL_MIX_COLOR_VARS }).series;
+
+    // Every one of the ten totals 1,500 across the two buckets — `1000 - i` and `500 + i` — so
+    // this input is R-V5's tiebreak in its pure form: the order is the label, ascending, and it
+    // is the *whole-range* total that ties, not the per-bucket one (bucket one ranks m0 first,
+    // bucket two ranks m9 first, and neither decides anything).
+    expect(ranked.map((series) => series.key)).toEqual(
+      Array.from({ length: 10 }, (_unused, index) => `m${index}`),
+    );
+    for (const series of ranked) expect(series.points).toHaveLength(2);
   });
 });

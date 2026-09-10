@@ -26,7 +26,7 @@ import type { ReactNode } from "react";
 import type { AdoptionSection as AdoptionViewModel, DistributionViewModel } from "@/data/queries";
 import { Figure, FigureList, count, share } from "./money-figure";
 import { PanelCard } from "./panel-card";
-import { TokenChart } from "./token-chart";
+import { ModelMixChart, TokenChart } from "./token-chart";
 import type { PanelDimension } from "./spend-panels";
 
 /** How the three roll-up levels read in a sentence (R-M7). Copy, and only copy. */
@@ -112,9 +112,9 @@ export function AdoptionSection(props: {
         level="h3"
         controls={props.modelLevelControl}
         title={mix.chart.title}
-        question={`Which Models the tokens went to, rolled up by ${level}. A breakdown and not a comparison axis: a session may span several Models, so no per-session metric is grouped by one.`}
+        question={`Which Models the tokens went to, rolled up by ${level}, as a share of each period's tokens. A breakdown and not a comparison axis: a session may span several Models, so no per-session metric is grouped by one. Read the lines for what the team moved between — the volume behind them is the chart above.`}
       >
-        <TokenChart chart={mix.chart} shape="bar" dimension={props.dimension} />
+        <ModelMixChart chart={mix.chart} dimension={props.dimension} />
         <ModelMixList distribution={mix.levels[mix.level]} />
       </PanelCard>
     </section>

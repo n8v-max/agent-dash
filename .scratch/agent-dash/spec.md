@@ -301,7 +301,9 @@ Then an **Adoption** section under its own heading, opening with a one-line stat
 measure use and not money:
 
 6. Tokens processed over time
-7. Model mix at exact / family / tier
+7. Model mix at exact / family / tier — **share of each period's tokens, one line per Model**
+   (amended 2026-09-10, ticket 70), on a fixed 0–100% axis, beside the level's distribution as a
+   list. Every Model on the roster is drawn; nothing is folded into "Other" (R-V7).
 
 **R-N10 — The page opens with the ratio, not with Total spend.** Total spend has already been
 read on the summary; repeating it in the first position spends the fold twice. The ratio is the
@@ -519,7 +521,7 @@ be exactly the rigour-shaped decoration this rule forbids.
 | Decomposition rate | `jobs` | Task grain |
 | Incomplete Tasks | `jobs` | Bucketed by age since last session |
 | Tokens processed | `tokens` | Sortable column and time series. Adoption, not cost |
-| Model mix | `tokens` | Distribution at exact / family / tier |
+| Model mix | `tokens` | Distribution at exact / family / tier, and each level's share over time |
 | Session duration | `jobs` | Median and p95 |
 | Agents per session | `jobs` | Median and p95, beside Session duration |
 | Human-presence spans | `jobs` | Composition, `interactive` sessions only |
@@ -770,9 +772,15 @@ false claim made by the geometry — but the claim is only false where the group
 | Grouping | Partition? | Stacking | Form (R-V12) |
 |---|---|---|---|
 | WorkType, Model tier/family, execution mode, machine spec, duration spans | Yes | Permitted | series |
+
 | **Team** | **No** — Members are many-to-many with Teams | **Forbidden** | series |
 | **Repository** | **No** for Task-grain measures — a Task's sessions may span repositories | **Forbidden** | series |
 | **Member** | Yes — a session has one Member | **Forbidden**: R-V1 permits, it does not require | **ranked** |
+
+**Permitted is not required, and the Model mix stopped taking it up on 2026-09-10** (ticket 70).
+The panel now plots each Model's *share* of a period's tokens, and a ratio is never stackable
+whatever its grouping partitions — the third conjunct of R-V1, not a change to the first. Model
+remains a permitted partition and the `/demo` mix tile is unaffected.
 
 **The table gained a form column on 2026-09-09** (ticket 44). Stacking was never the only thing a
 grouping decides about the geometry it may be drawn in: **Member decides the shape of the chart
@@ -794,8 +802,13 @@ Team figures do not sum to the Organization.
 
 **R-V4 — Series cap: top 4 + "Other", engaging only above five series.** A dimension with five or
 fewer distinct values in the selected range renders all of them; an "Other" bucket holding one
-repository reads as a rendering fault. The cap therefore bites on Member (20) and exact Model (7),
-and not on Repository (5) or WorkType (5). See § Conflicts resolved C1.
+repository reads as a rendering fault. The cap therefore bites on Member (20), and not on
+Repository (5) or WorkType (5). See § Conflicts resolved C1.
+
+**The cap is the palette's length, whichever palette the chart carries** (amended 2026-09-10,
+ticket 70). For every comparison chart that is five, so it is four named plus "Other". The Model
+mix panel carries its own ten-colour palette (R-V7) and is capped at the roster, so exact Model no
+longer reaches an "Other" at all.
 
 **R-V5 — The series set is ranked by the chart's own measure across the whole selected range**,
 then bucketed. Ties break by name ascending. The set is **stable across every bucket** and is
@@ -807,10 +820,23 @@ misleading and the exact input that triggers the legend reconciliation bug recor
 **R-V6 — "Other" is inert.** It is not clickable and does not expand. Its tooltip lists what it
 holds. **Filtering is how a viewer reaches beyond the top four; the cap itself never lifts.**
 
-**R-V7 — The five-colour palette is never extended.** `--chart-1..5` is the ceiling; four series
-plus "Other" fills it exactly. No `--chart-6..N` values are defined and no OKLCH generation is
-written. Categorical palettes run out of distinguishable hues around 10–12, so a 20-series chart is
-unreadable whether or not it is coloured.
+**R-V7 — The five-colour palette is never extended _for comparison charts_.** `--chart-1..5` is
+the ceiling; four series plus "Other" fills it exactly. No `--chart-6..N` values are defined and no
+OKLCH generation is written. Categorical palettes run out of distinguishable hues around 10–12, so
+a 20-series chart is unreadable whether or not it is coloured.
+
+**The Model mix panel is the one exception, and it is scoped by a property rather than by taste**
+(amended 2026-09-10, ticket 70). Its series set is a **closed roster** — the ten Models of ADR-0011
+— rather than an open dimension that grows, so it carries its own palette, `--model-1..10`, and is
+capped at that roster. Nothing is folded into "Other" at any of its three roll-up levels. Every
+other chart in the product keeps `--chart-1..5` and keeps R-V4's cap.
+
+What the rule keeps, exactly, is what it was always about: **a chart's colours and its cap are one
+decision** — the cap is derived from the palette the chart was handed, so the two cannot drift —
+and **no code path generates a hue**. Both palettes are closed lists of variables `globals.css`
+defines, and which one a chart takes follows its *grouping*, decided in one place. Ten colours are
+also the ceiling this rule already named: a closed roster of eleven would fold one into "Other"
+rather than gain a colour.
 
 **R-V8 — Attributed money figures carry no "estimated" label.** An attributed figure is the bill,
 not an estimate of it. Two labels do two different jobs:
@@ -993,7 +1019,7 @@ and stays. Until the fixture is extended past today the cut removes nothing on m
 is what makes it safe to have landed before the data needed it.
 
 **R-D3 — Scale.** 4 Teams · 20 Members (18 `human`, 2 `service_account`) · 5 Repositories · 5
-WorkTypes · 7 Models across 3 vendors · ~3,600 Tasks · ~7,800 **root** AgentSessions, plus the
+WorkTypes · 10 Models in 8 families across 3 vendors (ticket 70) · ~3,600 Tasks · ~7,800 **root** AgentSessions, plus the
 child sessions R-D21 fans out from them (~10,900 rows on disk in all). The session count the
 product reports is the root count (R-M19). Amended 2026-09-10 by ticket 66, which raised the
 volume by an order of magnitude, and again the same day by ticket 67, which put the reviews on
@@ -1008,17 +1034,23 @@ a logistic from ~2.5 sessions per Member-workday in April to ~5 in September, fl
 August — 2,043 (Member × workday) pairs on the committed data, every one of them inside the
 range. R-D10's seat holder is carved out of the result afterwards and is the one exception.
 
-**Weekly session spend is a smooth function of time.** A logistic in dollars sharing the volume
-curve's midpoint and steepness, from ~$1,900 per full week in April to a ~$2,650 plateau in
-August–September; a week whose first day falls before 1 July sits within ±40% of that curve, and
-a week from 1 July within ±20%. The curve is *shallower* than the volume curve — 1.39 against
-2.03 — because R-D17's falling frontier share makes the average priced token cheaper as the
-sessions get more numerous. There is no separate price ramp: costs are more modest initially by
-construction of the volume ramp and of R-D17, and by nothing else.
+**Weekly session spend is a smooth function of time.** A logistic in dollars, from ~$1,650 per
+full week in April to ~$5,140 in the closing week; a week whose first day falls before 1 July sits
+within ±40% of that curve, and a week from 1 July within ±20%. The curve is *steeper* than the
+volume curve — ~3.1 against 2.03 — because R-D17's **rising** frontier share makes the average
+priced token dearer as the sessions get more numerous, and its midpoint and steepness are its own
+because volume flattens across August while the mix does not. There is no separate price ramp: the
+level rises by construction of the volume ramp and of R-D17, and by nothing else.
+
+*(Rewritten 2026-09-10 by ticket 70, which reversed R-D17. Ticket 66 set this curve at ~$1,900 →
+~$2,650 and shallower than the volume curve — 1.39 against 2.03 — for the falling frontier share it
+then had, and ticket 68 re-fitted its level to 2,050 / 2,860 for the token scale. The shape, the
+bands and the repair rule are unchanged; the direction is not.)*
 
 **The seat fee is a minor share of Total spend**, and it is now stated as a ceiling: seats are
-**at most 25%** of Total spend, and on the committed data **7.1%** — $4,212 of seats against
-$55,293.74 of session cost. It was ~46% until this ticket, against a fixture deliberately held at
+**at most 25%** of Total spend, and on the committed data **5.5%** — $4,212 of seats against
+$72,682.16 of session cost (ticket 70's Model mix took the session bill up; the ceiling is what
+is asserted, and no level under it is). It was ~46% until this ticket, against a fixture deliberately held at
 ~750 attempts so that it would be, and the volume the product's own claims need is worth more
 than the size of that number. What survives is the part that never depended on the magnitude: a
 consumption-only model cannot see the seat line at all, because a seat is not a session and
@@ -1101,18 +1133,49 @@ Members belong to more than one Team**, so the non-additive case is real rather 
 
 **R-D15 — 40% of sessions span two or more Models**, so R-M7 has real cases behind it.
 
-**R-D16 — Model token share: `balanced` 55%, `fast` 30%, `frontier` 15%.** The roster and token
-rate card are fixed by ADR-0007; frontier input over fast input is **exactly 200×** (`gpt-6-astra`
-10.00 against `gpt-5-nano` 0.05), with real verified input prices and no thumb on the scale.
+**R-D16 — Token share by vendor: Anthropic ≈ 60%, OpenAI ≈ 30%, Google ≈ 10% over the window**
+(rewritten 2026-09-10, ticket 70). The roster and token rate card are fixed by ADR-0011, amending
+ADR-0007; frontier input over fast input is still **exactly 200×** (`claude-fable-5-1` and
+`gpt-6-astra` at 10.00 against `gpt-5-nano` at 0.05), with real verified input prices and no thumb
+on the scale. The vendor split is asserted to ±3 points.
 
-The invariant the fixture must satisfy is **the `frontier` tier carries more token spend than any
-other tier while holding the smallest token share**. The precise percentage is *derived by the
-generator from the card* and asserted, never hardcoded — ticket 16's "~56%" was computed against a
-card ADR-0007 replaced.
+**The tier shares are derived, not authored.** `TIER_TOKEN_SHARE` — 55 / 30 / 15 — is gone as a
+target: what a team chooses is a *model*, and its tier share is the consequence. The generator
+derives each month's tier target from R-D17's family table and the roster, and asserts the realised
+shares against it.
 
-**R-D17 — Frontier token share falls from 25% in April to 10% in August.** Spend per session drops
-while session count rises — a legible optimisation story, and the one thing on the dashboard a
-reader can act on.
+The invariant the fixture must satisfy is unchanged: **the `frontier` tier carries more token spend
+than any other tier while holding the smallest token share**, on a frontier token share that runs
+roughly 12–30% and rises. The precise percentage is *derived by the generator from the card* and
+asserted, never hardcoded — ticket 16's "~56%" was computed against a card ADR-0007 replaced.
+
+**R-D17 — The Model mix has a presence that moves month by month, and the frontier tier _rises_**
+(rewritten 2026-09-10, ticket 70). Share of each month's tokens, by family, Apr → Sep, asserted to
+±2 points:
+
+| Family | Apr | May | Jun | Jul | Aug | Sep |
+|---|---|---|---|---|---|---|
+| Claude Haiku | 28 | 26 | 22 | 16 | 12 | 10 |
+| Claude Sonnet | 24 | 26 | 28 | 30 | 30 | 30 |
+| Claude Opus | 6 | 6 | 6 | 5 | 5 | 5 |
+| Claude Fable | 0 | 0 | 2 | 6 | 10 | 13 |
+| OpenAI GPT-5 | 26 | 25 | 24 | 22 | 20 | 18 |
+| OpenAI GPT-6 Astra | 6 | 7 | 8 | 10 | 12 | 13 |
+| Gemini Pro | 6 | 6 | 6 | 6 | 6 | 6 |
+| Gemini Flash-Lite | 4 | 4 | 4 | 4 | 4 | 4 |
+
+Inside `Claude Sonnet`, `claude-sonnet-4-6` hands over to `claude-sonnet-5`, 70:30 in April to 5:95
+in September — so the family level is flat while the exact level shows a version migration.
+
+**The optimisation story is Claude Haiku's fade, and the frontier tier is the opposite of one.**
+The cheap model stops being the default as the balanced models get good enough; meanwhile
+`claude-fable-5-1` arrives in June and `gpt-6-astra` grows through the summer, so the frontier tier
+runs from ~12% of tokens in April to ~31% in September. That is the one thing on the dashboard a
+reader can act on, and it now points at a decision somebody made rather than at a drift nobody did.
+
+Until this ticket R-D17 ran the other way — 25% down to 10% — which made the average priced token
+*cheaper* as sessions got more numerous. It now gets dearer, and that is why the weekly spend curve
+under R-D4 is steeper than the volume curve rather than shallower.
 
 **R-D18 — The two accounts of R-A3 must differ visibly on `/demo/people` and `/demo/spend`**, or
 the reinstated restricted preset is untestable.
@@ -1234,7 +1297,7 @@ Testable statements the build must satisfy. `testing-spec.md` assigns each to a 
 | A10 | A restricted-account payload contains no figure outside its grants | R-A6 |
 | A11 | A token whose Organization does not match the path segment yields 404 | R-A7 |
 | A12 | A chart stacks only where its grouping partitions its measure; no pie chart exists | R-V1, R-V2 |
-| A13 | A 20-series Member grouping renders 5 series (4 + "Other"); a 5-series Repository grouping renders 5 and no "Other" | R-V4 |
+| A13 | A 20-series Member grouping renders 5 series (4 + "Other"); a 5-series Repository grouping renders 5 and no "Other"; the Model mix renders its whole roster and no "Other" | R-V4, R-V7 |
 | A14 | Series identity is stable across every bucket of one chart, and across a roll-up switch | R-V5 |
 | A15 | Every chart exposes a visually-hidden table mirror whose values equal the rendered series | R-X1 |
 | A16 | Every chart's `aria-label` names the current roll-up level | R-X2 |

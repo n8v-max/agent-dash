@@ -119,11 +119,14 @@ export const adoptionFixture = (): AdoptionSection => ({
       title: "Model mix",
       rollUpLevel: "Model (family)",
       buckets: WEEK_BUCKETS,
+      // Ticket 70 — the panel plots each Model's **share** of a period's tokens, in whole
+      // percentage points on a fixed 0–100% axis, so the fixture carries shares and not volumes
+      // and the chart does not stack (a share of a whole is not a part of one).
       series: [
-        { key: "claude", label: "claude", values: [2_000_000, 2_500_000, 1_500_000] },
-        { key: "gpt", label: "gpt", values: [1_000_000, 1_500_000, 1_500_000] },
+        { key: "claude", label: "claude", values: [67, 62, 50] },
+        { key: "gpt", label: "gpt", values: [33, 38, 50] },
       ],
-      stackable: true,
+      stackable: false,
     }),
     levels: {
       exact: distribution("exact"),

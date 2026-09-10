@@ -2,9 +2,11 @@
 // § TokenUsage). Disjointness is the property that makes the display sum safe, so the four
 // classes are split from one integer total and never overlap.
 //
-// R-D16 fixes the tier token shares and R-D17 the monthly frontier trend, and R-D16's
-// derived invariant — the frontier tier carries more token spend than any other tier while
-// holding the smallest token share — only holds if those shares land where they are
+// **R-D17 fixes the roster's presence month by month, and R-D16 falls out of it** (rewritten,
+// ticket 70). `FAMILY_SHARE_BY_MONTH` is the authored thing — Haiku fading, Sonnet handing over
+// to itself, Fable and Astra arriving — and the tier shares are *derived* from it and the
+// roster. R-D16's invariant, that the frontier tier carries more token spend than any other
+// while holding the smallest token share, only holds if the family shares land where they are
 // authored. Models are therefore drawn at random against the month's targets and then
 // *repaired* by moving whole parcels between Models until the realised shares match.
 // Drawing alone drifts by a percentage point or two, and the invariant lives inside that
@@ -20,13 +22,15 @@
 import { models } from "./catalog.mts";
 import { chance, largestRemainder, logNormal, pickWeighted, shuffled, sum, type Rng } from "./rng.mts";
 import {
-  FRONTIER_SHARE_BY_MONTH,
-  MODEL_WEIGHT_WITHIN_TIER,
+  FAMILY_SHARE_BY_MONTH,
+  GPT_5_NANO_WITHIN_FAMILY,
   MULTI_MODEL_SHARE,
-  TIER_TOKEN_SHARE,
+  SONNET_4_6_WITHIN_FAMILY,
   TOKEN_FLOOR,
   TOKEN_MEDIAN,
   TOKEN_SIGMA,
+  WINDOW_MONTHS,
+  type ModelFamily,
 } from "./targets.mts";
 import type { ModelTier, TokenUsage } from "./types.mts";
 
@@ -52,30 +56,55 @@ type Parcel = {
   model_id: string;
 };
 
-const tierTargets = (monthKey: string): Record<ModelTier, number> => {
-  const frontier = FRONTIER_SHARE_BY_MONTH[monthKey];
-  if (frontier === undefined) throw new Error(`no frontier target for ${monthKey}`);
-  const rest = 1 - frontier;
-  const denominator = TIER_TOKEN_SHARE.balanced + TIER_TOKEN_SHARE.fast;
-  return {
-    frontier,
-    balanced: (rest * TIER_TOKEN_SHARE.balanced) / denominator,
-    fast: (rest * TIER_TOKEN_SHARE.fast) / denominator,
-  };
+const monthIndex = (monthKey: string): number => {
+  const at = WINDOW_MONTHS.indexOf(monthKey as (typeof WINDOW_MONTHS)[number]);
+  if (at === -1) throw new Error(`no family share target for ${monthKey}`);
+  return at;
 };
 
-// A tier's target, split across its Models by the authored within-tier weights. Repairing at
-// Model grain rather than tier grain is what fixes the frontier's average price, and the
-// derived spend invariant is a function of exactly that.
-const modelTargets = (monthKey: string): Record<string, number> => {
-  const tiers = tierTargets(monthKey);
-  const entries = models.map((model) => {
-    const inTier = models.filter((candidate) => candidate.tier === model.tier);
-    const weight = MODEL_WEIGHT_WITHIN_TIER[model.id];
-    const tierWeight = sum(inTier.map((candidate) => MODEL_WEIGHT_WITHIN_TIER[candidate.id]));
-    return [model.id, (tiers[model.tier] * weight) / tierWeight] as const;
-  });
-  return Object.fromEntries(entries);
+/**
+ * **A model's share of its own family, in one month** (R-D17, ticket 70).
+ *
+ * Six of the eight families hold one model and take all of it. The two that hold two are the
+ * whole reason the family level and the exact level say different things: `Claude Sonnet` is
+ * flat while 4.6 hands over to 5, and `OpenAI GPT-5` divides evenly between a `fast` model and
+ * a `balanced` one, which is what puts one family across two tiers.
+ */
+const withinFamily = (modelId: string, month: number): number => {
+  if (modelId === "claude-sonnet-4-6") return SONNET_4_6_WITHIN_FAMILY[month];
+  if (modelId === "claude-sonnet-5") return 1 - SONNET_4_6_WITHIN_FAMILY[month];
+  if (modelId === "gpt-5-nano") return GPT_5_NANO_WITHIN_FAMILY;
+  if (modelId === "gpt-5.2") return 1 - GPT_5_NANO_WITHIN_FAMILY;
+  return 1;
+};
+
+/**
+ * A month's target share for every Model on the roster — the family table, split within each
+ * family. Repairing at Model grain rather than family or tier grain is what fixes the frontier's
+ * average price, and R-D16's derived spend invariant is a function of exactly that.
+ */
+export const modelTargets = (monthKey: string): Record<string, number> => {
+  const month = monthIndex(monthKey);
+  const shares = FAMILY_SHARE_BY_MONTH[monthKey];
+  return Object.fromEntries(
+    models.map((model) => [
+      model.id,
+      shares[model.family as ModelFamily] * withinFamily(model.id, month),
+    ]),
+  );
+};
+
+/**
+ * **R-D16's tier shares, derived rather than authored** (ticket 70). `TIER_TOKEN_SHARE` was a
+ * target until this ticket; it is now a consequence of which *families* a month reached for,
+ * which is the direction the causation actually runs in. `spend.mts` asserts the realised shares
+ * against these and asserts the invariant over the emitted tokens.
+ */
+export const tierTargets = (monthKey: string): Record<ModelTier, number> => {
+  const targets = modelTargets(monthKey);
+  const totals: Record<ModelTier, number> = { frontier: 0, balanced: 0, fast: 0 };
+  for (const model of models) totals[model.tier] += targets[model.id];
+  return totals;
 };
 
 /**

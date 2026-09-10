@@ -87,9 +87,14 @@ describe("T-U17 — Model mix at three roll-up levels on committed rows (R-M7, R
     }
   });
 
-  it("rolls exact into family into tier, model by model, on ADR-0007's roster", () => {
+  it("rolls exact into family into tier, model by model, on ADR-0011's roster", () => {
     expect(mix.levels.exact.slices).toHaveLength(models.length);
-    expect(mix.levels.family.slices).toHaveLength(7);
+    // Derived from the roster rather than typed out: ticket 70 took it from seven families to
+    // eight, and a literal here is a literal the next roster edit re-types without checking
+    // anything (`testing-spec.md` § T-F).
+    expect(mix.levels.family.slices).toHaveLength(
+      new Set(models.map((model) => model.family)).size,
+    );
     expect(mix.levels.tier.slices.map((slice) => slice.key)).toEqual(["frontier", "balanced", "fast"]);
 
     for (const family of mix.levels.family.slices) {
@@ -102,20 +107,45 @@ describe("T-U17 — Model mix at three roll-up levels on committed rows (R-M7, R
       expect(family.total).toBe(fromExact);
     }
 
+    // **`family` and `tier` are two roll-ups of `exact`, not a chain** (ticket 70). `OpenAI
+    // GPT-5` holds `gpt-5-nano` at `fast` and `gpt-5.2` at `balanced`, because a family is the
+    // vendor's *line* and a tier is a cross-vendor capability class, and a line spans classes.
+    // So a tier is the sum of its **Models**, and summing families into it would double-count
+    // the one that straddles. All three levels still partition the same tokens exactly, which
+    // is what T-U17 is about.
     for (const tier of mix.levels.tier.slices) {
-      const families = new Set(models.filter((model) => model.tier === tier.key).map((model) => model.family));
-      const fromFamily = mix.levels.family.slices
-        .filter((slice) => families.has(slice.key))
-        .reduce((running, slice) => running + slice.total, 0);
-      expect(tier.total).toBe(fromFamily);
+      const fromExact = models
+        .filter((model) => model.tier === tier.key)
+        .reduce(
+          (running, model) =>
+            running + (mix.levels.exact.slices.find((slice) => slice.key === model.id)?.total ?? 0),
+          0,
+        );
+      expect(tier.total).toBe(fromExact);
     }
+
+    const straddling = [...new Set(models.map((model) => model.family))].filter(
+      (family) =>
+        new Set(models.filter((model) => model.family === family).map((model) => model.tier))
+          .size > 1,
+    );
+    expect(straddling).toEqual(["OpenAI GPT-5"]);
   });
 
-  it("carries R-D16's tier shares — balanced 55%, fast 30%, frontier 15%", () => {
+  // **R-D16's tier shares are derived, not authored** (ticket 70). `TIER_TOKEN_SHARE` was a
+  // generator target until this ticket and 55/30/15 was written down in three places; the tier
+  // shares now fall out of `FAMILY_SHARE_BY_MONTH` and the roster, so what is checkable from
+  // outside the generator is the *ordering* the family table implies and the fact that the three
+  // partition the tokens. The generator asserts the shares against its own derivation (R-T23).
+  it("orders the tier shares as the family table implies — balanced, then fast, then frontier", () => {
     const tier = tokenModelMix(MIX, "tier");
-    expect(shareOf(tier.slices, "balanced", tier.total)).toBeCloseTo(0.55, 2);
-    expect(shareOf(tier.slices, "fast", tier.total)).toBeCloseTo(0.3, 2);
-    expect(shareOf(tier.slices, "frontier", tier.total)).toBeCloseTo(0.15, 2);
+    const shares = ["balanced", "fast", "frontier"].map((key) =>
+      shareOf(tier.slices, key, tier.total),
+    );
+
+    expect(shares[0]).toBeGreaterThan(shares[1]);
+    expect(shares[1]).toBeGreaterThan(shares[2]);
+    expect(shares.reduce((running, share) => running + share, 0)).toBeCloseTo(1, 10);
   });
 
   it("gives `frontier` the smallest token share, which is ADR-0007's invariant", () => {
