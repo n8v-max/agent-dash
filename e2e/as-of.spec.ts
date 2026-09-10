@@ -80,12 +80,17 @@ test.describe("T-E19 — no surface names an instant later than `now` (A42)", ()
     expect(started.filter((cell) => cell.trim() > NOW_LABEL)).toEqual([]);
   });
 
-  test("the as-of stamp is inside the slice, and still equals the History top row", async ({
+  test("the as-of stamp is inside the slice, and still names a row the page is showing", async ({
     page,
   }) => {
     // T-E15's identity, re-asserted under the pin. It is the assertion the slice could most
-    // easily break: the stamp is the last session to *end* and the top row is the last to
-    // *start*, and cutting the rows moves both — so they have to move together.
+    // easily break: the stamp is read off the last session to *end*, and cutting the rows moves
+    // which session that is — so the row it names has to move with it.
+    //
+    // The row is found **by id** rather than taken off the top of the table (ticket 66). The
+    // page is ordered by `started_at` and the stamp is the last session to *end*, and at this
+    // volume those are different rows: a long session that opened at 10:03 can finish after a
+    // short one that opened at 12:51. Both are inside the slice, which is what this asserts.
     await page.goto(`/${SLUG}/history`);
 
     const label = ((await page.getByTestId("data-as-of").textContent()) ?? "").replace(
@@ -94,10 +99,10 @@ test.describe("T-E19 — no surface names an instant later than `now` (A42)", ()
     );
     expect(label <= NOW_LABEL).toBe(true);
 
-    const top = page.locator("tbody tr[data-session]").first();
-    await expect(top.getByRole("cell").nth(1)).toHaveText(label);
     const named = await page.getByTestId("data-as-of").getAttribute("data-session");
-    await expect(top).toHaveAttribute("data-session", named ?? "");
+    const row = page.locator(`tbody tr[data-session="${named}"]`);
+    await expect(row).toHaveCount(1);
+    await expect(row.getByRole("cell").nth(1)).toHaveText(label);
   });
 
   test("the period menu stops at the month `now` falls in", async ({ page }) => {

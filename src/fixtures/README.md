@@ -31,7 +31,8 @@ The platform is multi-agent, so ~20% of visible roots spawn one to four **child 
 weighted toward `implementation` and `headless`. A child inherits its root's Task, Member,
 Repository, WorkType and `execution_mode`, carries no `accepted`, and runs inside its root's
 window. The application folds a child's cost, tokens and duration into its root at parse (R-M19),
-so **session count means root count**: 742 attempts, 292 children, 1,049 rows on disk.
+so **session count means root count**: 7,761 attempts, 2,960 children, 158 hidden roots, 10,879
+rows on disk.
 
 **`children.mts` runs last, and changes no root.** Everything upstream of it — the schedule, the
 Task shapes, the cell assignment, the model draw, the hidden rows — runs exactly as it did before
@@ -43,9 +44,10 @@ target being retuned.
 **A child is small in both dimensions at once.** Its machine allocation is 12–30% of its root's,
 and its tokens are that same fraction of its root's own draw, taken per Model — scaling the
 parcels rather than re-drawing them is what keeps R-D16's tier shares and R-D17's monthly trend
-where `tokens.mts` put them, because a fan-out uses the models its root was already using. The
-size is also what protects R-D4: session spend rose 8.4% and the seat share moved from 48.2% to
-46.2%, still inside its authored band.
+where `tokens.mts` put them, because a fan-out uses the models its root was already using. *(Until
+ticket 66 the size was also argued from R-D4's seat share, which a bigger child would have diluted
+out of an authored band. R-D4 no longer has that band — see below — and the sizing is now what it
+should always have been: a sub-agent is handed one slice of its root's work.)*
 
 Every distribution in `distributions.mts` and every money figure in `spend.mts` is asserted over
 **roots carrying their children** (`tree.mts`), because that is the population the product reads.
@@ -93,8 +95,8 @@ the generator uses it and is rendered nowhere (R-N11). The roster and the token 
 R-D16's headline is **derived, never hardcoded**: the generator computes the token spend share per
 tier from the card and the tokens it actually emitted, and asserts the invariant — *the `frontier`
 tier carries more token spend than any other tier while holding the smallest token share*. On the
-committed data that comes out at **frontier 49.9% of token spend on 14.6% of tokens** (balanced
-44.5%, fast 5.6%). Ticket 16's "~56%" was computed against a card ADR-0007 replaced.
+committed data that comes out at **frontier 49.8% of token spend on 14.3% of tokens** (balanced
+44.3%, fast 5.8%). Ticket 16's "~56%" was computed against a card ADR-0007 replaced.
 
 ## How the shape is hit
 
@@ -119,6 +121,42 @@ quietly lost one of them.
   offset against `Intl` on every row rather than trusting that no DST transition falls in the
   window. See the note below.
 
+## Volume, and the curve spend follows (R-D4, ticket 66)
+
+**On a workday each human Member runs `1 + Poisson(λ(t)·activity)` root sessions, capped at
+nine**; a weekend day runs about 15% of that rate and is usually empty. λ is a logistic in window
+fraction rising from ~1.5 in April to ~4 by September and flattening across August, and the
+per-Member activity multipliers are normalised to mean 1 over the humans, so λ alone fixes the
+organisation-wide rate. The committed data holds **2,043 (human Member × workday) pairs, every
+one of them inside 1–9**, at 2.39 sessions per human workday in April rising to 4.20 in September.
+The two service accounts keep the *weekly* zero-inflated Poisson the whole fixture used before
+ticket 66, scaled ×3: a nightly runner has no workday.
+
+**R-D10's seat holder is carved out afterwards** and stays at three sessions — 0.7% of a busy
+peer's — which is what keeps R-D10's own "fewer than 5 sessions" true of the data.
+
+**Weekly session cost follows `WEEKLY_SPEND_SHAPE`**, a logistic in dollars sharing the volume
+curve's midpoint and steepness: ~$1,900 per full week in April to a ~$2,650 plateau. `curve.mts`
+spreads it over a week's own days, so the six-day closing bucket — which still holds five workdays
+— is targeted at 97% of a full week rather than at six sevenths of one. A week that drifts past
+three quarters of its band has that week's **token draws** scaled until it lands on the curve; a
+week inside it is left exactly as drawn, which is where the fluctuation comes from. Two of the
+twenty-four weeks are repaired on the committed data, and the worst surviving departure is 19.5%
+against a ±40% band.
+
+**The curve is shallower than the volume curve — 1.39 against λ's 2.03 — and R-D17 is the whole
+of the difference.** The frontier tier's token share falls from 25% to 10% across the window
+against a 200× price spread (ADR-0007), so the average priced token gets cheaper as the sessions
+get more numerous. There is no separate price ramp anywhere in this directory.
+
+**One number is authored above where the ticket asked for it, and here is the arithmetic.** Ticket
+66 specified ~$450/week in April. Machine allocation is priced from the compute card and no token
+draw can move it: it is ~$1.95 per attempt, so an April week of ~230 attempts costs ~$460 in
+machine time before a single token is counted. $450 is below that floor, and the only fixture that
+reaches it is one whose token spend is a rounding error — which would make R-D16's "the frontier
+tier carries more token spend than any other" a claim about $1,200 of a $16,800 bill. The *shape*
+and the *bands* are the ticket's; the *level* is the fixture's own.
+
 ## Two places the fixture does not simply transcribe a spec
 
 Both are reported rather than resolved, and no spec was edited.
@@ -129,10 +167,12 @@ Both are reported rather than resolved, and no spec was edited.
   just after local midnight. **Both slices are seeded**: the 22:00–24:00 rows because R-D5 and
   T-F6 name them, and the 00:00–02:00 rows because those are what a UTC-bucketed query would put
   in the wrong period.
-- **Ticket 10's session-cost figures are not jointly reachable.** Median ~$3.20 with p95 ~$35
-  implies a mean near $9 and a window total near $6,900, which contradicts R-D4's ~$4,500 of
-  session spend and its ~48% seat share. R-D4 is in the spec and wins: the committed data carries
-  a median of $3.44 and a p95 of $18.42, with $4,523.63 of session spend against $4,212.00 of seat
-  cost — **48.2% of Total spend**. Ticket 48's fan-out then added 8.4% of session spend on top: the
-  committed data now carries a median of $3.64 and a p95 of $20.32, with $4,905.39 of session
-  spend against the same $4,212.00 of seat cost — **46.2% of Total spend**.
+- **The seat-cost finding was demoted, not preserved** (ticket 66). It used to be the sharpest
+  figure in the product at ~46% of Total spend, and the fixture was held at ~750 attempts so that
+  it would be. R-D4 now asks for one to nine sessions per human Member per workday, and the
+  committed data carries **$55,293.74 of session spend against $4,212.00 of seat cost — 7.1% of
+  Total spend**, asserted as a *ceiling* of 25% rather than as a band. The median session cost is
+  $3.62 and the p95 $24.04; no band is asserted over either, because ticket 66 deleted the
+  authored one with the fixture that produced it and ticket 68 sets the distribution next.
+  *(Ticket 10's median ~$3.20 / p95 ~$35 pair was withdrawn in the spec on 2026-09-09 and its
+  governing paragraph struck on 2026-09-10; nothing here now contradicts it.)*

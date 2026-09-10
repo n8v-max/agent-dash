@@ -30,6 +30,11 @@
 //   3. **The published token rate card** (R-N11), in `./fixture`, which is not a Member datapoint
 //      at all. Its cache-write multiplier `1.25` and one model's output rate `1.5` were the last
 //      two `/demo/spend` literals, and neither is anybody's cost.
+//   4. **The projection** (ticket 66). `/demo/projection` renders the viewer's own spend
+//      *extrapolated* — a rate carried forward per day, and the month-end figure that rate
+//      implies. Neither is a sum and neither is a quotient at a reported key, so classes 1 and 2
+//      cannot see them: the literal that exposed the gap was `15.5`, the remainder the method
+//      carries onto today, which is also some other Member's session cost.
 //
 // **The quotients are taken over matching keys only.** A cross product of every sum against
 // every count would blanket the value space and gut the search set; the product never renders
@@ -49,12 +54,14 @@ import {
   civilDayIn,
   orgTimezone,
   periodKeysOf,
+  seatCharge,
   teamMatesOf,
   tokenRateCardFigures,
   visibleChildSessions,
   visibleSessions,
   type SessionRow,
 } from "./fixture";
+import { PINNED_NOW } from "./now";
 
 // --- What the viewer's own rows can legitimately be read as ------------------------------------
 
@@ -163,6 +170,49 @@ const moneyQuotients = (bucket: Bucket): readonly number[] => [
   ...over(bucket.cost, bucket.sessions),
   ...over(bucket.cost, countOf(bucket.tasks, isCompleted)),
 ];
+
+/**
+ * **The Projection page's four figures, restated** (R-N23, R-N25, ticket 64).
+ *
+ * Restated rather than imported, for the reason the whole module is: `projection.ts` is code
+ * under test, and a test that asked it what to allow could not catch it allowing too much. It
+ * is four numbers and the method is one sentence — spend to date over the share of the month
+ * elapsed — so restating it costs a dozen lines and keeps the property.
+ *
+ *   * the **daily rate**, spend so far over the days so far, drawn on every day still to come;
+ *   * **today's remainder**, the rate less what today has already cost, clamped at zero;
+ *   * the **projected session cost**, the same division taken over the whole month;
+ *   * the **projected total**, which is that plus the month's *whole* seat charge — a seat is
+ *     never pro-rated (R-M5, R-D2), so it crosses into the forecast unextrapolated.
+ *
+ * The last day's bar carries today's own cost as its residual, which is already a day-grain
+ * bucket sum and therefore already subtracted by class 1.
+ */
+const projectionFigures = (own: readonly SessionRow[], timezone: string): readonly number[] => {
+  const civilDayOf = civilDayIn(timezone);
+  const today = civilDayOf(PINNED_NOW);
+  const month = today.slice(0, 7);
+  const elapsedDays = Number(today.slice(8, 10));
+  // Day 0 of the next month is the last day of this one — arithmetic on a civil date, not a clock.
+  const totalDays = new Date(
+    Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0),
+  ).getUTCDate();
+  const inMonth = own.filter((row) => civilDayOf(row.started_at).startsWith(month));
+  const toDate = inMonth.reduce((running, row) => running + row.cost, 0);
+  if (elapsedDays === 0 || toDate === 0) return [];
+  const rate = toDate / elapsedDays;
+  const todayCost = inMonth
+    .filter((row) => civilDayOf(row.started_at) === today)
+    .reduce((running, row) => running + row.cost, 0);
+  const projectedSession = (toDate * totalDays) / elapsedDays;
+  const seat = seatCharge();
+  return [
+    rate,
+    Math.max(0, rate - todayCost),
+    projectedSession,
+    projectedSession + seat.fee * seat.seats,
+  ];
+};
 
 /**
  * The **count** ratios: the acceptance rate (`/demo/work`, R-M6) and the two Task-grain rates
@@ -283,6 +333,10 @@ export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<strin
     ...buckets.flatMap(moneyQuotients),
     ...buckets.flatMap(countQuotients),
     ...teamBuckets.flatMap(countQuotients),
+    ...projectionFigures(
+      own.filter((row) => row.parent_session_id === null),
+      orgTimezone(),
+    ),
     ...tokenRateCardFigures(),
   ]);
   const ungranted = literalsFor(

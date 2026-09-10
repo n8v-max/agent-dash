@@ -12,13 +12,13 @@ import { atLeast, check, near } from "./check.mts";
 import { repositories } from "./catalog.mts";
 import { members, OPEN_ACCOUNT_MEMBER_ID, RESTRICTED_ACCOUNT_MEMBER_ID } from "./people.mts";
 import { isCpuHeavy } from "./predicates.mts";
-import { median } from "./rng.mts";
-import { dayOfRow, weekOfRow } from "./rows.mts";
-import { weekMonthKey } from "./schedule.mts";
+import { dayOfRow } from "./rows.mts";
+import { isWorkday, monthKeyOfDay } from "./schedule.mts";
 import {
   ACCEPTANCE_BY_REPOSITORY,
   ACCEPTANCE_BY_WORK_TYPE,
   CPU_HEAVY_COUNT,
+  DAILY_VOLUME,
   DECOMPOSITION_RATE,
   HIDDEN_SHARE,
   LOW_USAGE_MEMBER_ID,
@@ -142,24 +142,58 @@ export const populationLines = (roots: readonly AgentSession[]): string[] => {
   ];
 };
 
-// R-D4 — the adoption ramp, measured the way the requirement states it: per Member, per week.
+// R-D4 — volume, measured the way the requirement states it (ticket 66): **per human Member,
+// per workday**. Three claims, and each one fails differently.
+//
+//   * the *range* — one to nine root sessions on a workday a Member worked at all. The floor and
+//     the ceiling are both in `dailyCount`, so this holds by construction; ≥95% is the tolerance
+//     the requirement is written with, and anything that ever put a tenth session on a Member's
+//     day would surface here rather than in a chart nobody re-reads.
+//   * the *ramp* — September's rate is materially above April's. Volume that did not rise would
+//     leave R-D17's "session count rises while spend per session falls" with half a story, and
+//     would flatten `WEEKLY_SPEND_SHAPE` into a horizontal line the repair would then enforce.
+//   * the *weekend* — a Saturday is quiet but not empty. Both halves matter: a fixture with no
+//     weekend rows makes every week-grain bucket a five-day bucket in disguise.
+//
+// Service accounts are excluded from all three: they run a pipeline's week, not a person's day.
 export const rampLines = (roots: readonly AgentSession[]): string[] => {
-  const counts = new Map<string, number>();
+  const humans = new Set(members.filter((member) => member.kind === "human").map((m) => m.id));
+  const perDay = new Map<number, Map<string, number>>();
   for (const row of roots) {
-    const key = `${row.member_id}|${weekOfRow(row)}`;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    if (!humans.has(row.member_id)) continue;
+    const day = dayOfRow(row);
+    const held = perDay.get(day) ?? new Map<string, number>();
+    held.set(row.member_id, (held.get(row.member_id) ?? 0) + 1);
+    perDay.set(day, held);
   }
-  const forMonth = (month: string): number[] => {
-    const weeks = Array.from({ length: Math.ceil(WINDOW_DAYS / 7) }, (_, week) => week).filter(
-      (week) => weekMonthKey(week) === month,
+  const countsOn = (holds: (day: number) => boolean): number[] =>
+    [...perDay.entries()].filter(([day]) => holds(day)).flatMap(([, held]) => [...held.values()]);
+  const workdayCounts = countsOn(isWorkday);
+  const inRange = workdayCounts.filter((count) => count >= 1 && count <= DAILY_VOLUME.cap);
+  check(
+    inRange.length / workdayCounts.length >= 0.95,
+    `R-D4: only ${inRange.length} of ${workdayCounts.length} (Member, workday) pairs run 1–${DAILY_VOLUME.cap} sessions`,
+  );
+  const perWorkdayIn = (month: string): number => {
+    const days = Array.from({ length: WINDOW_DAYS }, (_, day) => day).filter(
+      (day) => isWorkday(day) && monthKeyOfDay(day) === month,
     );
-    return members.flatMap((member) => weeks.map((week) => counts.get(`${member.id}|${week}`) ?? 0));
+    const total = days.reduce(
+      (running, day) => running + [...(perDay.get(day)?.values() ?? [])].reduce((a, b) => a + b, 0),
+      0,
+    );
+    return total / (days.length * humans.size);
   };
-  const april = forMonth("2026-04");
-  const august = forMonth("2026-08");
-  check(median(april) === 0, `R-D4: April median is ${median(april)}, not 0`);
-  check(median(august) === 2, `R-D4: August median is ${median(august)}, not 2`);
-  check(Math.max(...april) === 3, `R-D4: April max is ${Math.max(...april)}, not 3`);
-  check(Math.max(...august) === 8, `R-D4: August max is ${Math.max(...august)}, not 8`);
-  return ["R-D4 sessions per Member per week: April median 0 / max 3, August median 2 / max 8"];
+  const april = perWorkdayIn("2026-04");
+  const september = perWorkdayIn("2026-09");
+  check(
+    september >= april + 1,
+    `R-D4: the ramp did not rise — April runs ${april.toFixed(2)} sessions per human workday, September ${september.toFixed(2)}`,
+  );
+  const weekend = countsOn((day) => !isWorkday(day));
+  check(weekend.length > 0, "R-D4: no human ran a session at a weekend, so week buckets are five-day buckets");
+  return [
+    `R-D4 ${workdayCounts.length} (human Member × workday) pairs, ${inRange.length} of them 1–${DAILY_VOLUME.cap} sessions · max ${Math.max(...workdayCounts)}`,
+    `R-D4 sessions per human workday: April ${april.toFixed(2)} → September ${september.toFixed(2)} · ${weekend.length} weekend Member-days`,
+  ];
 };

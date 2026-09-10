@@ -218,9 +218,12 @@ describe("R-M19 — a child that disagrees with its root is a fault, not a row t
     readDataset(readerWith({ [POPULATED_PAIR]: payload }));
 
   it("rejects a child naming a root that is not in the fixture", () => {
+    // `ses_absent` rather than a plausible-looking number: at ticket 66's volume the fixture
+    // runs past `ses_9999`, so the id this case used to name is now a real row and the fault it
+    // raised became "your parent is a child" instead of "your parent does not exist".
     const read = readingOf(
       withChild((child) => {
-        Object.assign(child, { parent_session_id: "ses_9999" });
+        Object.assign(child, { parent_session_id: "ses_absent" });
       }),
     );
 

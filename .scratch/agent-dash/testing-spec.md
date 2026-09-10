@@ -40,8 +40,8 @@ run the generator. A test that regenerates its own input tests the generator, no
 it as a pure function over rows does.
 
 **P5 — No `Date.now()` in the domain layer.** Every function taking "now" takes it as an argument.
-The fixture window ends 2026-09-08, so a test that reads the wall clock passes today and fails
-tomorrow. `/demo/projection` and the Incomplete-Task age buckets are the two places this bites.
+The fixture window ends 2026-09-25 and the data runs past today (R-D2, tickets 62 and 66), so a
+test that reads the wall clock passes today and fails tomorrow. `/demo/projection` and the Incomplete-Task age buckets are the two places this bites.
 
 **P6 — A test that would pass against an empty fixture is not a test.** Each unit target below
 names the fixture property (R-D*) that gives it something to fail against.
@@ -303,7 +303,7 @@ against.
   same row. **No clock is read** (P5): the observation is a property of the rows and takes no
   `now`, so it cannot drift with the day the suite runs.
   - **Over the committed fixture**, in `src/data/clock.test.ts`: `dataAsOf()` names the session
-    that ended last out of all 742, prints that session's **start** through the one instant
+    that ended last out of all 7,761, prints that session's **start** through the one instant
     formatter in the Organization's timezone, lands **inside `window_end`** — which is the reason
     it prints the start rather than the end — and is the same string when the wall clock is moved
     five years forward.

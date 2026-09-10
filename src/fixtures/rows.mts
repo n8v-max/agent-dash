@@ -11,6 +11,7 @@ import {
   CPU_HEAVY_REPOSITORIES,
   HIDDEN_SHARE,
   MADRID_OFFSET_LABEL,
+  WINDOW_END_DAY,
   WINDOW_START_DAY,
 } from "./targets.mts";
 import { planTokens } from "./tokens.mts";
@@ -19,6 +20,12 @@ import type { AgentSession, Member, Task, TokenUsage, WorkTypeKey } from "./type
 const HOUR_MS = 3_600_000;
 const DAY_MS = 86_400_000;
 const WINDOW_START_MS = Date.parse(`${WINDOW_START_DAY}T00:00:00${MADRID_OFFSET_LABEL}`);
+const WINDOW_END_MS = Date.parse(`${WINDOW_END_DAY}T23:59:59${MADRID_OFFSET_LABEL}`);
+
+// R-D12 — how long after the attempt it shadows a hidden retry starts. Bounded by the window:
+// a retry that fell off the end would be a row R-D2 forbids, which at the old volume happened
+// to be unreachable because the last day held too few accepted single-session Tasks to draw.
+const HIDDEN_OFFSET_HOURS = { min: 2, max: 20 };
 
 type Draft = {
   member: Member;
@@ -81,13 +88,23 @@ const hiddenDraftsFrom = (rng: Rng, drafts: readonly Draft[]): Draft[] => {
   const perTask = new Map<string, number>();
   for (const draft of drafts) perTask.set(draft.task_key, (perTask.get(draft.task_key) ?? 0) + 1);
   const target = Math.round((drafts.length * HIDDEN_SHARE) / (1 - HIDDEN_SHARE));
+  const roomHours = (draft: Draft): number =>
+    Math.floor((WINDOW_END_MS - draft.started_at_ms) / HOUR_MS);
   const eligible = drafts.filter(
-    (draft) => draft.accepted && perTask.get(draft.task_key) === 1 && !draft.cpu_heavy,
+    (draft) =>
+      draft.accepted &&
+      perTask.get(draft.task_key) === 1 &&
+      !draft.cpu_heavy &&
+      roomHours(draft) >= HIDDEN_OFFSET_HOURS.min,
   );
   return shuffled(rng, eligible)
     .slice(0, target)
     .map((draft) => {
-      const offsetHours = intBetween(rng, 2, 20);
+      const offsetHours = intBetween(
+        rng,
+        HIDDEN_OFFSET_HOURS.min,
+        Math.min(HIDDEN_OFFSET_HOURS.max, roomHours(draft)),
+      );
       const startedAtMs = draft.started_at_ms + offsetHours * HOUR_MS;
       return {
         ...draft,

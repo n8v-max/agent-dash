@@ -49,9 +49,9 @@ describe("the committed fixture is not empty of the rows these claims need (P6, 
     }
   });
 
-  it("declares Europe/Madrid and the 12 Apr – 8 Sep window (R-D1, R-D2)", () => {
+  it("declares Europe/Madrid and the 12 Apr – 25 Sep window (R-D1, R-D2)", () => {
     expect(organization.timezone).toBe("Europe/Madrid");
-    expect(WINDOW).toEqual({ start: "2026-04-12", end: "2026-09-08" });
+    expect(WINDOW).toEqual({ start: "2026-04-12", end: "2026-09-25" });
   });
 });
 
@@ -114,21 +114,28 @@ describe("T-U8 — the aggregate over the fixture window (A26, R-D2, R-E2)", () 
   });
 
   it("bills the month-boundary session to the month its Organization worked it", () => {
-    // ses_0443 starts 2026-08-01T00:58:51+02:00 — 2026-07-31T22:58 UTC. A UTC-bucketed total
-    // puts its cost in July; the Organization's declared timezone puts it in August.
+    // A session opening just after local midnight on the 1st sits on the *previous* UTC day and
+    // therefore in the previous UTC month. A UTC-bucketed total puts its cost there; the
+    // Organization's declared timezone puts it in the month it actually worked.
+    //
+    // Stated over **every** such row rather than over one named id (ticket 66): at this volume
+    // the fixture carries several, spread across four of the five month boundaries, and naming
+    // one would make the claim a fact about that row rather than about the rule.
     const crossing = crossesUtcMidnight.filter((session) => localDate(session).endsWith("-01"));
     expect(crossing.length).toBeGreaterThan(0);
 
-    const august = months.find((bucket) => bucket.key === "2026-08");
-    const july = months.find((bucket) => bucket.key === "2026-07");
+    const monthOf = (key: string) => months.find((bucket) => bucket.key === key);
     for (const session of crossing) {
-      expect(august?.rows).toContain(session);
-      expect(july?.rows).not.toContain(session);
-      expect(utcDate(session).slice(0, 7)).toBe("2026-07");
+      const local = localDate(session).slice(0, 7);
+      const utc = utcDate(session).slice(0, 7);
+      expect(monthOf(local)?.rows).toContain(session);
+      // The two disagree, and the Organization's month is the one that holds the row.
+      expect(utc).not.toBe(local);
+      expect(monthOf(utc)?.rows ?? []).not.toContain(session);
     }
   });
 
-  it("rejects day grain over the 150-day window (A3, R-M11)", () => {
+  it("rejects day grain over the 167-day window (A3, R-M11)", () => {
     const result = planPeriods({
       timezone: organization.timezone,
       grain: "day",

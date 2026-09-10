@@ -8,13 +8,15 @@
 
 import { SEAT_FEE_MONTHLY_USD } from "./catalog.mts";
 import { check, near, percent } from "./check.mts";
+import { weeklySpendTarget, weeklySpendTolerance } from "./curve.mts";
 import { humanMembers } from "./people.mts";
 import { tierTotals } from "./pricing.mts";
 import { median, quantile, sum } from "./rng.mts";
+import { weekOfRow } from "./rows.mts";
+import { WEEK_COUNT } from "./schedule.mts";
 import {
   FRONTIER_SHARE_BY_MONTH,
-  MEDIAN_SESSION_COST_RANGE,
-  SEAT_SHARE_RANGE,
+  SEAT_SHARE_CEILING,
   TIER_TOKEN_SHARE,
 } from "./targets.mts";
 import type { AgentSession, ModelTier } from "./types.mts";
@@ -75,28 +77,62 @@ export const trendLines = (roots: readonly AgentSession[]): string[] => {
   return lines;
 };
 
-// R-D4 — seat cost is ~46% of Total spend (it was 48.2% before ticket 48's fan-out added real
-// session spend), which is the sharpest finding in the product and the reason the fixture is
-// deliberately low-volume. R-M5: seats attach to `human` Members
-// only, at monthly grain and coarser.
+// R-D4 — **the seat fee is a minor share of Total spend** (rewritten, ticket 66). It used to be
+// the sharpest finding in the product, at ~46% of Total spend against a fixture kept deliberately
+// low-volume so that it would be. At one to nine sessions per human Member per workday it is a
+// minor line and the spec says so, so what is asserted here is a **ceiling** and nothing below
+// it: a fixture that let seats back over a quarter of Total spend would have lost the volume.
+// R-M5: seats attach to `human` Members only, at monthly grain and coarser.
 export const totalSpendLines = (roots: readonly AgentSession[]): string[] => {
   const sessionCost = sum(roots.map((row) => row.cost));
   const seatCost = humanMembers.length * SEAT_FEE_MONTHLY_USD * WINDOW_MONTHS.length;
   const share = seatCost / (seatCost + sessionCost);
   check(
-    share >= SEAT_SHARE_RANGE.min && share <= SEAT_SHARE_RANGE.max,
-    `R-D4: seat cost is ${percent(share)} of Total spend, outside the authored band`,
+    share <= SEAT_SHARE_CEILING,
+    `R-D4: seat cost is ${percent(share)} of Total spend, above the authored ceiling of ${percent(
+      SEAT_SHARE_CEILING,
+    )}`,
   );
+  // The session-cost distribution is **not** asserted here. Ticket 66 deleted the authored
+  // median band with the low-volume fixture that produced it; ticket 68 sets the token and cost
+  // distribution, and until it does, printing the two percentiles is the honest amount to say.
   const costs = roots.map((row) => row.cost);
-  const middle = median(costs);
-  check(
-    middle >= MEDIAN_SESSION_COST_RANGE.min && middle <= MEDIAN_SESSION_COST_RANGE.max,
-    `median session cost ${middle} is outside the authored band`,
-  );
   return [
     `R-D4 session Cost $${sessionCost.toFixed(2)} · seat cost $${seatCost.toFixed(2)} · seats are ${percent(
       share,
     )} of Total spend`,
-    `session cost median $${middle.toFixed(2)} · p95 $${quantile(costs, 0.95).toFixed(2)}`,
+    `session cost median $${median(costs).toFixed(2)} · p95 $${quantile(costs, 0.95).toFixed(2)}`,
+  ];
+};
+
+// R-D4 — weekly session spend follows `WEEKLY_SPEND_SHAPE` inside its band (ticket 66).
+//
+// Asserted here rather than inside `curve.mts` for the reason every check in this directory is
+// re-asserted over the finished rows: the repair is a *proposal*, and a repair that silently did
+// nothing — or that ran against a different population than the product reads — would still leave
+// this failing. The population is roots carrying their children (R-M19), which is the population
+// `/demo/spend`'s weekly buckets actually sum.
+export const weeklySpendLines = (roots: readonly AgentSession[]): string[] => {
+  const spend = new Array<number>(WEEK_COUNT).fill(0);
+  for (const row of roots) spend[weekOfRow(row)] += row.cost;
+  let worst = { week: 0, gap: 0 };
+  for (let week = 0; week < WEEK_COUNT; week += 1) {
+    const target = weeklySpendTarget(week);
+    const tolerance = weeklySpendTolerance(week);
+    const gap = Math.abs(spend[week] - target) / target;
+    check(
+      gap <= tolerance,
+      `R-D4: week ${week} spent $${spend[week].toFixed(0)} against a curve of $${target.toFixed(
+        0,
+      )} — ${percent(gap)} off, outside its ${percent(tolerance)} band`,
+    );
+    if (gap > worst.gap) worst = { week, gap };
+  }
+  return [
+    `R-D4 weekly session spend $${Math.min(...spend).toFixed(0)}–$${Math.max(...spend).toFixed(
+      0,
+    )} across ${WEEK_COUNT} weeks · worst departure from the curve ${percent(
+      worst.gap,
+    )} in week ${worst.week}`,
   ];
 };

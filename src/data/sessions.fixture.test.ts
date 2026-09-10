@@ -38,10 +38,10 @@ const totalCost = (rows: readonly AgentSession[]): number =>
   rows.reduce((running, row) => running + row.cost, 0);
 
 describe("T-U24 — the committed fixture fans out, and the fold loses nothing (R-D21)", () => {
-  it("holds 292 child sessions under 148 of its 742 visible roots", () => {
-    expect(sessions).toHaveLength(742);
-    expect(storedChildren).toHaveLength(292);
-    expect(childSessions.size).toBe(148);
+  it("holds 2,960 child sessions under 1,552 of its 7,761 visible roots", () => {
+    expect(sessions).toHaveLength(7761);
+    expect(storedChildren).toHaveLength(2960);
+    expect(childSessions.size).toBe(1552);
     // R-D21's share, over the population `children.mts` draws from.
     expect(childSessions.size / sessions.length).toBeCloseTo(0.2, 2);
   });
@@ -95,11 +95,11 @@ describe("T-U24 — the fan-out moves no Task-grain rate (R-M19, the whole ticke
 
   it("would read a much higher Rework rate if a child counted as an attempt", () => {
     // The counterfactual, computed rather than argued in prose: relabel every child as a root
-    // and Rework goes from 18% to 31% on the same work. That thirteen-point error is what the
+    // and Rework goes from 18% to 30% on the same work. That twelve-point error is what the
     // parent link is worth, and it grows with how much a team fans out.
     const asAttempts = taskFacts(visibleRows.map((row) => ({ ...row, parent_session_id: null })));
 
-    expect(reworkRate(asAttempts).rate).toBeCloseTo(0.31, 2);
+    expect(reworkRate(asAttempts).rate).toBeCloseTo(0.3, 2);
     expect(reworkRate(asAttempts).rate ?? 0).toBeGreaterThan(
       (reworkRate(overRoots).rate ?? 0) + 0.12,
     );
@@ -109,8 +109,8 @@ describe("T-U24 — the fan-out moves no Task-grain rate (R-M19, the whole ticke
 describe("T-U25 — Agents per session over the committed fixture", () => {
   it("reads a median of one agent and a p95 of four", () => {
     expect(agentsPerSession(sessions, childSessions)).toEqual({
-      sessions: 742,
-      agents: 1034,
+      sessions: 7761,
+      agents: 10721,
       median: 1,
       p95: 4,
     });

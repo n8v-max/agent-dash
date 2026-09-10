@@ -6,11 +6,16 @@
 // against an empty fixture is not a test.
 //
 // The floor is a rule about *narrow* views, so it needs a narrow view to act on. The committed
-// roster supplies one: Noelia Gallego runs 1 · 0 · 0 · 1 · 1 · 0 sessions across the six months
-// of the window. Two of her month-over-month comparisons have nothing to compare against and
-// are suppressed; the two that do are shown, one of them a fall of −100%. Elena Sáez goes from
-// one session in May to five in June — **+400% off a base of one, shown**, which is the case a
-// magnitude threshold would delete and the reason R-M12 refuses to have one.
+// roster supplies one: Noelia Gallego runs 0 · 1 · 0 · 0 · 1 · 1 sessions across the six months
+// of the window (R-D10). Three of her month-over-month comparisons have nothing to compare
+// against and are suppressed; **May → June is shown, a fall of −100% off a base of one**, which
+// is the case a magnitude threshold would delete and the reason R-M12 refuses to have one.
+// Elena Sáez, who runs 31 · 34 · 44 · 54 · 51 · 66, is the other side of it: an ordinary busy
+// Member whose every comparable pair is shown.
+//
+// **Ticket 66 rewrote the figures here and not the claims.** At one to nine sessions per human
+// Member per workday the organisation-wide months are in the thousands and nobody but R-D10's
+// seat holder has an empty one — which is exactly why R-D10 is the Member this file reads.
 //
 // It reads committed output and never runs the generator (P3, R-T20). It follows the precedent
 // `periods.fixture.test.ts` set for the same reason.
@@ -53,7 +58,7 @@ const ORG = monthlyCounts(sessions);
 const GALLEGO = forMember("mem_ngallego");
 const SAEZ = forMember("mem_esaez");
 
-/** April … September. The window is 12 Apr – 8 Sep, so the ends are partial (R-D2, A26). */
+/** April … September. The window is 12 Apr – 25 Sep, so the ends are partial (R-D2, A26). */
 const monthAt = (figures: readonly PeriodFigure[], key: string): PeriodFigure => {
   const figure = figures.find((held) => held.key === key);
   if (!figure) throw new Error(`no ${key} bucket`);
@@ -75,16 +80,33 @@ describe("the committed fixture is not empty of what the floor needs (P6)", () =
       "2026-08",
       "2026-09",
     ]);
-    expect(ORG.map((figure) => figure.value)).toEqual([31, 100, 111, 189, 247, 64]);
+    expect(ORG.map((figure) => figure.value)).toEqual([630, 1013, 1198, 1654, 1706, 1560]);
     expect(ORG.map((figure) => figure.partial)).toEqual([true, false, false, false, false, true]);
   });
 
   it("carries a Member whose months hold nothing, which is what the floor acts on", () => {
-    expect(GALLEGO.map((figure) => figure.value)).toEqual([1, 0, 0, 1, 1, 0]);
+    expect(GALLEGO.map((figure) => figure.value)).toEqual([0, 1, 0, 0, 1, 1]);
   });
 
-  it("carries a Member who goes from one session to five, which is what it must not act on", () => {
-    expect(SAEZ.map((figure) => figure.value)).toEqual([1, 1, 5, 4, 5, 2]);
+  it("carries a Member whose every month is busy, which is what it must not act on", () => {
+    expect(SAEZ.map((figure) => figure.value)).toEqual([31, 34, 44, 54, 51, 66]);
+    // Her four comparable pairs — the two the window clips aside — are every one of them shown.
+    const shown = SAEZ.slice(1).map((current, index) =>
+      changeBetween({ current, prior: SAEZ[index] }).shown,
+    );
+    expect(shown).toEqual([false, true, true, true, false]);
+  });
+
+  it("leaves exactly one Member with an empty month, and it is R-D10's seat holder", () => {
+    // The premise of this whole file, asserted rather than assumed. At ticket 66's volume every
+    // other human runs on every workday, so the *only* narrow view the committed data offers is
+    // the seat held against near-zero usage — and if a later ticket ever gave Noelia Gallego a
+    // busier calendar, R-M12's floor would lose its one real case here without a word.
+    const withAnEmptyMonth = members
+      .filter((member) => forMember(member.id).some((figure) => figure.value === 0))
+      .map((member) => member.id);
+
+    expect(withAnEmptyMonth).toEqual(["mem_ngallego"]);
   });
 
   it("counts the same sessions the dataset ships, and no hidden one", () => {
@@ -94,35 +116,30 @@ describe("the committed fixture is not empty of what the floor needs (P6)", () =
 });
 
 describe("T-U3 — the floor is a count of one, on committed rows (R-M12, A8)", () => {
-  it("suppresses June → July, where the prior month holds nothing and the current holds one", () => {
-    const change = changeInto(GALLEGO, "2026-07");
+  it("suppresses July → August, where the prior month holds nothing and the current holds one", () => {
+    const change = changeInto(GALLEGO, "2026-08");
 
     expect(change).toMatchObject({ shown: false, reason: "prior-period-holds-nothing" });
-    expect(monthAt(GALLEGO, "2026-06").value).toBe(0);
-    expect(monthAt(GALLEGO, "2026-07").value).toBe(1);
+    expect(monthAt(GALLEGO, "2026-07").value).toBe(0);
+    expect(monthAt(GALLEGO, "2026-08").value).toBe(1);
   });
 
-  it("suppresses May → June, where neither month holds anything", () => {
-    expect(changeInto(GALLEGO, "2026-06")).toMatchObject({
+  it("suppresses June → July, where neither month holds anything", () => {
+    expect(changeInto(GALLEGO, "2026-07")).toMatchObject({
       shown: false,
       reason: "prior-period-holds-nothing",
     });
   });
 
-  it("shows July → August off a base of one, flat, rather than suppressing a small figure", () => {
-    expect(changeInto(GALLEGO, "2026-08")).toMatchObject({
+  it("shows May → June at −100% off a base of one — the case a magnitude floor would delete", () => {
+    // One session against none. The *absolute* movement is a single session, which is what any
+    // magnitude threshold would round away; the base is one, which is the only thing R-M12
+    // measures. Both months are whole, so nothing else is withholding it.
+    expect(changeInto(GALLEGO, "2026-06")).toMatchObject({
       shown: true,
-      ratio: 0,
-      direction: "flat",
-    });
-  });
-
-  it("shows May → June at +400% off a base of one — the case a magnitude floor would delete", () => {
-    expect(changeInto(SAEZ, "2026-06")).toMatchObject({
-      shown: true,
-      absolute: 4,
-      ratio: 4,
-      direction: "up",
+      absolute: -1,
+      ratio: -1,
+      direction: "down",
     });
   });
 
@@ -164,7 +181,7 @@ describe("T-U3 — the floor is a count of one, on committed rows (R-M12, A8)", 
   it("shows the org-wide month-over-month figure wherever both months are whole", () => {
     const june = changeInto(ORG, "2026-06");
 
-    expect(june).toMatchObject({ shown: true, absolute: 11, direction: "up" });
+    expect(june).toMatchObject({ shown: true, absolute: 185, direction: "up" });
     // Every pair except the two the window clips: the one whose baseline is April, and the one
     // whose current month is September (C13).
     const shownInto = ORG.slice(1).map((figure, index) => ({
@@ -211,16 +228,16 @@ describe("R-M13 / C13 — an unfinished month on either side withholds the figur
   });
 
   it("distinguishes the three suppressions by reason, not merely by outcome", () => {
-    // Gallego's April is partial and holds one session, so April → May is withheld for the
-    // *baseline*. Her May holds nothing, so May → June is withheld for the *zero*. August →
-    // September is withheld for the month *on screen*. All three are absent figures; they are
-    // different facts about the page and the copy says which.
-    expect(changeInto(GALLEGO, "2026-05")).toMatchObject({
+    // Sáez's April is partial, so April → May is withheld for the *baseline*. Gallego's June and
+    // July both hold nothing, so June → July is withheld for the *zero*. August → September is
+    // withheld for the month *on screen*. All three are absent figures; they are different facts
+    // about the page and the copy says which.
+    expect(changeInto(SAEZ, "2026-05")).toMatchObject({
       shown: false,
       reason: "prior-period-incomplete",
       incomplete: true,
     });
-    expect(changeInto(GALLEGO, "2026-06")).toMatchObject({
+    expect(changeInto(GALLEGO, "2026-07")).toMatchObject({
       shown: false,
       reason: "prior-period-holds-nothing",
       incomplete: false,

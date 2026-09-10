@@ -36,7 +36,7 @@ checkable against something other than itself.
 | Refused claim | `e2e/smoke.spec.ts` — the landing is asserted against `/faster\|productiv\|velocity\|10x/i`. `spec.md` § 1 carries the argument. |
 | Model mix | ADR-0007. The 200× is a property of this project's roster and is stated as one. |
 | Rework | `CONTEXT.md` § Rework, and R-M1. Measurable only because Task and AgentSession are different things. |
-| Seats | `CONTEXT.md` § Seat cost, and R-D4. Seat cost is **46.2%** of Total spend on the committed fixture, and a consumption-only model cannot see it. The fixture's volume is deliberately low so that it does not get buried. |
+| Seats | `CONTEXT.md` § Seat cost, and R-D4. Seat cost is **7.1%** of Total spend on the committed fixture (it was 46.2% until ticket 66 gave the fixture the volume R-D4 asks for), and a consumption-only model cannot see it at all — a seat is not a session. One Member holds a $234 seat against $5.47 of sessions, which is where the line is sharpest. |
 | Default | [ADR-0003](adr/0003-individual-visibility-is-open-by-default.md), and the two stricter positions it supersedes. |
 | Not a performance review tool | `/demo/people` sorts by Completed Jobs descending — an ordering by output rather than by spend, chosen and recorded rather than defaulted into (R-N15). No percentile is computed and no ordering is presented as a verdict. |
 

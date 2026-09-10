@@ -154,6 +154,27 @@ type RateCards = {
     readonly derivation: TokenRate;
     readonly rates: readonly TokenRate[];
   };
+  /** R-M5's seat fee, in whole dollars per `human` Member per month. */
+  readonly seat: { readonly usd: number };
+};
+
+/**
+ * **The month's seat charge, as `/demo/projection` adds it back** (R-M5, R-D2). A seat is
+ * charged by whole months and is never extrapolated, so the projected *total* on that page is a
+ * projected session cost plus this figure exactly — and a literal search has to know the sum as
+ * well as the part. The population is every seat-holding `human`, which is what the page charges
+ * whichever account is reading it: a seat is the Organization's cost, not the viewer's.
+ */
+export const seatCharge = (): { readonly fee: number; readonly seats: number } => {
+  const fee = readFixture<RateCards>("rate_cards.json").seat.usd;
+  const directory = readFixture<{
+    readonly members: readonly { readonly kind: string; readonly seat_active: boolean }[];
+  }>("members.json");
+  return {
+    fee,
+    seats: directory.members.filter((member) => member.kind === "human" && member.seat_active)
+      .length,
+  };
 };
 
 /** The four priced token classes. Named, so a `model_id` string cannot arrive as a "figure". */

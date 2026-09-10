@@ -8,12 +8,17 @@ import type { MachineSpec, ModelTier, WorkTypeKey } from "./types.mts";
 // committed output is diffed in CI (R-T21 / T-F9).
 export const SEED = 20260412;
 
-// R-D2 — 12 Apr – 8 Sep 2026 inclusive, 150 days. Europe/Madrid is UTC+2 across all of it:
-// EU DST moved on 29 Mar 2026 and moves again on 25 Oct 2026, so no transition falls inside
-// the window. `schedule.mts` verifies that against Intl rather than trusting this comment.
+// R-D2 — 12 Apr – 25 Sep 2026 inclusive, 167 days (ticket 66). Europe/Madrid is UTC+2 across
+// all of it: EU DST moved on 29 Mar 2026 and moves again on 25 Oct 2026, so no transition falls
+// inside the window. `schedule.mts` verifies that against Intl rather than trusting this comment.
+//
+// **The window now runs past today**, which is the point of it: ticket 62 put `datasetAsOf(now)`
+// at the query facade, so what is on disk is the declared window and what any surface shows is
+// the part of it that has happened. 12 Apr 2026 is a Sunday, so every full week here is Sunday
+// through Saturday with five workdays in it, and the last bucket (20–25 Sep) is six days long.
 export const WINDOW_START_DAY = "2026-04-12";
-export const WINDOW_END_DAY = "2026-09-08";
-export const WINDOW_DAYS = 150;
+export const WINDOW_END_DAY = "2026-09-25";
+export const WINDOW_DAYS = 167;
 export const MADRID_OFFSET_MINUTES = 120;
 export const MADRID_OFFSET_LABEL = "+02:00";
 
@@ -63,18 +68,46 @@ export const SHARE_TRANSFER_LIMIT = 0.01;
 // existence is what makes "a missing file is a fault" a testable claim (T-F1).
 export const EMPTY_PAIRS: readonly (readonly [string, WorkTypeKey])[] = [["mobile-app", "deploy"]];
 
-// R-D4 — the adoption ramp, per Member per week: median 0 sessions in April rising to 2 in
-// August, max 3 rising to 8. Zero-inflation is what holds the April median at 0 while the
-// mean is already above it.
-export const RAMP = {
+// R-D4 — volume, **as a daily model per human Member** (ticket 66, replacing the weekly ramp).
+//
+// On a workday a Member runs `1 + Poisson(λ(t)·activity)` root sessions, capped at `cap`; on a
+// weekend day `Poisson(λ(t)·activity·weekendRate)`, which is usually none. λ is a logistic in
+// window fraction, so the curve is flat at both ends and steep in the middle: ~1.5 in April,
+// ~3.5 by the start of August, ~4.0 at the close. That is the whole of the adoption story and
+// the whole of the spend story — see `WEEKLY_SPEND_SHAPE`, which is the same logistic in dollars.
+//
+// `1 +` is deliberate and it is what the requirement says: a Member who is working at all runs
+// **at least one** session on a workday. The floor is what makes "one to nine" a range rather
+// than a ceiling over a mostly-empty calendar, and R-D10's near-idle seat is carved out of the
+// result afterwards rather than modelled as a low λ, so that seat stays a person and not a
+// tail of the distribution.
+export const DAILY_VOLUME = {
+  lambdaStart: 1.5,
+  lambdaEnd: 4,
+  /** Where the logistic crosses its own midpoint, as a fraction of the window. */
+  midpoint: 0.5,
+  /** In units of window fractions: 9 puts the flat ends inside April and inside August. */
+  steepness: 9,
+  weekendRate: 0.15,
+  cap: 9,
+  /** Spread between Members. Normalised to mean 1 over humans, so λ alone fixes the org rate. */
+  memberActivitySigma: 0.5,
+};
+
+// The two service accounts **keep the weekly schedule they had before ticket 66**, scaled ×3.
+// They run on a pipeline's clock rather than on a person's day: a nightly runner has no
+// workday, so `1 + Poisson` per weekday would be a claim about it that is simply false. The
+// ×3 is applied to the weekly mean and to the cap together, so the shape is the one they had
+// and only the height moves with the rest of the fixture.
+export const SERVICE_RAMP = {
   meanStart: 0.7,
   meanEnd: 2.62,
   zeroInflationStart: 0.62,
   zeroInflationEnd: 0.08,
   capStart: 3,
   capEnd: 8,
-  memberActivitySigma: 0.5,
 };
+export const SERVICE_ACCOUNT_SCALE = 3;
 
 // R-D8 — Rework 18% of Tasks, Decomposition 12%. Independent labels, so the overlap is the
 // product; a Task carrying both runs [failed, accepted, accepted].
@@ -85,11 +118,15 @@ export const DECOMPOSITION_RATE = 0.12;
 // children, weighted toward `implementation` and `headless`. The share is a share and not a
 // probability, so `children.mts` samples without replacement and hits it exactly.
 //
-// **These numbers are the ones the seat-cost finding survives.** A child's cost is real session
-// spend, and R-D4 puts seat cost at ~48% of Total spend — so the fan-out is sized to add a small
-// single-digit percentage to session spend rather than whatever a plausible-looking sub-agent
-// would cost. The scale band does both jobs at once: it is the fraction of its root's machine
-// allocation a child holds *and* the fraction of its root's tokens it draws.
+// **The scale band is sized for realism, not for the seat share** (rewritten, ticket 66). Until
+// this ticket these numbers were argued from R-D4's ~48% seat share: a fan-out that cost what a
+// root costs would have diluted that finding out of its authored band, so the child was made
+// small to protect it. R-D4 no longer says that — the seat fee is now a *minor* share of Total
+// spend and `SEAT_SHARE_CEILING` is a ceiling, which no plausible fan-out can breach from below.
+// What is left is the honest reason, and it was always the better one: a sub-agent is handed one
+// slice of its root's work, so it is small in both dimensions at once. The scale band is the
+// fraction of its root's machine allocation a child holds *and* the fraction of its root's
+// tokens it draws.
 export const CHILD_ROOT_SHARE = 0.2;
 export const CHILD_COUNT_WEIGHTS = [
   [1, 0.45],
@@ -112,7 +149,10 @@ export const HIDDEN_SHARE = 0.02;
 export const CPU_HEAVY_COUNT = 20;
 export const CPU_HEAVY_REPOSITORIES = ["terraform-infra", "api-gateway"] as const;
 
-// R-D10 — one human Member holds a seat against almost no usage.
+// R-D10 — one human Member holds a seat against almost no usage. **Held at 3 through ticket
+// 66**, which permitted it to rise to 12: at ~450 attempts for a busy peer, three is 0.7% of
+// one, so the finding is sharper at 3 than at 12 and R-D10's own wording ("fewer than 5
+// sessions") stays true of the data without a spec amendment nobody asked for.
 export const LOW_USAGE_MEMBER_ID = "mem_ngallego";
 export const LOW_USAGE_SESSIONS = 3;
 
@@ -189,9 +229,48 @@ export const MACHINE_SPEC_BIAS: Record<string, Partial<Record<MachineSpec, numbe
   "mobile-app": { storage: 1.6 },
 };
 
-// R-D4 — seat cost is roughly half of Total spend: 48.2% before ticket 48's fan-out and 46.2%
-// with it, because a child session's cost is real session spend. That is the sharpest finding in
-// the product, so the generator asserts the realised share rather than hoping for it — and the
-// band is what sizes CHILD_SCALE above.
-export const SEAT_SHARE_RANGE = { min: 0.44, max: 0.52 };
-export const MEDIAN_SESSION_COST_RANGE = { min: 2.4, max: 4.2 };
+// R-D4 — **a ceiling, not a band** (ticket 66). Until this ticket the seat fee was the sharpest
+// finding in the product and the fixture was kept deliberately low-volume to protect it: seat
+// cost sat at ~46% of Total spend inside an authored 44–52% band. At one to nine sessions per
+// human Member per workday it is a minor line, and the spec now says so instead of pretending
+// otherwise. What survives is the *direction*: a fixture that let seats back over a quarter of
+// Total spend would have lost the volume this ticket exists to add, so the generator asserts a
+// ceiling and nothing below it.
+export const SEAT_SHARE_CEILING = 0.25;
+
+// R-D4 — **weekly session spend as a smooth function of time.** A logistic in dollars per full
+// week, sharing `DAILY_VOLUME`'s midpoint and steepness because it *is* `DAILY_VOLUME`, priced:
+// spend per attempt is flat and the ramp is the volume ramp, so there is no separate price ramp
+// anywhere in this directory. `startUsd` and `plateauUsd` are per **full** week; `curve.mts`
+// spreads them over a week's own days, which is what keeps the six-day closing bucket honest.
+//
+// **The level is the fixture's own and not an arbitrary one.** Machine allocation is priced from
+// the compute card and cannot be moved by a token draw, so it is a floor under every week:
+// ~$1.95 of machine time per attempt, which is ~$460 in an April week before a single token is
+// counted. The two figures below sit above that floor with room for a real token bill, and their
+// *ratio* — 2.03 — is λ's own, which is what "more modest initially by construction of the ramp"
+// means arithmetically. See the ticket 66 comments for the derivation.
+export const WEEKLY_SPEND_SHAPE = {
+  startUsd: 1_900,
+  plateauUsd: 2_650,
+  midpoint: DAILY_VOLUME.midpoint,
+  steepness: DAILY_VOLUME.steepness,
+};
+
+// The tolerance around that curve. Wide while adoption is noisy and the weekly population is
+// small, tight from 1 July, when "fluctuates within ±20% of its trend" is the claim the
+// Projection page's method rests on. A week is early or late by the month of its **first** day.
+export const WEEKLY_SPEND_BAND = {
+  early: 0.4,
+  late: 0.2,
+  tightensOn: "2026-07-01",
+  /**
+   * The fraction of a week's own band at which `curve.mts` pulls it back onto the trend. Below
+   * the band on purpose: the repair works on unrounded money over every row, and the assertion
+   * works on whole-cent costs over roots carrying their children, so a repair aimed at the band
+   * edge could land a cent outside the thing it was trying to satisfy. Three quarters also
+   * leaves the fluctuation the requirement asks for — a late week may still sit 15% off its
+   * trend — while making the repair something the committed data actually exercises.
+   */
+  repairAt: 0.75,
+};

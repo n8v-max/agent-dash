@@ -22,6 +22,7 @@ import { roleFor,
 import type { ChartViewModel } from "@/domain/viewmodel";
 import { datasetAsOf } from "./as-of";
 import { controlsWith, defaultControls, type ControlSet, type PageKey } from "./params";
+import { bucketRows, planPeriods } from "@/domain/periods";
 import {
   historyPage,
   peoplePage,
@@ -815,10 +816,20 @@ describe("C14 — per-capita on `/demo/spend` divides the money panels, and only
 
 // --- R-M18 — the acceptance case, over the committed fixture (ticket 40) --------------------
 //
-// P6: a test that would pass against an empty fixture is not a test. The restricted account's
-// Cost per completed Job at week grain is the case ticket 40 names, and it is real data — the
-// account's own sessions are sparse enough that six weeks of the window hold spend, or nothing
-// at all, and no Completed Job to divide by. Every one of them drew `$0` before this rule.
+// P6: a test that would pass against an empty fixture is not a test. Cost per completed Job at
+// week grain is the case ticket 40 names, and it is real data.
+//
+// **Ticket 66 moved which weeks supply it, and the weeks are now derived rather than
+// transcribed.** Ticket 40 named six weeks in which the restricted account spent money and
+// completed nothing; at one to nine sessions per human Member per workday that account finishes
+// work in every week it worked, so those six weeks are gone. What supplies the case instead is
+// sharper and is the pair of tickets 62 and 66 meeting: the **declared** window runs to 25
+// September and `now` is the 8th, so the window offers buckets the dataset holds no row in at
+// all. Nothing was measured there, and the chart says nothing rather than `$0`.
+//
+// The empty weeks are read off the *dataset*, through the same planner the page uses, and the
+// chart is then checked against them — so a build that started coercing absences to zero fails
+// here, and so does a fixture that quietly stopped supplying an empty bucket.
 
 describe("R-M18 — a week with no Completed Job draws nothing, not zero", () => {
   const weekly = spendPage(RESTRICTED, paramsFor("spend", { grain: "week" }));
@@ -829,14 +840,32 @@ describe("R-M18 — a week with no Completed Job draws nothing, not zero", () =>
     chart.buckets.map((bucket, at) => [bucket.key, chart.mirror.rows[at]?.[1]]),
   );
 
-  /** The weeks ticket 40 names as the acceptance case. */
-  const EMPTY_WEEKS = ["2026-W15", "2026-W16", "2026-W17", "2026-W20", "2026-W21", "2026-W23"];
+  /** The weeks of the selected range the dataset holds no session in. */
+  const EMPTY_WEEKS = ((): readonly string[] => {
+    const plan = planPeriods({
+      timezone: data.organization.timezone,
+      grain: "week",
+      range: RANGE,
+      now: NOW,
+    });
+    if (!plan.ok) throw new Error(`plan unexpectedly rejected: ${plan.reason}`);
+    return bucketRows(plan.plan, data.sessions)
+      .filter((bucket) => bucket.rows.length === 0)
+      .map((bucket) => bucket.key);
+  })();
 
-  it("holds no reading in exactly the weeks the ticket names", () => {
+  it("holds no reading in exactly the weeks the dataset holds no row in", () => {
+    expect(EMPTY_WEEKS.length).toBeGreaterThanOrEqual(2);
     for (const week of EMPTY_WEEKS) {
       expect(readings.has(week)).toBe(true);
       expect(readings.get(week)).toBeNull();
     }
+    // …and only there: every other bucket of this chart carries a figure, so the absence is a
+    // measurement about those weeks rather than a chart that has stopped drawing.
+    const drawn = chart.buckets
+      .map((bucket) => bucket.key)
+      .filter((key) => !EMPTY_WEEKS.includes(key));
+    for (const week of drawn) expect(typeof readings.get(week)).toBe("number");
   });
 
   it("still holds a reading in the weeks that finished something", () => {

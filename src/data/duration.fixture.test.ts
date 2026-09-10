@@ -41,17 +41,17 @@ describe("T-U19 — median and p95 on the committed, right-skewed distribution (
   const summary = sessionDurationSummary(sessions);
 
   it("reports the fixture's median and p95", () => {
-    expect(summary).toEqual({ count: 742, median: 8512, p95: 21_293 });
+    expect(summary).toEqual({ count: 7761, median: 8557, p95: 18_951 });
   });
 
-  it("is right-skewed on real rows: the mean sits above 62% of the sessions", () => {
+  it("is right-skewed on real rows: the mean sits above 61% of the sessions", () => {
     const durations = sessions.map(sessionDurationSeconds);
     const mean = durations.reduce((running, value) => running + value, 0) / durations.length;
-    expect(mean).toBeCloseTo(10_020.36, 2);
+    expect(mean).toBeCloseTo(9_707.81, 2);
     expect(mean).toBeGreaterThan(summary.median ?? 0);
-    expect(durations.filter((value) => value < mean)).toHaveLength(460);
+    expect(durations.filter((value) => value < mean)).toHaveLength(4703);
     // The figure the product declines to report, computed here only to show the gap: it is
-    // 18% above the median, and no session ran for it.
+    // 13% above the median, and no session ran for it.
     expect(summary.median).not.toBe(mean);
   });
 
@@ -97,7 +97,7 @@ describe("T-U20 — the three spans sum to machine allocation on every row (R-T1
   });
 
   it("makes every headless session 100% AFK, with zero interactive and zero idle", () => {
-    expect(headless).toHaveLength(263);
+    expect(headless).toHaveLength(2399);
     for (const session of headless) {
       expect(spansOf(session)).toEqual({
         interactive: 0,
@@ -111,28 +111,28 @@ describe("T-U20 — the three spans sum to machine allocation on every row (R-T1
 describe("T-U20 — the composition is interactive sessions only (R-N14, A27)", () => {
   const composition = spanComposition(sessions);
 
-  it("totals the 479 interactive sessions and excludes the 263 headless ones", () => {
-    expect(composition.sessions).toBe(479);
-    expect(composition.excluded).toBe(263);
+  it("totals the 5,362 interactive sessions and excludes the 2,399 headless ones", () => {
+    expect(composition.sessions).toBe(5362);
+    expect(composition.excluded).toBe(2399);
     expect(composition.sessions + composition.excluded).toBe(sessions.length);
     expect(composition.total).toBe(totalOf(interactive));
     // The totals carry the fan-out: a root's machine time is its own plus its children's
-    // (R-M19), so these are 4,743,050 seconds of machine allocation across 479 attempts.
+    // (R-M19), so these are 53,036,600 seconds of machine allocation across 5,362 attempts.
     expect(composition.slices).toEqual([
-      { key: "interactive", total: 1_782_366, share: 1_782_366 / 4_743_050 },
-      { key: "idle", total: 1_323_413, share: 1_323_413 / 4_743_050 },
-      { key: "afk", total: 1_637_271, share: 1_637_271 / 4_743_050 },
+      { key: "interactive", total: 19_647_694, share: 19_647_694 / 53_036_600 },
+      { key: "idle", total: 14_689_053, share: 14_689_053 / 53_036_600 },
+      { key: "afk", total: 18_699_853, share: 18_699_853 / 53_036_600 },
     ]);
   });
 
-  it("reports an AFK share of 35%, where both modes together would report 62%", () => {
+  it("reports an AFK share of 35%, where both modes together would report 58%", () => {
     // The reading R-N14 forbids, computed here so the difference is a number rather than an
-    // argument: including the headless population nearly doubles the AFK share, and the
+    // argument: including the headless population lifts the AFK share by two thirds, and the
     // composition stops being about human presence at all.
     const afkAcrossBothModes =
       sessions.reduce((running, session) => running + session.afk_duration_s, 0) / totalOf(sessions);
-    expect(afkAcrossBothModes).toBeCloseTo(0.618, 3);
-    expect(composition.slices[2]?.share).toBeCloseTo(0.345, 3);
+    expect(afkAcrossBothModes).toBeCloseTo(0.58, 3);
+    expect(composition.slices[2]?.share).toBeCloseTo(0.353, 3);
   });
 
   it("stacks legitimately: the slices sum to the population's machine allocation (R-V1)", () => {
@@ -146,8 +146,8 @@ describe("T-U20 — the composition is interactive sessions only (R-N14, A27)", 
   });
 
   it("says so, in words, with the counts it was computed from (A27)", () => {
-    expect(composition.note).toContain("Interactive sessions only: 479 of 742");
-    expect(composition.note).toContain("263 headless sessions are excluded");
+    expect(composition.note).toContain("Interactive sessions only: 5362 of 7761");
+    expect(composition.note).toContain("2399 headless sessions are excluded");
   });
 });
 
@@ -158,22 +158,22 @@ describe("R-D13 — `execution_mode` and `Member.kind` are independent, and stay
     ).length;
 
   it("fills all four cells: an interactive service account and headless humans", () => {
-    expect(cell("service_account", "interactive")).toBe(47);
-    expect(cell("human", "headless")).toBe(185);
-    expect(cell("human", "interactive")).toBe(432);
-    expect(cell("service_account", "headless")).toBe(78);
+    expect(cell("service_account", "interactive")).toBe(87);
+    expect(cell("human", "headless")).toBe(2206);
+    expect(cell("human", "interactive")).toBe(5275);
+    expect(cell("service_account", "headless")).toBe(193);
   });
 
   it("restricts the composition by mode, and by nothing about who ran the session", () => {
-    // Restricting by Member.kind instead would keep the 78 headless service-account sessions
-    // and drop the 47 interactive ones, and the totals would differ. They do differ, which is
+    // Restricting by Member.kind instead would keep the 193 headless service-account sessions
+    // and drop the 87 interactive ones, and the totals would differ. They do differ, which is
     // what proves the filter reads the session's own field.
     const byHumanMembers = spanComposition(
       sessions.filter((session) => kindOf.get(session.member_id) === "human"),
     );
-    expect(byHumanMembers.sessions).toBe(432);
+    expect(byHumanMembers.sessions).toBe(5275);
     expect(byHumanMembers.total).not.toBe(spanComposition(sessions).total);
     // And the mode-restricted population includes the service account's interactive sessions.
-    expect(spanComposition(sessions).sessions).toBe(432 + 47);
+    expect(spanComposition(sessions).sessions).toBe(5275 + 87);
   });
 });

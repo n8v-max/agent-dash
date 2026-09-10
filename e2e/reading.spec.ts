@@ -46,21 +46,31 @@ test.describe("T-E15 — the as-of stamp stands on every surface (R-N3.1, A39)",
     expect(new Set(seen).size).toBe(1);
   });
 
-  test("matches the History page's top row, by instant and by session", async ({ page }) => {
+  test("names a session the History page is showing, and prints that row's instant", async ({
+    page,
+  }) => {
+    // **The stamp is the session that *ended* last, printed at its **start** (ticket 45), and
+    // `/demo/history` is newest first by **start** (R-N20).** Those are the same row only when
+    // the last session to finish is also the last to begin, which the low-volume fixture
+    // happened to make true and ticket 66's does not: a four-hour run that opened at 10:03
+    // finished after a half-hour one that opened at 12:51.
+    //
+    // What R-N3.1 actually claims is that the stamp is *checkable* — that a reader who goes to
+    // the page the freshness claim is about finds the row it was read off, carrying the same
+    // instant. That is asserted here, by id, and the ordering the stamp does have to satisfy is
+    // asserted beside it.
     await page.goto(`/${SLUG}/history`);
 
     const label = ((await stamp(page).textContent()) ?? "").replace("Data to ", "");
-    const top = page.locator("tbody tr[data-session]").first();
-
-    // The instant. `/demo/history` is newest first by default (R-N20) and its Started column is
-    // the Organization's timezone (R-N19), so the stamp and the cell are the same string or the
-    // stamp is describing a dataset the table is not showing.
-    await expect(top.getByRole("cell").nth(1)).toHaveText(label);
-    // And the row: the stamp carries the id of the session it was read off, so this is an
-    // identity rather than two formatters agreeing by luck.
     const named = await stamp(page).getAttribute("data-session");
     expect(named).toMatch(/^ses_/);
-    await expect(top).toHaveAttribute("data-session", named ?? "");
+
+    const row = page.locator(`tbody tr[data-session="${named}"]`);
+    await expect(row).toHaveCount(1);
+    await expect(row.getByRole("cell").nth(1)).toHaveText(label);
+    // And it cannot have started after the newest row on a page ordered by start.
+    const top = page.locator("tbody tr[data-session]").first();
+    expect(label <= (((await top.getByRole("cell").nth(1).textContent()) ?? "").trim())).toBe(true);
   });
 
   test("does not move when a filter narrows the page", async ({ page }) => {
