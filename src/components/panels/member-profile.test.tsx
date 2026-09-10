@@ -45,12 +45,13 @@ describe("R-N16 — the profile surface", () => {
   it("renders the four headline tiles, each figure in its own unit", () => {
     renderProfile();
 
-    // usd and usd_per_task carry two decimals; tokens are grouped whole numbers with no
-    // compact notation, which would put a bare decimal in the payload T-E4 searches.
+    // usd and usd_per_task carry two decimals; a count is grouped and decimal-free; tokens read
+    // in K, M and B (ticket 69), which is a decimal a unit letter always sits against and so is
+    // never a candidate cost literal in the payload T-E4 searches.
     expect(tiles().getByText("$310.50")).toBeInTheDocument();
     expect(tiles().getByText("42")).toBeInTheDocument();
     expect(tiles().getByText("$7.39")).toBeInTheDocument();
-    expect(tiles().getByText("1,240,000")).toBeInTheDocument();
+    expect(tiles().getByText("1.2M")).toBeInTheDocument();
   });
 
   it("carries R-N7's change on a tile, and R-M12's reason where the figure is suppressed", () => {
@@ -106,6 +107,12 @@ describe("R-N17 — the comparator is paired bars", () => {
     expect(cost.getByText(GROUP_SERIES_LABEL)).toBeInTheDocument();
     expect(cost.getByText("$7.39")).toBeInTheDocument();
     expect(cost.getByText("$9.50")).toBeInTheDocument();
+
+    // And the token pair reads in token units (ticket 69), because a comparator bar reaches the
+    // same formatter through the same `unit` a column does.
+    const volume = within(groups[2]);
+    expect(volume.getByText("1.2M")).toBeInTheDocument();
+    expect(volume.getByText("900K")).toBeInTheDocument();
   });
 
   it("draws each bar as a whole-number percentage of the longer of its pair", () => {

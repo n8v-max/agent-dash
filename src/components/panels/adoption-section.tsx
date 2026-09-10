@@ -15,13 +15,18 @@
 // volumes on `/demo/history` alone; on this page the four classes appear only as the rate card's
 // columns, never as figures.
 //
+// **Both charts draw their measure axis in token units** (ticket 69): `75K`, `1.3M`, `2.1B`, not
+// eight digits along the left edge of a card. That is `TokenChart` rather than `ChartFrame`
+// directly — a `tickFormat` is a function and this is a Server Component, so the function has to
+// be created on the client side of the boundary. See `token-chart.tsx`.
+//
 // **It computes nothing** (R-T6): the shares arrived resolved, and `levels[level]` is a lookup.
 
 import type { ReactNode } from "react";
 import type { AdoptionSection as AdoptionViewModel, DistributionViewModel } from "@/data/queries";
-import { ChartFrame } from "@/components/charts/chart-frame";
 import { Figure, FigureList, count, share } from "./money-figure";
 import { PanelCard } from "./panel-card";
+import { TokenChart } from "./token-chart";
 import type { PanelDimension } from "./spend-panels";
 
 /** How the three roll-up levels read in a sentence (R-M7). Copy, and only copy. */
@@ -100,7 +105,7 @@ export function AdoptionSection(props: {
           </FigureList>
         }
       >
-        <ChartFrame chart={adoption.tokensOverTime} shape="area" dimension={props.dimension} />
+        <TokenChart chart={adoption.tokensOverTime} shape="area" dimension={props.dimension} />
       </PanelCard>
 
       <PanelCard
@@ -109,7 +114,7 @@ export function AdoptionSection(props: {
         title={mix.chart.title}
         question={`Which Models the tokens went to, rolled up by ${level}. A breakdown and not a comparison axis: a session may span several Models, so no per-session metric is grouped by one.`}
       >
-        <ChartFrame chart={mix.chart} shape="bar" dimension={props.dimension} />
+        <TokenChart chart={mix.chart} shape="bar" dimension={props.dimension} />
         <ModelMixList distribution={mix.levels[mix.level]} />
       </PanelCard>
     </section>

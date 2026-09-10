@@ -53,6 +53,32 @@ describe("R-M9 — tokens are never presented beside a spend figure", () => {
   });
 });
 
+/**
+ * **Ticket 69 — both measure axes read in token units.**
+ *
+ * The ticks are the only rendered evidence that `tickFormat` reached the axis at all: a
+ * `ChartFrame` left on its default draws the same chart with `4m` along its edge, at the `en-GB`
+ * compact spelling, which is a different figure from the `4M` the Tokens column beside it reads.
+ * So the assertion is on the tick text — found by text, like any other string on the page, rather
+ * than by reaching into Recharts' SVG. The formatter itself is pinned in `figures.test.ts`.
+ *
+ * Two of each, because there are two charts: the volume line and the Model mix bars.
+ */
+describe("ticket 69 — the token axes read in K, M and B", () => {
+  it("labels both charts' measure axes in units, never in seven digits", () => {
+    render(<AdoptionSection adoption={adoptionFixture()} dimension={SIZE} />);
+
+    expect(screen.getAllByText("4M")).toHaveLength(2);
+    expect(screen.getAllByText("2M")).toHaveLength(2);
+    // The spelling this replaced: `ChartFrame`'s own default, whose `en-GB` compact notation is
+    // lower-case and reads as a different kind of figure from the `4M` in the column beside it.
+    expect(screen.queryByText("4m")).toBeNull();
+    // The R-X1 mirror is untouched and still holds the figure exactly — it is the chart's data
+    // table, and a screen reader reading a rounded number would be reading a different chart.
+    expect(screen.getAllByText("4,000,000").length).toBeGreaterThan(0);
+  });
+});
+
 describe("R-M7 — Model is a breakdown at the level the viewer chose", () => {
   it("renders the current level's distribution with its shares", () => {
     render(<AdoptionSection adoption={adoptionFixture()} dimension={SIZE} />);

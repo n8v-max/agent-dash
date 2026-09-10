@@ -17,7 +17,7 @@
 import { describe, expect, it } from "vitest";
 import type { Change, ChangeShown } from "@/domain/change";
 import type { FigureUnit } from "@/domain/viewmodel";
-import { changeText, figureText, NO_FIGURE, usd, usdTick } from "./figures";
+import { changeText, figureText, NO_FIGURE, tokensTick, usd, usdTick } from "./figures";
 
 const shown = (ratio: number): ChangeShown => ({
   shown: true,
@@ -46,9 +46,9 @@ describe("figureText", () => {
     ["usd", 813.45, "$813.45"],
     ["usd_per_task", 135.575, "$135.58"],
     ["count", 1500, "1,500"],
-    // Written out in full, not compacted: `12.3m` would put the bare literal `12.3` in
-    // the payload T-E4 scans, and the Tokens column is read by comparing Members.
-    ["tokens", 12_345_678, "12,345,678"],
+    // Compacted, and uppercase (ticket 69): the Tokens column is read by comparing Members, and
+    // eight digits is a length before it is a number.
+    ["tokens", 12_345_678, "12M"],
     ["share", 0.18, "18%"],
     ["seconds", 1234, "1,234s"],
   ])("formats %s", (unit, value, expected) => {
@@ -92,6 +92,67 @@ describe("usd — the one money formatter in the product (ticket 41)", () => {
     expect(usdTick(1650)).toBe("$1,650");
     expect(usdTick(2200.4)).toBe("$2,200");
     expect(usdTick(1650)).not.toMatch(/\d\.\d/);
+  });
+});
+
+/**
+ * **Ticket 69 — a token figure reads in K, M and B.**
+ *
+ * The bands and their boundaries, because the boundaries are where a units formatter goes wrong:
+ * one either side of every threshold, and the two the mantissa rule turns on (below ten it keeps
+ * a decimal; at ten and above it has three digits of its own and does not).
+ *
+ * **999,999 reads `1M`, not `1,000K`.** The rule puts it in the `K` band — it is under a million
+ * — but its mantissa rounds to a full thousand, and `1,000K` is a figure nobody writes. A
+ * mantissa that fills up promotes to the band above, which is why the two sides of the million
+ * boundary read the same and not absurdly differently.
+ *
+ * **No figure here is a bare decimal.** Every one that carries a decimal point carries a unit
+ * letter immediately after it, which is the property `e2e/support/costs.ts` excludes on and the
+ * whole reason compact notation is available to this unit and to no other.
+ */
+describe("the tokens unit", () => {
+  it.each<readonly [number, string]>([
+    [0, "0"],
+    [750, "750"],
+    [999, "999"],
+    [1_000, "1K"],
+    [9_800, "9.8K"],
+    [75_000, "75K"],
+    [110_660, "111K"],
+    [999_499, "999K"],
+    [999_999, "1M"],
+    [1_000_000, "1M"],
+    [1_300_000, "1.3M"],
+    [100_000_000, "100M"],
+    [999_999_999, "1B"],
+    [1_000_000_000, "1B"],
+    [2_100_000_000, "2.1B"],
+  ])("renders %d tokens as %s", (value, expected) => {
+    expect(figureText(value, "tokens")).toBe(expected);
+  });
+
+  it("puts a unit letter against every decimal it prints, so none of them is a bare one", () => {
+    const figures = [1_300_000, 9_800, 2_100_000_000, 12_345_678, 999].map((value) =>
+      figureText(value, "tokens"),
+    );
+
+    expect(figures.filter((text) => /\d\.\d(?![KMB])/.test(text))).toEqual([]);
+  });
+
+  it("is withheld as the dash, never as a zero volume", () => {
+    expect(figureText(null, "tokens")).toBe(NO_FIGURE);
+  });
+
+  // A tick is a position on a scale, not a figure: the tooltip and the R-X1 mirror carry the
+  // reading exactly, so an axis spends no characters on a decimal.
+  it("renders an axis tick in the same units, with no decimal at all", () => {
+    expect(tokensTick(1_300_000)).toBe("1M");
+    expect(tokensTick(9_800)).toBe("10K");
+    expect(tokensTick(2_100_000_000)).toBe("2B");
+    expect(tokensTick(999)).toBe("999");
+    expect(tokensTick(999_999)).toBe("1M");
+    expect(tokensTick(1_300_000)).not.toMatch(/\d\.\d/);
   });
 });
 

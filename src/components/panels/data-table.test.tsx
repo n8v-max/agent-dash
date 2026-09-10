@@ -92,7 +92,7 @@ describe("R-T6 — the table renders the order it was given and produces none of
       "Human",
       "42",
       "90",
-      "1,240,000",
+      "1.2M",
       "$310.50",
     ]);
   });
@@ -127,8 +127,48 @@ describe("R-N15 — the Cost column is money, and it is the tiles' money", () =>
   it("leaves a column carrying no unit exactly as it was", () => {
     renderTable();
 
-    // Completed Jobs, Sessions and Tokens are counts: grouped, decimal-free, no symbol.
-    expect(bodyRows()[0].slice(3, 6)).toEqual(["42", "90", "1,240,000"]);
+    // Completed Jobs and Sessions are counts: grouped, decimal-free, no symbol. Tokens read in
+    // their own unit (ticket 69), which is the point of the column carrying one.
+    expect(bodyRows()[0].slice(3, 6)).toEqual(["42", "90", "1.2M"]);
+  });
+});
+
+/**
+ * **Ticket 69 — the Tokens column reads in K, M and B.** The same mechanism as the Cost column
+ * and for the same reason: the unit is on the column, so the cell has nothing to decide. What
+ * changed is what `tokens` means, and it changed because eight digits is not a figure anyone
+ * compares down a column — `1,240,000` beside `980,000` is two lengths to count before it is two
+ * numbers to compare, where `1.2M` beside `980K` is legible at a glance (R-N4, R-N15).
+ *
+ * The billions row is written here rather than into the shared fixture: an org whose People rows
+ * cross 1e9 is a scale this product will reach and the committed fixture has not, and the band
+ * boundary is a property of the formatter rather than of any particular Member.
+ */
+describe("R-N15 — the Tokens column reads in token units", () => {
+  const tokenCells = (): readonly string[] => bodyRows().map((cells) => cells[5]);
+
+  it("renders every granted token figure in its unit, and never as bare digits", () => {
+    renderTable();
+
+    expect(tokenCells()).toEqual(["1.2M", "980K", "310K"]);
+    for (const cell of tokenCells()) expect(cell).toMatch(/^[\d,.]+[KMB]$/);
+  });
+
+  it("carries the unit up into billions", () => {
+    renderTable({
+      ...PEOPLE_TABLE,
+      rows: [
+        { key: "svc_0001", cells: ["Nightly bot", "Platform", "Service account", 900, 4100, 2_100_000_000, 41_200.5] },
+      ],
+    });
+
+    expect(tokenCells()).toEqual(["2.1B"]);
+  });
+
+  it("renders the same figure the tile formatter would, because it is that formatter", () => {
+    renderTable();
+
+    expect(tokenCells()[0]).toBe(figureText(1_240_000, "tokens"));
   });
 });
 
