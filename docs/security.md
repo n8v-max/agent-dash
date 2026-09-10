@@ -10,12 +10,12 @@ rather than the implemented one is worse than none, because it will be believed.
 Two adversaries are in scope. **A signed-in visitor** trying to reach figures their Role does not
 grant — this is the one the product is built around, and § 4 is the answer. **An unauthenticated
 visitor** probing for which Organizations exist — § 3. What is *not* in scope: the dataset is not a
-secret. The fixture is committed to the repository, both seeded accounts are offered to any
-anonymous visitor at `/sign-in` (`src/app/sign-in/page.tsx:77`), and CI says so in as many words
-when it declines to make the signing key a repo secret (`.github/workflows/ci.yml:18-21`). The
-asset being protected is **the correctness of the access model as a demonstration**, not the rows.
-That fact does real work below — most notably in § 2, where it is why the honest answer on CSRF is
-"no token".
+secret. The fixture is committed to the repository, the one offered account is handed to any
+anonymous visitor at `/sign-in` (`src/app/(public)/sign-in/page.tsx:94`), and CI says so in as many
+words when it declines to make the signing key a repo secret (`.github/workflows/ci.yml:18-21`).
+The asset being protected is **the correctness of the access model as a demonstration**, not the
+rows. That fact does real work below — most notably in § 2, where it is why the honest answer on
+CSRF is "no token".
 
 ---
 
