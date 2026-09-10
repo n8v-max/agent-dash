@@ -24,7 +24,7 @@
 //
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
-import { civilDayIn, civilDaysBetween } from "../periods";
+import { civilDayIn, civilDaysBetween, civilDaysOf } from "../periods";
 import { ratio, type Ratio } from "../ratio";
 
 /**
@@ -160,5 +160,171 @@ export function projectPeriodSpend(input: ProjectionInput): ProjectionResult {
       incomplete: days < totalDays,
       method: PROJECTION_METHOD,
     },
+  };
+}
+
+
+// --- The same method, one civil day at a time (ticket 64) -------------------------------------
+
+/** Spend attributed to one civil day of the period. Summed upstream, exactly as `actual` is. */
+export type DailySpend = {
+  /** `YYYY-MM-DD`, in the Organization's timezone. */
+  readonly day: string;
+  readonly actual: number;
+};
+
+/**
+ * One civil day of the period, as two figures that stack: what was spent, and what the method
+ * says is still to come. **They are never both a claim about the same money** — a day before
+ * today projects nothing, a day after today has spent nothing, and today carries the part of
+ * its own daily rate it has not reached yet.
+ */
+export type ProjectedDay = {
+  readonly day: string;
+  /** Attributed spend on that day (R-M4). Zero on a day that has not happened. */
+  readonly actual: number;
+  /** The remainder the method carries onto that day. Zero on a day already spent. */
+  readonly projected: number;
+};
+
+/** Why a period has no daily forecast. `projectPeriodSpend`'s two, plus the one this adds. */
+export const DAILY_PROJECTION_REJECTIONS = [...PROJECTION_REJECTIONS, "not-started"] as const;
+export type DailyProjectionRejectionReason = (typeof DAILY_PROJECTION_REJECTIONS)[number];
+
+export type DailyProjectionInput = {
+  readonly period: ProjectedPeriod;
+  /** Spend to date, per civil day. Days the caller omits held nothing. */
+  readonly spend: readonly DailySpend[];
+  /** An ISO 8601 instant, supplied by the caller (P5). Never read from a clock. */
+  readonly now: string;
+  readonly timezone: string;
+};
+
+/**
+ * **The daily forecast, and the figure it sums to.**
+ *
+ * `projected` is `projectPeriodSpend`'s own figure — the tile's projected session cost — carried
+ * here rather than recomputed, so "the bars add up to the headline" is an identity of one
+ * arithmetic rather than an agreement between two.
+ */
+export type DailyProjection = {
+  readonly key: string;
+  /** Every civil day of the period, in order. A day holding nothing is a zero, not a gap. */
+  readonly days: readonly ProjectedDay[];
+  /** `Σ actual + Σ projected`, by construction. R-N24: still no band, and nowhere to put one. */
+  readonly projected: number;
+};
+
+export type DailyProjectionResult =
+  | { readonly ok: true; readonly projection: DailyProjection }
+  | {
+      readonly ok: false;
+      readonly reason: DailyProjectionRejectionReason;
+      readonly message: string;
+    };
+
+const rejectDaily = (
+  reason: DailyProjectionRejectionReason,
+  message: string,
+): DailyProjectionResult => ({ ok: false, reason, message });
+
+/** Spend by day, tolerant of a caller that split one day across two entries. */
+const spentByDay = (spend: readonly DailySpend[]): ReadonlyMap<string, number> => {
+  const held = new Map<string, number>();
+  for (const entry of spend) held.set(entry.day, (held.get(entry.day) ?? 0) + entry.actual);
+  return held;
+};
+
+/**
+ * The three kinds of day, and nothing between them.
+ *
+ * `rate` is spend to date over the days elapsed — **the same division `projected` is**, seen per
+ * day instead of per period. Today is the only day carrying both figures, and its remainder is
+ * clamped at zero: a day that has already outspent the average is not owed negative money.
+ */
+const dailyRows = (
+  days: readonly string[],
+  spent: ReadonlyMap<string, number>,
+  todayAt: number,
+  rate: number,
+): readonly ProjectedDay[] =>
+  days.map((day, at) => {
+    const actual = spent.get(day) ?? 0;
+    if (at < todayAt) return { day, actual, projected: 0 };
+    if (at === todayAt) return { day, actual, projected: Math.max(0, rate - actual) };
+    return { day, actual, projected: rate };
+  });
+
+/**
+ * **The identity, made true by construction rather than asserted about.**
+ *
+ * The last day of the period absorbs whatever the per-day arithmetic leaves over, so
+ * `Σ actual + Σ projected` is the projected session cost exactly and not to fifteen decimal
+ * places. There are two residuals and this closes both: today's clamped remainder, which the
+ * per-day rule adds on top of the elapsed-proportional total, and floating-point drift over
+ * thirty additions.
+ *
+ * The residual is non-negative by algebra — it works out to `min(rate, today's spend)` while the
+ * period is open, and to zero once it has closed, which is why **the last day of a finished
+ * month projects nothing**. `Math.max` guards float noise, not the arithmetic.
+ */
+const absorbResidual = (
+  rows: readonly ProjectedDay[],
+  projected: number,
+): readonly ProjectedDay[] => {
+  const last = rows.length - 1;
+  const held = rows.reduce(
+    (running, row, at) => running + row.actual + (at === last ? 0 : row.projected),
+    0,
+  );
+  return rows.map((row, at) =>
+    at === last ? { ...row, projected: Math.max(0, projected - held) } : row,
+  );
+};
+
+/**
+ * **The month's remainder, spread over the days it has left** (R-N23, ticket 64).
+ *
+ * It is `projectPeriodSpend` seen one day at a time: the same elapsed-proportional division, the
+ * same `now`, the same absence of a band (R-N24). Nothing is smoothed, nothing is weighted and
+ * no day is treated as busier than another — a rate is the only shape this method has, and
+ * pretending Tuesdays cost more would be the fabricated precision R-N24 refuses.
+ *
+ * **A period that has not begun is rejected rather than drawn flat.** Before any of it has
+ * elapsed there is no rate to carry, and thirty bars of zero would be a forecast of nothing
+ * rather than the absence of one.
+ */
+export function projectDaily(input: DailyProjectionInput): DailyProjectionResult {
+  const { period } = input;
+  const days = civilDaysOf({ start: period.startsOn, end: period.endsOn });
+  if (days === undefined || days.length === 0) {
+    return rejectDaily(
+      "invalid-period",
+      `${period.startsOn}..${period.endsOn} is not a period to project over`,
+    );
+  }
+
+  const spent = spentByDay(input.spend);
+  const total = days.reduce((running, day) => running + (spent.get(day) ?? 0), 0);
+  const result = projectPeriodSpend({
+    period,
+    actual: total,
+    now: input.now,
+    timezone: input.timezone,
+  });
+  if (!result.ok) return result;
+
+  const { elapsed, projected } = result.projection;
+  if (projected === null) {
+    return rejectDaily(
+      "not-started",
+      `${period.key} has not begun as of ${input.now}, so there is no rate to carry forward`,
+    );
+  }
+
+  const rows = dailyRows(days, spent, elapsed.days - 1, total / elapsed.days);
+  return {
+    ok: true,
+    projection: { key: period.key, days: absorbResidual(rows, projected), projected },
   };
 }

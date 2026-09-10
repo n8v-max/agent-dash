@@ -255,13 +255,26 @@ against.
   asserted, because they are different claims. **No confidence band is produced** (R-N24). Before
   any of the period has elapsed there is no elapsed share to divide by, so the projection is
   `null` (R-M18) and not the actual figure.
-- **T-U21.1 — The projection's components** (R-N23.1, R-M5). The `/demo/projection` ViewModel
-  carries `sessionToDate`, `seat`, `projectedSession` and `projectedTotal`, and
+- **T-U21.1 — The projection's components** (R-N23.1, R-N23.2, R-M5). The `/demo/projection`
+  ViewModel carries `sessionToDate`, `seat`, `projectedSession` and `projectedTotal`, and
   **`projectedTotal === projectedSession + seat`** — asserted as an equality, not a tolerance,
   because the total is *assigned* that sum rather than summed a second time. The seat charge is
-  identical in both figures (it is never extrapolated), and the daily chart carries one series,
-  session Cost, unstacked. It sits in `src/data/queries.test.ts` because the ViewModel is
-  assembled at the seam; the extrapolation itself is T-U21's, in the domain layer.
+  identical in both figures (it is never extrapolated). The daily chart carries **two** series
+  (ticket 64), `stackable`, over every civil day of the month: the attributed column sums to
+  `sessionToDate` and the two columns together sum to `projectedSession` — and **not** to
+  `projectedTotal`, which is how "the seat charge is in neither series" is asserted as arithmetic
+  rather than as the absence of a label. The series set is asserted as a *set*, because R-V5
+  ranks the two by their whole-range measure and the order is a fact about the month. It sits in
+  `src/data/queries.test.ts` because the ViewModel is assembled at the seam; the extrapolation
+  itself is T-U21's, in the domain layer.
+- **T-U21.2 — The daily projection** (R-N23.2, R-N24, P5). `projectDaily` in the domain layer,
+  over a pinned `now`. **`Σ actual + Σ projected` is the projected session cost** at one day
+  elapsed, mid-month with today only part spent, and on the last day of the month — where the
+  projected series is **all zero**, because a closed month is measured rather than forecast. A
+  day before today projects nothing and a day after today has spent nothing; a day with no
+  session is a real zero rather than a gap (R-M18). A month that has not begun is **rejected**:
+  there is no rate to carry forward, and thirty flat bars would be a forecast of nothing rather
+  than the absence of one. R-N24 rides along unchanged — no band, and no field to carry one.
 - **T-U22 — The zero-denominator rule** (`domain/ratio.ts`, R-M18, A29). The rule is one
   expression, so it gets one test rather than nine, and the nine call sites get one assertion each
   that they divide through it:
@@ -584,6 +597,13 @@ product's central interaction.
     `stackable: true` is itself a failure. This is the test that keeps R-V1's narrowing honest —
     a blanket `no stackId` assertion would have been easier and would have forbidden a legitimate
     part-to-whole panel.
+  - **`projection_component` stacks** (ticket 64, R-N23.2): a day's attributed spend beside the
+    remainder the method carries onto it. The two are outside each other by construction and
+    their sum is the projected session cost exactly, which is the partition R-V1 asks for. The
+    forecast mark's fill is asserted as a **pair** — the projected bar carries
+    `chart-config.tsx`'s 40% alpha and the attributed bar beside it is solid — with a chart
+    naming no forecast as the control, because "the projected bar is lighter" is only a claim if
+    something is darker.
   - **The `/demo` WorkType tile is asserted `stackable: false`** (C11). WorkType partitions
     *sessions*; this tile counts *Tasks*, whose sessions may span WorkTypes, so the grouping does
     not partition this measure. The table is keyed on (grouping × measure), not on grouping alone —
@@ -598,6 +618,14 @@ product's central interaction.
   numbers. R-N24's "one figure, no bound" claim is restated rather than dropped: the projected
   tile's money figures are exactly the headline and its two named components, so a fourth number
   fails the test. The seat charge is asserted **beside** the chart, never as a series in it.
+  - **Ticket 64 restated R-V8's count as a claim about kind.** The marker now appears on the
+    projected tile *and* on the daily chart's forecast series, which are the same forecast said
+    twice. "Exactly once on the page" would have been satisfied by deleting one of them, so what
+    is asserted instead is: exactly once among the two headline figures, and every other element
+    carrying it is text that names the forecast — never an attributed figure. Beside it, the
+    panel is asserted to give the chart two legend entries, to mark only the forecast one, and to
+    render a day still to come as a projected figure on no attributed one, read off the R-X1
+    mirror. That the two marks share a stack id is T-C11's claim, over `stackIdOf`.
 - **T-C18 — A ranked ViewModel draws horizontal bars, whatever shape the panel named** (A36,
   R-V12, ticket 44). Asserted over `shapeFor`, the one expression that resolves a form into a
   shape — the same shape of claim T-C11 makes over `stackIdOf` and T-C12 over `furnitureFor`, and
@@ -776,6 +804,13 @@ inside the desktop project, which keeps each width beside the requirement it bel
   session cost and the projected total, with the two totals equal to their components to within
   the cent the strings are rounded to. The exact identity is T-U21.1's; what this test adds is
   that the figures a reader can *see* are the ones it holds between.
+  - **And the chart says the same thing** (R-N23.2, ticket 64). The daily chart's R-X1 mirror is
+    read column by column: its attributed column sums to the session cost to date and both
+    columns together sum to the projected session cost, over every civil day of the month. The
+    tolerance is the mirror's own rounding — sixty cells each rounded to the cent — and it is the
+    only loose comparison in the chain, because every layer below asserts the identity exactly.
+    This is the step that proves the two series survive the RSC boundary with the figures the
+    tiles above them print, which no unit layer can see.
 - **T-E14 — Ranked bars and monthly repositories survive the whole stack** (A36, R-V12, R-N9.1,
   ticket 44). Every layer below proves a piece — the domain layer decides what a ranked table is,
   the query decides which subject level is ranked, `shapeFor` decides what that draws — and none

@@ -316,14 +316,84 @@ test.describe("/demo/projection — where the current month lands", () => {
     await expect(page.getByTestId("incomplete-flag")).toBeVisible();
   });
 
-  test("labels the forecast 'estimated', and nothing else on the page (R-V8, A17)", async ({
-    page,
-  }) => {
+  // Ticket 64 put R-V8's marker in a second place — the daily chart's forecast series, whose
+  // label the query spells `Projected (estimated)`. That is the same forecast said per day, so
+  // the assertion is no longer a count: **every** element carrying the marker names the
+  // forecast, and the attributed figure carries none.
+  test("labels the forecast 'estimated', and nothing attributed (R-V8, A17)", async ({ page }) => {
     await page.goto(`/${OPEN_ACCOUNT.orgSlug}/projection`);
 
     await expect(page.getByTestId("figure-projected-cost")).toContainText("Estimated");
     await expect(page.getByTestId("figure-spend-to-date")).not.toContainText(/estimat/i);
-    await expect(page.getByRole("main").getByText(/estimated/i)).toHaveCount(1);
+
+    const marked = await page.getByRole("main").getByText(/estimated/i).allTextContents();
+
+    expect(marked.length).toBeGreaterThan(1);
+    expect([...new Set(marked.map((text) => text.trim()))].sort()).toEqual([
+      "Estimated",
+      "Projected (estimated)",
+    ]);
+  });
+
+  /**
+   * **Ticket 64 — the stacked forecast survives the whole stack.**
+   *
+   * Every layer below proves a piece: `metrics/projection.ts` makes the identity true by
+   * construction, `data/queries/projection.ts` turns it into two series, `chart-shapes.tsx`
+   * puts them in one stack. None of them proves the two series reach a running page through
+   * the RSC boundary with the same figures the tiles above them print — which is the reading a
+   * viewer actually takes off the chart.
+   *
+   * Read off the R-X1 mirror, because that is the chart's output as queryable DOM (P2, T-C1).
+   * The tolerance is the mirror's own rounding: sixty cells each rounded to the cent can differ
+   * from the rounded total by up to 0.30, and the exact identity is asserted where the numbers
+   * are exact — `src/data/queries.test.ts` and `src/domain/metrics/projection.test.ts`.
+   */
+  test("T-E11 — the daily chart's two columns sum to the two session figures (R-N23)", async ({
+    page,
+  }) => {
+    await page.goto(`/${OPEN_ACCOUNT.orgSlug}/projection`);
+
+    const table = page
+      .getByRole("group", { name: "Daily session cost, grouped by Organization" })
+      .getByRole("table");
+
+    const headings = await table.locator("thead th").allTextContents();
+
+    expect(headings[0]).toBe("Day");
+    // R-V5 ranks the two series by their whole-range measure, so which column is which is a
+    // fact about the month rather than about the page: the set is asserted, the order is read.
+    expect([...headings.slice(1)].sort()).toEqual(["Projected (estimated)", "Session cost"]);
+
+    const actualAt = headings.indexOf("Session cost");
+    const projectedAt = headings.indexOf("Projected (estimated)");
+    const figure = (cell: string): number => Number(cell.replace(/,/g, ""));
+
+    const rows = await table.locator("tbody tr").all();
+    // Every civil day of the month, the ones still to come included.
+    expect(rows.length).toBeGreaterThan(27);
+
+    let actual = 0;
+    let projected = 0;
+    for (const row of rows) {
+      const cells = await row.locator("th, td").allTextContents();
+      actual += figure(cells[actualAt] ?? "0");
+      projected += figure(cells[projectedAt] ?? "0");
+    }
+
+    const usd = async (testId: string): Promise<number> =>
+      Number(((await page.getByTestId(testId).textContent()) ?? "").replace(/[^\d.]/g, ""));
+
+    // The bars already drawn are spend to date; the stack's full height is the projected
+    // session cost. The seat charge is in neither, and is stated beside the chart in words.
+    expect(projected).toBeGreaterThan(0);
+    expect(Math.abs(actual - (await usd("spend-to-date-session")))).toBeLessThanOrEqual(0.5);
+    expect(
+      Math.abs(actual + projected - (await usd("projected-cost-session"))),
+    ).toBeLessThanOrEqual(0.5);
+    await expect(page.getByTestId("chart-seat-note")).toContainText(
+      "Projected bars share the method above",
+    );
   });
 
   // Ticket 42 — the reader has to be able to check the forecast against what is on the page.

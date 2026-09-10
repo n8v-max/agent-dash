@@ -18,7 +18,9 @@
 
 import type { Viewer } from "@/domain/access";
 import {
+  projectDaily,
   projectPeriodSpend,
+  type DailyProjection,
   type Elapsed,
   type Projection,
 } from "@/domain/metrics/projection";
@@ -84,7 +86,10 @@ export type ProjectionPageViewModel = {
   readonly tiles: readonly TileViewModel[];
   /** Actual spend by day within the month, so the extrapolation sits beside what it read. */
   readonly chart: ChartViewModel;
-  /** Why the seat charge is beside the daily bars rather than in them (R-M5, R-D2). */
+  /**
+   * Why the seat charge is beside the daily bars rather than in them (R-M5, R-D2), and — where
+   * the month is being forecast — what the lighter bars stacked on them are (ticket 64).
+   */
   readonly note: string;
   /** Populated where the month cannot be projected at all; both figures are then absent. */
   readonly unavailable: string | null;
@@ -101,35 +106,135 @@ const SEAT_NOTE =
   "A seat is charged by whole months and is never pro-rated across days, so it is stated here " +
   "rather than spread over the bars.";
 
+/**
+ * **Why the chart has a second, lighter series** (ticket 64, R-N23).
+ *
+ * One sentence, and it names the method the panel has already stated rather than restating it:
+ * the projected bars are the *same* elapsed-proportional division, drawn per day. It is said
+ * only where the bars are actually drawn — a note claiming a forecast on a chart that has none
+ * is worse than no note.
+ */
+const PROJECTED_NOTE =
+  "Projected bars share the method above: today's spend rate, carried to the end of the month.";
+
+/** The chart's two group keys. Presentation reads `ACTUAL_SERIES`/`PROJECTED_SERIES`, never a string. */
+const ACTUAL_SERIES = "actual";
+const PROJECTED_SERIES = "projected";
+
+/** The two series' labels. R-V8's marker belongs to the forecast and to nothing beside it. */
+const SERIES_LABELS: Readonly<Record<string, string>> = {
+  [ACTUAL_SERIES]: "Session cost",
+  [PROJECTED_SERIES]: "Projected (estimated)",
+};
+
 const NO_ELAPSED: Elapsed = { days: 0, totalDays: 0, fraction: 0 };
+
+/** One civil day of the month: its identity, R-E2's flag, and what was attributed to it. */
+type DaySpend = { readonly key: string; readonly partial: boolean; readonly actual: number };
+
+/** The month's days and what was attributed to each, at the grain the forecast is computed on. */
+const dailySpend = (
+  context: PageContext,
+  month: PeriodBucket<AgentSession>,
+): readonly DaySpend[] => {
+  const plan = planPeriods({
+    timezone: context.data.organization.timezone,
+    grain: "day",
+    range: { start: month.startsOn, end: month.endsOn },
+    now: context.params.now,
+  });
+  if (!plan.ok) return [];
+  return bucketRows(plan.plan, month.rows).map((day) => ({
+    key: day.key,
+    partial: day.partial,
+    actual: sessionCost(day.rows),
+  }));
+};
+
+/**
+ * **The two stacked series, bar by bar** (ticket 64).
+ *
+ * The `actual` cell is what a day cost; the `projected` cell is what the method says is still to
+ * come on it. They are emitted for **every** civil day of the month, today and the ones still
+ * ahead included — a day with no session is a zero bar, not a missing one, once the whole month
+ * is being forecast, and a chart that skipped it would draw a shorter September than the one the
+ * projection is over.
+ *
+ * The seat charge is in neither series (R-M5, R-D2): it is stated beside the bars in words.
+ */
+const cellsFor = (
+  spend: readonly DaySpend[],
+  forecast: DailyProjection | null,
+): readonly { readonly bucket: string; readonly group: string; readonly value: number }[] => {
+  if (!forecast) {
+    return spend.map((day) => ({ bucket: day.key, group: ACTUAL_SERIES, value: day.actual }));
+  }
+  return forecast.days.flatMap((day) => [
+    { bucket: day.day, group: ACTUAL_SERIES, value: day.actual },
+    { bucket: day.day, group: PROJECTED_SERIES, value: day.projected },
+  ]);
+};
 
 const dailyChart = (
   context: PageContext,
-  month: PeriodBucket<AgentSession> | undefined,
-): ChartViewModel => {
-  const plan =
-    month &&
-    planPeriods({
-      timezone: context.data.organization.timezone,
-      grain: "day",
-      range: { start: month.startsOn, end: month.endsOn },
-      now: context.params.now,
-    });
-  const days = plan?.ok ? bucketRows(plan.plan, month?.rows ?? []) : [];
-
-  return chartViewModel({
-    title: "Actual spend to date",
+  spend: readonly DaySpend[],
+  forecast: DailyProjection | null,
+): ChartViewModel =>
+  chartViewModel({
+    title: "Daily session cost",
     rollUpLevel: "Organization",
-    // One series over one population: there is no grouping, so there is nothing to stack.
-    grouping: "organization",
+    // Spend already attributed to a day, beside the remainder carried onto it. The two are
+    // outside each other by construction and sum to the projected session cost exactly, which
+    // is what R-V1 asks of a grouping before its geometry may stack.
+    grouping: "projection_component",
     measure: "additive",
-    buckets: days.map((day) => context.label.bucket(day)),
-    cells: days
-      .filter((day) => day.rows.length > 0)
-      .map((day) => ({ bucket: day.key, group: "actual", value: sessionCost(day.rows) })),
-    labelOf: () => "Session cost",
+    buckets: spend.map((day) => context.label.bucket(day)),
+    cells: cellsFor(spend, forecast),
+    labelOf: (key) => SERIES_LABELS[key] ?? key,
+    // R-V8 — which series is the forecast, as a fact. The lighter fill and the marker are copy.
+    estimated: forecast ? PROJECTED_SERIES : undefined,
     bucketColumn: "Day",
   });
+
+/**
+ * **The daily forecast** (ticket 64) — `projectDaily`, over the same month, the same `now` and
+ * the same rows the tile's figure was read off. `null` where the month has no basis to be
+ * forecast from, which is the same condition that leaves `projectedTotal` absent: the chart then
+ * draws the days it has and claims nothing about the ones it does not.
+ */
+const forecastOf = (
+  context: PageContext,
+  month: PeriodBucket<AgentSession> | undefined,
+  spend: readonly DaySpend[],
+): DailyProjection | null => {
+  if (!month) return null;
+  const result = projectDaily({
+    period: { key: month.key, startsOn: month.startsOn, endsOn: month.endsOn },
+    spend: spend.map((day) => ({ day: day.key, actual: day.actual })),
+    now: context.params.now,
+    timezone: context.data.organization.timezone,
+  });
+  return result.ok ? result.projection : null;
+};
+
+/**
+ * **The chart and the sentence under it, decided together.**
+ *
+ * The note claims a forecast exactly when the chart draws one, which is why they leave this
+ * module as one value rather than as two fields a caller pairs up. A month with no basis to be
+ * projected from gets the seat sentence alone: a note about projected bars that are not there
+ * would be the page describing a chart nobody is looking at.
+ */
+const chartAndNote = (
+  context: PageContext,
+  month: PeriodBucket<AgentSession> | undefined,
+): { readonly chart: ChartViewModel; readonly note: string } => {
+  const spend = month ? dailySpend(context, month) : [];
+  const forecast = forecastOf(context, month, spend);
+  return {
+    chart: dailyChart(context, spend, forecast),
+    note: forecast ? `${SEAT_NOTE} ${PROJECTED_NOTE}` : SEAT_NOTE,
+  };
 };
 
 const figuresFor = (
@@ -242,6 +347,7 @@ export function projectionPage(viewer: Viewer, params: ControlSet): ProjectionPa
   const period = context.label.bucket(month ?? { key: params.range.end, partial: true });
 
   const components = componentsOf(projection, actual);
+  const daily = chartAndNote(context, month);
 
   return {
     orgSlug: params.orgSlug,
@@ -251,8 +357,8 @@ export function projectionPage(viewer: Viewer, params: ControlSet): ProjectionPa
     incomplete: projection?.incomplete ?? period.partial,
     components,
     tiles: tilesFor({ period, actual, components }),
-    chart: dailyChart(context, month),
-    note: SEAT_NOTE,
+    chart: daily.chart,
+    note: daily.note,
     // Set whenever there is no figure — a month outside the range, or one that has not begun.
     unavailable:
       components.projectedTotal === null

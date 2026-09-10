@@ -364,14 +364,64 @@ describe("the panel checklist — every panel in `spec.md` § 3 has a ViewModel"
     expect(page.tiles[1].value).toBe(components.projectedTotal);
   });
 
-  // R-M5 — a daily chart carrying the seat charge would apportion a monthly fee across days,
-  // which is the invented precision R-M5 forbids. One series, and it is session Cost.
-  it("T-U21.1 — the daily chart holds session Cost only, unstacked (R-M5)", () => {
-    const { chart } = OPEN_PAGES.projection;
+  // Ticket 64 — the daily chart stacks the month's remainder on the days already spent. The
+  // series set is asserted as a **set**: R-V5 ranks by whole-range measure, and at eight days
+  // elapsed the remainder outweighs the spend, so the order is a fact about the data rather
+  // than about this page.
+  it("T-U21.1 — the daily chart carries actual beside projected, stacked (R-N23)", () => {
+    const { chart, elapsed } = OPEN_PAGES.projection;
 
-    expect(chart.series.map((series) => series.label)).toEqual(["Session cost"]);
-    expect(chart.stackable).toBe(false);
-    expect(chart.mirror.columns).toEqual(["Day", "Session cost"]);
+    expect([...chart.series.map((series) => series.label)].sort()).toEqual([
+      "Projected (estimated)",
+      "Session cost",
+    ]);
+    // R-V1 — the two are outside each other and sum to the projected session cost, so the
+    // geometry may assert the part-to-whole reading a stack makes.
+    expect(chart.stackable).toBe(true);
+    // R-V8 — which of the two is the forecast is a domain fact, not a fill a panel picked.
+    expect(chart.estimated).toBe("projected");
+    // Every civil day of the month, the ones still to come included: a day holding no session
+    // is a zero bar, not a missing one, once the whole month is being forecast.
+    expect(chart.buckets).toHaveLength(elapsed.totalDays);
+    expect(chart.mirror.rows).toHaveLength(elapsed.totalDays);
+    expect(chart.mirror.columns).toHaveLength(3);
+    expect(chart.mirror.columns[0]).toBe("Day");
+  });
+
+  it("T-U21.1 — the two series sum to the projected session cost, and to nothing else", () => {
+    const { chart, components } = OPEN_PAGES.projection;
+    const totalOf = (label: string): number =>
+      chart.series
+        .filter((series) => series.label === label)
+        .flatMap((series) => series.points)
+        .reduce((running, point) => running + (point.value ?? 0), 0);
+
+    const attributed = totalOf("Session cost");
+    const forecast = totalOf("Projected (estimated)");
+
+    // The bars already drawn are spend to date, bar for bar with the tile above them.
+    expect(attributed).toBeCloseTo(components.sessionToDate, 6);
+    // And the stack's full height is the projected **session** cost — the figure the second
+    // tile prints as its own session component.
+    expect(attributed + forecast).toBeCloseTo(components.projectedSession ?? 0, 6);
+    expect(forecast).toBeGreaterThan(0);
+  });
+
+  // R-M5 — a daily chart carrying the seat charge would apportion a monthly fee across days,
+  // which is the invented precision R-M5 forbids. Asserted as arithmetic rather than as the
+  // absence of a series label: the stack's height is the session figure, not the total.
+  it("T-U21.1 — the seat charge is in neither series (R-M5, R-D2)", () => {
+    const { chart, components } = OPEN_PAGES.projection;
+    const height = chart.series
+      .flatMap((series) => series.points)
+      .reduce((running, point) => running + (point.value ?? 0), 0);
+
+    expect(components.seat).toBeGreaterThan(0);
+    expect(height).toBeCloseTo(components.projectedSession ?? 0, 6);
+    expect(height).not.toBeCloseTo(components.projectedTotal ?? 0, 2);
+    // And it is said in words instead, beside the bars, with the projected bars' own sentence.
+    expect(OPEN_PAGES.projection.note).toMatch(/never pro-rated across days/);
+    expect(OPEN_PAGES.projection.note).toMatch(/carried to the end of the month/);
   });
 
   it("`/demo/projection` produces no confidence band (R-N24)", () => {
@@ -533,6 +583,21 @@ describe("R-T17 / R-A6 — the permission filter ran before aggregation", () => 
     const own = restricted.spend.adoption.volume.processed;
     expect(own).toBeGreaterThan(0);
     expect(own).toBeLessThan(OPEN_PAGES.spend.adoption.volume.processed);
+  });
+
+  // Ticket 64 — `/demo/projection` is viewer-agnostic on the figures it holds: the projection
+  // is over whatever rows the viewer may read, so both accounts get the stacked forecast and
+  // the restricted one gets it over its own smaller month.
+  it("stacks the forecast for the restricted account too, over its own rows", () => {
+    const { chart, components } = restricted.projection;
+
+    expect(chart.estimated).toBe("projected");
+    expect(chart.stackable).toBe(true);
+    expect(components.sessionToDate).toBeGreaterThan(0);
+    expect(components.sessionToDate).toBeLessThan(OPEN_PAGES.projection.components.sessionToDate);
+    expect(
+      chart.series.flatMap((series) => series.points).reduce((run, at) => run + (at.value ?? 0), 0),
+    ).toBeCloseTo(components.projectedSession ?? 0, 6);
   });
 
   it("resolves nobody but itself by name on `/demo/people` — one row, no aggregate (C10)", () => {

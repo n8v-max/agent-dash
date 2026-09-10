@@ -22,12 +22,12 @@
 // test may not import `src/domain` at runtime (R-T6). Together they close the loop, and the
 // static assertion below is what stops a panel from reaching around both.
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 import type { Grouping } from "@/domain/viewmodel";
 import { ChartFrame } from "./chart-frame";
-import { BUCKET_TICK_INTERVAL, CHART_INTERPOLATION } from "./chart-config";
+import { BUCKET_TICK_INTERVAL, CHART_INTERPOLATION, estimatedFill } from "./chart-config";
 import {
   CHART_SHAPES,
   STACKING_SHAPES,
@@ -63,6 +63,7 @@ const STACKABLE_BY_GROUPING: Readonly<Record<Grouping, boolean>> = {
   presence_span: true,
   machine_spec: true,
   cost_component: true,
+  projection_component: true,
   repository: false,
   team: false,
   member: false,
@@ -505,5 +506,112 @@ describe("T-C22 — the period axis thins and the legend wraps (R-V15)", () => {
 
     expect(legend.innerHTML).toContain("flex-wrap");
     expect(LEGEND_LAYOUT).toContain("flex-wrap");
+  });
+});
+
+// --- R-V8 at series grain — a forecast mark is drawn lighter than a measured one (ticket 64) ---
+//
+// `/demo/projection` stacks the month's remainder on the days already spent, and the two halves
+// of a column are not the same kind of claim: the lower one is the bill and the upper one is an
+// extrapolation. Three things are asserted, and the third is the one that would rot silently:
+//
+//   * both marks carry the **guarded** stack id, so the column really is one stack;
+//   * the forecast mark is filled through `chart-config.tsx`'s alpha and the attributed mark is
+//     not — asserted as a **pair**, because "the projected bar is lighter" is only a claim if
+//     the actual bar beside it is solid;
+//   * a chart naming **no** forecast paints every mark solid. Without that control the fill rule
+//     would pass against a product that had lightened every bar in it.
+//
+// Over the element tree, for the reason T-C11 asserts `stackIdOf`: an SVG query would depend on
+// jsdom, on a dimension and on Recharts' class names.
+
+describe("R-V8 — a forecast series is stacked on the actual one and drawn lighter", () => {
+  const DAY_LABELS = ["6 Sep 2026", "7 Sep 2026", "8 Sep 2026", "9 Sep 2026"];
+
+  const dailyChart = (estimated: string | undefined) =>
+    chartFixture({
+      title: "Daily session cost",
+      rollUpLevel: "Organization",
+      buckets: DAY_LABELS,
+      series: [
+        { key: "actual", label: "Session cost", values: [10, 12, 5, 0] },
+        { key: "projected", label: "Projected (estimated)", values: [0, 0, 4, 9] },
+      ],
+      stackable: true,
+      bucketColumn: "Day",
+      estimated,
+    });
+
+  const STACKED = dailyChart("projected");
+
+  const propsOf = (element: ReactElement): Record<string, unknown> =>
+    element.props as Record<string, unknown>;
+
+  const childrenOf = (element: ReactElement): ReactNode => {
+    const { children } = propsOf(element) as { readonly children?: ReactNode };
+    return children;
+  };
+
+  /** The two `Bar` marks, keyed by the series they draw. */
+  const barsOf = (chart: typeof STACKED): ReadonlyMap<string, Record<string, unknown>> => {
+    const element = chartElementFor({ chart, shape: "bar", tickFormat: String });
+    const keys = new Set(chart.series.map((series) => series.key));
+
+    return new Map(
+      Children.toArray(childrenOf(element))
+        .filter((child): child is ReactElement => isValidElement(child))
+        .map(propsOf)
+        .filter((props) => keys.has(String(props.dataKey)))
+        .map((props) => [String(props.dataKey), props]),
+    );
+  };
+
+  it("puts both marks in one stack, through the guarded stack id", () => {
+    const bars = barsOf(STACKED);
+
+    expect([...bars.keys()].sort()).toEqual(["actual", "projected"]);
+    expect(bars.get("actual")?.stackId).toBe(STACK_ID);
+    expect(bars.get("projected")?.stackId).toBe(STACK_ID);
+  });
+
+  it("fills the forecast at 40% of its own colour and leaves the attributed mark solid", () => {
+    const bars = barsOf(STACKED);
+
+    expect(bars.get("actual")?.fill).toBe("var(--color-actual)");
+    expect(bars.get("projected")?.fill).toBe(
+      "color-mix(in oklab, var(--color-projected) 40%, transparent)",
+    );
+  });
+
+  it("paints every mark solid on a chart that names no forecast — the control", () => {
+    const bars = barsOf(dailyChart(undefined));
+
+    expect(bars.get("actual")?.fill).toBe("var(--color-actual)");
+    expect(bars.get("projected")?.fill).toBe("var(--color-projected)");
+  });
+
+  it("requests no palette variable of its own — the alpha rides on the series' colour (R-V7)", () => {
+    expect(estimatedFill("var(--color-projected)")).toBe(
+      "color-mix(in oklab, var(--color-projected) 40%, transparent)",
+    );
+    // No bare decimal: `e2e/payload.spec.ts` searches the payload for money literals, and a
+    // `fillOpacity={0.4}` would put one there.
+    expect(estimatedFill("var(--color-projected)")).not.toMatch(/\d\.\d/);
+  });
+
+  it("draws the day after today as a projected bar on no attributed one", () => {
+    const rows = chartRows(STACKED);
+
+    expect(rows).toHaveLength(DAY_LABELS.length);
+    expect(rows.at(-1)).toEqual({ bucket: "9 Sep 2026", actual: 0, projected: 9 });
+  });
+
+  it("names both series in the legend, and the forecast carries the marker", () => {
+    render(<ChartFrame chart={STACKED} shape="bar" dimension={SIZE} />);
+    const legend = screen.getByRole("group", { name: LEGEND_LABEL });
+
+    expect(within(legend).getAllByLabelText(/legend icon/)).toHaveLength(2);
+    expect(within(legend).getByText("Projected (estimated)")).toBeInTheDocument();
+    expect(within(legend).getByText("Session cost")).toBeInTheDocument();
   });
 });

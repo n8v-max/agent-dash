@@ -449,9 +449,24 @@ is one sentence and the arithmetic stands in place of prose explaining it. The s
 stated **beside** the daily chart as a flat monthly figure and is never a series in it:
 apportioning a monthly fee across days is the invented precision R-M5 forbids.
 
+**R-N23.2 — The daily chart stacks the month's projected remainder on the actual bars**, and the
+two series sum, bar by bar, to the projected **session** cost the tile prints. It is the same
+method the panel already states, applied per civil day: spend to date over the days elapsed is a
+rate, a day already spent is owed nothing more, today carries the part of its own rate it has not
+reached, and every day still to come carries one rate. Every civil day of the month is drawn,
+today and the days ahead included — a day with no session is a zero bar, not a missing one, once
+the whole month is being forecast. The projected series is drawn in a lighter fill of its own
+palette colour and its legend entry carries R-V8's "estimated" marker, because the two halves of
+a column are not the same kind of claim: the lower one is the bill and the upper one is a
+forecast. The seat charge remains outside both (R-M5, R-D2).
+
 **R-N24 — No confidence band.** A band computed over authored fixture data would be fabricated
 precision dressed as rigour. The method plus the elapsed fraction is the honest uncertainty
 statement available here — a projection at 10% elapsed and one at 90% are different claims.
+**Unchanged by R-N23.2, and re-asserted over it**: a stacked forecast is a second figure drawn at
+the same grain as the first, not a bound on either. No band, no interval and no low/high pair is
+computed, carried on the ViewModel or drawn — and a shaded ribbon around the projected bars would
+be exactly the rigour-shaped decoration this rule forbids.
 
 **R-N25 — Nothing else in the product depends on `/demo/projection`.**
 
@@ -766,7 +781,10 @@ not an estimate of it. Two labels do two different jobs:
 
 - **"Illustrative rates"** on the token rate card, because the rates are invented.
 - **"Estimated"** on Projected cost only, because a forecast is the one money figure here that
-  really is an estimate.
+  really is an estimate. It reaches a chart **series** as well as a tile (R-N23.2): the projected
+  bars are the same forecast said per day, and their legend entry reads `Projected (estimated)`.
+  The rule is about which *kind* of figure may carry it, not about how many times it appears —
+  and no attributed figure carries it in either place.
 
 See § Conflicts resolved C3.
 

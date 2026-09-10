@@ -23,11 +23,31 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { chartFixture } from "@/components/charts/chart-viewmodels.fixture";
+import { LEGEND_LABEL } from "@/components/charts/series-legend";
 import type { ProjectionPageViewModel } from "@/data/queries";
 import type { TileViewModel } from "@/domain/viewmodel";
 import { ProjectionPanel } from "./projection-panel";
 
 const PERIOD = { key: "2026-09", label: "Sep 2026", partial: true };
+
+/**
+ * Ticket 64 — the daily chart as the query now assembles it: four civil days, two stacked
+ * series, and the domain fact naming which of them is the forecast. The 8th is "today" — part
+ * spent, part still owed — and the 9th has not happened, which is why it carries a projected
+ * bar on no attributed one.
+ */
+const DAILY_CHART = chartFixture({
+  title: "Daily session cost",
+  rollUpLevel: "Organization",
+  bucketColumn: "Day",
+  buckets: ["6 Sep 2026", "7 Sep 2026", "8 Sep 2026", "9 Sep 2026"],
+  series: [
+    { key: "actual", label: "Session cost", values: [10, 12, 5, 0] },
+    { key: "projected", label: "Projected (estimated)", values: [0, 0, 4, 9] },
+  ],
+  stackable: true,
+  estimated: "projected",
+});
 
 const METHOD =
   "Spend to date, extrapolated to the end of the period in proportion to the period elapsed.";
@@ -67,8 +87,11 @@ const VIEW: ProjectionPageViewModel = {
     tile("spend-to-date", "Spend to date", 1_708.5),
     tile("projected-cost", "Projected month-end spend", 5_119.88),
   ],
-  chart: chartFixture({ title: "Actual spend to date", rollUpLevel: "Organization" }),
-  note: "A seat is charged by whole months and is never pro-rated across days, so it is stated here rather than spread over the bars.",
+  chart: DAILY_CHART,
+  note:
+    "A seat is charged by whole months and is never pro-rated across days, so it is stated here " +
+    "rather than spread over the bars. Projected bars share the method above: today's spend " +
+    "rate, carried to the end of the month.",
   unavailable: null,
 };
 
@@ -128,10 +151,24 @@ describe("R-V8 / A17 — 'estimated' is on Projected cost and on nothing else", 
     expect(screen.getByTestId("figure-spend-to-date")).not.toHaveTextContent(/estimat/i);
   });
 
-  it("uses the marker exactly once on the page", () => {
+  // Ticket 64 put the marker in a second place — on the forecast **series** of the daily chart,
+  // where the query spells its label `Projected (estimated)`. That is the same forecast said per
+  // day rather than a second claim, so the count is no longer the assertion. What R-V8 actually
+  // forbids is the marker reaching an *attributed* figure, and that is asserted directly: once
+  // among the two headline figures, and everywhere else only on text that names the forecast.
+  it("uses the marker once among the figures, and on nothing attributed anywhere", () => {
     panel();
 
-    expect(text().match(/estimated/gi) ?? []).toHaveLength(1);
+    const figures = ["figure-spend-to-date", "figure-projected-cost"]
+      .map((id) => screen.getByTestId(id).textContent ?? "")
+      .join(" ");
+
+    expect(figures.match(/estimated/gi) ?? []).toHaveLength(1);
+    // Every other place the word appears is the forecast series naming itself — in the legend
+    // and in the R-X1 mirror heading that states what the legend claims.
+    expect(new Set(screen.getAllByText(/estimated/i).map((node) => node.textContent))).toEqual(
+      new Set(["Estimated", "Projected (estimated)"]),
+    );
   });
 
   it("does not render the token rate card — that lives on /demo/spend only (R-N11)", () => {
@@ -214,6 +251,10 @@ describe("T-C17 — the figure is verifiable from what is on screen (R-N23.1, R-
 
     expect(note).toHaveTextContent("$468.00");
     expect(note).toHaveTextContent(/never pro-rated across days/);
+    // Ticket 64 — and one sentence for the lighter bars, naming the method rather than restating
+    // it. The method sentence itself is unchanged (T-U21).
+    expect(note).toHaveTextContent("Projected bars share the method above");
+    expect(screen.getByTestId("projection-method")).toHaveTextContent(METHOD);
   });
 
   it("prints no arithmetic where there is no projection to verify", () => {
@@ -238,7 +279,54 @@ describe("R-T28 — the one chart on the page goes through ChartFrame", () => {
     panel();
 
     expect(
-      screen.getByRole("group", { name: "Actual spend to date, grouped by Organization" }),
+      screen.getByRole("group", { name: "Daily session cost, grouped by Organization" }),
     ).toBeInTheDocument();
+  });
+});
+
+/**
+ * **Ticket 64 — the projected remainder, stacked on the days already spent.**
+ *
+ * What a *component* owes here is that both series reach the reader: two legend entries, the
+ * forecast carrying R-V8's marker, and a day still to come rendered as a projected figure on no
+ * attributed one. That the two marks share a stack id is `chart-shapes.test.tsx`'s claim, over
+ * the one expression that produces one; that they sum to the tile's figure is
+ * `src/data/queries.test.ts`'s, over the real fixture.
+ */
+describe("the daily chart carries both series, and says which one is the forecast", () => {
+  const legend = () => screen.getByRole("group", { name: LEGEND_LABEL });
+
+  it("names two series in the legend, with a swatch each", () => {
+    panel();
+
+    expect(within(legend()).getAllByLabelText(/legend icon/)).toHaveLength(2);
+    expect(within(legend()).getByText("Session cost")).toBeInTheDocument();
+    expect(within(legend()).getByText("Projected (estimated)")).toBeInTheDocument();
+  });
+
+  it("marks the forecast series and leaves the attributed one unmarked (R-V8)", () => {
+    panel();
+
+    expect(within(legend()).getByText("Session cost")).not.toHaveTextContent(/estimat/i);
+    expect(within(legend()).getByText("Projected (estimated)")).toHaveTextContent(/estimated/i);
+  });
+
+  it("gives the R-X1 mirror a column for each series, headed by the day", () => {
+    panel();
+
+    expect(
+      within(screen.getByRole("table"))
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Day", "Session cost", "Projected (estimated)"]);
+  });
+
+  it("draws a day still to come as a projected figure on no attributed one", () => {
+    panel();
+
+    // The row reads: 9 Sep 2026, nothing spent, 9 projected — the shape of every future bar.
+    expect(screen.getByRole("row", { name: "9 Sep 2026 0 9" })).toBeInTheDocument();
+    // And today carries both halves, which is the only bar that does.
+    expect(screen.getByRole("row", { name: "8 Sep 2026 5 4" })).toBeInTheDocument();
   });
 });
