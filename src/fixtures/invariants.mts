@@ -19,7 +19,13 @@ import { githubUsers, members } from "./people.mts";
 import { crossesUtcDay, startsLateEvening } from "./predicates.mts";
 import { madridOffsetMinutes } from "./schedule.mts";
 import { tokenScaleLines } from "./scale.mts";
-import { modelMixLines, totalSpendLines, trendLines, weeklySpendLines } from "./spend.mts";
+import {
+  familyMixLines,
+  modelMixLines,
+  totalSpendLines,
+  trendLines,
+  weeklySpendLines,
+} from "./spend.mts";
 import {
   CHILD_EDGE_SECONDS,
   CHILD_ROOT_SHARE,
@@ -218,10 +224,14 @@ const assertScale = (): string[] => {
   const humans = members.filter((member) => member.kind === "human");
   check(members.length === 20 && humans.length === 18, "R-D3: 20 Members, 18 of them human");
   check(repositories.length === 5 && workTypes.length === 5, "R-D3: 5 Repositories, 5 WorkTypes");
-  check(models.length === 7, "R-D3: 7 Models");
+  check(models.length === 10, "R-D3: 10 Models");
   check(new Set(models.map((model) => model.vendor)).size === 3, "R-D3: 3 vendors");
+  check(new Set(models.map((model) => model.family)).size === 8, "R-D3: 8 Model families");
   check(organization.slug === "demo", "R-A1: the seeded Organization is `demo`");
-  return [`R-D3 ${members.length} Members (${humans.length} human) · 5 Repositories · 7 Models`];
+  return [
+    `R-D3 ${members.length} Members (${humans.length} human) · 5 Repositories · ` +
+      `${models.length} Models in ${new Set(models.map((model) => model.family)).size} families`,
+  ];
 };
 
 export const assertFixture = (fixture: {
@@ -252,6 +262,7 @@ export const assertFixture = (fixture: {
     ...edgeCaseLines(fixture.sessions.filter(isRoot), roots),
     ...tokenScaleLines(fixture.sessions.filter(isRoot), roots),
     ...populationLines(roots),
+    ...familyMixLines(roots),
     ...modelMixLines(roots),
     ...trendLines(roots),
     ...totalSpendLines(roots),

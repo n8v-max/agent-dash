@@ -1,30 +1,40 @@
-// Money and Model mix. R-D16's headline is *derived here from ADR-0007's card and the tokens
-// the generator actually emitted* — never hardcoded.
+// Money and Model mix. **Nothing about the mix is hardcoded here**: the family table is the
+// authored thing (`targets.mts`), the tier shares are derived from it and the roster, and
+// R-D16's spend headline is priced from ADR-0011's card against the tokens the generator
+// actually emitted.
 //
 // **`roots` means visible root sessions carrying their children's cost and tokens** (R-M19): the
 // tier shares are token-grain and a child's tokens are its root's to answer for, and the median
 // session cost is the median of an *attempt*, not of an agent. Ticket 16's "~56% of token spend" was
 // computed against a card ADR-0007 replaced, which is exactly the failure mode this avoids.
 
-import { SEAT_FEE_MONTHLY_USD } from "./catalog.mts";
+import { modelById, SEAT_FEE_MONTHLY_USD } from "./catalog.mts";
 import { check, near, percent } from "./check.mts";
 import { weeklySpendTarget, weeklySpendTolerance } from "./curve.mts";
 import { humanMembers } from "./people.mts";
-import { tierTotals } from "./pricing.mts";
+import { tierTotals, tokenTotal } from "./pricing.mts";
 import { median, quantile, sum } from "./rng.mts";
 import { weekOfRow } from "./rows.mts";
 import { WEEK_COUNT } from "./schedule.mts";
 import {
-  FRONTIER_SHARE_BY_MONTH,
+  FAMILY_SHARE_POINTS,
+  FAMILY_SHARE_TOLERANCE,
+  FRONTIER_TOKEN_SHARE_BAND,
+  MODEL_FAMILIES,
   SEAT_SHARE_CEILING,
-  TIER_TOKEN_SHARE,
+  VENDOR_SHARE_TOLERANCE,
+  VENDOR_TOKEN_SHARE,
+  WINDOW_MONTHS,
 } from "./targets.mts";
-import type { AgentSession, ModelTier } from "./types.mts";
+import { tierTargets } from "./tokens.mts";
+import type { AgentSession, ModelTier, TokenUsage } from "./types.mts";
 
 const TIERS: readonly ModelTier[] = ["frontier", "balanced", "fast"];
-const WINDOW_MONTHS = Object.keys(FRONTIER_SHARE_BY_MONTH);
 
 const usagesOf = (rows: readonly AgentSession[]) => rows.flatMap((row) => row.token_usage);
+
+const monthRows = (rows: readonly AgentSession[], month: string): AgentSession[] =>
+  rows.filter((row) => row.started_at.startsWith(month));
 
 const shareOf = (totals: Record<ModelTier, { tokens: number; spend: number }>, field: "tokens" | "spend") => {
   const total = TIERS.reduce((acc, tier) => acc + totals[tier][field], 0);
@@ -34,12 +44,84 @@ const shareOf = (totals: Record<ModelTier, { tokens: number; spend: number }>, f
   >;
 };
 
+const tokensOf = (usages: readonly TokenUsage[]): number =>
+  sum(usages.map((usage) => tokenTotal(usage)));
+
+/** A month's token totals, keyed however the caller groups a Model. */
+const shareByKey = (
+  usages: readonly TokenUsage[],
+  keyOf: (modelId: string) => string,
+): Record<string, number> => {
+  const held: Record<string, number> = {};
+  for (const usage of usages) {
+    const key = keyOf(usage.model_id);
+    held[key] = (held[key] ?? 0) + tokenTotal(usage);
+  }
+  const total = Math.max(1, sum(Object.values(held)));
+  return Object.fromEntries(Object.entries(held).map(([key, value]) => [key, value / total]));
+};
+
+const familyOf = (modelId: string): string => modelById(modelId).family;
+const vendorOf = (modelId: string): string => modelById(modelId).vendor;
+
+/**
+ * **R-D17 — the family table, asserted month by month against the figures the human authored**
+ * (ticket 70), and R-D16's vendor split over the whole window.
+ *
+ * The monthly assertion is against `FAMILY_SHARE_POINTS` — the authored numbers — rather than
+ * against the normalised table the generator draws from, so the ±2 points absorbs the
+ * normalisation as well as the draw. Three of the six authored rows sum to 99 and normalising
+ * them moves no family by more than 0.3 of a point.
+ */
+export const familyMixLines = (roots: readonly AgentSession[]): string[] => {
+  const lines: string[] = [];
+  for (const month of WINDOW_MONTHS) {
+    const shares = shareByKey(usagesOf(monthRows(roots, month)), familyOf);
+    for (const family of MODEL_FAMILIES) {
+      const authored = FAMILY_SHARE_POINTS[family][WINDOW_MONTHS.indexOf(month)] / 100;
+      check(
+        Math.abs((shares[family] ?? 0) - authored) <= FAMILY_SHARE_TOLERANCE,
+        `R-D17: ${family} holds ${percent(shares[family] ?? 0)} of ${month}'s tokens ` +
+          `against an authored ${percent(authored)}`,
+      );
+    }
+    lines.push(
+      `R-D17 ${month} ${MODEL_FAMILIES.map(
+        (family) => `${family} ${percent(shares[family] ?? 0)}`,
+      ).join(" · ")}`,
+    );
+  }
+
+  const vendors = shareByKey(usagesOf(roots), vendorOf);
+  for (const [vendor, target] of Object.entries(VENDOR_TOKEN_SHARE)) {
+    check(
+      Math.abs((vendors[vendor] ?? 0) - target) <= VENDOR_SHARE_TOLERANCE,
+      `R-D16: ${vendor} holds ${percent(vendors[vendor] ?? 0)} of the window's tokens against a target of ${percent(target)}`,
+    );
+  }
+  lines.push(
+    `R-D16 vendor token share ${Object.keys(VENDOR_TOKEN_SHARE)
+      .map((vendor) => `${vendor} ${percent(vendors[vendor] ?? 0)}`)
+      .join(" · ")}`,
+  );
+  return lines;
+};
+
+/**
+ * **R-D16 — the tier shares are derived from the family table, and the invariant is asserted
+ * over what was emitted** (rewritten, ticket 70).
+ *
+ * There is no authored tier target any more: `tierTargets` reads `FAMILY_SHARE_BY_MONTH` and the
+ * roster, so a tier share is a consequence of which families a month reached for. What survives
+ * as a *claim* is ADR-0007's invariant — the frontier tier carries more token spend than any
+ * other tier while holding the smallest token share — and it is checked against the tokens the
+ * generator actually wrote, priced from the card, never hardcoded.
+ */
 export const modelMixLines = (roots: readonly AgentSession[]): string[] => {
-  const totals = tierTotals(usagesOf(roots));
+  const usages = usagesOf(roots);
+  const totals = tierTotals(usages);
   const tokens = shareOf(totals, "tokens");
   const spend = shareOf(totals, "spend");
-  // The invariant, stated as ADR-0007 states it: the frontier tier carries more token spend
-  // than any other tier while holding the smallest token share.
   for (const tier of TIERS.filter((candidate) => candidate !== "frontier")) {
     check(
       spend.frontier > spend[tier],
@@ -50,31 +132,90 @@ export const modelMixLines = (roots: readonly AgentSession[]): string[] => {
       `R-D16: frontier token share ${percent(tokens.frontier)} is not below ${tier} ${percent(tokens[tier])}`,
     );
   }
+  for (const month of ["window", ...WINDOW_MONTHS]) {
+    const share =
+      month === "window"
+        ? tokens.frontier
+        : (() => {
+            const totals = tierTotals(usagesOf(monthRows(roots, month)));
+            return (
+              totals.frontier.tokens /
+              TIERS.reduce((acc, tier) => acc + totals[tier].tokens, 0)
+            );
+          })();
+    check(
+      share >= FRONTIER_TOKEN_SHARE_BAND.min && share <= FRONTIER_TOKEN_SHARE_BAND.max,
+      `R-D16: frontier holds ${percent(share)} of ${month}'s tokens, outside the ${percent(
+        FRONTIER_TOKEN_SHARE_BAND.min,
+      )}–${percent(FRONTIER_TOKEN_SHARE_BAND.max)} band the family table implies`,
+    );
+  }
+  // The derived target, month by month, so a drift between the table and the draw fails here.
+  const derived = TIERS.map((tier) => {
+    const weighted = WINDOW_MONTHS.map((month) => {
+      const rows = monthRows(roots, month);
+      return { share: tierTargets(month)[tier], tokens: tokensOf(usagesOf(rows)) };
+    });
+    const total = sum(weighted.map((entry) => entry.tokens));
+    return [tier, sum(weighted.map((entry) => entry.share * entry.tokens)) / total] as const;
+  });
   return [
-    ...TIERS.map((tier) => near(`R-D16 token share ${tier}`, tokens[tier], TIER_TOKEN_SHARE[tier], 0.02)),
+    ...derived.map(([tier, target]) =>
+      near(`R-D16 DERIVED token share ${tier}`, tokens[tier], target, 0.02),
+    ),
     `R-D16 DERIVED token spend share: frontier ${percent(spend.frontier)} · balanced ${percent(
       spend.balanced,
     )} · fast ${percent(spend.fast)} — on ${percent(tokens.frontier)} of tokens`,
   ];
 };
 
-// R-D17 — the frontier share falls from 25% in April to 10% in August. Spend per session
-// drops while session count rises: the one thing on the dashboard a reader can act on.
+// **R-D17 — the frontier tier *rises* late in the window** (rewritten, ticket 70). It fell, from
+// 25% to 10%, while the roster stopped at `gpt-6-astra` and `claude-opus-5`. With `claude-fable-
+// 5-1` arriving in June and Astra growing through the summer it rises instead, and the
+// optimisation story moves to `Claude Haiku`, whose share falls from 28 points to 10 as the
+// balanced models get good enough to be the default. Both halves are asserted.
 export const trendLines = (roots: readonly AgentSession[]): string[] => {
   const monthly = WINDOW_MONTHS.map((month) => {
-    const rows = roots.filter((row) => row.started_at.startsWith(month));
-    const totals = tierTotals(usagesOf(rows));
+    const rows = monthRows(roots, month);
+    const usages = usagesOf(rows);
+    const totals = tierTotals(usages);
     const tokens = TIERS.reduce((acc, tier) => acc + totals[tier].tokens, 0);
-    return { month, rows: rows.length, share: totals.frontier.tokens / tokens };
+    const haiku = sum(
+      usages.filter((usage) => usage.model_id === "claude-haiku-4-5").map(tokenTotal),
+    );
+    return {
+      month,
+      rows: rows.length,
+      frontier: totals.frontier.tokens / tokens,
+      haiku: haiku / tokens,
+    };
   });
-  const lines = monthly.map(({ month, share }) =>
-    near(`R-D17 frontier tokens ${month}`, share, FRONTIER_SHARE_BY_MONTH[month], 0.03),
-  );
   const april = monthly[0];
-  const august = monthly[monthly.length - 2];
-  check(april.share - august.share >= 0.1, "R-D17: the frontier share did not fall across the window");
-  check(august.rows > april.rows, "R-D17: session volume did not rise across the window");
-  return lines;
+  const september = monthly[monthly.length - 1];
+  for (const [at, entry] of monthly.entries()) {
+    if (at === 0) continue;
+    check(
+      entry.frontier > monthly[at - 1].frontier,
+      `R-D17: the frontier share did not rise from ${monthly[at - 1].month} to ${entry.month}`,
+    );
+  }
+  check(
+    september.frontier - april.frontier >= 0.1,
+    `R-D17: the frontier share did not rise across the window (${percent(april.frontier)} → ${percent(
+      september.frontier,
+    )})`,
+  );
+  check(
+    april.haiku - september.haiku >= 0.1,
+    `R-D17: Claude Haiku did not fade across the window (${percent(april.haiku)} → ${percent(
+      september.haiku,
+    )})`,
+  );
+  check(september.rows > april.rows, "R-D17: session volume did not rise across the window");
+  return monthly.map(
+    ({ month, frontier, haiku }) =>
+      `R-D17 ${month} frontier ${percent(frontier)} · Claude Haiku ${percent(haiku)}`,
+  );
 };
 
 // R-D4 — **the seat fee is a minor share of Total spend** (rewritten, ticket 66). It used to be

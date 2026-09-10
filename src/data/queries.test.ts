@@ -19,7 +19,7 @@
 import { describe, expect, it } from "vitest";
 import { roleFor,
   sealViewer, membershipFromTeams, type Viewer } from "@/domain/access";
-import type { ChartViewModel } from "@/domain/viewmodel";
+import { STACKABLE_GROUPINGS, type ChartViewModel } from "@/domain/viewmodel";
 import { datasetAsOf } from "./as-of";
 import { controlsWith, defaultControls, type ControlSet, type PageKey } from "./params";
 import { bucketRows, planPeriods } from "@/domain/periods";
@@ -553,12 +553,22 @@ describe("R-V1 — `stackable` follows the partition, not the panel", () => {
     }
   });
 
-  it("stacks the partitions R-V1 names: Model, the spans, the cost split", () => {
+  it("stacks the partitions R-V1 names: the spans, the cost split", () => {
     // The `/demo` WorkType tile is deliberately absent from this list — C11. `stackable` is keyed
     // on (grouping × measure), and WorkType does not partition a Task-grained measure.
     expect(OPEN_PAGES.spend.totalSpend.chart.stackable).toBe(true);
-    expect(OPEN_PAGES.spend.adoption.modelMix.chart.stackable).toBe(true);
     expect(OPEN_PAGES.work.presenceSpans.chart.stackable).toBe(true);
+  });
+
+  // **Model is still a permitted partition, and the Model mix panel still does not stack**
+  // (ticket 70). The two are not in tension: R-V1 permits, it does not require, and the third
+  // conjunct is the measure. The panel plots each Model's *share* of a period's tokens — a
+  // ratio — so `stackable` is false for the reason it is false on every other ratio in the
+  // product, and not because anything decided Model stopped partitioning the tokens.
+  it("does not stack the Model mix, because a share of a whole is not a part of one", () => {
+    expect(STACKABLE_GROUPINGS.model).toBe(true);
+    expect(OPEN_PAGES.spend.adoption.modelMix.chart.stackable).toBe(false);
+    expect(OPEN_PAGES.spend.adoption.modelMix.levels.family.stackable).toBe(true);
   });
 
   it("never stacks a ratio, even where the grouping partitions the rows", () => {
@@ -1063,5 +1073,94 @@ describe("R-N23 — the projection is read off the rows its own chart draws (tic
 
     expect(spent.length).toBeGreaterThan(0);
     expect(spent.filter((point) => point.bucket > today)).toEqual([]);
+  });
+});
+
+/**
+ * **The Model mix panel, after ticket 70** — the one panel in the product whose series set is a
+ * closed roster, and the only one exempt from the five-colour cap (R-V7 as amended).
+ *
+ * Everything here is derived from the committed roster rather than written down: the roster
+ * grew from seven Models to ten on 2026-09-10 and will grow again, and a literal count is a
+ * literal the next roster edit re-types without checking anything.
+ */
+describe("Model mix — a closed roster, drawn as share over time (R-V7, R-D17, ticket 70)", () => {
+  const pageAt = (level: "exact" | "family" | "tier") =>
+    spendPage(OPEN, paramsFor("spend", { modelLevel: level })).adoption.modelMix;
+
+  const rosterSizes = {
+    exact: data.models.length,
+    family: new Set(data.models.map((model) => model.family)).size,
+    tier: new Set(data.models.map((model) => model.tier)).size,
+  } as const;
+
+  it.each(["exact", "family", "tier"] as const)(
+    "draws every Model at level %s and folds none of them into Other",
+    (level) => {
+      const mix = pageAt(level);
+
+      expect(mix.chart.series).toHaveLength(rosterSizes[level]);
+      expect(mix.chart.other).toBeNull();
+      expect(mix.chart.series.some((series) => series.inert)).toBe(false);
+      // Ten distinct colours, all of them from the panel's own palette.
+      const colours = mix.chart.series.map((series) => series.colorVar);
+      expect(new Set(colours).size).toBe(colours.length);
+      expect(colours.every((colour) => colour.startsWith("--model-"))).toBe(true);
+    },
+  );
+
+  /** A series' readings, with R-M18's absences dropped — the buckets past `now` have none. */
+  const readingsOf = (
+    mix: ReturnType<typeof pageAt>,
+    key: string,
+  ): readonly number[] =>
+    (mix.chart.series.find((series) => series.key === key)?.points ?? []).flatMap((point) =>
+      point.value === null ? [] : [point.value],
+    );
+
+  it("plots a share of each period's tokens, in whole points on a 0–100 scale", () => {
+    const mix = pageAt("exact");
+    const values = mix.chart.series.flatMap((series) =>
+      series.points.map((point) => point.value),
+    );
+
+    expect(values.length).toBeGreaterThan(0);
+    for (const value of values) {
+      if (value === null) continue;
+      expect(Number.isInteger(value)).toBe(true);
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(100);
+    }
+    // **A bucket is all readings or no readings** (R-M18). The window runs past `now` (ticket
+    // 62), so its last buckets hold no session and therefore no denominator: a share of nothing
+    // is an absence, not ten zeroes, and the lines break there rather than dropping to the floor.
+    for (const [at, bucket] of mix.chart.buckets.entries()) {
+      const readings = mix.chart.series.map((series) => series.points[at].value);
+      const present = readings.filter((value) => value !== null);
+      expect([0, readings.length], `bucket ${bucket.key}`).toContain(present.length);
+      // A share, so a bucket that has readings adds to ~100 across the roster. Not exactly:
+      // the points are whole numbers, and the chart does not stack, so no geometry claims they do.
+      if (present.length === 0) continue;
+      const total = present.reduce((running, value) => running + (value ?? 0), 0);
+      expect(Math.abs(total - 100)).toBeLessThanOrEqual(rosterSizes.exact / 2);
+    }
+    expect(mix.chart.buckets.filter((bucket) => bucket.partial).length).toBeGreaterThan(0);
+  });
+
+  it("shows Claude Haiku fading: its last reading is well under its first (R-D17)", () => {
+    const points = readingsOf(pageAt("exact"), "claude-haiku-4-5");
+
+    expect(points.length).toBeGreaterThan(1);
+    expect(points.at(-1)).toBeLessThanOrEqual(12);
+    expect(points[0]).toBeGreaterThan((points.at(-1) as number) + 10);
+  });
+
+  it("shows the frontier rising: Claude Fable starts absent and ends present", () => {
+    const points = readingsOf(pageAt("exact"), "claude-fable-5-1");
+
+    expect(points.length).toBeGreaterThan(1);
+    // A measured zero, not a gap: April had tokens, and none of them were Fable's.
+    expect(points[0]).toBe(0);
+    expect(points.at(-1)).toBeGreaterThan(5);
   });
 });

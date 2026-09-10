@@ -183,6 +183,18 @@ const TOKEN_CLASSES = ["uncached_input", "cache_read", "cache_write", "output"] 
 const figuresOf = (rate: TokenRate): readonly number[] =>
   TOKEN_CLASSES.map((tokenClass) => rate[tokenClass]);
 
+/**
+ * **The committed Model roster** (ADR-0011). Read as data for the reason everything else here
+ * is: a count typed into a spec is a count the next roster edit re-types without checking, and
+ * ticket 70 took this from seven rows to ten.
+ */
+export const models = (): readonly {
+  readonly id: string;
+  readonly vendor: string;
+  readonly family: string;
+  readonly tier: string;
+}[] => readFixture("models.json");
+
 /** Every number the R-N11 token card puts on the page: the multipliers and the per-model rates. */
 export const tokenRateCardFigures = (): readonly number[] => {
   const card = readFixture<RateCards>("rate_cards.json").token;

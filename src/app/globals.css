@@ -79,6 +79,30 @@
     --chart-3: #1baf7a;
     --chart-4: #eda100;
     --chart-5: #e87ba4;
+    /* The Model mix panel's own palette (R-V7 as amended, ticket 70). Ten slots, because the
+       Model roster is a closed set of ten (ADR-0011) and folding six of them into "Other"
+       would delete the finding the panel exists to show. Vendor-hued as a set: five warm
+       steps for Anthropic (terracotta #96372b → ochre #d1ad32), three cool for OpenAI (navy
+       #2e4b9f → teal #06afb1) and two greens for Google.
+
+       The slot ORDER is not the vendor order and that is the point — colours are assigned by
+       walking the palette, so adjacent slots are adjacent legend entries, and interleaving the
+       three hue families is what clears the separation gates at ten slots that five warm steps
+       in a row could not. Derived with the dataviz skill's validator, not by eye: lightness
+       band and chroma floor pass, worst adjacent CVD ΔE 11.3 (deutan), worst adjacent
+       normal-vision ΔE 22.1, against the light surface. Four slots sit under 3:1 on white; the
+       relief is the same one --chart-1..5 relies on — every chart carries a legend naming each
+       series and an R-X1 table mirror carrying every figure. */
+    --model-1: #c87301;
+    --model-2: #06afb1;
+    --model-3: #cf931c;
+    --model-4: #0f7dcc;
+    --model-5: #0a7e3a;
+    --model-6: #2e4b9f;
+    --model-7: #bd4d00;
+    --model-8: #6bad48;
+    --model-9: #96372b;
+    --model-10: #d1ad32;
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
@@ -118,6 +142,20 @@
     --chart-3: #199e70;
     --chart-4: #c98500;
     --chart-5: #d55181;
+    /* The same ten hues re-stepped for the dark surface, in the same slot order — selected, not
+       flipped. Validated against the dark card (#171717): lightness band and chroma floor pass,
+       worst adjacent CVD ΔE 10.2 (deutan), worst adjacent normal-vision ΔE 20.9; two slots
+       under 3:1, with the legend and the mirror as the relief. */
+    --model-1: #b06505;
+    --model-2: #0ca5a7;
+    --model-3: #b27c01;
+    --model-4: #0b7bca;
+    --model-5: #11813c;
+    --model-6: #3a5cb8;
+    --model-7: #b14802;
+    --model-8: #61a13d;
+    --model-9: #9d3d31;
+    --model-10: #b29000;
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);

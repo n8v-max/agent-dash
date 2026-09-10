@@ -1,5 +1,5 @@
 // The authored vocabularies: the Organization, the five Repositories, the five WorkTypes,
-// ADR-0007's seven-model roster, and both rate cards. Serialised as-is — these imitate a
+// ADR-0011's ten-model roster, and both rate cards. Serialised as-is — these imitate a
 // mocked internal API (R-T19), except the repositories, which imitate the GitHub API.
 
 import { WINDOW_DAYS, WINDOW_END_DAY, WINDOW_START_DAY } from "./targets.mts";
@@ -92,17 +92,29 @@ export const workTypes: WorkType[] = [
   },
 ];
 
-// ADR-0007 — seven models, three vendors, tiers 2/2/3, every tier cross-vendor, `family`
-// carrying the vendor. Input prices are real as verified on 2026-09-07; the roster replaces
-// ticket 16's, three of whose seven strings did not exist.
+// ADR-0011, amending ADR-0007 — **ten models, three vendors, tiers 3/4/3**, every tier
+// cross-vendor, `family` carrying the vendor line across versions. Input prices are real:
+// ADR-0007's seven were verified on 2026-09-07 and the three additions on 2026-09-10.
+//
+// **`family` is the vendor line, not the version**, which is why `claude-sonnet-4-6` and
+// `claude-sonnet-5` share `Claude Sonnet` and `gpt-5-nano` and `gpt-5.2` share `OpenAI GPT-5`.
+// That is ticket 16's naming approach applied to a roster that now spans two versions of a line;
+// it is also what makes the family level a *presence over time* rather than a second spelling of
+// the exact level (R-D17).
+//
+// **The 200× spread survives the roster growing**: `claude-fable-5-1` and `gpt-6-astra` at 10.00
+// against `gpt-5-nano` at 0.05, with no thumb on the scale (CONTEXT.md § Models & Money).
 const ROSTER: readonly (readonly [string, string, string, Model["tier"], number])[] = [
-  ["gpt-6-astra", "OpenAI", "OpenAI GPT-6 Astra", "frontier", 10.0],
+  ["claude-fable-5-1", "Anthropic", "Claude Fable", "frontier", 10.0],
   ["claude-opus-5", "Anthropic", "Claude Opus", "frontier", 5.0],
+  ["gpt-6-astra", "OpenAI", "OpenAI GPT-6 Astra", "frontier", 10.0],
+  ["claude-sonnet-4-6", "Anthropic", "Claude Sonnet", "balanced", 3.0],
   ["claude-sonnet-5", "Anthropic", "Claude Sonnet", "balanced", 2.0],
+  ["gpt-5.2", "OpenAI", "OpenAI GPT-5", "balanced", 1.75],
   ["gemini-3.1-pro-preview", "Google", "Gemini Pro", "balanced", 2.0],
   ["claude-haiku-4-5", "Anthropic", "Claude Haiku", "fast", 1.0],
   ["gemini-3.5-flash-lite", "Google", "Gemini Flash-Lite", "fast", 0.3],
-  ["gpt-5-nano", "OpenAI", "OpenAI GPT-5 nano", "fast", 0.05],
+  ["gpt-5-nano", "OpenAI", "OpenAI GPT-5", "fast", 0.05],
 ];
 
 export const models: Model[] = ROSTER.map(([id, vendor, family, tier]) => ({
@@ -111,6 +123,9 @@ export const models: Model[] = ROSTER.map(([id, vendor, family, tier]) => ({
   family,
   tier,
 }));
+
+/** The distinct `family` values, in roster order — the Model mix's own series set (R-V7). */
+export const modelFamilies: readonly string[] = [...new Set(models.map((model) => model.family))];
 
 export const modelById = (id: string): Model => {
   const found = models.find((model) => model.id === id);

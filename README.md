@@ -125,9 +125,10 @@ can bypass the schema validation at the boundary. Hidden sessions — the ~2% th
 are stripped once, at parse, so nothing downstream can forget to.
 
 **The fixture generator is committed, seeded, and so is its output** (`src/fixtures/`). 3,626
-Tasks and 7,761 root AgentSessions plus their sub-agent children — 10,854 rows on disk, 59.5B
-tokens and $59,258 of attributed session cost — over a 167-day window closing 2026-09-25, across
-20 Members, 4 overlapping Teams, 5 Repositories, 5 WorkTypes and 7 Models from 3 vendors. **The window runs past today on purpose**, and the
+Tasks and 7,761 root AgentSessions plus their sub-agent children — 10,854 rows on disk, 61.5B
+tokens and $72,682 of attributed session cost — over a 167-day window closing 2026-09-25, across
+20 Members, 4 overlapping Teams, 5 Repositories, 5 WorkTypes and 10 Models in 8 families from 3
+vendors. **The window runs past today on purpose**, and the
 application cuts the dataset at `now` once, at the data boundary.
 Datasets are shaped by where they would really come from — one file per `(repository × work_type)`
 for platform events, GitHub field names for the mocked GitHub API — and the generator asserts its
@@ -136,7 +137,9 @@ them carry one surname to the other half's two, so a name in a legend identifies
 surface may assume a three-word shape. On a workday each human Member runs one to nine sessions,
 rising along a logistic from April, and weekly spend follows the same curve inside an authored
 band. A Member-month runs to ~110M tokens at the median and to 2–3B for the leaders, and no
-attempt processes fewer than 75,000 tokens. Tests read the committed output and never run the
+attempt processes fewer than 75,000 tokens. **The Model mix moves month by month** — Haiku fading
+from 28% of tokens to 10% while Fable and Astra arrive — which is what makes the spend curve
+steeper than the volume curve, and the only price ramp anywhere in the generator. Tests read the committed output and never run the
 generator, and CI regenerates from the seed and diffs, so the data the tests pass against is the
 data the app ships.
 

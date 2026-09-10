@@ -62,14 +62,22 @@ describe("R-M9 — tokens are never presented beside a spend figure", () => {
  * So the assertion is on the tick text — found by text, like any other string on the page, rather
  * than by reaching into Recharts' SVG. The formatter itself is pinned in `figures.test.ts`.
  *
- * Two of each, because there are two charts: the volume line and the Model mix bars.
+ * **One chart, not two, since ticket 70.** The Model mix beside it stopped being a volume: it
+ * plots each Model's share of a period's tokens on a fixed 0–100% axis, so its ticks read `25%`
+ * and `50%` and a token unit on them would be a category error. The two axes are asserted
+ * together here so that a panel wired to the wrong formatter fails in one place.
  */
-describe("ticket 69 — the token axes read in K, M and B", () => {
-  it("labels both charts' measure axes in units, never in seven digits", () => {
+describe("ticket 69 — the token axis reads in K, M and B; ticket 70 — the mix axis in %", () => {
+  it("labels the volume axis in units and the mix axis in per cent, never in seven digits", () => {
     render(<AdoptionSection adoption={adoptionFixture()} dimension={SIZE} />);
 
-    expect(screen.getAllByText("4M")).toHaveLength(2);
-    expect(screen.getAllByText("2M")).toHaveLength(2);
+    expect(screen.getAllByText("4M")).toHaveLength(1);
+    expect(screen.getAllByText("2M")).toHaveLength(1);
+    // The Model mix panel's own scale: pinned 0–100, so a filter that leaves one Model at 40%
+    // does not redraw its line at the top of the card.
+    for (const tick of ["0%", "50%", "100%"]) {
+      expect(screen.getAllByText(tick).length).toBeGreaterThan(0);
+    }
     // The spelling this replaced: `ChartFrame`'s own default, whose `en-GB` compact notation is
     // lower-case and reads as a different kind of figure from the `4M` in the column beside it.
     expect(screen.queryByText("4m")).toBeNull();

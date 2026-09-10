@@ -31,7 +31,14 @@
 // This module is PURE (R-T5): no React, no Next, no fs, no JSON, no wall clock, no environment.
 
 import type { Change } from "./change";
-import { capSeries, type Series, type SeriesSet } from "./series";
+import {
+  CHART_COLOR_VARS,
+  MODEL_MIX_COLOR_VARS,
+  capSeries,
+  type ChartPalette,
+  type Series,
+  type SeriesSet,
+} from "./series";
 
 // --- The pieces a panel renders -------------------------------------------------------------
 
@@ -166,6 +173,40 @@ export const STACKABLE_GROUPINGS: Readonly<Record<Grouping, boolean>> = {
 };
 
 /**
+ * **R-V7's amendment, as data** (ticket 70). Which palette a grouping's chart is painted from —
+ * and therefore how many series it may carry, because `capSeries` takes the cap from the palette.
+ *
+ * A total lookup on the closed `Grouping` union, for the reason `STACKABLE_GROUPINGS` is one: a
+ * grouping added here without a palette is a type error rather than a chart that quietly falls
+ * back to five colours. Every grouping but `model` is a **comparison** over an open dimension —
+ * more Members, more Repositories, more Teams arrive over time — and top four plus "Other" is
+ * the reading R-V4 exists to give. `model` is the exception because the roster is **closed**:
+ * ten authored rows (ADR-0011), and a reader looking at the mix is choosing between exactly
+ * those ten, so an "Other" holding six of them would delete the finding.
+ */
+export const PALETTE_BY_GROUPING: Readonly<Record<Grouping, ChartPalette>> = {
+  work_type: CHART_COLOR_VARS,
+  model: MODEL_MIX_COLOR_VARS,
+  execution_mode: CHART_COLOR_VARS,
+  presence_span: CHART_COLOR_VARS,
+  machine_spec: CHART_COLOR_VARS,
+  cost_component: CHART_COLOR_VARS,
+  projection_component: CHART_COLOR_VARS,
+  repository: CHART_COLOR_VARS,
+  team: CHART_COLOR_VARS,
+  member: CHART_COLOR_VARS,
+  organization: CHART_COLOR_VARS,
+  measure: CHART_COLOR_VARS,
+};
+
+/**
+ * **The seam.** The one expression in the product that decides what a chart is painted from —
+ * so `seriesFrom` hands `capSeries` a palette rather than `capSeries` knowing what a Model is,
+ * and a panel has nothing to pass.
+ */
+export const paletteFor = (grouping: Grouping): ChartPalette => PALETTE_BY_GROUPING[grouping];
+
+/**
  * Whether a chart's measure is a sum of row figures or a reading derived from two of them.
  * A **ratio is never stackable**: cost per completed Task by WorkType groups on a partition of
  * the sessions, and the five ratios still do not add up to an Organization ratio.
@@ -270,6 +311,8 @@ const seriesFrom = (input: ChartInput): SeriesSet => {
     labelOf: input.labelOf,
     // R-M18 — the one place the measure kind reaches the cap.
     absent: absentOf(input.measure),
+    // R-V7 — and the one place the grouping reaches the palette.
+    palette: paletteFor(input.grouping),
   });
 };
 

@@ -321,7 +321,13 @@ export type Distribution = {
   readonly level: ModelLevel;
   readonly slices: readonly Slice[];
   readonly total: number;
-  /** Always true: exact → family → tier is a true partition, and the contrast case to Team. */
+  /**
+   * Always true: every level partitions the same tokens exactly, which is the contrast case to
+   * Team. **Not a chain, though** — `family` is the vendor's line and `tier` a cross-vendor
+   * capability class, and `OpenAI GPT-5` spans two tiers (ticket 70). Each level is computed
+   * from the exact entries below rather than from the level above it, so that is a property of
+   * the data and not something this function has to know.
+   */
   readonly partition: boolean;
 };
 
@@ -334,7 +340,8 @@ const LABEL_OF: Readonly<Record<ModelLevel, (model: ModelFacts) => string>> = {
 /**
  * Model mix at one roll-up level — a **distribution** (R-M7). Every level is a true partition of
  * the same token-grain measure, so all three carry the same total; T-U6 asserts that as the
- * contrast to Team.
+ * contrast to Team. Each is summed from the **exact** entries, never from the level below it,
+ * which is why a family straddling two tiers (`OpenAI GPT-5`, ticket 70) costs nothing here.
  *
  * An entry naming a Model outside the roster is counted nowhere, on the same rule as an
  * unattributable row.

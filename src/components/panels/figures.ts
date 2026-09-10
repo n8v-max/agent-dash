@@ -188,6 +188,18 @@ export const usdTick = (value: number): string => MONEY_TICK.format(value);
  */
 export const tokensTick = (value: number): string => inTokenUnits(value, noDecimals);
 
+/**
+ * **A share axis tick, where the figure on the wire is already in percentage points** (ticket
+ * 70). The Model mix panel plots a Model's share of a bucket's tokens as a whole number 0–100,
+ * so the tick appends the sign rather than multiplying — `percent` above takes a *fraction*, and
+ * putting the two through one function would silently render 28% as 2,800%.
+ *
+ * Whole numbers, like every other tick in the product, for `usdTick`'s reason: a tick is a
+ * position on a scale rather than a figure to read off, and a decimal on an axis is a decimal in
+ * the payload `e2e/payload.spec.ts` scans.
+ */
+export const sharePointTick = (value: number): string => `${WHOLE.format(value)}%`;
+
 /** The same function under the name the summary tiles reach for. */
 export const figureText = formatFigure;
 

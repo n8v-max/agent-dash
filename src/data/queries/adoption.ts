@@ -95,16 +95,12 @@ const distributionOf = (distribution: Distribution): DistributionViewModel => ({
 });
 
 /**
- * Tokens by Model label, per bucket. Entries naming a Model outside the roster are counted
- * nowhere — the same rule `modelMix` applies, restated here because this pass is per bucket.
- */
-/**
  * The series key for a Model grouping — an identifier, never a display label.
  *
  * `family` is the one Model level whose value is authored for a reader ("Claude Sonnet"), and a
  * series key travels further than the other keys do: R-T30 turns it into a CSS custom property,
  * and `--color-Claude Sonnet` is not a valid property name, so the declaration is dropped and the
- * mark renders unpainted. The legend swatch reads `--chart-N` directly and stays coloured, which
+ * mark renders unpainted. The legend swatch reads the palette variable directly and stays coloured, which
  * makes it the silent wrong-colour class R-T30 and T-C3 exist to close rather than a visible
  * error. Every other grouping in the product is already keyed on an id (`team_platform`,
  * `api-gateway`, `balanced`), so this is the only level that needed one.
@@ -114,22 +110,55 @@ const distributionOf = (distribution: Distribution): DistributionViewModel => ({
 const modelGroupKey = (context: PageContext, id: string, level: ModelLevel): string =>
   context.label.model(id, level).replace(/[^\w-]+/g, "-");
 
+/**
+ * **The Model mix chart's own measure: a Model's share of its bucket's tokens, in whole
+ * percentage points** (ticket 70). One cell per (bucket × Model), and three properties are
+ * deliberate:
+ *
+ *   * **It is a share, not a volume.** The panel answers "what was the team running, and how
+ *     did that move" — and a token volume answers it badly, because every line rises together
+ *     with adoption and the mix is the small difference between them. A share holds the mix
+ *     still while the volume ramps, which is the whole of R-D17.
+ *   * **A bucket the Model ran nothing in is a measured `0`, not a gap.** The denominator
+ *     exists — other Models ran — so the reading was taken and it came to nothing, which is a
+ *     line on the floor. A bucket with **no tokens at all** emits no cell and is R-M18's
+ *     absence: no denominator, no reading, and `absent: null` breaks the line there.
+ *   * **Whole points.** A share is read off a 0–100% axis to the nearest point, and rounding it
+ *     here rather than in a formatter keeps the series and the R-X1 mirror the same number
+ *     (T-C1) — and keeps bare decimals the access-model payload scan would have to reason about
+ *     (T-E4) off the wire, for `figures.ts`'s reason.
+ *
+ * Entries naming a Model outside the roster are counted nowhere, in the numerator and in the
+ * denominator alike — the same rule `modelMix` applies, restated here because this pass is per
+ * bucket.
+ */
 const modelCells = (
   context: PageContext,
   level: ModelLevel,
   buckets: readonly PeriodBucket<AgentSession>[],
 ): readonly Cell[] => {
   const roster = new Set(context.data.models.map((model) => model.id));
+  const groups = [
+    ...new Set(context.data.models.map((model) => modelGroupKey(context, model.id, level))),
+  ];
   return buckets.flatMap((bucket) => {
     const totals = new Map<string, number>();
+    let total = 0;
     for (const row of bucket.rows) {
       for (const entry of row.token_usage) {
         if (!roster.has(entry.model_id)) continue;
         const group = modelGroupKey(context, entry.model_id, level);
-        totals.set(group, (totals.get(group) ?? 0) + tokensProcessed(entry));
+        const tokens = tokensProcessed(entry);
+        totals.set(group, (totals.get(group) ?? 0) + tokens);
+        total += tokens;
       }
     }
-    return [...totals].map(([group, value]) => ({ bucket: bucket.key, group, value }));
+    if (total === 0) return [];
+    return groups.map((group) => ({
+      bucket: bucket.key,
+      group,
+      value: Math.round((100 * (totals.get(group) ?? 0)) / total),
+    }));
   });
 };
 
@@ -153,12 +182,15 @@ const modelMixPanel = (context: PageContext): ModelMixPanel => {
       title: "Model mix",
       rollUpLevel: `Model (${level})`,
       grouping: "model",
-      // Every Model level partitions the tokens exactly, so the geometry may assert one (R-V1).
-      measure: "additive",
+      // **A share is a ratio, so the chart does not stack** — and that is a change of claim, not
+      // of styling (ticket 70). The stacked bars this panel drew until this ticket asserted the
+      // partition every Model level really is; a line per Model over time asserts nothing about
+      // the whole and says the thing the panel is for, which is how the mix *moved*. `ratio` is
+      // also what makes a bucket holding no token at all an absence rather than ten zeroes.
+      measure: "ratio",
       buckets: bucketAxis(context, view.buckets),
       cells: modelCells(context, level, view.buckets),
       labelOf: (key) => modelLabels.get(key) ?? key,
-      partition: true,
     }),
     levels: {
       exact: distributionOf(mix.levels.exact),

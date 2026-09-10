@@ -6,12 +6,17 @@
 // through, and the Projection page's method (`domain/metrics/projection.ts`) rests on there
 // being one.
 //
-// **The curve is the volume curve, priced.** `WEEKLY_SPEND_SHAPE` shares `DAILY_VOLUME`'s
-// midpoint and steepness on purpose, and there is no separate price ramp anywhere in this
-// directory. It is *shallower* than the volume curve — 1.39 against λ's 2.03 — and the whole of
-// the difference is R-D17: the frontier tier's token share falls from 25% to 10% across the
-// window against a 200× price spread (ADR-0007), so the average priced token gets cheaper as
+// **The curve is the volume curve, priced**, and there is no separate price ramp anywhere in
+// this directory. It is *steeper* than the volume curve — ~3.1 against λ's 2.03 — and the whole
+// of the difference is R-D17: the frontier tier's token share **rises** from ~12% to ~31% across
+// the window against a 200× price spread (ADR-0011), so the average priced token gets dearer as
 // the sessions get more numerous. That is R-D17's own sentence, priced.
+//
+// **It no longer shares `DAILY_VOLUME`'s midpoint and steepness, and it cannot** (ticket 70).
+// Volume flattens across August; the mix keeps getting dearer to the last week of the window, so
+// their product still rises where λ has stopped. A logistic on λ's midpoint could not follow it,
+// and the alternative to re-fitting was a repair pulling half the weeks onto a curve the fixture
+// does not draw — which is the failure ticket 66 named when it re-fitted the *level*.
 //
 // **What the repair may move, and what it may not.** It scales a week's **token draws** and
 // re-prices from them. It never moves a session between weeks: the schedule is R-D4's other
@@ -21,10 +26,10 @@
 // time per attempt, which is a hard floor under every week's target.
 //
 // **The repair is a trim, not a fit.** A week inside three quarters of its band is left exactly
-// as it was drawn, so the fluctuation the requirement asks for is the fixture's own — late weeks
-// still sit up to 14% off the trend on the committed data. Only a week beyond that is pulled
-// onto the curve, and `spend.mts` then asserts the **full** band over the population the product
-// reads, independently of this module having run. See `WEEKLY_SPEND_BAND.repairAt` for why the
+// as it was drawn, so the fluctuation the requirement asks for is the fixture's own — three of
+// the twenty-four weeks are repaired on the committed data and the worst surviving departure is
+// 29.9% against a ±40% band. Only a week beyond that is pulled onto the curve, and `spend.mts`
+// then asserts the **full** band over the population the product reads, independently of this module having run. See `WEEKLY_SPEND_BAND.repairAt` for why the
 // two thresholds are not the same number.
 
 import { check, percent } from "./check.mts";
@@ -118,8 +123,9 @@ const rescale = (row: AgentSession, scale: number): void => {
  * that week's token draws until the week lands on the curve, and re-pricing from them.
  *
  * Scaling is uniform inside the week, so it moves no Model's share of that week's tokens and
- * therefore neither R-D16's tier shares nor R-D17's monthly frontier trend — both of which are
- * shares of a month's own tokens, and a month is a set of weeks each scaled as a whole.
+ * therefore neither R-D17's monthly family table nor the tier shares R-D16 derives from it —
+ * both of which are shares of a month's own tokens, and a month is a set of weeks each scaled
+ * as a whole.
  * Hidden rows are scaled with the visible ones they sit among, so a hidden row stays
  * indistinguishable from the row it is meant to look like (R-D12).
  */

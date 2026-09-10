@@ -387,6 +387,16 @@ classes derive by uniform ratios (0.1× / 1.25× / 5×), which are Anthropic's a
 all three vendors** — so the card stays illustrative and keeps that label. Frontier over fast is
 exactly 200× with no adjustment.
 
+**Amended 2026-09-10 by [ADR-0011](../../docs/adr/0011-the-roster-grows-to-ten-and-the-mix-moves.md),
+ticket 70.** The roster is **ten models in eight families, 3 vendors, tiers 3/4/3**; the check was
+re-run on OpenAI's current list, where `gpt-5.2` is real at $1.75 input and the ticket's proposed
+`gpt-5-2` is not a string OpenAI publishes. Everything above survives: real inputs, uniform
+derived classes, the illustrative label, and 200× reached with no adjustment — now by
+`claude-fable-5-1` and `gpt-6-astra` at 10.00 against `gpt-5-nano` at 0.05. What is new is that a
+`family` may hold two versions of a line and may therefore straddle two tiers, and that the
+generator's authored target is a **monthly family table** (R-D17) with the tier shares derived
+from it rather than an authored tier split.
+
 ---
 
 ## 7. URL state
@@ -435,6 +445,13 @@ the mirror rather than through SVG geometry.
 **R-T30 — `ChartConfig` is built from the ViewModel's series**, so the config and the rendered
 series cannot drift. Four series plus "Other" fills `--chart-1..5` exactly; nothing can request a
 sixth colour (R-V7), so the silent transparent-series failure is unreachable by construction.
+
+**A second palette does not weaken that** (ticket 70). The Model mix panel's `--model-1..10` is a
+closed list like the first, `ChartColorVar` is the union of exactly the two, and the cap is taken
+from whichever palette the chart was handed — so "a series that had no colour to take could not be
+emitted" is still what makes the failure unreachable. Which palette a chart takes is decided by
+`paletteFor(grouping)`, a total lookup over the closed `Grouping` union in `domain/viewmodel.ts`,
+so a grouping added without one is a type error.
 
 **R-T31 — The roll-up spike runs first, before any panel is built.** Ticket 14 names it the
 cheapest available risk reduction and the specific thing that would falsify the charting decision:

@@ -263,6 +263,30 @@ same underlying data can be viewed at three zoom levels:
 | `family` | the vendor's model line, **carrying the vendor** | `Claude Sonnet` |
 | `tier` | cross-vendor capability class | `frontier` \| `balanced` \| `fast` |
 
+**`family` and `tier` are two roll-ups of exact, not a chain.** A family is the vendor's *line*
+and holds every version of it, so `Claude Sonnet` holds 4.6 and 5, and `OpenAI GPT-5` holds
+`gpt-5-nano` and `gpt-5.2` — one `fast` and one `balanced`. A tier is therefore the sum of its
+**Models** and not of its families. All three levels partition the same tokens exactly, which is
+what makes Model mix readable at any of them; what does not hold, and is never assumed, is that a
+family sits inside one tier. A vendor's line spans capability classes, which is the same fact the
+tier bet is made against.
+
+**The roster** — ten models, three vendors, every tier cross-vendor, one authored input price each
+(`docs/adr/0011-the-roster-grows-to-ten-and-the-mix-moves.md`, amending ADR-0007):
+
+| Model | Vendor | `family` | `tier` | input $/MTok |
+|---|---|---|---|---|
+| `claude-fable-5-1` | Anthropic | Claude Fable | `frontier` | 10.00 |
+| `claude-opus-5` | Anthropic | Claude Opus | `frontier` | 5.00 |
+| `gpt-6-astra` | OpenAI | OpenAI GPT-6 Astra | `frontier` | 10.00 |
+| `claude-sonnet-4-6` | Anthropic | Claude Sonnet | `balanced` | 3.00 |
+| `claude-sonnet-5` | Anthropic | Claude Sonnet | `balanced` | 2.00 |
+| `gpt-5.2` | OpenAI | OpenAI GPT-5 | `balanced` | 1.75 |
+| `gemini-3.1-pro-preview` | Google | Gemini Pro | `balanced` | 2.00 |
+| `claude-haiku-4-5` | Anthropic | Claude Haiku | `fast` | 1.00 |
+| `gemini-3.5-flash-lite` | Google | Gemini Flash-Lite | `fast` | 0.30 |
+| `gpt-5-nano` | OpenAI | OpenAI GPT-5 | `fast` | 0.05 |
+
 Model selection is a **speed/cost lever**, not an implementation detail: it is the mechanism
 by which token volume and monetary cost diverge. The ~200× input-price spread across tiers is
 what gives that divergence its size.
@@ -299,7 +323,8 @@ The spread from the fastest to the frontier tier is **200× on input**, which is
 token volume, dominates cost variance. That figure is a property of this project's roster rather
 than a constant of the market: it is reachable only with a roster spanning a genuine premium
 reasoning model and a genuine nano model, and a roster of mid-range models spans nearer 20×.
-See `docs/adr/0007-model-roster-spans-a-real-200x.md`.
+See `docs/adr/0007-model-roster-spans-a-real-200x.md`, as amended by ADR-0011 — the roster grew to
+ten and the spread is unchanged, now reached by two frontier models against the same nano one.
 
 **TokenUsage** — Tokens consumed by an AgentSession, **keyed by Model**. A single AgentSession
 may consume tokens across more than one Model.
@@ -335,6 +360,19 @@ question of what happens to an un-normalisable vendor reading.
 period, viewable at any of the three roll-up levels. It is a **breakdown, not a comparison
 axis**: a single AgentSession may span several Models, so no per-session metric can be grouped
 or filtered by Model without attributing a session's cost to one of them unsoundly.
+
+**A mix is read over time as well as at a moment.** What a team moves *between* — off the fast
+model as the balanced ones get good enough, onto a frontier model the month it arrives, from one
+version of a line to the next — is a change in the mix and not a change in volume, and it is the
+part of the picture that predicts the bill. The Model mix surface therefore draws each Model's
+**share of the period's tokens** period by period, on a fixed 0–100% scale. A share is not a part
+of a whole, so it is never stacked.
+
+**The roster is closed, and that is what makes the mix an exception.** Every other dimension the
+product charts grows — more Members, more Repositories — so a chart of it is capped and the rest
+are swept into "Other". A reader of the mix is choosing between exactly the ten Models in the table
+above, and an "Other" holding six of them would delete the finding. The Model mix is the one
+surface with a palette of its own, sized to the roster.
 
 **Cost** — Monetary spend. At AgentSession grain it is **token cost plus machine cost**, blended
 into one figure; a session never presents the two separately.

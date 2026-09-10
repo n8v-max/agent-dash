@@ -303,11 +303,18 @@ describe("waste sits in the numerator and not the denominator (R-M1, T-U13)", ()
     expect(rejected.cost).toBeGreaterThan(0);
   });
 
-  it("reads a lower figure across the window than in April, as adoption ramps (R-D4)", () => {
+  // **The direction reversed with R-D17** (ticket 70). It used to read *lower* across the window
+  // than in April: the frontier tier's token share fell from 25% to 10%, so the average priced
+  // token got cheaper as the sessions got more numerous, and that outran the seat fee April
+  // carries against nineteen days of sessions. R-D17 now runs the other way — `claude-fable-5-1`
+  // and `gpt-6-astra` arrive and grow — so the same figure rises. Both readings are derived from
+  // the committed rows and neither is written down as a number; what is asserted is the
+  // direction, which is the thing R-D17 is a claim about.
+  it("reads a higher figure across the window than in April, as the mix gets dearer (R-D17)", () => {
     const window = totalSpendPerCompletedTask(spendOver(MONTHS));
 
     expect(window.completedTasks).toBe(completedTaskKeys(sessions).length);
-    expect(figure(window)).toBeLessThan(figure(totalSpendPerCompletedTask(spendOver([APRIL]))));
+    expect(figure(window)).toBeGreaterThan(figure(totalSpendPerCompletedTask(spendOver([APRIL]))));
   });
 
   it("counts a Task once even where its sessions span work types (R-D8, R-D14)", () => {
@@ -350,13 +357,15 @@ describe("a seat held against near-zero usage (R-D10, T-U12, T-U13)", () => {
     expect(HER_SPEND.seatShare ?? 0).toBeGreaterThan(0.9);
   });
 
-  it("is the highest cost per unit of work in the Organization, by seventeen times", () => {
+  it("is the highest cost per unit of work in the Organization", () => {
     const hers = totalSpendPerCompletedTask(HER_SPEND);
     const org = totalSpendPerCompletedTask(spendOver(MONTHS));
 
     // **The highest of anyone's**, which is the claim rather than any particular multiple: the
-    // multiple is a function of how much her peers ran, and ticket 67 moved that. She holds a
-    // whole window of seat against three sessions, and nobody else comes near.
+    // multiple is a function of how much her peers ran and of what their tokens cost, and two
+    // tickets have moved both (67 the work mix, 70 the Model roster and R-D17's direction). So
+    // the multiples below are floors well under what the fixture reads, and the *ranking* is
+    // the exact assertion.
     const perMember = members
       .filter((member) => member.kind === "human")
       .map((member) =>
@@ -366,11 +375,16 @@ describe("a seat held against near-zero usage (R-D10, T-U12, T-U13)", () => {
           ),
         ),
       );
+    const ranked = [...perMember].sort((left, right) => right - left);
 
     expect(hers.completedTasks).toBe(completedTaskKeys(ROWS).length);
     expect(hers.completedTasks).toBeGreaterThan(0);
     expect(figure(hers)).toBe(Math.max(...perMember));
-    expect(figure(hers) / figure(org)).toBeGreaterThan(3);
+    // Above the Organization's own figure, and an order of magnitude above the median Member's
+    // — which is the shape of the finding, and the half of it that does not move with the price
+    // of a token.
+    expect(figure(hers)).toBeGreaterThan(2 * figure(org));
+    expect(figure(hers)).toBeGreaterThan(5 * ranked[Math.floor(ranked.length / 2)]);
   });
 
   it("is invisible to a consumption-only reading, which is the point of R-D10", () => {

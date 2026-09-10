@@ -1,8 +1,8 @@
 [
   {
-    "id": "gpt-6-astra",
-    "vendor": "OpenAI",
-    "family": "OpenAI GPT-6 Astra",
+    "id": "claude-fable-5-1",
+    "vendor": "Anthropic",
+    "family": "Claude Fable",
     "tier": "frontier"
   },
   {
@@ -12,9 +12,27 @@
     "tier": "frontier"
   },
   {
+    "id": "gpt-6-astra",
+    "vendor": "OpenAI",
+    "family": "OpenAI GPT-6 Astra",
+    "tier": "frontier"
+  },
+  {
+    "id": "claude-sonnet-4-6",
+    "vendor": "Anthropic",
+    "family": "Claude Sonnet",
+    "tier": "balanced"
+  },
+  {
     "id": "claude-sonnet-5",
     "vendor": "Anthropic",
     "family": "Claude Sonnet",
+    "tier": "balanced"
+  },
+  {
+    "id": "gpt-5.2",
+    "vendor": "OpenAI",
+    "family": "OpenAI GPT-5",
     "tier": "balanced"
   },
   {
@@ -38,7 +56,7 @@
   {
     "id": "gpt-5-nano",
     "vendor": "OpenAI",
-    "family": "OpenAI GPT-5 nano",
+    "family": "OpenAI GPT-5",
     "tier": "fast"
   }
 ]

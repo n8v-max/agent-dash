@@ -82,6 +82,9 @@ const repositories = read<Repository[]>("repositories.json");
 const directory = read<{ github_users: GithubUser[]; members: Member[] }>("members.json");
 
 const repositoryNameById = new Map(repositories.map((repository) => [repository.id, repository.name]));
+// The roster is read off the committed file rather than typed here, so ticket 70's ten models
+// and their tiers are one source of truth for this file as well as for the application.
+const models = read<{ id: string; vendor: string; family: string; tier: string }[]>("models.json");
 const memberById = new Map(directory.members.map((member) => [member.id, member]));
 
 const acceptanceOf = (rows: readonly AgentSession[]): number =>
@@ -326,29 +329,48 @@ describe("T-F4 — the required distributions", () => {
     expect(multi.length / roots.length).toBeCloseTo(0.4, 1);
   });
 
-  it("holds R-D17's falling frontier share", () => {
-    const frontier = new Set(["gpt-6-astra", "claude-opus-5"]);
-    const shareIn = (month: string): number => {
-      const usages = visible
-        .filter((row) => row.started_at.startsWith(month))
-        .flatMap((row) => row.token_usage);
-      const total = usages.reduce(
+  // **R-D17, rewritten by ticket 70.** The frontier share used to fall, 25% to 10%, against a
+  // roster that stopped at `gpt-6-astra` and `claude-opus-5`. With `claude-fable-5-1` arriving
+  // in June it *rises* instead, and the optimisation story moved to `claude-haiku-4-5`, which
+  // fades from 28 points to 10 as the balanced models get good enough to be the default.
+  //
+  // The frontier set and the months are derived — from `models.json` and from the rows — for
+  // the reason `testing-spec.md` § T-F gives: a literal a roster edit re-types is a literal that
+  // has stopped checking anything.
+  it("holds R-D17's rising frontier share and Claude Haiku's fade", () => {
+    const frontier = new Set(
+      models.filter((model) => model.tier === "frontier").map((model) => model.id),
+    );
+    const tokensOf = (usages: readonly { uncached_input: number; cache_read: number; cache_write: number; output: number }[]): number =>
+      usages.reduce(
         (sum, usage) =>
           sum + usage.uncached_input + usage.cache_read + usage.cache_write + usage.output,
         0,
       );
-      const top = usages
-        .filter((usage) => frontier.has(usage.model_id))
-        .reduce(
-          (sum, usage) =>
-            sum + usage.uncached_input + usage.cache_read + usage.cache_write + usage.output,
-          0,
-        );
-      return top / total;
+    const months = [...new Set(visible.map((row) => row.started_at.slice(0, 7)))].sort();
+    const sharesIn = (month: string) => {
+      const usages = visible
+        .filter((row) => row.started_at.startsWith(month))
+        .flatMap((row) => row.token_usage);
+      const total = tokensOf(usages);
+      return {
+        frontier: tokensOf(usages.filter((usage) => frontier.has(usage.model_id))) / total,
+        haiku: tokensOf(usages.filter((usage) => usage.model_id === "claude-haiku-4-5")) / total,
+      };
     };
-    expect(shareIn("2026-04")).toBeCloseTo(0.25, 1);
-    expect(shareIn("2026-08")).toBeCloseTo(0.1, 1);
-    expect(shareIn("2026-04")).toBeGreaterThan(shareIn("2026-08") + 0.1);
+
+    expect(frontier.size).toBe(3);
+    expect(months).toHaveLength(6);
+    const monthly = months.map(sharesIn);
+    // Rising, every month, and by at least ten points across the window.
+    for (const [at, entry] of monthly.entries()) {
+      if (at === 0) continue;
+      expect(entry.frontier).toBeGreaterThan(monthly[at - 1].frontier);
+    }
+    expect(monthly.at(-1)!.frontier).toBeGreaterThan(monthly[0].frontier + 0.1);
+    // And the fade that replaced it as the optimisation story.
+    expect(monthly[0].haiku).toBeGreaterThan(monthly.at(-1)!.haiku + 0.1);
+    expect(monthly.at(-1)!.haiku).toBeLessThanOrEqual(0.12);
   });
 });
 
