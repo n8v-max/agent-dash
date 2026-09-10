@@ -1,6 +1,6 @@
 Type: implementation
 Status: ready-for-agent
-Blocked by: 68
+Blocked by: 68, 71
 Label: ready-for-agent
 
 # Model roster to Fable and Astra, families with a month-by-month presence, and a distinct palette for the Model mix
