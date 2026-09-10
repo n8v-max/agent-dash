@@ -33,7 +33,10 @@
 //      than a fact about the fixture, the route or the regex. It could not be written until
 //      `/[org]/people` rendered rows, and it now can.
 //
-// The two set-shape tests do the same job for the cost half.
+// The two set-shape tests do the same job for the cost half, and the scanner's own four tests do
+// it for the instrument: a search that cannot find `24.39` where a leak would put it proves
+// nothing by not finding it, and a search that reads `1.3M` as a cost fails on the Tokens column
+// of a page that leaked nothing (ticket 69).
 //
 // **The one T-E2-shaped assertion this file still does not make** is the restricted payload's
 // *row count*. `testing-spec.md` § 5 asks for two rows — the viewer's own plus its Team's
@@ -112,6 +115,50 @@ const OWN_AGGREGATE_COLLISION = "7.31";
  */
 const OWN_QUOTIENT_COLLISION = "0.7";
 
+/**
+ * **The scanner itself, before anything is asserted with it** (ticket 69).
+ *
+ * `decimalsIn` is the search T-E4's negative claims are made of: everything below is only worth
+ * what it finds. Two properties, and they pull in opposite directions —
+ *
+ *   * it **finds** a bare decimal wherever a leak would put one, against any punctuation the RSC
+ *     flight payload wraps a value in;
+ *   * it **does not find** a decimal that is part of something else: a model version string
+ *     (`gemini-3.1-pro`), or a token volume in the units the product now reads them in
+ *     (`1.3M`, ticket 69). `1.3` is a real session cost in the committed fixture, so without the
+ *     second property the People page's own Tokens column would fail this file.
+ *
+ * They are asserted here rather than in `vitest` because the scanner is E2E's own instrument and
+ * this file is where its claims are made; `vitest`'s `include` is `src/**` by design.
+ */
+test.describe("T-E4 — the scanner", () => {
+  test("finds a cost literal against every character a payload wraps one in", () => {
+    const payload = `,${KNOWN_UNGRANTED_LITERAL}] "${KNOWN_UNGRANTED_LITERAL}" >${KNOWN_UNGRANTED_LITERAL}< $${KNOWN_UNGRANTED_LITERAL}`;
+
+    expect(decimalsIn(payload)).toEqual(new Set([KNOWN_UNGRANTED_LITERAL]));
+  });
+
+  test("does not read a compact token figure as a cost", () => {
+    // The People, History and session tables and both Adoption axes serialise figures of this
+    // shape on every route below.
+    const payload = '{"tokens":"1.3M","peak":"9.8K","total":"2.1B"}';
+
+    expect(decimalsIn(payload)).toEqual(new Set());
+  });
+
+  test("reads the bare decimal beside a token figure, and only it", () => {
+    // The discriminating case: the same digits, once as a volume and once as money. `1.30` is
+    // what a cost of 1.3 reaches the wire as, and it is still searched for.
+    const payload = '{"tokens":"1.3M","cost":1.30,"model":"gemini-3.1-pro-preview"}';
+
+    expect(decimalsIn(payload)).toEqual(new Set(["1.30"]));
+  });
+
+  test("finds a bare 1.3, so the exclusion is about the unit and not about the value", () => {
+    expect(decimalsIn('{"cost":1.3}')).toEqual(new Set(["1.3"]));
+  });
+});
+
 test.describe("T-E4 — the restricted account's payload", () => {
   test.beforeEach(async ({ context, baseURL }) => {
     await useSession(
@@ -127,6 +174,20 @@ test.describe("T-E4 — the restricted account's payload", () => {
     const payload = await payloadFor(page, `/${RESTRICTED_ACCOUNT.orgSlug}`);
 
     expect(payload).toContain(RESTRICTED_ACCOUNT.fullName);
+  });
+
+  /**
+   * **The positive control for the scanner's token exclusion** (ticket 69). The rule above is
+   * only worth anything if this payload actually carries a figure of that shape: the restricted
+   * account holds `self` and `team` over `tokens`, so its own Tokens cell reaches the wire as
+   * `75K` or `1.3M`, and the exclusion is being applied to a real string on a real route rather
+   * than kept as a regex with nothing to match. Asserted on the cell's own delimiters so that
+   * chart path data — where an `M` legitimately follows a coordinate — cannot satisfy it.
+   */
+  test("carries its own token volume in compact units (R-N15)", async ({ page }) => {
+    const payload = await payloadFor(page, `/${RESTRICTED_ACCOUNT.orgSlug}/people`);
+
+    expect(payload).toMatch(/>\d{1,3}(\.\d)?[KMB]</);
   });
 
   test("the fixture holds names and costs to look for", () => {

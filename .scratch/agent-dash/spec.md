@@ -353,6 +353,22 @@ there is one money formatter in the product and no surface spells its own. The `
 value, and **the raw enum never reaches a reader** on any surface. Added 2026-09-09 (ticket 41),
 after `/demo/people` shipped a Cost column reading `310.5` one click from a tile reading `$310.50`.
 
+**A token figure reads in K, M and B.** `75K`, `1.3M`, `2.1B` — one decimal while the mantissa is
+below ten, none at or above it, no space before the unit, and the unit letter uppercase at the
+`en-GB` pinning every figure in the product takes. Below a thousand a token count reads as itself.
+An axis tick takes the same units and no decimal at all, because a tick is a position on a scale
+and the tooltip and the R-X1 mirror carry the reading exactly. This governs **every** table column
+and chart axis of unit `tokens` — `/demo/people`, `/demo/history`, the session table, the member
+profile's tile and comparator bar, and both Adoption axes on `/demo/spend`.
+
+**The one exemption is `/demo/history`'s expanded row** (R-N20.1), whose four token-class volumes
+and their total stay full grouped integers: that table exists so a reader can check that four
+disjoint classes add up, and four rounded figures need not. Added 2026-09-10 (ticket 69), because
+an eight-digit integer is a length to count before it is a number to compare, and a Tokens column
+of them compares nothing (R-N4). It is the only unit that takes compact notation, and it is
+available because `e2e/support/costs.ts` excludes a decimal a `K`, `M` or `B` sits on from T-E4's
+candidate cost literals — a bare decimal on screen would still be a collision, and still is one.
+
 **R-N16 — `?member=…` replaces the list with that Member's profile**: the four headline tiles at
 their scope, their WorkType mix, and the comparator (R-N17).
 

@@ -526,6 +526,14 @@ product's central interaction.
   decimals, and `usd(x)` equals the `usd` and `usd_per_task` tile formatters because it *is* them.
   Component: the People table's Cost cells match `/^\$[\d,]+\.\d{2}$/` and a column carrying no
   unit renders exactly as it did. E2E: the same shape, on the served page.
+
+  **Ticket 69 adds the token half.** Unit: the formatter's band table and its boundaries — 999,
+  1,000, 999,999, 1,000,000, 1e9 — with `999,999` reading `1M` rather than `1,000K`, because a
+  mantissa that rounds to a full thousand promotes. Component: the People table's Tokens cells
+  read `1.2M` / `980K` / `310K` and a billions row reads `2.1B`; the member profile's tile and
+  comparator bar read the same figure the column does; `/demo/history`'s expanded row still
+  renders full grouped integers, which is what makes T-C9.1's sum checkable; and both Adoption
+  measure axes carry a unit letter on their ticks.
 - **T-C9.3 — `Member.kind` reaches a reader as words** (A31). Component: no cell in the People
   table contains `service_account`; the Kind column reads "Human" and "Service account". E2E: a
   sweep of all six routes over **`innerText`**, not markup — the enum is legitimately a URL value
@@ -688,6 +696,20 @@ inside the desktop project, which keeps each width beside the requirement it bel
   grants. **This is the one assertion only E2E can make** — the unit layer proves the filter is
   correct; only this proves the filtered result is what actually shipped. It is the difference
   between the access model working and the access model being theatre.
+
+  **The scan is over *bare* decimals, and it excludes two things that only look like one**: a
+  decimal inside an identifier (`gemini-3.1-pro`'s `3.1`) and a decimal a compact token unit sits
+  on (`1.3M`, `9.8K`, `2.1B` — ticket 69, R-N15). A token volume is not a price, and the unit
+  letter says so on the wire as plainly as on screen; without the second exclusion the Tokens
+  column would fail this test on every page carrying one, because `1.3` is a real session cost in
+  the committed fixture. Neither exclusion narrows the search for a leak: an escaped cost reaches
+  the wire as `,24.39]`, `"24.39"`, `>24.39<` or `$24.39`, and every one of those still matches.
+  **The scanner carries its own tests** — a cost literal found against each of those four
+  wrappings, `1.3M` and `9.8K` yielding nothing, and `1.3` still found on its own so the exclusion
+  is about the unit and not about the value. A search is only worth what it finds. **And a third
+  positive control on the payload itself**: the restricted account's `/people` response carries a
+  Tokens cell in compact units, so the exclusion is applied to a real figure on a real route
+  rather than kept as a rule with nothing to match.
 - **T-E5 — Control state does not survive navigation** (A20, R-C5). Set a period on `/demo/spend`,
   navigate to `/demo/work`, assert the default.
 - **T-E6 — The account switcher re-issues the token and stays on the current URL** (R-A5). Same

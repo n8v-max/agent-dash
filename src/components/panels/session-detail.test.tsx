@@ -72,6 +72,24 @@ describe("T-C9.1 — the four disjoint token class volumes", () => {
     expect(volumes.reduce((total, value) => total + value, 0)).toBe(processed[0]);
   });
 
+  /**
+   * **Ticket 69 — this table is the one that keeps its digits.** Every other token figure in the
+   * product now reads in K, M and B; these four do not, and the exemption is the table's whole
+   * reason for existing. `12,400 + 88,100 + 6,250 + 3,910 = 110,660` is a sum a reader can check;
+   * `12K + 88K + 6.3K + 3.9K = 111K` is four roundings that need not add up, and the test above
+   * would be checking the formatter's arithmetic rather than the component's.
+   */
+  it("keeps the four classes and their total as full grouped integers", () => {
+    render(<SessionDetailPanel detail={DETAIL} />);
+
+    const cells = [
+      ...within(screen.getByTestId("token-class-volumes")).getAllByRole("cell"),
+      ...within(screen.getByTestId("token-class-total")).getAllByRole("cell"),
+    ].map((cell) => cell.textContent);
+
+    expect(cells).toEqual(["12,400", "88,100", "6,250", "3,910", "110,660"]);
+  });
+
   it("puts the total where a reader can check the sum, labelled as Tokens processed", () => {
     render(<SessionDetailPanel detail={DETAIL} />);
 

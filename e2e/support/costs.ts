@@ -186,21 +186,38 @@ const countQuotients = (bucket: Bucket): readonly number[] => {
 const MONEY = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
 /**
- * Every decimal literal a string contains, as written.
+ * What may not sit against a decimal for it to be a *bare* one — two exclusions, spelled
+ * separately because they are two rules that happen to share a character class.
  *
- * The lookarounds exclude letters and hyphens as well as digits and dots, so a decimal that is
- * part of a longer *identifier* is not read as a number. Without that, `gemini-3.1-pro-preview`
- * contributes `3.1` — and some Member's session cost is 3.1, so R-N20.1's Model mix (the one
- * surface in the product allowed to carry a per-session Model breakdown) tripped T-E4 on a model
- * version string. Measured on the restricted `/demo/history` payload: the difference between the
- * loose and strict forms is exactly `{3.1, 3.5}`, both from model ids.
+ *   1. **An identifier fragment.** `gemini-3.1-pro-preview` contributes `3.1`, and some Member's
+ *      session cost is 3.1 — so R-N20.1's Model mix (the one surface in the product allowed to
+ *      carry a per-session Model breakdown) tripped T-E4 on a model version string. Measured on
+ *      the restricted `/demo/history` payload: the difference between the loose and the strict
+ *      form is exactly `{3.1, 3.5}`, both from model ids.
+ *   2. **A compact token unit** (ticket 69). A token figure now reads `9.8K`, `1.3M`, `2.1B`, and
+ *      `1.3` is a real session cost in the committed fixture. A volume is not a price and the
+ *      unit letter says so on the wire as plainly as it does on screen — so a decimal a `K`, `M`
+ *      or `B` sits on is not a candidate cost literal. Without this, putting units on the Tokens
+ *      column would fail T-E4 on the People page, on a figure that is a count of tokens.
  *
- * This does not narrow the search for a leak. A cost that has actually escaped reaches the wire as
+ * The second is a subset of the first *today*, and it is written out anyway: they are removed for
+ * different reasons, and a future narrowing of the identifier rule must not silently re-admit the
+ * token units with it. The unit test in `../payload.spec.ts` holds both halves.
+ *
+ * **Neither narrows the search for a leak.** A cost that has actually escaped reaches the wire as
  * `,24.39]`, `"24.39"`, `>24.39<` or `$24.39` — every one of those still matches, because none of
- * the excluded characters can sit against the digits. The named guards hold either way: `24.39`
- * stays in the search set and `13.04` stays out.
+ * these characters can sit against the digits. The named guards hold either way: `24.39` stays in
+ * the search set and `13.04` stays out. A leak that arrived with a `K` welded to it would be a
+ * token volume, which is what the whole exclusion says.
  */
-const DECIMAL_LITERAL = /(?<![\d.\-A-Za-z])\d+\.\d+(?![\d.\-A-Za-z])/g;
+const IDENTIFIER_EDGE = String.raw`\d.\-A-Za-z`;
+const TOKEN_UNIT_EDGE = "KMB";
+
+/** Every decimal literal a string contains, as written — and nothing that only looks like one. */
+const DECIMAL_LITERAL = new RegExp(
+  String.raw`(?<![${IDENTIFIER_EDGE}])\d+\.\d+(?![${IDENTIFIER_EDGE}${TOKEN_UNIT_EDGE}])`,
+  "g",
+);
 
 export const decimalsIn = (payload: string): ReadonlySet<string> =>
   new Set(payload.match(DECIMAL_LITERAL) ?? []);

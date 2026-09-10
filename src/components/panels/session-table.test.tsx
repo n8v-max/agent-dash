@@ -108,9 +108,9 @@ describe("R-N19 — one row per AgentSession, in ten columns", () => {
     table(1);
 
     expect(screen.getByRole("cell", { name: "$12.34" })).toBeInTheDocument();
-    // Tokens are a grouped whole number, and the duration column — which names its unit in its
-    // own label — is untouched.
-    expect(screen.getByRole("cell", { name: "110,660" })).toBeInTheDocument();
+    // Tokens read in their own unit (ticket 69) — `111K`, not six digits in a column nobody
+    // compares — and the duration column, which names its unit in its own label, is untouched.
+    expect(screen.getByRole("cell", { name: "111K" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "621" })).toBeInTheDocument();
   });
 
