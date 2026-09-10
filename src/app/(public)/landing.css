@@ -1,0 +1,274 @@
+/* Ticket 60 — the landing's layout, scoped under `.landing`.
+ *
+ * Tailwind utilities carry the type and spacing in the two page files. This block carries what
+ * utilities cannot say cleanly: the reads grid's explicit row and column placement, the three
+ * bands drawn *under* the cells, the figure band's bleed, and the hero's one entrance. The
+ * tokens it reads are declared in `src/app/globals.css` under the same class.
+ *
+ * One DOM, three layouts. A read is an <article> holding its five cells *and* its three bands.
+ * On a phone each article is its own grid, so every read keeps its own bands. From 640px the
+ * article becomes `display: contents`, its cells join the section's grid by nth-child, and only
+ * the first article of each row of reads draws the bands — spanning `1 / -1` so they run across
+ * the row and touch. Tablet is two rows of two; desktop is one row of four. The claims stay four
+ * <h2>s in source order at every width, which is what the unit test counts.
+ */
+
+.landing {
+  --landing-gutter: 24px;
+  --landing-hairline: color-mix(in srgb, var(--landing-ink) 10%, transparent);
+  --landing-divider: color-mix(in srgb, var(--landing-ink) 12%, transparent);
+  min-height: 100svh;
+  overflow-x: clip;
+  background: var(--landing-paper);
+  color: var(--landing-ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.landing-serif {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.landing-column {
+  max-width: calc(1120px + 2 * var(--landing-gutter));
+  margin-inline: auto;
+  padding-inline: var(--landing-gutter);
+}
+
+/* --- The hero's entrance: h1, paragraph, CTA at 0 / 120 / 240ms, and nothing else. --- */
+
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.landing-rise {
+  animation: landing-rise 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.landing-rise-2 {
+  animation-delay: 120ms;
+}
+.landing-rise-3 {
+  animation-delay: 240ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-rise {
+    animation: none;
+  }
+}
+
+/* --- The reads: phone first, one grid per read. --- */
+
+.landing-reads {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.landing-read {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Every cell names its column. Items with an explicit row and an *auto* column are placed after
+   the bands, which already occupy column 1 of that row, so auto-placement would push them into
+   an implicit second column. */
+.landing-read > * {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+}
+
+.landing-read > .landing-band {
+  z-index: 0;
+  grid-column: 1 / -1;
+}
+
+.landing-read-label,
+.landing-read-verb {
+  padding-left: 0;
+}
+
+.landing-read-label {
+  grid-row: 1;
+}
+.landing-read-claim,
+.landing-band-claims {
+  grid-row: 2;
+}
+.landing-read-figure,
+.landing-band-figures,
+.landing-band-label {
+  grid-row: 3;
+}
+.landing-read-reading,
+.landing-band-readings {
+  grid-row: 4;
+}
+.landing-read-verb {
+  grid-row: 5;
+}
+
+.landing-band-claims {
+  background: var(--landing-claims);
+  border: 1px solid var(--landing-rule);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+}
+
+.landing-band-figures {
+  background: var(--landing-figures);
+  margin-inline: calc(-1 * var(--landing-gutter));
+  border-top: 1px solid var(--landing-hairline);
+  border-bottom: 1px solid var(--landing-hairline);
+}
+
+.landing-band-readings {
+  background: var(--landing-readings);
+  border: 1px solid var(--landing-rule);
+  border-top: 0;
+  border-radius: 0 0 18px 18px;
+}
+
+.landing-band-label {
+  grid-column: 1 / -1;
+  justify-self: end;
+  align-self: start;
+  pointer-events: none;
+}
+
+/* --- Tablet: two columns, two rows of reads; bands run across each pair. --- */
+
+@media (min-width: 640px) {
+  .landing-reads {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .landing-read {
+    display: contents;
+  }
+
+  .landing-read:nth-child(odd) > * {
+    grid-column: 1;
+  }
+  .landing-read:nth-child(even) > * {
+    grid-column: 2;
+  }
+  .landing-read > .landing-band,
+  .landing-read > .landing-band-label {
+    grid-column: 1 / -1;
+  }
+  .landing-read:nth-child(even) > .landing-band,
+  .landing-read:nth-child(even) > .landing-band-label {
+    display: none;
+  }
+
+  .landing-read:nth-child(n + 3) > .landing-read-label {
+    grid-row: 6;
+    padding-top: 56px;
+  }
+  .landing-read:nth-child(n + 3) > :is(.landing-read-claim, .landing-band-claims) {
+    grid-row: 7;
+  }
+  .landing-read:nth-child(n + 3)
+    > :is(.landing-read-figure, .landing-band-figures, .landing-band-label) {
+    grid-row: 8;
+  }
+  .landing-read:nth-child(n + 3) > :is(.landing-read-reading, .landing-band-readings) {
+    grid-row: 9;
+  }
+  .landing-read:nth-child(n + 3) > .landing-read-verb {
+    grid-row: 10;
+  }
+
+  /* One hairline between the columns, inside bands 2–4 only. */
+  .landing-read:nth-child(odd) > :is(.landing-read-claim, .landing-read-reading) {
+    border-right: 1px solid var(--landing-rule);
+  }
+  .landing-read:nth-child(odd) > .landing-read-figure {
+    border-right: 1px solid var(--landing-divider);
+  }
+  .landing-read:nth-child(even) > :is(.landing-read-label, .landing-read-verb) {
+    padding-left: 28px;
+  }
+}
+
+/* --- Desktop: one grid, four columns, five rows; the bleed widens to 40px. --- */
+
+@media (min-width: 1024px) {
+  .landing {
+    --landing-gutter: 40px;
+  }
+
+  .landing-reads {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .landing-read:nth-child(1) > * {
+    grid-column: 1;
+  }
+  .landing-read:nth-child(2) > * {
+    grid-column: 2;
+  }
+  .landing-read:nth-child(3) > * {
+    grid-column: 3;
+  }
+  .landing-read:nth-child(4) > * {
+    grid-column: 4;
+  }
+  .landing-read > .landing-band,
+  .landing-read > .landing-band-label {
+    grid-column: 1 / -1;
+  }
+  .landing-read:not(:first-child) > .landing-band,
+  .landing-read:not(:first-child) > .landing-band-label {
+    display: none;
+  }
+  .landing-read:first-child > .landing-band {
+    display: block;
+  }
+  .landing-read:first-child > .landing-band-label {
+    display: block;
+  }
+
+  .landing-read:nth-child(n + 3) > .landing-read-label {
+    grid-row: 1;
+    padding-top: 22px;
+  }
+  .landing-read:nth-child(n + 3) > :is(.landing-read-claim, .landing-band-claims) {
+    grid-row: 2;
+  }
+  .landing-read:nth-child(n + 3)
+    > :is(.landing-read-figure, .landing-band-figures, .landing-band-label) {
+    grid-row: 3;
+  }
+  .landing-read:nth-child(n + 3) > :is(.landing-read-reading, .landing-band-readings) {
+    grid-row: 4;
+  }
+  .landing-read:nth-child(n + 3) > .landing-read-verb {
+    grid-row: 5;
+  }
+
+  .landing-read > :is(.landing-read-claim, .landing-read-reading) {
+    border-right: 1px solid var(--landing-rule);
+  }
+  .landing-read > .landing-read-figure {
+    border-right: 1px solid var(--landing-divider);
+  }
+  .landing-read:last-child > :is(.landing-read-claim, .landing-read-reading, .landing-read-figure) {
+    border-right: 0;
+  }
+  .landing-read:nth-child(n + 2) > :is(.landing-read-label, .landing-read-verb) {
+    padding-left: 28px;
+  }
+}

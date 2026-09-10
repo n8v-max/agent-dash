@@ -1,3 +1,5 @@
+*Built as ticket 60.*
+
 # Landing drafts
 
 **Build ticket:** [`60-landing-v2.md`](../../.scratch/agent-dash/issues/60-landing-v2.md), specified for an AFK run against `img/picture-v2.png`.

@@ -96,7 +96,9 @@ are not a ladder, so a Role holding only `team` over `jobs` would resolve nobody
 permission matrix; the surviving reason carries it alone. See § 11 C6, C9.
 
 **R-A4 — `/sign-in` offers two "continue as" buttons**, each issuing that account's JWT and
-redirecting to `/demo`.
+redirecting to `/demo`. *Amended 2026-09-10, ticket 60: `/sign-in` offers one "sign in to the
+demo account" action for the open default; the restricted account is reached from the header
+switcher (R-A5).*
 
 **R-A5 — The header account switcher re-issues the token and reloads in place**, keeping the
 viewer on the current URL. The difference must read as *the same page with fewer rows*.

@@ -1,7 +1,7 @@
 Type: grilling
-Status: needs-triage
+Status: resolved
 Blocked by: 37, 49
-Label: ready-for-human
+Label: resolved
 
 # Reshape the landing: two readers, and the swarm's value to the organisation
 
@@ -135,3 +135,10 @@ render. The human answered the four open questions (hardcoded figures, fonts on 
 routes only, MCP line shipped with a roadmap item, sign-in as a mock provider page with one demo
 action). Everything is specified in **ticket 60**, `60-landing-v2.md`, which is `ready-for-agent`.
 This ticket resolves when 60 lands.
+
+### 2026-09-10 — resolved by ticket 60
+
+Landed: `/` is the slogan, the paragraph, one link and the four reads; `/sign-in` is the mock
+provider page with one demo action. Copy, layout, tests and docs are as specified in
+`60-landing-v2.md`; the positioning revision is recorded in `docs/positioning.md` § Revision —
+2026-09-10, and the MCP surface the landing promises is first under *Next* in `docs/roadmap.md`.

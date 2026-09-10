@@ -2,14 +2,15 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import Home from "./page";
+import { READS } from "./reads";
 
-describe("`/` — the positioning line, and one link (R-N1, ticket 37)", () => {
-  it("renders the line as the page's heading, inside a main landmark", () => {
+describe("`/` — the slogan, one link, and four reads (R-N1; tickets 37 and 60)", () => {
+  it("renders the slogan as the page's heading, inside a main landmark", () => {
     render(<Home />);
 
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Agent spend, measured per finished task. Not per token, not per seat.",
+      "What your agents do, spend and solve, per finished job.",
     );
   });
 
@@ -31,5 +32,15 @@ describe("`/` — the positioning line, and one link (R-N1, ticket 37)", () => {
 
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAttribute("href", "/sign-in");
+  });
+
+  it("renders the four claims as level-2 headings, in order (ticket 60)", () => {
+    // The outline is the slogan and the four claims under it. One <h2> per read, in source
+    // order at every width — the layout moves cells, never the DOM.
+    render(<Home />);
+
+    const claims = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+
+    expect(claims).toEqual(READS.map((read) => read.claim));
   });
 });
