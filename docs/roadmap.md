@@ -30,6 +30,16 @@ vendor".
 per session, median and p95 — and not in *composition*: the roll-up knows a root ran four agents,
 not which four, so a regression in one agent version hides inside every aggregate containing it.
 
+**A second signed-in account, switched in place.** Ticket 61 took the switcher down to what one
+account justifies — a name, an Organization and *Add another account* — because a control that
+re-issued your identity between two presets is a mechanic no real product has. The honest version
+of the feature is the one Google ships: sign in twice, hold two sessions at once, and switch
+between them without losing the page. That needs a cookie per account rather than one, a chooser
+that lists the sessions actually held, and a `/sign-in` that adds to the set instead of replacing
+it. The restricted contractor is already seated and granted, so it is the second account the day
+this exists; today it is reachable only from a test
+(`e2e/support/session.ts`, `docs/security.md` § the wire).
+
 **Tool and MCP call counts per session.** `prompt_count` is deliberately the only interaction-volume
 measure (`CONTEXT.md` § Session measures), and it counts the human; nothing counts what the agent
 did between prompts, which is where a `headless` session's cost is made. Precedent exists now where
@@ -76,13 +86,13 @@ purpose. This is an analytical dashboard, not a control plane — cost *projecti
   withdrew the permission matrix nothing renders them at all. Authoring from a surface that does not
   exist is two features, not one.
 - **Real OAuth, live APIs, a real GitHub App** — fixture data throughout (`spec.md` § 1.1). Two
-  JWT-holding accounts demonstrate the access model; an identity provider would demonstrate an
-  identity provider.
+  JWT-holding accounts demonstrate the access model — one offered, one seated and reachable only
+  from a test since ticket 61; an identity provider would demonstrate an identity provider.
 - **Seat cost visible to the restricted account — an accepted leak** (human decision, 2026-09-09).
   The seat fee is flat and period-stable, so a restricted account reading its own Total spend split
   learns the Organization's per-seat price — a `cost` fact about every human Member, not only itself
   — and times any headcount it can reach, that is somebody else's seat bill. Accepted rather than
   suppressed: seat cost is ~46% of Total spend, a total without it is the wrong number, and hiding
   the split would make the restricted view a different page rather than the same page with fewer
-  rows (R-A5, R-A8). The claim is that this product does not *display* a figure outside a grant,
+  rows (R-A8). The claim is that this product does not *display* a figure outside a grant,
   never that the figure is unrecoverable — as ADR-0003 says of subtraction.

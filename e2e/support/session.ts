@@ -5,22 +5,43 @@
 // with itself while disagreeing with the product, and a test that re-implements signing stops
 // proving that the server's verification accepts the server's own tokens.
 //
+// Since ticket 61 the two accounts arrive by two different routes, because the product treats
+// them differently: the open default is *offered* (`signInAccounts`), the contractor is only
+// *seated* (`accountFor`). Both derivations are the application's.
+//
 // The cost search set is the deliberate exception and lives in `./costs`: what a test *allows*
 // must not be decided by the code the test is checking. See that file's header.
 
 import type { BrowserContext, Page } from "@playwright/test";
-import { signInAccounts, type Account } from "../../src/data/accounts";
+import { accountFor, signInAccounts, type Account } from "../../src/data/accounts";
 import { loadDataset } from "../../src/data/load";
+import { RESTRICTED_ROLE } from "../../src/domain/access";
 import { SESSION_COOKIE } from "../../src/data/session-cookie";
 import { issueSession } from "../../src/data/session";
 
-/** R-A4 order: the open default first, the restricted contractor second. */
-const [openAccount, restrictedAccount] = signInAccounts();
+/** The one account the product offers (R-A4 as amended, ticket 61). */
+const [openAccount] = signInAccounts();
 
-if (!openAccount || !restrictedAccount) throw new Error("R-A3: two seeded accounts expected");
+if (!openAccount) throw new Error("R-A4: the open default is expected to be offered");
 
 export const OPEN_ACCOUNT: Account = openAccount;
-export const RESTRICTED_ACCOUNT: Account = restrictedAccount;
+
+/**
+ * **The contractor, minted directly from the fixture** (ticket 61).
+ *
+ * The product offers this account nowhere — `/sign-in` does not list it and `POST /api/session`
+ * returns 400 for its id — so a test can no longer reach it the way a visitor would. It is
+ * still a seated Member holding a real Role, and T-E3, T-E4 and every other restricted-account
+ * case still act as it: `useSession` writes a token for it straight into the cookie jar, which
+ * is the same mechanism the org-mismatch case has always used to install claims the application
+ * would never mint.
+ *
+ * `accountFor` is the application's own derivation, exported rather than copied here. A support
+ * file that re-answered "which Member is the contractor" could agree with itself while
+ * disagreeing with `memberships.json`, and then T-E4 would be asserting the payload of somebody
+ * else.
+ */
+export const RESTRICTED_ACCOUNT: Account = accountFor(RESTRICTED_ROLE);
 
 /** Every `/[org]/**` route that exists today. Ticket 30 adds panels; the paths are these. */
 export const orgRoutes = (slug: string): readonly string[] => [

@@ -143,10 +143,11 @@ issued token before its 8 hours elapse, and it invalidates all of them.
 - **Next.js's built-in Origin-vs-Host CSRF check does not cover this endpoint.** It is a Server
   Action protection (`node_modules/next/dist/docs/01-app/02-guides/server-actions.md:82`,
   `.../data-security.md:546-552`), and the same docs single out `route.ts` as a file to audit by
-  hand (`data-security.md:611`). Both forms here post to a route handler, deliberately, so that
-  sign-in and account switching need no JavaScript (`src/app/sign-in/page.tsx:3-5`,
-  `src/components/shell/account-switcher.tsx:4-6`). That choice is also a choice to opt out of the
-  framework's check, and it is written down here because nothing else in the repo says so.
+  hand (`data-security.md:611`). The form here posts to a route handler, deliberately, so that
+  sign-in needs no JavaScript (`src/app/(public)/sign-in/page.tsx`). That choice is also a choice
+  to opt out of the framework's check, and it is written down here because nothing else in the
+  repo says so. Since ticket 61 there is exactly **one** such form in the product: the account
+  switcher stopped posting and became a link (`src/components/shell/account-switcher.tsx`).
 
 ### `SameSite=Lax` does not close this, and must not be read as if it did
 
@@ -160,9 +161,15 @@ sub-request, and against that it holds.
 
 ### What an attacker gains, worked through rather than assumed
 
-A forged POST switches the victim between the two seeded accounts. It cannot:
+**Narrower since ticket 61.** The endpoint mints only for `OFFERED_PRESETS`, which holds one
+account, so a forged POST can no longer move a victim between two identities — it can only sign an
+anonymous visitor in as, or re-sign a signed-in victim as, *the same* open default they could
+already reach themselves at `/sign-in`. Everything below still holds, and the first bullet now
+covers the restricted contractor too. It cannot:
 
-- **mint a token for any other Member** — 400 (`src/app/api/session/route.ts:63-65`);
+- **mint a token for any other Member** — 400 (`src/app/api/session/route.ts:63-65`). Including
+  the **restricted contractor**, who is seated in the fixture and offered nowhere: its own id is
+  refused, asserted at `src/app/api/session/route.test.ts`;
 - **widen grants** — the token carries two claims (`src/data/session.ts:52`) and the Role is
   resolved from the fixture per request (`src/data/viewer.ts:75`), proven adversarially at
   `src/data/viewer.test.ts:117`;
@@ -174,30 +181,30 @@ A forged POST switches the victim between the two seeded accounts. It cannot:
   asserted rejected at `src/app/api/session/route.test.ts:99-110`;
 - **read anything back** — no CORS headers are configured; `next.config.ts` is fourteen lines and
   declares only `outputFileTracingIncludes`;
-- **destroy anything** — there is nothing to destroy, and the switch is reversed by one click in the
-  header (`src/components/shell/account-switcher.tsx:51-79`).
+- **destroy anything** — there is nothing to destroy, and a session is ended by clearing the
+  cookie or by waiting out its 8 hours.
 
-Both target identities are **public and freely obtainable**: `/sign-in` hands either one to any
-anonymous visitor (`src/app/sign-in/page.tsx:77-113`). So the attacker forces the victim into a
-state the attacker can already occupy, over data the attacker can already read. The residual harm
-is that a victim reads the dashboard as the *other* demo account — visibly, since the header shows
-whose account it is and which Role (`src/components/shell/account-switcher.tsx:133-146`), and the two
-accounts differ only in how many rows they receive, never in navigation
+The one target identity is **public and freely obtainable**: `/sign-in` hands it to any anonymous
+visitor (`src/app/(public)/sign-in/page.tsx`). So the attacker forces the victim into a state the
+attacker can already occupy, over data the attacker can already read — and, since ticket 61, into
+the *only* state the endpoint issues. The residual harm is that a victim who had cleared their
+session finds themselves signed in; the header names whose account it is
+(`src/components/shell/account-switcher.tsx`), and navigation is the same for every account
 (`src/components/shell/app-header.tsx:19-22`).
 
 ### Verdict: no CSRF token
 
 **And the reason is not "SameSite covers it".** The reason is that the exposure is empty: the
-endpoint's entire authority is to choose between two public read-only identities, and it refuses
-every other input.
+endpoint's entire authority is to issue one public read-only identity, and it refuses every other
+input.
 
 The cost of adding one is not zero, and it is a specific cost. A synchroniser token has to be
-minted at render time and carried in a hidden field — and the account switcher lives in a *layout*,
-which renders once and is preserved across client-side navigations. That is precisely why the
-return path is taken from `Referer` rather than from a hidden field
-(`src/app/api/session/route.ts:44-48`, `src/components/shell/account-switcher.tsx:8-14`): a field
-written at render time is stale after the first soft navigation. A CSRF token in the same position
-would go stale the same way, and its failure mode is worse — the switch would start rejecting
+minted at render time and carried in a hidden field — and the header the second form used to live
+in is a *layout*, which renders once and is preserved across client-side navigations. That is
+precisely why the return path is taken from `Referer` rather than from a hidden field
+(`src/app/api/session/route.ts:44-48`): a field written at render time is stale after the first
+soft navigation. A CSRF token in the same position would go stale the same way, and its failure
+mode is worse — the sign-in would start rejecting
 rather than merely returning to the wrong page.
 
 **The cheaper control, also not taken here: an Origin check.** Comparing `Origin` against the
@@ -328,7 +335,14 @@ contractor's browser and makes the access model theatre.
 
 **The claim is asserted on the wire, not in the DOM.** `e2e/payload.spec.ts` fetches the restricted
 account's pages and searches the **response body**, including the RSC flight payload, for Member
-names and cost figures outside its grants. `not.toBeVisible()` would prove something was not
+names and cost figures outside its grants.
+
+*Since ticket 61 the restricted account is demonstrable **only** under test.* The product offers
+it nowhere and `POST /api/session` refuses its id, so the suite installs a token minted straight
+off the fixture through the application's own `accountFor` (`e2e/support/session.ts`). The
+enforcement claim is therefore no weaker and the derivation is no more duplicated than before —
+what is gone is a visitor's ability to occupy the restricted identity, which was never part of
+the claim. `not.toBeVisible()` would prove something was not
 rendered and nothing about whether it was *sent*; a figure serialised and never displayed has still
 left the server and is still in devtools (`e2e/payload.spec.ts:3-7`). The suite carries two positive
 controls, the stronger being that the *open* account's payload does contain all nineteen names
@@ -394,13 +408,13 @@ limits what leaves the origin, and the return path is validated same-origin rega
 by `e2e/enforcement.spec.ts:90-104`, but **nothing in the UI calls it** — there is no sign-out
 control in the header (`src/components/shell/app-header.tsx`) or anywhere else in `src/`. A session
 ends when its 8 hours elapse (`src/data/session-cookie.ts:14`) or when the visitor clears cookies.
-The account switcher makes this unimportant for the demo, since switching re-issues rather than
-requiring a sign-out — but it is an absence, not a decision recorded anywhere, and it is written
-down here as the former.
+The header's "Add another account" link goes to `/sign-in`, which re-issues rather than signing
+out. This mattered less when the switcher could re-issue in place; with one account offered it is
+plainly an absence, not a decision recorded anywhere, and it is written down here as the former.
 
-**No real identity.** No password, no OAuth, no verification: `/sign-in` mints a token for whichever
-of the two seeded accounts is asked for, for any visitor
-(`src/app/api/session/route.ts:62`, `src/app/sign-in/page.tsx:77-113`). This is a stated non-goal
+**No real identity.** No password, no OAuth, no verification: `/sign-in` mints a token for the one
+offered account, for any visitor
+(`src/app/api/session/route.ts:62`, `src/app/(public)/sign-in/page.tsx`). This is a stated non-goal
 (`.scratch/agent-dash/spec.md` § 1.1 — *"Real OAuth, live API integration, a real GitHub App. Fixture data
 throughout."*), and it is the premise most of § 2 rests on: every identity here is public and freely
 obtainable, so a control protecting *access to an identity* buys nothing. Any of the § 2 triggers

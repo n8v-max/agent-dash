@@ -1,11 +1,14 @@
 // **T-E5** — control state does not survive navigation (A20, R-C5, R-T27).
-// **T-E6** — the account switcher re-issues the token and stays on the current URL (A5, R-A5).
+// **T-E6** — the account switcher identifies the acting account and links out (R-A5 as amended
+// by ticket 61).
 //
 // Both are end-to-end claims and neither is provable below this layer. T-E5's mechanism is an
 // *absence* — nav `href`s carry no query — and an absence is only real once a browser has
-// followed one. T-E6 crosses a `Set-Cookie`, a 303 and a fresh render, which is the whole
-// feature: the unit layer can prove the endpoint computes the right redirect, and only this can
-// prove the viewer ends up on the page they were reading with fewer rows on it.
+// followed one. T-E6's claim is now about the running shell: the switcher used to cross a
+// `Set-Cookie`, a 303 and a fresh render, and the requirement it served was withdrawn. What
+// replaced it is a *shape* — one link out, no form, in a `<details>` rendered by a layout — and
+// a unit test on the component cannot see that the layout ships it, that the link resolves, or
+// that the page it lands on is still the one-action sign-in page.
 
 import { expect, test, type Page } from "@playwright/test";
 import { OPEN_ACCOUNT, RESTRICTED_ACCOUNT, useSession } from "./support/session";
@@ -24,15 +27,6 @@ const openMenu = async (page: Page, selector: string): Promise<void> => {
  * claim R-C5 makes is about which one the summary reads.
  */
 const currentPeriod = (page: Page) => page.locator('[data-testid="control-period"] summary');
-
-/**
- * The switcher's entries name **Roles, not people** (R-A6): a Member name in that menu would be a
- * named individual in a payload whose viewer holds no identifying scope over them, which is the
- * leak T-E4 catches. So the handle here is the Role.
- */
-const switchTo = async (page: Page, roleName: string): Promise<void> => {
-  await page.getByTestId("switch-account").getByRole("button", { name: roleName }).click();
-};
 
 test.describe("T-E5 — control state does not survive navigation (A20, R-C5)", () => {
   test.beforeEach(async ({ context, baseURL }) => {
@@ -108,57 +102,69 @@ test.describe("T-E5 — control state does not survive navigation (A20, R-C5)", 
   });
 });
 
-test.describe("T-E6 — the account switcher stays on the current URL (A5, R-A5)", () => {
-  const rowsOn = (page: Page) => page.locator("tbody tr");
+test.describe("T-E6 — the switcher identifies and links out (R-A5 as amended)", () => {
+  const menu = (page: Page) => page.getByTestId("switch-account");
 
-  test("the same path and query, with fewer rows on it", async ({ page, context, baseURL }) => {
-    await useSession(
-      context,
-      { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG },
-      baseURL ?? BASE,
-    );
-
-    const target = `/${SLUG}/people?sort=cost`;
-    await page.goto(target);
-    await expect(page.getByTestId("viewer")).toHaveText(OPEN_ACCOUNT.fullName);
-    const before = await rowsOn(page).count();
-    expect(before).toBeGreaterThan(1);
-
-    await openMenu(page, '[data-testid="account-switcher"]');
-    await switchTo(page, RESTRICTED_ACCOUNT.roleName);
-
-    // R-A5 — in place: the same page, the same control state, a different viewer.
-    await expect(page).toHaveURL(target);
-    await expect(page.getByTestId("viewer")).toHaveText(RESTRICTED_ACCOUNT.fullName);
-
-    const after = await rowsOn(page).count();
-    expect(after).toBeGreaterThan(0);
-    expect(after).toBeLessThan(before);
-  });
-
-  test("re-issues the token rather than reusing the old one", async ({
+  test("names the acting Member and their Organization, and offers one link to /sign-in", async ({
     page,
     context,
     baseURL,
   }) => {
-    await useSession(
-      context,
-      { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG },
-      baseURL ?? BASE,
-    );
-    await page.goto(`/${SLUG}/history`);
-    const [issued] = await context.cookies();
+    await useSession(context, { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG }, baseURL ?? BASE);
+    await page.goto(`/${SLUG}/people?sort=cost`);
+
+    await expect(page.getByTestId("viewer")).toHaveText(OPEN_ACCOUNT.fullName);
 
     await openMenu(page, '[data-testid="account-switcher"]');
-    await switchTo(page, RESTRICTED_ACCOUNT.roleName);
-    await expect(page).toHaveURL(`/${SLUG}/history`);
 
-    const [reissued] = await context.cookies();
-    expect(reissued?.value).not.toBe(issued?.value);
-    expect(reissued?.httpOnly).toBe(true);
+    await expect(menu(page)).toContainText(OPEN_ACCOUNT.fullName);
+    await expect(menu(page)).toContainText(OPEN_ACCOUNT.orgName);
+    // Exactly one, so an entry added back as a second link fails here rather than silently
+    // re-offering an account the endpoint would refuse anyway.
+    await expect(menu(page).getByRole("link")).toHaveCount(1);
+    await expect(menu(page).getByRole("link")).toHaveAttribute("href", "/sign-in");
+    await expect(menu(page).getByRole("link")).toHaveText("Add another account");
   });
 
-  test("switching from a page with no control in its bar keeps that page too", async ({
+  test("holds no form: nothing in the header posts, and nothing in it switches", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await useSession(context, { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG }, baseURL ?? BASE);
+    await page.goto(`/${SLUG}/people?sort=cost`);
+    await openMenu(page, '[data-testid="account-switcher"]');
+
+    // The form was the mechanism of the old R-A5. Its absence in the *served document* is the
+    // claim: a component test proves what the component renders, not what the layout ships.
+    await expect(menu(page).locator("form")).toHaveCount(0);
+    await expect(menu(page).getByRole("button")).toHaveCount(0);
+    await expect(page.locator("header form")).toHaveCount(0);
+    await expect(menu(page)).not.toHaveText(/switch|restricted|contractor|fewer rows/i);
+  });
+
+  test("the link lands on /sign-in, which still has one form and one submit", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await useSession(context, { member_id: OPEN_ACCOUNT.memberId, org_slug: SLUG }, baseURL ?? BASE);
+    await page.goto(`/${SLUG}/people?sort=cost`);
+    await openMenu(page, '[data-testid="account-switcher"]');
+
+    await menu(page).getByRole("link").click();
+
+    await expect(page).toHaveURL(/\/sign-in$/);
+    // A session already exists and the page renders anyway: no redirect logic was added, and
+    // the demo action simply re-issues the open account.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in");
+    await expect(page.locator("main form")).toHaveCount(1);
+    await expect(page.locator("main button[type=submit]")).toHaveCount(1);
+  });
+
+  // R-A8, restated for the world ticket 61 leaves behind: the switcher is still the one thing
+  // in the header that differs between accounts, and it still differs only in what it *says*.
+  test("the restricted account is offered the same one link, under its own name", async ({
     page,
     context,
     baseURL,
@@ -169,17 +175,15 @@ test.describe("T-E6 — the account switcher stays on the current URL (A5, R-A5)
       baseURL ?? BASE,
     );
     await page.goto(`/${SLUG}/projection`);
-    // R-N3.1 — the bar is here, holding the as-of stamp and no control. What this test needs of
-    // the page is the second half of that, which is what it now asserts.
-    await expect(page.getByTestId("page-toolbar").locator('[data-testid^="control-"]')).toHaveCount(
-      0,
-    );
+
+    await expect(page.getByTestId("viewer")).toHaveText(RESTRICTED_ACCOUNT.fullName);
 
     await openMenu(page, '[data-testid="account-switcher"]');
-    await switchTo(page, OPEN_ACCOUNT.roleName);
 
-    await expect(page).toHaveURL(`/${SLUG}/projection`);
-    await expect(page.getByTestId("viewer")).toHaveText(OPEN_ACCOUNT.fullName);
+    await expect(menu(page)).toContainText(RESTRICTED_ACCOUNT.fullName);
+    await expect(menu(page).getByRole("link")).toHaveCount(1);
+    await expect(menu(page).getByRole("link")).toHaveAttribute("href", "/sign-in");
+    await expect(menu(page).locator("form")).toHaveCount(0);
   });
 });
 

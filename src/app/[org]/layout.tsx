@@ -22,7 +22,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { AppHeader } from "@/components/shell/app-header";
-import { organizationsFor } from "@/data/accounts";
 import { SESSION_COOKIE } from "@/data/session-cookie";
 import { resolveViewer } from "@/data/viewer";
 
@@ -41,11 +40,7 @@ export default async function OrgLayout({ children, params }: LayoutProps<"/[org
         Role (R-A3.1), so it is in grant for both accounts and is the one identity on the page
         that always is.
       */}
-      <AppHeader
-        orgSlug={org}
-        account={resolution.account}
-        organizations={organizationsFor(resolution.account.memberId)}
-      />
+      <AppHeader orgSlug={org} account={resolution.account} />
       {children}
     </div>
   );

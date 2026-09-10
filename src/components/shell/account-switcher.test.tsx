@@ -1,115 +1,109 @@
-// **Ticket 58 — the switcher's Organization group, which the committed fixture cannot show.**
+// **Ticket 61 — the switcher identifies the account and links out.**
 //
-// One Organization is seeded, so `organizationsFor` returns a single entry for every Member and
-// the "Switch organisation" group never renders in the running application. That is a deliberate
-// consequence of keeping one dataset, not an oversight — but it means the branch has no e2e
-// coverage and could rot silently. So the component takes its Organization list as a prop, and
-// these tests hand it the two-Organization world the fixture does not contain.
+// Every assertion here is about what the menu *is* now: the acting Member's name, their
+// Organization's name, and one anchor to `/sign-in`. Three of them are absences, and absences
+// are the point of this ticket — the "Switch account" heading, the Role line, the Organization
+// group and the closing paragraph about "fewer rows" are all gone, and a test that only checked
+// the positives would pass against a menu that still carried every one of them.
 //
-// **The T-E4 line is asserted, not assumed.** The menu may carry the viewer's *own* name — R-A3.1
-// grants `self` over every class to every Role — and must not carry anybody else's, because the
-// other entry names a Member the viewer may hold no identifying scope over. Both halves are
-// checked, since a test that only asserted the absence would pass against a menu rendering no
-// names at all.
+// **The T-E4 line is asserted, not assumed.** The menu may carry the viewer's *own* name —
+// R-A3.1 grants `self` over every class to every Role — and must carry no other person's. That
+// is now structural rather than conditional: nothing in this component reads a list of accounts,
+// so the only name it *can* render is the one it is handed. The test states it anyway, because
+// "there is no way to regress" is a property of today's code and not of the requirement.
+//
+// No module mock: the component imports `Account` as a type only, so nothing here reaches the
+// fixture and the account under test is a literal.
 
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { Account } from "@/data/accounts";
-import type { Organization } from "@/domain/types";
+import { AccountSwitcher } from "./account-switcher";
 
 const ALPHA: Account = {
   memberId: "mem_here",
   orgSlug: "alpha",
   orgName: "Alpha S.L.",
-  fullName: "Héctor Vidal",
+  fullName: "Héctor Camps Vidal",
   roleName: "Open default",
 };
 
-const OTHER: Account = {
-  memberId: "mem_other",
-  orgSlug: "alpha",
-  orgName: "Alpha S.L.",
-  fullName: "Someone Else Entirely",
-  roleName: "Restricted (contractor)",
-};
+const menu = () => within(screen.getByTestId("switch-account"));
 
-// `signInAccounts` reads the fixture through `loadDataset`; the two accounts are the input to
-// this component, not the thing under test, so they are supplied rather than loaded.
-vi.mock("@/data/accounts", () => ({ signInAccounts: () => [ALPHA, OTHER] }));
+describe("the menu — who you are, where you are, one way on", () => {
+  it("names the acting Member and their Organization, and nothing about their Role", () => {
+    render(<AccountSwitcher account={ALPHA} />);
 
-const { AccountSwitcher } = await import("./account-switcher");
+    expect(menu().getByText("Héctor Camps Vidal")).toBeInTheDocument();
+    expect(menu().getByText("Alpha S.L.")).toBeInTheDocument();
+    // The Role name is on the Account and is deliberately not rendered: R-A5 as amended drops
+    // the mechanics, and the Role was the label the mechanics needed.
+    expect(menu().queryByText(/Open default/)).toBeNull();
+  });
 
-const org = (id: string, slug: string, name: string): Organization => ({
-  id,
-  slug,
-  name,
-  timezone: "Europe/Madrid",
-  github_org: slug,
-  window_start: "2026-04-12",
-  window_end: "2026-09-08",
-  window_days: 150,
-});
+  it("offers exactly one link, to /sign-in, labelled Add another account", () => {
+    render(<AccountSwitcher account={ALPHA} />);
 
-const ALPHA_ORG = org("org_a", "alpha", "Alpha S.L.");
-const GLOBEX_ORG = org("org_b", "globex", "Globex Corp.");
+    const links = menu().getAllByRole("link");
 
-describe("with one Membership — the shipped fixture's shape", () => {
-  it("offers no Organization switch", () => {
-    render(<AccountSwitcher account={ALPHA} organizations={[ALPHA_ORG]} />);
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAccessibleName("Add another account");
+    expect(links[0]).toHaveAttribute("href", "/sign-in");
+  });
 
+  it("holds no form and no button: nothing here posts, and nothing here switches", () => {
+    render(<AccountSwitcher account={ALPHA} />);
+
+    // `document.forms` rather than a container query: an unnamed <form> has no ARIA role, so
+    // Testing Library cannot see one at all, and the DOM's own registry of every form in the
+    // rendered document is both the honest question and the stronger one.
+    expect(document.forms).toHaveLength(0);
+    expect(menu().queryAllByRole("button")).toHaveLength(0);
+  });
+
+  it("carries no copy about switching, roles, rows, grants or the restricted account", () => {
+    render(<AccountSwitcher account={ALPHA} />);
+
+    // The closing paragraph explained a mechanic that no longer exists; the Organization group
+    // offered a second tenant the fixture does not hold. Both are asserted gone by their words,
+    // because either could come back as prose without failing a structural count.
+    expect(screen.getByTestId("switch-account").textContent).not.toMatch(
+      /switch|row|restricted|grant|contractor|organisation/i,
+    );
     expect(screen.queryByTestId("switch-organization")).toBeNull();
-    // The positive control: the account group is there, so the absence above means something.
-    expect(within(screen.getByTestId("switch-account")).getAllByRole("button")).toHaveLength(2);
   });
 
-  it("names the Organization and the Role on every entry", () => {
-    render(<AccountSwitcher account={ALPHA} organizations={[ALPHA_ORG]} />);
+  it("names the acting Member and nobody else (T-E4's line, at this layer)", () => {
+    render(<AccountSwitcher account={{ ...ALPHA, fullName: "Nuria Castells Vidal" }} />);
 
-    const menu = within(screen.getByTestId("switch-account"));
-    expect(menu.getByText("Alpha S.L. · Open default")).toBeDefined();
-    expect(menu.getByText("Alpha S.L. · Restricted (contractor)")).toBeDefined();
-  });
-});
+    const rendered = screen.getByTestId("switch-account").textContent ?? "";
 
-describe("T-E4 — the menu names the viewer, and nobody else", () => {
-  it("carries the acting Member's own name and not the other account's", () => {
-    render(<AccountSwitcher account={ALPHA} organizations={[ALPHA_ORG]} />);
-
-    const menu = within(screen.getByTestId("switch-account"));
-    expect(menu.getAllByText("Héctor Vidal").length).toBeGreaterThan(0);
-    expect(menu.queryByText("Someone Else Entirely")).toBeNull();
-  });
-
-  it("swaps which name is shown when the other account is the acting one", () => {
-    render(<AccountSwitcher account={OTHER} organizations={[ALPHA_ORG]} />);
-
-    const menu = within(screen.getByTestId("switch-account"));
-    expect(menu.getAllByText("Someone Else Entirely").length).toBeGreaterThan(0);
-    expect(menu.queryByText("Héctor Vidal")).toBeNull();
+    expect(rendered).toContain("Nuria Castells Vidal");
+    // Everything the menu says, spelled out: two facts and one action. A second person's name
+    // could only arrive by adding text, so the whole string is the assertion.
+    expect(rendered).toBe("Nuria Castells Vidal" + "Alpha S.L." + "Add another account");
   });
 });
 
-describe("with two Memberships — the world the fixture does not hold", () => {
-  it("offers the Organizations the Member holds, minus the one they are in", () => {
-    render(<AccountSwitcher account={ALPHA} organizations={[ALPHA_ORG, GLOBEX_ORG]} />);
+describe("the trigger — an avatar and a name", () => {
+  it("shows the full name, and no Role line beside it", () => {
+    render(<AccountSwitcher account={ALPHA} />);
 
-    const group = within(screen.getByTestId("switch-organization"));
-    const buttons = group.getAllByRole("button");
-    expect(buttons).toHaveLength(1);
-    expect(group.getByText("Globex Corp.")).toBeDefined();
-    // The current Organization is not offered as a destination — switching to where you already
-    // are is a round trip that reads as a no-op bug.
-    expect(group.queryByText("Alpha S.L.")).toBeNull();
+    const trigger = within(screen.getByTestId("account-switcher"));
+
+    expect(screen.getByTestId("viewer")).toHaveTextContent("Héctor Camps Vidal");
+    expect(trigger.queryByText("Open default")).toBeNull();
   });
 
-  it("posts the acting Member and the target slug, so the endpoint resolves the pairing", () => {
-    render(<AccountSwitcher account={ALPHA} organizations={[ALPHA_ORG, GLOBEX_ORG]} />);
+  it("reduces a multi-part name to the initials of its first and last parts", () => {
+    render(<AccountSwitcher account={ALPHA} />);
 
-    // The pairing is the security-relevant part of this form: `/api/session` re-resolves it
-    // against the Member's Memberships, and a slug posted for somebody else's tenant is what
-    // ticket 58 exists to stop being mintable.
-    const group = within(screen.getByTestId("switch-organization"));
-    expect(group.getByDisplayValue("mem_here")).toHaveAttribute("name", "member_id");
-    expect(group.getByDisplayValue("globex")).toHaveAttribute("name", "org_slug");
+    expect(screen.getByTestId("account-switcher").textContent).toContain("HV");
+  });
+
+  it("falls back to the first two letters when a name has one part", () => {
+    render(<AccountSwitcher account={{ ...ALPHA, fullName: "Prometheus" }} />);
+
+    expect(screen.getByTestId("account-switcher").textContent).toContain("Pr");
   });
 });

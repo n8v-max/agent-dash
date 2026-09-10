@@ -38,23 +38,27 @@ afterEach(() => {
 });
 
 describe("the seeded accounts", () => {
-  it("offers exactly the two presets of R-A3, in the order /sign-in shows them", async () => {
+  // Ticket 61 split *seated* from *offered*. Both halves are asserted, because the whole point
+  // of the split is that the restricted preset survives being taken off the menu: a test that
+  // only checked the offer would pass equally against a codebase that deleted the Role.
+  it("offers exactly one account — the open default (R-A4 as amended)", async () => {
     const { signInAccounts } = await loadModule();
 
-    expect(signInAccounts().map((account) => account.roleName)).toEqual([
-      OPEN_DEFAULT_ROLE.name,
-      RESTRICTED_ROLE.name,
-    ]);
+    expect(signInAccounts().map((account) => account.roleName)).toEqual([OPEN_DEFAULT_ROLE.name]);
   });
 
-  it("resolves each account to a distinct Member of the seeded Organization", async () => {
-    const { signInAccounts } = await loadModule();
+  it("still seats the restricted contractor, as a distinct Member of the same Organization", async () => {
+    const { signInAccounts, accountFor } = await loadModule();
 
-    const accounts = signInAccounts();
+    const [open] = signInAccounts();
+    const restricted = accountFor(RESTRICTED_ROLE);
 
-    expect(new Set(accounts.map((account) => account.memberId)).size).toBe(2);
-    expect(accounts.every((account) => account.orgSlug === "demo")).toBe(true);
-    expect(accounts.every((account) => account.fullName.length > 0)).toBe(true);
+    expect(restricted.roleName).toBe(RESTRICTED_ROLE.name);
+    expect(restricted.memberId).not.toBe(open?.memberId);
+    for (const account of [open, restricted]) {
+      expect(account?.orgSlug).toBe("demo");
+      expect(account?.fullName.length).toBeGreaterThan(0);
+    }
   });
 });
 
@@ -104,9 +108,9 @@ describe("resolving a viewer", () => {
 
 describe("grants are resolved from the fixture, never from the token", () => {
   it("gives the restricted account the restricted Role", async () => {
-    const { resolveViewer, signInAccounts } = await loadModule();
-    const restricted = signInAccounts()[1];
-    const token = await forge({ member_id: restricted?.memberId, org_slug: "demo" });
+    const { resolveViewer, accountFor } = await loadModule();
+    const restricted = accountFor(RESTRICTED_ROLE);
+    const token = await forge({ member_id: restricted.memberId, org_slug: "demo" });
 
     const resolution = await resolveViewer(token, "demo");
 
@@ -117,10 +121,10 @@ describe("grants are resolved from the fixture, never from the token", () => {
   // The extra claims are signed with the real key, so verification passes and they are still
   // ignored — the Role comes from `members.json`, which the holder cannot sign.
   it("ignores grants, scopes and a role name smuggled into a validly signed token", async () => {
-    const { resolveViewer, signInAccounts } = await loadModule();
-    const restricted = signInAccounts()[1];
+    const { resolveViewer, accountFor } = await loadModule();
+    const restricted = accountFor(RESTRICTED_ROLE);
     const token = await forge({
-      member_id: restricted?.memberId,
+      member_id: restricted.memberId,
       org_slug: "demo",
       role: "member",
       grants: [{ scope: "org-member", datapoint: "cost" }],
@@ -133,9 +137,9 @@ describe("grants are resolved from the fixture, never from the token", () => {
   });
 
   it("resolves the viewer's Teams from the fixture, not from the token", async () => {
-    const { resolveViewer, signInAccounts } = await loadModule();
-    const restricted = signInAccounts()[1];
-    const token = await forge({ member_id: restricted?.memberId, org_slug: "demo", teams: ["x"] });
+    const { resolveViewer, accountFor } = await loadModule();
+    const restricted = accountFor(RESTRICTED_ROLE);
+    const token = await forge({ member_id: restricted.memberId, org_slug: "demo", teams: ["x"] });
 
     const resolution = await resolveViewer(token, "demo");
 

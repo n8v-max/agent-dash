@@ -151,8 +151,24 @@ export const RESTRICTED_ROLE: Role = {
   grants: permissions(["team"], ["jobs", "tokens"]),
 };
 
-/** The two presets R-A3 ships, in the order `/sign-in` offers them (R-A4). */
+/** The two presets R-A3 ships. Both are real Roles the fixture seats a Member in. */
 export const SHIPPED_PRESETS: readonly Role[] = [OPEN_DEFAULT_ROLE, RESTRICTED_ROLE];
+
+/**
+ * The presets a visitor may sign in **as** (R-A4 as amended, ticket 61) — the open default, and
+ * nothing else.
+ *
+ * **Shipped and offered are two different lists, and this is the smaller one.** The restricted
+ * preset stays in `SHIPPED_PRESETS` with its grants intact: it is still a Role the model
+ * expresses, still what `roleFor("contractor")` resolves to, and still the account T-E3 and
+ * T-E4 act as. What changed is that the product stops *offering* it — `/sign-in` shows one
+ * action and the header switcher shows none — so a token for it can only be minted directly,
+ * from the fixture, by a test.
+ *
+ * A second list rather than a flag on `Role`, because a `Role` is a set of grants and this is a
+ * fact about a sign-in page: a preset nobody offers is not a narrower Role.
+ */
+export const OFFERED_PRESETS: readonly Role[] = [OPEN_DEFAULT_ROLE];
 
 /**
  * The fail-closed floor. **Not a shipped preset** and not offered at `/sign-in`: it is what an

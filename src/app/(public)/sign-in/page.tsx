@@ -8,11 +8,11 @@
 // `POST /api/session` as before — no client component, no JavaScript, no fetch — signing in as
 // the **first** account `signInAccounts()` returns, which is R-A4's open default.
 //
-// **The restricted account is not on this page.** It stays seeded, stays in `signInAccounts()`,
-// and is reached through the header account switcher (R-A5), which is where the README's
-// thirty-second path already switches. The sentence under the button says so instead of
-// offering it, so the page has one action and the demonstration of restriction happens where
-// restriction is visible: on a page that has just lost rows.
+// **The restricted account is not on this page, and is no longer anywhere else either**
+// (ticket 61). `signInAccounts()` now returns the open default alone, so this page offers what
+// the endpoint will mint and nothing more; the header switcher stopped offering the contractor
+// at the same time. The preset, its grants and the tests that mint it directly are untouched —
+// restriction is demonstrable under test, not through the UI.
 //
 // **Why the pills are anchors and the demo action is a button.** An anchor cannot POST without
 // JavaScript; a provider page is a place, not an action. Each element is the one that does its
@@ -99,7 +99,11 @@ function SsoBlock() {
   );
 }
 
-function DemoCard({ memberId }: { readonly memberId: string }) {
+/**
+ * The name is read from the offered account rather than written here: the fixture names the
+ * Member, and a literal would go stale the first time it is reseeded (ticket 61).
+ */
+function DemoCard(props: { readonly memberId: string; readonly fullName: string }) {
   return (
     <form
       method="post"
@@ -107,13 +111,13 @@ function DemoCard({ memberId }: { readonly memberId: string }) {
       aria-labelledby="demo-account"
       className="flex flex-col gap-4 rounded-[18px] border border-(--landing-rule) bg-(--landing-claims) p-6"
     >
-      <input type="hidden" name="member_id" value={memberId} />
+      <input type="hidden" name="member_id" value={props.memberId} />
       <p id="demo-account" className={`m-0 ${SMALL_CAPS} text-(--landing-ink-3)`}>
         Demo account
       </p>
       <p className="m-0 text-pretty text-[15px] leading-[1.55] text-(--landing-ink-2)">
-        You will be Nuria Castells Vidal, the open default: every Member by name, their jobs,
-        their tokens, their cost.
+        You will be {props.fullName}, the open default: every Member by name, their jobs, their
+        tokens, their cost.
       </p>
       <button
         type="submit"
@@ -121,15 +125,13 @@ function DemoCard({ memberId }: { readonly memberId: string }) {
       >
         Sign in to the demo account
       </button>
-      <p className="m-0 text-[13px] text-(--landing-ink-2)">
-        Switch to the restricted contractor view from the header on any page.
-      </p>
     </form>
   );
 }
 
 export default function SignInPage() {
-  // R-A4 order: the open default first. Read, not hardcoded, so the id stays the fixture's.
+  // R-A4 as amended: one offered account, the open default. Read, not hardcoded, so the id and
+  // the name both stay the fixture's.
   const [openDefault] = signInAccounts();
   if (!openDefault) throw new Error("R-A3: no seeded account to sign in as.");
 
@@ -144,7 +146,7 @@ export default function SignInPage() {
       <ProviderRow />
       <Divider />
       <SsoBlock />
-      <DemoCard memberId={openDefault.memberId} />
+      <DemoCard memberId={openDefault.memberId} fullName={openDefault.fullName} />
 
       <Link
         href="/"

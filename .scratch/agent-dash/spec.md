@@ -98,10 +98,21 @@ permission matrix; the surviving reason carries it alone. See § 11 C6, C9.
 **R-A4 — `/sign-in` offers two "continue as" buttons**, each issuing that account's JWT and
 redirecting to `/demo`. *Amended 2026-09-10, ticket 60: `/sign-in` offers one "sign in to the
 demo account" action for the open default; the restricted account is reached from the header
-switcher (R-A5).*
+switcher (R-A5).* **Amended again 2026-09-10, ticket 61: the product offers one account and
+one action, and nothing else anywhere.** The restricted contractor is offered on no surface —
+not on `/sign-in`, not in the header — and `POST /api/session` mints only for the offered list,
+so its id returns 400. The preset, its grants and its seated Member are unchanged; it is
+demonstrable only under test, from a token minted directly off the fixture.
 
 **R-A5 — The header account switcher re-issues the token and reloads in place**, keeping the
 viewer on the current URL. The difference must read as *the same page with fewer rows*.
+*Amended 2026-09-10, ticket 61: the switcher no longer switches — it **identifies and links
+out**.* It shows the acting Member's name and their Organization's name, and offers one action,
+**Add another account**, which is a link to `/sign-in`. It carries no Role line, no Organization
+group, no explanation of any mechanic, and no `<form>`: with one account offered, a control that
+re-issued identity in place had nothing to switch between. The in-place return path stays in
+`POST /api/session`, which still honours a validated `Referer` for a sign-in made from a page
+under the Organization.
 
 **R-A6 — Enforcement is server-side and lives in the data layer.** A figure the acting Member is
 not granted must never reach the client payload. Client-side filtering over a full fixture is
@@ -111,8 +122,12 @@ model theatre.
 **R-A7 — A token/path Organization mismatch, or an unknown slug, returns 404 — not 403.** A 403
 confirms that an Organization exists, which is a tenancy leak.
 
-**R-A8 — Navigation is identical for both accounts.** No item is hidden, none is disabled. The
-restricted account simply receives fewer rows.
+**R-A8 — Navigation is identical for every account.** No item is hidden, none is disabled. A
+restricted account simply receives fewer rows. *Restated 2026-09-10, ticket 61 — unchanged in
+substance: navigation is identical for any account that can be signed in, and the header
+switcher differs between accounts only in the name it prints, never in what it offers.* Since
+only one account can be signed in, the claim's remaining bite is on the seated contractor, and
+it is still asserted against it end to end from a directly minted token.
 
 **R-A9 — Visibility under the open default is symmetric.** Named individual usage and spend for
 anyone in the Organization, visible to everyone on the same terms. No minimum-population floor at

@@ -15,6 +15,7 @@ import {
   RESTRICTED_ROLE,
   SCOPE_RESOLUTION,
   SELF_ONLY_ROLE,
+  OFFERED_PRESETS,
   SHIPPED_PRESETS,
   SUBJECT_SCOPES,
   filterRows,
@@ -525,9 +526,25 @@ describe("the matrix renders as data (R-A10) and Roles are data, not an enum", (
     expect(matrix.org).toEqual({ jobs: false, tokens: false, cost: false, access: false });
   });
 
-  it("ships exactly two presets, in the order /sign-in offers them", () => {
+  it("ships exactly two presets — the Role model, unchanged by ticket 61", () => {
     expect(SHIPPED_PRESETS.map((preset) => preset.key)).toEqual(["open-default", "restricted"]);
     expect(SHIPPED_PRESETS).not.toContain(SELF_ONLY_ROLE);
+  });
+
+  // Ticket 61 split *shipped* from *offered*. Both directions are asserted: the offer is a
+  // strict subset of what ships (so nothing unshipped can be signed into), and the restricted
+  // preset is in the first list and out of the second (so "stop offering it, keep it" is one
+  // statement rather than two hopes).
+  it("offers the open default alone, and offers a subset of what it ships", () => {
+    expect(OFFERED_PRESETS.map((preset) => preset.key)).toEqual(["open-default"]);
+    expect(OFFERED_PRESETS.every((preset) => SHIPPED_PRESETS.includes(preset))).toBe(true);
+  });
+
+  it("keeps the restricted contractor shipped, and out of the offer", () => {
+    expect(SHIPPED_PRESETS).toContain(RESTRICTED_ROLE);
+    expect(OFFERED_PRESETS).not.toContain(RESTRICTED_ROLE);
+    // Its grants are unchanged — the wipe stopped at offering. Asserted cell by cell above,
+    // where the preset itself is described.
   });
 
   it("maps the fixture's Member.role strings onto the shipped presets", () => {

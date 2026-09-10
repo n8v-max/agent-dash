@@ -44,13 +44,20 @@ The positioning in full, with what each line is held to:
 
 ## 2. Live, and the thirty-second path
 
-**<https://agent-use-dash.vercel.app>** — public, no deployment protection. Two seeded accounts, no
-password; `/sign-in` signs anyone in to the first, and the header switcher reaches the second.
+**<https://agent-use-dash.vercel.app>** — public, no deployment protection. **One account is
+offered**, no password: `/sign-in` signs anyone in to the open default. The header menu names who
+you are and links back to `/sign-in`; it does not switch accounts.
 
-| Account | Role | Sees |
-|---|---|---|
-| **Nuria Castells Vidal** | Open default | *"Every Member of the Organization by name — their jobs, their tokens, their cost."* |
-| **Héctor Camps Vidal** | Restricted (contractor) | *"Yourself by name; your Team's jobs and tokens as totals only, and no cost at all."* |
+| Account | Role | Sees | Offered? |
+|---|---|---|---|
+| **Nuria Castells Vidal** | Open default | *"Every Member of the Organization by name — their jobs, their tokens, their cost."* | Yes — the one demo action |
+| **Héctor Camps Vidal** | Restricted (contractor) | *"Yourself by name; your Team's jobs and tokens as totals only, and no cost at all."* | **No — demonstrable only under test** |
+
+**The restricted account is seated, not offered** (ticket 61). Its Role and grants are shipped and
+unchanged, and it is the account the payload tests act as — but nothing in the product mints a
+token for it, and `POST /api/session` answers 400 for its id. To watch the access model subtract
+data you run the suite, not the site: `e2e/payload.spec.ts` and `e2e/people.spec.ts` install its
+token directly from the fixture.
 
 Walk it:
 
@@ -65,12 +72,18 @@ Walk it:
    carrying its evidence.
 3. **Go to People.** Twenty Members, ordered by Completed Jobs descending — by output, never by
    spend.
-4. **Open the account switcher and pick "Restricted (contractor)".** You stay on `/demo/people`.
-   The table goes from **20 rows to 1**; the sentence above it changes from *"You can see yourself
-   by name, and every other Member of this Organization by name"* to *"You can see yourself by name.
-   Other Members' work reaches the totals on this page without being named."* **The navigation is
-   identical** — six links, nothing hidden, no error page and no locked panel. It is the same page
-   with fewer rows, which is the whole point: the access model subtracts data, not features.
+4. **The header menu names you and your Organization, and offers one thing: "Add another
+   account", which goes back to `/sign-in`.** That is the whole of it — no Role line, no second
+   account, no explanation of a mechanic.
+
+**What the fourth step used to be, and where it went.** It used to switch you to the contractor
+on `/demo/people` and the table went from **20 rows to 1**, with the sentence above it changing
+from *"You can see yourself by name, and every other Member of this Organization by name"* to
+*"You can see yourself by name. Other Members' work reaches the totals on this page without being
+named."* **The navigation stayed identical** — six links, nothing hidden, no error page and no
+locked panel. That is still exactly what happens; it is now asserted rather than clickable. Run
+`pnpm e2e`: `people.spec.ts` walks both sentences and both row counts, and `routes.spec.ts`
+asserts the two accounts are shown the same set of doors on all six routes.
 
 The filtering happens in the data layer, before aggregation, and `e2e/payload.spec.ts` inspects the
 HTML *and* the RSC flight payload to prove an ungranted figure never reaches the wire — not merely
