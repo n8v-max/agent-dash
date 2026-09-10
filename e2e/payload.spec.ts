@@ -46,7 +46,7 @@
 // with the difference-in-kind claim asserted sharply beside it. It is not restated here.
 
 import { expect, test } from "@playwright/test";
-import { decimalsIn, ungrantedCostLiterals } from "./support/costs";
+import { costCollisions, decimalsIn, ungrantedCostLiterals } from "./support/costs";
 import {
   OPEN_ACCOUNT,
   RESTRICTED_ACCOUNT,
@@ -64,8 +64,10 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 
 /**
  * The floor the residual cost set must clear. Measured on the committed fixture: **1,653**
- * candidate ungranted literals, **604** after subtracting every figure the viewer's granted rows
- * can produce. The classes subtracted, each measured against a real failure:
+ * candidate ungranted literals after ticket 66, 604 of them surviving the subtraction, and
+ * **654** surviving on ticket 68's token and cost scale — the absolute size is what the search
+ * depends on, and it has grown with every regeneration.
+ * The classes subtracted, each measured against a real failure:
  *
  *   * the viewer's own session costs and the totals its rows aggregate to (sums);
  *   * money quotients — Cost per session and Cost per completed Job, at the same
@@ -73,23 +75,19 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
  *     the class that made `/demo/spend` fail on 16 R-X1 mirror cells;
  *   * the session- and Task-grain **rates**: acceptance rate, Rework rate, Decomposition rate.
  *     This is the class that made `/demo/work` — a page carrying no money figure at all — fail
- *     on `0.7`, `0.6` and `0.86`, and again on `0.43` and `0.07` after ticket 48 regenerated the
- *     fixture. Counts over counts, so they are subtracted over the **Team** as well as over the
- *     viewer's own rows: R-A3 grants `team` over `jobs`, so that is the population `/demo/work`
- *     genuinely computes them across, and a count can never be a cost;
+ *     on `0.7`, `0.6` and `0.86`. Counts over counts, so they are subtracted over the **Team**
+ *     as well as over the viewer's own rows: R-A3 grants `team` over `jobs`, so that is the
+ *     population `/demo/work` genuinely computes them across, and a count can never be a cost;
  *   * the **projection** (ticket 66): `/demo/projection` extrapolates the viewer's own spend —
  *     a daily rate carried forward, today's remainder, and the month-end figures those imply.
  *     None of them is a sum and none is a quotient at a reported key, so the two classes above
- *     cannot see them; the literal that exposed the gap was `15.5`, today's remainder, which is
- *     also some other Member's session cost;
+ *     cannot see them;
  *   * the published token rate card (R-N11), which is nobody's datapoint.
  *
- * **Both sides grew with ticket 66's volume, and the residual share fell.** Ten times the rows
- * put ten times the money into the same narrow range, so a far larger fraction of it is
- * reachable as some legitimate reading of the viewer's own work: **568** of the candidates after
- * ticket 67 regenerated the fixture, 604 before it, where ticket 48 measured 384 of 612. The set
- * is bigger in absolute terms and thinner in proportion, and it is the absolute size the search
- * depends on.
+ * **Both sides grew with the volume, and the residual share fell.** Ten times the rows put ten
+ * times the money into the same narrow range, so a far larger fraction of it is reachable as
+ * some legitimate reading of the viewer's own work. The set is bigger in absolute terms and
+ * thinner in proportion, and it is the absolute size the search depends on.
  *
  * **300 is the line below which this stops being a search of the money range.** If a fixture or
  * a subtraction change ever drops the set under it, the cost assertion has become theatre and
@@ -98,32 +96,23 @@ const UNGRANTED_COSTS = ungrantedCostLiterals(RESTRICTED_ACCOUNT.memberId);
 const UNGRANTED_COST_FLOOR = 300;
 
 /**
- * `23.20` is `ses_3364`'s cost — `mem_nightlybot`'s, a Member the contractor holds no scope
- * over — and it plays the part `28.04` played before ticket 67 regenerated the fixture, and
- * `24.39` before ticket 66: the literal ticket 29's falsification probe leaked to prove T-E4 can
- * fail. It must survive the subtraction, or the probe would no longer fire and neither would a
- * leak.
+ * **The three named literals are derived, not typed** (ticket 68).
+ *
+ * They used to be three measurements written into this file — `23.20` for a real ungranted cost,
+ * `9.16` for one the viewer's own rows sum to, `0.8` for one they divide out to — and every
+ * ticket that regenerated the fixture had to re-measure all three. The value was never the
+ * claim. The claim is that each subtraction class is **non-empty**, so that removing it is doing
+ * work, and that removing it does not reach the costs a leak would be made of. `costCollisions`
+ * computes exactly that from the committed rows; this ticket's tokens and costs moved every one
+ * of the old three.
+ *
+ * `probe` is picked from the rows and not from the surviving set — the dearest session held by a
+ * Member the contractor holds no scope over — so "it survives the subtraction" is a claim about
+ * the subtraction and not a tautology. It plays the part `23.20`, `28.04` and `24.39` played for
+ * tickets 67, 66 and 29: the literal ticket 29's falsification probe leaked to prove T-E4 can
+ * fail.
  */
-const KNOWN_UNGRANTED_LITERAL = "23.20";
-
-/**
- * `9.16` is another Member's session cost (`ses_1821`) **and** the viewer's own accepted-session
- * total for 27 August 2026 — one cell of an R-X1 mirror. It is the same kind of false positive
- * ticket 31 measured on `/demo/spend`, and it is the defect this file exists to fix: value
- * identity is not fact identity. (It reads `9.16` rather than ticket 66's `24.87` because
- * ticket 67 regenerated the fixture; the property it is named for is the same one.)
- */
-const OWN_AGGREGATE_COLLISION = "9.16";
-
-/**
- * `0.8` is the viewer's own acceptance rate on its `bugfix` Jobs in week 24 of 2026 — and it is
- * also some other Member's session cost of `$0.80` (`ses_10054`). It is the kind of literal `/demo/work`
- * failed on, on a page whose ViewModel carries **no cost field at all**. Measured: it is
- * produced by no sum and by no money quotient of the viewer's own rows, so *only* the count
- * quotients remove it. It is named here so that a future change reverting the quotient half
- * fails on a value, not just on a set size.
- */
-const OWN_QUOTIENT_COLLISION = "0.8";
+const COLLISIONS = costCollisions(RESTRICTED_ACCOUNT.memberId);
 
 /**
  * **The scanner itself, before anything is asserted with it** (ticket 69).
@@ -143,9 +132,12 @@ const OWN_QUOTIENT_COLLISION = "0.8";
  */
 test.describe("T-E4 — the scanner", () => {
   test("finds a cost literal against every character a payload wraps one in", () => {
-    const payload = `,${KNOWN_UNGRANTED_LITERAL}] "${KNOWN_UNGRANTED_LITERAL}" >${KNOWN_UNGRANTED_LITERAL}< $${KNOWN_UNGRANTED_LITERAL}`;
+    // The probe is a real ungranted session cost read off the committed rows, so this is the
+    // instrument being pointed at the value a leak would actually be made of.
+    const cost = COLLISIONS.probe.literal;
+    const payload = `,${cost}] "${cost}" >${cost}< $${cost}`;
 
-    expect(decimalsIn(payload)).toEqual(new Set([KNOWN_UNGRANTED_LITERAL]));
+    expect(decimalsIn(payload)).toEqual(new Set([cost]));
   });
 
   test("does not read a compact token figure as a cost", () => {
@@ -211,30 +203,43 @@ test.describe("T-E4 — the restricted account's payload", () => {
   // in either direction on a specific, named value, which a size check cannot see.
   test("the search set still holds a real ungranted cost literal", () => {
     expect(
-      UNGRANTED_COSTS.has(KNOWN_UNGRANTED_LITERAL),
-      `${KNOWN_UNGRANTED_LITERAL} is another Member's session cost and must remain searched for`,
+      UNGRANTED_COSTS.has(COLLISIONS.probe.literal),
+      `${COLLISIONS.probe.literal} is ${COLLISIONS.probe.id}'s cost, held by a Member the ` +
+        "contractor has no scope over, and must remain searched for",
     ).toBe(true);
   });
 
-  test("the search set excludes a figure the viewer's own rows aggregate to", () => {
+  test("the search set excludes every figure the viewer's own rows aggregate to", () => {
+    // Non-vacuity first: a class with nothing in it would pass the exclusion below by being
+    // empty, and would mean the fixture no longer exercises the collision at all.
+    expect(COLLISIONS.aggregate.size).toBeGreaterThan(0);
+
+    const leaked = [...COLLISIONS.aggregate].filter((literal) => UNGRANTED_COSTS.has(literal));
+
     expect(
-      UNGRANTED_COSTS.has(OWN_AGGREGATE_COLLISION),
-      `${OWN_AGGREGATE_COLLISION} is a total of the viewer's own sessions; self scope grants it`,
-    ).toBe(false);
+      leaked,
+      "these are totals of the viewer's own sessions, which self scope grants",
+    ).toEqual([]);
   });
 
-  test("the search set excludes a ratio the viewer's own rows divide out to", () => {
+  test("the search set excludes every ratio the viewer's own rows divide out to", () => {
+    // The sharper half of the pair: literals only the *quotient* subtraction can remove, so a
+    // change reverting it fails here on values rather than on a set size.
+    expect(COLLISIONS.quotient.size).toBeGreaterThan(0);
+
+    const leaked = [...COLLISIONS.quotient].filter((literal) => UNGRANTED_COSTS.has(literal));
+
     expect(
-      UNGRANTED_COSTS.has(OWN_QUOTIENT_COLLISION),
-      `${OWN_QUOTIENT_COLLISION} is the viewer's own acceptance rate for one WorkType in one ` +
-        "month — a quotient of its own granted rows, not a cost it holds no scope over",
-    ).toBe(false);
+      leaked,
+      "these are acceptance, Rework and Decomposition rates of granted rows — counts over " +
+        "counts, on pages that carry no money figure at all",
+    ).toEqual([]);
 
     // Named beside it, because the pair is the point: subtracting quotients must not have
     // reached the costs a leak would actually be made of.
     expect(
-      UNGRANTED_COSTS.has(KNOWN_UNGRANTED_LITERAL),
-      `${KNOWN_UNGRANTED_LITERAL} must survive the quotient subtraction as well as the sum one`,
+      UNGRANTED_COSTS.has(COLLISIONS.probe.literal),
+      `${COLLISIONS.probe.literal} must survive the quotient subtraction as well as the sum one`,
     ).toBe(true);
   });
 

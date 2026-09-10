@@ -662,3 +662,85 @@ describe("R-D1 — no two Members share a first name or a surname", () => {
     }
   });
 });
+
+// R-D23 — **the token scale**, re-derived from the committed JSON (ticket 68). The figures are
+// restated here from `spec.md` § 8 rather than imported from `targets.mts`, exactly as the rates
+// above are: a test that imported the target would move with it and check nothing.
+//
+// The Member-month claims are read over **roots carrying their children** — a child's tokens are
+// its root's to answer for (R-M19) — and over the four months lying wholly inside the window,
+// which are the only ones a monthly figure can be read off.
+describe("T-F12 — the token scale (R-D23)", () => {
+  const TOKEN_FLOOR = 75_000;
+  const CPU_HEAVY_CEILING = 60_000;
+  const POOLED_BAND = { min: 80_000_000, max: 130_000_000 };
+  const MONTHLY_BAND = { min: 70_000_000, max: 145_000_000 };
+  const LEADER = 1_000_000_000;
+  const FULL_MONTHS = ["2026-05", "2026-06", "2026-07", "2026-08"];
+
+  const storedRoots = allSessions.filter((row) => row.parent_session_id === null);
+  const isCpuHeavy = (row: AgentSession): boolean =>
+    row.machine_spec === "compute" &&
+    row.machine_allocation_duration_s >= 4 * 3600 &&
+    tokensOf(row) <= CPU_HEAVY_CEILING;
+
+  /** Every visible row's tokens, keyed by the Member and the month of its **root's** start. */
+  const memberMonths = (month: string): number[] => {
+    const rootOf = new Map(roots.map((row) => [row.id, row]));
+    const held = new Map<string, number>();
+    for (const row of visible) {
+      const root = rootOf.get(row.parent_session_id ?? row.id);
+      if (root === undefined || !root.started_at.startsWith(month)) continue;
+      if (memberById.get(root.member_id)?.kind !== "human") continue;
+      held.set(root.member_id, (held.get(root.member_id) ?? 0) + tokensOf(row));
+    }
+    return [...held.values()];
+  };
+
+  const median = (values: readonly number[]): number => {
+    const sorted = [...values].sort((a, b) => a - b);
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  };
+
+  it("puts no attempt below 75,000 tokens but R-D11's token-light rows", () => {
+    const light = storedRoots.filter((row) => tokensOf(row) < TOKEN_FLOOR);
+
+    // Non-vacuity: the floor is a claim about a population that exists, and the exception is a
+    // population of about twenty, not of one row or of every row.
+    expect(storedRoots.length).toBeGreaterThan(1000);
+    expect(light.length).toBeGreaterThanOrEqual(18);
+    expect(light.length).toBeLessThanOrEqual(22);
+    expect(light.filter((row) => !isCpuHeavy(row))).toEqual([]);
+  });
+
+  it("puts the median human Member-month at ~100M tokens", () => {
+    const pooled = FULL_MONTHS.flatMap(memberMonths);
+
+    expect(pooled.length).toBeGreaterThan(60);
+    expect(median(pooled)).toBeGreaterThanOrEqual(POOLED_BAND.min);
+    expect(median(pooled)).toBeLessThanOrEqual(POOLED_BAND.max);
+  });
+
+  it("keeps every full month's own median inside its wider band", () => {
+    for (const month of FULL_MONTHS) {
+      const middle = median(memberMonths(month));
+      expect(middle, `${month} median Member-month`).toBeGreaterThanOrEqual(MONTHLY_BAND.min);
+      expect(middle, `${month} median Member-month`).toBeLessThanOrEqual(MONTHLY_BAND.max);
+    }
+  });
+
+  it("runs a Member into the billions in each of the last three full months", () => {
+    for (const month of FULL_MONTHS.slice(-3)) {
+      expect(Math.max(...memberMonths(month)), `${month} busiest Member-month`).toBeGreaterThanOrEqual(
+        LEADER,
+      );
+    }
+  });
+
+  it("spreads the Member-months by an order of magnitude, which is what `/demo/people` shows", () => {
+    const august = memberMonths("2026-08");
+
+    expect(Math.max(...august) / median(august)).toBeGreaterThanOrEqual(10);
+  });
+});

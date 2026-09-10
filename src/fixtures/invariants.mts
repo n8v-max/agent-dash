@@ -18,6 +18,7 @@ import { joinGithubUser, normaliseName } from "./join.mts";
 import { githubUsers, members } from "./people.mts";
 import { crossesUtcDay, startsLateEvening } from "./predicates.mts";
 import { madridOffsetMinutes } from "./schedule.mts";
+import { tokenScaleLines } from "./scale.mts";
 import { modelMixLines, totalSpendLines, trendLines, weeklySpendLines } from "./spend.mts";
 import {
   CHILD_EDGE_SECONDS,
@@ -249,6 +250,7 @@ export const assertFixture = (fixture: {
     ...taskLines(roots),
     ...reviewLines(roots),
     ...edgeCaseLines(fixture.sessions.filter(isRoot), roots),
+    ...tokenScaleLines(fixture.sessions.filter(isRoot), roots),
     ...populationLines(roots),
     ...modelMixLines(roots),
     ...trendLines(roots),

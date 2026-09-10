@@ -304,28 +304,24 @@ const literalsFor = (figures: readonly number[]): Set<string> => {
 };
 
 /**
- * Cost literals the viewer holds no grant over, and which nothing on the page can legitimately
- * produce.
+ * The two populations the search is a difference of, computed once so that each class of
+ * subtraction can be named on its own (ticket 68).
  *
- * Both sides go through the same three renderings, which is what keeps the two comparable: an
- * ungranted cost of `2` is searched for as `2.00` because that is the only shape of it a
- * decimal search can find, and the viewer's own cost of `2` is subtracted in the same shape.
- * Subtracted, in order: the viewer's own individual session costs, every total those rows
- * aggregate to, every ratio those same rows divide out to at the same key, and the published
- * token rate card. What remains is a value that can only have come from a row the viewer holds
- * no scope over — which is the claim T-E4 makes.
+ * `candidates` is every literal a leak would be made of — the session costs of Members the
+ * viewer holds no scope over. The rest are what the viewer's own granted rows can legitimately
+ * put on the page: the sums (its own costs and every total those rows aggregate to), the
+ * quotients (money over the same key, and the count-over-count rates, which are read across the
+ * Team as well), and the published rate card, which is nobody's datapoint.
  */
-export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<string> => {
+const costPopulations = (viewerMemberId: string) => {
   // Roots carrying their fan-out — the population every page aggregates — and the child rows,
   // whose own cost `/demo/history` prints under the root that spawned them (R-M19, R-N20.2).
   const rows = [...visibleSessions(), ...visibleChildSessions()];
   const own = rows.filter((row) => row.member_id === viewerMemberId);
   // Bucketed over roots alone: a child is never a row in an aggregate, so no total or ratio in
   // the product is ever read over one.
-  const buckets = grantedBuckets(
-    own.filter((row) => row.parent_session_id === null),
-    orgTimezone(),
-  );
+  const ownRoots = own.filter((row) => row.parent_session_id === null);
+  const buckets = grantedBuckets(ownRoots, orgTimezone());
 
   // R-A3 — `team` over `jobs`, so the Task- and session-grain *rates* are read across the Team.
   // Counts only: no money figure is ever taken from this population.
@@ -335,22 +331,77 @@ export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<strin
     orgTimezone(),
   );
 
-  const granted = literalsFor([
-    ...own.map((row) => row.cost),
-    ...buckets.map((bucket) => bucket.cost),
-    ...buckets.flatMap(moneyQuotients),
-    ...buckets.flatMap(countQuotients),
-    ...teamBuckets.flatMap(countQuotients),
-    ...projectionFigures(
-      own.filter((row) => row.parent_session_id === null),
-      orgTimezone(),
-    ),
-    ...tokenRateCardFigures(),
-  ]);
-  const ungranted = literalsFor(
-    rows.filter((row) => row.member_id !== viewerMemberId).map((row) => row.cost),
-  );
+  const ungrantedRows = rows.filter((row) => row.member_id !== viewerMemberId);
+  return {
+    ungrantedRows,
+    candidates: literalsFor(ungrantedRows.map((row) => row.cost)),
+    sums: literalsFor([...own.map((row) => row.cost), ...buckets.map((bucket) => bucket.cost)]),
+    quotients: literalsFor([
+      ...buckets.flatMap(moneyQuotients),
+      ...buckets.flatMap(countQuotients),
+      ...teamBuckets.flatMap(countQuotients),
+    ]),
+    projection: literalsFor(projectionFigures(ownRoots, orgTimezone())),
+    card: literalsFor(tokenRateCardFigures()),
+  };
+};
 
-  for (const literal of granted) ungranted.delete(literal);
-  return ungranted;
+const without = (from: ReadonlySet<string>, ...removed: readonly ReadonlySet<string>[]) => {
+  const held = new Set(from);
+  for (const set of removed) for (const literal of set) held.delete(literal);
+  return held;
+};
+
+const intersect = (left: ReadonlySet<string>, right: ReadonlySet<string>): Set<string> =>
+  new Set([...left].filter((literal) => right.has(literal)));
+
+/**
+ * Cost literals the viewer holds no grant over, and which nothing on the page can legitimately
+ * produce.
+ *
+ * Both sides go through the same three renderings, which is what keeps the two comparable: an
+ * ungranted cost of `2` is searched for as `2.00` because that is the only shape of it a
+ * decimal search can find, and the viewer's own cost of `2` is subtracted in the same shape.
+ * Subtracted, in order: the viewer's own individual session costs, every total those rows
+ * aggregate to, every ratio those same rows divide out to at the same key, the projection, and
+ * the published token rate card. What remains is a value that can only have come from a row the
+ * viewer holds no scope over — which is the claim T-E4 makes.
+ */
+export const ungrantedCostLiterals = (viewerMemberId: string): ReadonlySet<string> => {
+  const held = costPopulations(viewerMemberId);
+  return without(held.candidates, held.sums, held.quotients, held.projection, held.card);
+};
+
+/**
+ * **The collisions each subtraction class exists to remove** (ticket 68), derived rather than
+ * named.
+ *
+ * `payload.spec.ts` used to carry three literals typed out of a measurement — `23.20` for a real
+ * ungranted cost, `9.16` for one the viewer's own rows sum to, `0.8` for one they divide out to.
+ * Every ticket in this wave regenerates the fixture and every one of them had to re-measure all
+ * three. What the tests were checking was never the value: it was that each class is *non-empty*
+ * — a subtraction with nothing to subtract proves nothing — and that removing it does not reach
+ * the costs a leak would be made of. Both are properties of the sets, so both are computed here.
+ *
+ *   * `probe` — the largest ungranted session cost, which is what a falsification probe leaks. It
+ *     must survive every subtraction.
+ *   * `aggregate` — literals that are both an ungranted session cost and a total of the viewer's
+ *     own rows. Class 1 removes them; without it `/demo/spend`'s own mirror cells read as leaks.
+ *   * `quotient` — literals that are an ungranted session cost and a *ratio* of granted rows and
+ *     **not** a sum of them, so that only the quotient class can remove them. This is the class
+ *     that made `/demo/work` — a page carrying no money figure at all — fail on an acceptance
+ *     rate.
+ */
+export const costCollisions = (viewerMemberId: string) => {
+  const held = costPopulations(viewerMemberId);
+  // The probe is chosen from the **rows**, before any subtraction is applied, so that asserting
+  // it survives is a claim about the subtraction rather than a restatement of it. The dearest
+  // ungranted session is the one a leak is most visible in and the one ticket 29's falsification
+  // probe leaked; a subtraction that reached it would have swallowed the top of the range.
+  const dearest = held.ungrantedRows.reduce((top, row) => (row.cost > top.cost ? row : top));
+  return {
+    probe: { id: dearest.id, cost: dearest.cost, literal: dearest.cost.toFixed(2) },
+    aggregate: intersect(held.candidates, held.sums),
+    quotient: without(intersect(held.candidates, held.quotients), held.sums),
+  };
 };

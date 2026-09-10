@@ -30,7 +30,7 @@ const outputDirectory = (argv: readonly string[]): string => {
 
 const main = (): void => {
   const rng = mulberry32(SEED);
-  const slots = generateSlots(rng, members);
+  const { slots, activity } = generateSlots(rng, members);
   const plan = planCells(slots.length);
   // R-D22 — a review is a session somebody ran, so it takes a slot off the schedule rather than
   // being appended to it. The split is deterministic and draws no random numbers, so everything
@@ -39,7 +39,13 @@ const main = (): void => {
   const { tasks: plannedTasks } = planTasks(rng, members, split.work);
   const assigned = assignCells(rng, members, plannedTasks, plan);
   const tasks = mintTasks(rng, assigned);
-  const built = buildWorkSessions(rng, { members, assigned, tasks, visibleRoots: slots.length });
+  const built = buildWorkSessions(rng, {
+    members,
+    assigned,
+    tasks,
+    visibleRoots: slots.length,
+    activity,
+  });
   // R-D22 — the reviews are generated **from** finished rows, because the band the ticket states
   // runs from the reviewed session's *end*, which is not known until its duration is drawn.
   const links = linkReviews(rng, {
@@ -48,7 +54,11 @@ const main = (): void => {
     slots: split.review,
     plan,
   });
-  const roots = identify([...built.visible, ...buildReviewSessions(rng, members, links), ...built.hidden]);
+  const roots = identify([
+    ...built.visible,
+    ...buildReviewSessions(rng, members, links, activity),
+    ...built.hidden,
+  ]);
   // R-D21 — the fan-out is drawn last, from finished rows, so every root keeps the id, the
   // timestamps and the figures it had before children existed (ADR-0008).
   const sessions = [...roots, ...spawnChildren(rng, roots)].sort(

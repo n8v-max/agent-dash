@@ -8,6 +8,16 @@ export const check = (condition: boolean, message: string): void => {
 
 export const percent = (value: number): string => `${(value * 100).toFixed(1)}%`;
 
+/**
+ * A token count, in the units the product reads them in (ticket 69). The generator's report is
+ * the first place anybody reads these figures, and eleven digits is not a figure anybody reads.
+ */
+export const tokenFigure = (value: number): string => {
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`;
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  return `${Math.round(value / 1_000)}K`;
+};
+
 export const near = (
   label: string,
   actual: number,

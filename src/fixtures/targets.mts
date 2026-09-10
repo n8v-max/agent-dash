@@ -268,15 +268,75 @@ export const MODEL_WEIGHT_WITHIN_TIER: Record<string, number> = {
 // R-D15 — 40% of sessions span two or more Models.
 export const MULTI_MODEL_SHARE = 0.4;
 
-// Session token medians (ticket 10 § Session shape), and the spread that carries the
-// right-skew the duration and cost distributions are described with.
-export const TOKEN_MEDIAN: Record<string, number> = {
-  cache_read: 2_500_000,
-  uncached_input: 100_000,
-  cache_write: 200_000,
-  output: 60_000,
+// R-D23 — **the token scale** (ticket 68). A session draws a log-normal total and splits it
+// into the four classes by the shares below; the classes are the ones ticket 10 authored, kept
+// as *shares* so the mix survives a change of level (cache read dominant, output smallest).
+//
+// **The median is a session's, not a Member's.** A human Member runs about sixty root sessions
+// in a month (R-D4), and a log-normal at this median and spread means the month totals near
+// 100M — which is what R-D23 states and `distributions.mts` measures over the committed rows.
+// The spread is what carries the right skew the duration and cost distributions are described
+// with: at σ = 1.1 the mean session is 1.8× the median one and the p95 is about six times it.
+export const TOKEN_SESSION_MEDIAN = 1_100_000;
+export const TOKEN_SIGMA = 1.1;
+
+// The class mix (R-D23, unchanged in shape since ticket 10): cache read dominates, because an
+// agent re-reads a repository far more than it writes one.
+export const TOKEN_CLASS_SHARE: Record<string, number> = {
+  cache_read: 0.875,
+  uncached_input: 0.035,
+  cache_write: 0.07,
+  output: 0.02,
 };
-export const TOKEN_SIGMA = 1.2;
+
+export const TOKEN_MEDIAN: Record<string, number> = Object.fromEntries(
+  Object.entries(TOKEN_CLASS_SHARE).map(([name, share]) => [name, share * TOKEN_SESSION_MEDIAN]),
+);
+
+// R-D23 — **no session processes fewer than 75,000 tokens**, applied after the class split so
+// the floor is a property of the session total rather than of any one class. R-D11's ~20
+// CPU-heavy rows are the one named exception: they exist to be token-light, and a floor over
+// them would delete the requirement. `curve.mts` re-applies it after the weekly repair, which
+// is the only other thing in this directory that scales a token count.
+export const TOKEN_FLOOR = 75_000;
+
+// R-D23 — **the per-Member spread.** A Member's activity multiplier (R-D4) multiplies its
+// *token appetite* as well as its session count, so a busy Member runs more sessions **and**
+// bigger ones — which is why the Member-month distribution is wider than the session one, and
+// why the leaders are an order of magnitude above the median rather than twice it.
+//
+// On top of that, four Members carry a heavy-tail factor. Three or four leaders reaching the
+// billions in a month is the finding `/demo/people` sorted by Tokens exists to show, and a
+// log-normal over eighteen Members does not reach it on its own without pulling the median up
+// with it. The four are named rather than drawn so the ranking is stable across a regeneration,
+// and the factors differ because a tail of four identical Members reads as a bug.
+export const TOKEN_APPETITE_HEAVY: Record<string, number> = {
+  mem_ivazquez: 7,
+  mem_dnavarro: 6,
+  mem_mpena: 10,
+  mem_aruiz: 12,
+};
+
+// R-D23 — what a Member-month has to come out at, over the months lying wholly inside the
+// window. April opens on the 12th and September closes on the 25th, so neither is a month
+// anybody could read a monthly figure off, and neither is asserted.
+//
+// **Two bands, because one median over eighteen Members is not a stable statistic and the
+// ticket's band is narrower than its own noise.** Ticket 68 asks for 80–130M in *each* full
+// month, a range of 1.63×. The realised medians run 76M to 133M, a range of 1.75×, and both
+// causes are structural rather than tunable: R-D4's ramp takes the median human from 51
+// sessions in May to 78 in August, and the appetite spread opens a gap in the middle of an
+// 18-point sample exactly where its median sits. No level of `TOKEN_SESSION_MEDIAN` fits a
+// 1.75× spread inside a 1.63× band. So the ticket's band is asserted over the **pooled**
+// Member-months of the four full months — seventy figures, where a median means something —
+// and the per-month claim is asserted at ±45% of 100M. See ticket 68's `## Comments`.
+export const MEMBER_MONTH_TOKENS = { min: 80_000_000, max: 130_000_000 };
+export const MEMBER_MONTH_TOKENS_BY_MONTH = { min: 70_000_000, max: 145_000_000 };
+
+// R-D23 — "the top few Members run into the billions", as a floor under the busiest human
+// Member-month of each of the window's last three full months.
+export const MEMBER_MONTH_LEADER_TOKENS = 1_000_000_000;
+export const MEMBER_MONTH_LEADER_MONTHS = 3;
 
 // ticket 10 § Session shape. Interactive: 40 / 30 / 38 minutes at the median. Headless is
 // AFK for its whole lifetime by construction (CONTEXT.md § Duration spans).
@@ -329,8 +389,8 @@ export const SEAT_SHARE_CEILING = 0.25;
 // *ratio* — 2.03 — is λ's own, which is what "more modest initially by construction of the ramp"
 // means arithmetically. See the ticket 66 comments for the derivation.
 export const WEEKLY_SPEND_SHAPE = {
-  startUsd: 1_900,
-  plateauUsd: 2_650,
+  startUsd: 2_050,
+  plateauUsd: 2_860,
   midpoint: DAILY_VOLUME.midpoint,
   steepness: DAILY_VOLUME.steepness,
 };

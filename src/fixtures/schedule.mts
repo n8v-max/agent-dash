@@ -233,7 +233,18 @@ const activityOf = (rng: Rng, members: readonly Member[]): Map<string, number> =
   );
 };
 
-export const generateSlots = (rng: Rng, members: readonly Member[]): Slot[] => {
+/**
+ * The schedule, and the multipliers it was drawn from.
+ *
+ * **The activity multipliers leave this module** (ticket 68) because R-D23 multiplies a Member's
+ * activity into its *token appetite*: a Member who runs more sessions runs bigger ones, and the
+ * two halves of "busy" have to be the same draw or they would be two unrelated orderings of the
+ * same eighteen people. Returning them costs nothing — they are already drawn here, first, from
+ * this module's own `rng` — and it keeps the draw in the one place that owns R-D4.
+ */
+export type Schedule = { slots: Slot[]; activity: ReadonlyMap<string, number> };
+
+export const generateSlots = (rng: Rng, members: readonly Member[]): Schedule => {
   const activity = activityOf(rng, members);
   const slots: Slot[] = [];
   const push = (member: Member, dayIndex: number, count: number): void => {
@@ -258,7 +269,10 @@ export const generateSlots = (rng: Rng, members: readonly Member[]): Slot[] => {
       push(member, dayIndex, dailyCount(rng, dayIndex, mine));
     }
   }
-  return trimLowUsage(rng, slots).sort(
-    (a, b) => a.started_at_ms - b.started_at_ms || a.member_id.localeCompare(b.member_id),
-  );
+  return {
+    slots: trimLowUsage(rng, slots).sort(
+      (a, b) => a.started_at_ms - b.started_at_ms || a.member_id.localeCompare(b.member_id),
+    ),
+    activity,
+  };
 };

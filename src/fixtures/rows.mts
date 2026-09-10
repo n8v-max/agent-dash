@@ -13,6 +13,7 @@ import {
   CPU_HEAVY_REPOSITORIES,
   HIDDEN_SHARE,
   MADRID_OFFSET_LABEL,
+  TOKEN_APPETITE_HEAVY,
   WINDOW_END_DAY,
   WINDOW_START_DAY,
 } from "./targets.mts";
@@ -158,12 +159,28 @@ const rowFrom = (rng: Rng, draft: Draft, usages: TokenUsage[]): Omit<AgentSessio
   };
 };
 
-const rowsFor = (rng: Rng, drafts: readonly Draft[]): Omit<AgentSession, "id">[] => {
+/**
+ * **R-D23 — a Member's token appetite.** The activity multiplier R-D4's schedule drew for this
+ * Member, times the heavy-tail factor if it is one of the named leaders. It is a multiplier on
+ * the *median* of the session's draw, so it widens the Member-month distribution without
+ * touching the shape of any one session's.
+ */
+export const appetiteOf = (
+  activity: ReadonlyMap<string, number>,
+  memberId: string,
+): number => (activity.get(memberId) ?? 1) * (TOKEN_APPETITE_HEAVY[memberId] ?? 1);
+
+const rowsFor = (
+  rng: Rng,
+  drafts: readonly Draft[],
+  activity: ReadonlyMap<string, number>,
+): Omit<AgentSession, "id">[] => {
   const usages = planTokens(
     rng,
     drafts.map((draft) => ({
       month_key: monthKeyOfDay(draft.day_index),
       cpu_heavy: draft.cpu_heavy,
+      appetite: appetiteOf(activity, draft.member.id),
     })),
   );
   return drafts.map((draft, index) => rowFrom(rng, draft, usages[index]));
@@ -184,15 +201,17 @@ export const buildWorkSessions = (
     tasks: readonly Task[];
     /** Every visible root the fixture will hold, reviews included — R-D12's denominator. */
     visibleRoots: number;
+    /** R-D4's per-Member activity multipliers, which R-D23 reads as token appetite. */
+    activity: ReadonlyMap<string, number>;
   },
 ): { visible: Unidentified[]; hidden: Unidentified[] } => {
-  const { members, assigned, tasks, visibleRoots } = plan;
+  const { members, assigned, tasks, visibleRoots, activity } = plan;
   const drafts = draftsFrom(assigned, tasks, members);
   markCpuHeavy(rng, drafts);
   // Visible rows carry the tier ledger on their own, so R-D16's shares are exact over the
   // rows the product can actually see. The hidden rows are planned separately.
-  const visible = rowsFor(rng, drafts);
-  const hidden = rowsFor(rng, hiddenDraftsFrom(rng, drafts, visibleRoots));
+  const visible = rowsFor(rng, drafts, activity);
+  const hidden = rowsFor(rng, hiddenDraftsFrom(rng, drafts, visibleRoots), activity);
   return { visible, hidden };
 };
 
@@ -204,6 +223,7 @@ export const buildReviewSessions = (
   rng: Rng,
   members: readonly Member[],
   links: readonly ReviewLink[],
+  activity: ReadonlyMap<string, number>,
 ): Unidentified[] => {
   const memberOf = new Map(members.map((member) => [member.id, member]));
   const nameOf = new Map(repositories.map((repository) => [repository.id, repository.name]));
@@ -226,7 +246,7 @@ export const buildReviewSessions = (
       };
     })
     .sort(byTime);
-  return rowsFor(rng, drafts);
+  return rowsFor(rng, drafts, activity);
 };
 
 /**
