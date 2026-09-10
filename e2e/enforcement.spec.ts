@@ -69,9 +69,10 @@ test.describe("T-E3 — the authoritative boundary", () => {
 });
 
 test.describe("R-A4 / R-T13 — issuing a session", () => {
-  // Ticket 60: `/sign-in` offers one action, for the open default. The restricted account is
-  // reached from the header switcher (R-A5), which routes.spec.ts and mobile.spec.ts exercise;
-  // where a test only needs to *be* the contractor it installs the token with `useSession`.
+  // Ticket 60 gave `/sign-in` one action, for the open default; ticket 61 removed the header
+  // switcher's second entry, so the contractor is offered nowhere and this endpoint refuses its
+  // id (asserted at `src/app/api/session/route.test.ts`). Where a test needs to *be* the
+  // contractor it installs a token minted straight off the fixture, with `useSession`.
   test("signing in to the demo account sets an httpOnly session cookie and lands on its org", async ({
     page,
     context,

@@ -157,15 +157,21 @@ test.describe("T-E17 — what the fit is made of (R-V15)", () => {
     expect(overflows).toBe(false);
   });
 
-  test("the account switcher is the avatar alone, and still switches (R-A5)", async ({ page }) => {
+  test("the account switcher is the avatar alone, and still opens (R-A5)", async ({ page }) => {
     await page.goto(`/${SLUG}`);
 
-    // The name and Role line are the two things the header drops at this width; the control
-    // itself is untouched, so the menu still opens and still offers both accounts.
+    // The name is what the header drops at this width; the avatar carries the identity, and
+    // the control itself is untouched, so the menu still opens and still spells the name out.
+    // Ticket 61: what it opens onto is one link out, not a choice of accounts.
     await expect(page.getByTestId("viewer")).toBeHidden();
     await expect(page.getByTestId("account-switcher")).toBeVisible();
     await page.getByTestId("account-switcher").click();
-    await expect(page.getByTestId("switch-account").getByRole("button")).toHaveCount(2);
+
+    const menu = page.getByTestId("switch-account");
+    await expect(menu).toContainText(OPEN_ACCOUNT.fullName);
+    await expect(menu.getByRole("link")).toHaveCount(1);
+    await expect(menu.getByRole("link")).toHaveAttribute("href", "/sign-in");
+    await expect(menu.locator("form")).toHaveCount(0);
   });
 
   test("a wide table scrolls inside its own card, not the page (R-V15)", async ({ page }) => {

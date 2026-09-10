@@ -695,9 +695,19 @@ inside the desktop project, which keeps each width beside the requirement it bel
   between the access model working and the access model being theatre.
 - **T-E5 — Control state does not survive navigation** (A20, R-C5). Set a period on `/demo/spend`,
   navigate to `/demo/work`, assert the default.
-- **T-E6 — The account switcher re-issues the token and stays on the current URL** (R-A5). Same
-  path, fewer rows. (Previously cited "A5/R-A5"; A5 is the Team-overlap criterion and has nothing to
-  do with the switcher. R-A5 was always the rule meant.)
+- **T-E6 — The account switcher identifies the acting account and links out** (R-A5 as amended
+  by ticket 61). The menu names the acting Member and their Organization, holds **exactly one
+  link** — to `/sign-in` — and **no `<form>` and no button**; following it lands on a `/sign-in`
+  that still has one form and one submit, with a session already in place. Asserted for the
+  restricted account too, from a directly minted token, which is R-A8's "same doors" at the one
+  control that differs between accounts. (Previously cited "A5/R-A5"; A5 is the Team-overlap
+  criterion and has nothing to do with the switcher. R-A5 was always the rule meant.)
+
+  **It was "re-issues the token and stays on the current URL — same path, fewer rows".** That
+  claim died with the mechanic: ticket 61 offers one account, so nothing in the header switches.
+  The endpoint's in-place return path is unchanged and is still tested, at the unit layer, in
+  `src/app/api/session/route.test.ts`. "Fewer rows on the same doors" survives in T-E1 and in
+  `people.spec.ts`, both of which install the restricted token directly.
 - **T-E7 — `/demo` renders four tiles and nothing else**, each linking to its evidence page (A1,
   A2). The one E2E test about layout, because "nothing else" is a structural claim about the page.
   **Three tiles carry a headline figure, not four** (R-N8, C11): the WorkType tile carries a title,

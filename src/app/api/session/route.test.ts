@@ -1,21 +1,29 @@
 // @vitest-environment node
-// R-A5 — the account switch happens **in place**, so this endpoint has to know where "in place"
-// was. The rule it applies is the whole security surface of the feature, so each arm of it is a
-// case: honoured when the path belongs to the account's Organization, ignored otherwise.
+// R-A5 — a sign-in returns the browser to where it came from, so this endpoint has to know
+// where that was. The rule it applies is the whole security surface of the feature, so each arm
+// of it is a case: honoured when the path belongs to the account's Organization, ignored
+// otherwise.
+//
+// It also decides *who* may be minted, which ticket 61 narrowed to `OFFERED_PRESETS`. The
+// contractor's own id is tested as a refusal below.
 //
 // The module is imported dynamically after the environment is stubbed, exactly as
 // `src/data/session.test.ts` does: `session.ts` reads `AUTH_JWT_SECRET` at module *load* (R-T14),
 // so a static import would run before any stub.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { signInAccounts } from "@/data/accounts";
+import { restrictedAccount, signInAccounts } from "@/data/accounts";
 import { SESSION_COOKIE } from "@/data/session-cookie";
 
 const SECRET = "a-thirty-two-byte-or-longer-testing-key";
 const ENDPOINT = "http://localhost:3000/api/session";
 
-const [openAccount, restrictedAccount] = signInAccounts();
-if (!openAccount || !restrictedAccount) throw new Error("R-A3: two seeded accounts expected");
+const [openAccount] = signInAccounts();
+if (!openAccount) throw new Error("R-A4: the open default is expected to be offered");
+
+// Seated in the fixture, offered nowhere (ticket 61). It is here to be *refused*: the endpoint
+// mints for the offered list, so this account's own id is the sharpest input to test that with.
+const contractor = restrictedAccount();
 
 const post = async (input: {
   readonly memberId?: string;
@@ -50,7 +58,7 @@ afterEach(() => {
 
 describe("POST /api/session — issuing the token (R-T13)", () => {
   it("sets the session cookie and answers 303 so the POST becomes a GET", async () => {
-    const response = await post({ memberId: restrictedAccount.memberId });
+    const response = await post({ memberId: openAccount.memberId });
 
     expect(response.status).toBe(303);
     expect(response.headers.get("set-cookie")).toContain(`${SESSION_COOKIE}=`);
@@ -64,15 +72,28 @@ describe("POST /api/session — issuing the token (R-T13)", () => {
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
+  // Ticket 61. The contractor is a real, seated Member holding a real Role, and it is exactly
+  // the id an attacker would try: the account the product used to offer. Refusing an unknown id
+  // proves nothing about it — a seated-but-unoffered id is the case that does.
+  it("mints no token for the restricted contractor, who is seated but not offered", async () => {
+    const response = await post({ memberId: contractor.memberId });
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
+
   it("mints no token for a request carrying no account at all", async () => {
     expect((await post({})).status).toBe(400);
   });
 });
 
-describe("R-A5 — the switch keeps the viewer on the current URL", () => {
-  it("returns to the page the switch was made from, query string and all", async () => {
+// The switcher stopped posting here (ticket 61), so the only caller that carries a `Referer`
+// worth honouring today is a re-sign-in from a page under the Organization. The rule is
+// unchanged and still the endpoint's whole security surface, so every arm of it stays tested.
+describe("R-A5 — a sign-in returns to the page it was made from", () => {
+  it("returns to the referring page, query string and all", async () => {
     const response = await post({
-      memberId: restrictedAccount.memberId,
+      memberId: openAccount.memberId,
       referer: "http://localhost:3000/demo/spend?period=2026-08&grain=day",
     });
 

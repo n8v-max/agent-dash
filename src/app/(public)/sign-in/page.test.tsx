@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { signInAccounts } from "@/data/accounts";
+import { restrictedAccount, signInAccounts } from "@/data/accounts";
 import SignInPage from "./page";
 
 // The form's `method` and `action` are asserted end to end instead of here: T-E3 clicks the
@@ -24,7 +24,7 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
     expect(screen.getAllByRole("button", { name: "Sign in to the demo account" })).toHaveLength(1);
   });
 
-  it("signs in as the first seeded account — the open default — read from the fixture", () => {
+  it("signs in as the one offered account — the open default — read from the fixture", () => {
     const [openDefault] = signInAccounts();
     render(<SignInPage />);
 
@@ -33,6 +33,16 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
       "name",
       "member_id",
     );
+  });
+
+  it("names that account from the fixture rather than from a literal (ticket 61)", () => {
+    // The card used to hardcode "Nuria Castells Vidal". Reseeding the Organization would have
+    // left the page confidently naming somebody who no longer exists.
+    const [openDefault] = signInAccounts();
+    render(<SignInPage />);
+
+    expect(openDefault?.fullName).toBeTruthy();
+    expect(screen.getByText(new RegExp(`You will be ${openDefault?.fullName ?? ""},`))).toBeInTheDocument();
   });
 
   it("links the three provider pills to the real sign-in pages, in a new window", () => {
@@ -62,14 +72,16 @@ describe("SignInPage — one demo action (R-A4 as amended, ticket 60)", () => {
     expect(screen.getByText("Single sign-on is not connected in the demo.")).toBeInTheDocument();
   });
 
-  it("does not offer the restricted account: its name is absent from the page", () => {
-    // R-A5: the contractor is reached from the header switcher, not from here. The name is
-    // the fixture's, not a literal, so a reseeded restricted account keeps the assertion honest.
-    const [, restricted] = signInAccounts();
+  it("does not offer the restricted account, and no longer points anywhere that does", () => {
+    // Ticket 61: the contractor is offered nowhere — not here, not in the header switcher. The
+    // account is built straight off the fixture, so a reseeded contractor keeps this honest,
+    // and the sentence that used to send a reader to the header is asserted gone by its words.
+    const restricted = restrictedAccount();
     render(<SignInPage />);
 
-    expect(restricted).toBeDefined();
-    expect(screen.queryByText(new RegExp(restricted?.fullName ?? "", "i"))).not.toBeInTheDocument();
+    expect(restricted.fullName).toBeTruthy();
+    expect(screen.queryByText(new RegExp(restricted.fullName, "i"))).not.toBeInTheDocument();
+    expect(screen.getByRole("main").textContent).not.toMatch(/restricted|contractor|switch/i);
   });
 
   it("offers four links: the three providers, and Back to the landing", () => {
